@@ -24,7 +24,7 @@ plants-own
 [
   plant-biomass
   resource-FON-R ; use distance(xy) to calculate FON
-  visitation-counter ;used for reproduction
+  visited? ;used for reproduction
   juvenile?
   Fa
   C
@@ -70,7 +70,7 @@ to setup
     set pcolor 67
     set pollinator-resource 0
     set plant-resource 10
-    set temperature random-normal mean-temperature 5
+    set temperature random-normal mean-temperature 25
     set FON-sum 0
     set n-FONs 0
   ]
@@ -95,7 +95,7 @@ to setup
     setxy random-pxcor random-pycor
     set plant-biomass 15
     set resource-FON-R (sqrt((plant-biomass ^ (2 / 3)) / pi) * 3) ;initial-FON-R
-    set visitation-counter 0
+    set visited? true
     set juvenile? false ;they start mature
 
     ;setting up the FON: same as the plant-establish function
@@ -103,8 +103,8 @@ to setup
       [
         set n-FONs (n-FONs + 1) ;new individual, new FON
         set FON-sum FON-sum + exp(-(distance myself))
-        set pcolor scale-color orange FON-sum 1 0
-        set pollinator-resource (pollinator-resource - 1)
+        ;set pcolor scale-color orange FON-sum 1 0
+        set pollinator-resource (pollinator-resource + 1)
 
         ;procedure for ploting avg FON in the plot
         if n-FONs >= 1 ;check if there is any FON in the patchs
@@ -148,8 +148,8 @@ to go
     [set pcolor 36]
   ]
 
-  ;;; DISTURBANCE every 1,5 years #TODO maybe even less
-  if (ticks > 0 and remainder ticks 100 = 0)
+  ;;; DISTURBANCE every 1 years #TODO maybe even less
+  if (ticks > 0 and remainder ticks 50 = 0)
   [
     ask patches
     [set habitat? false]
@@ -157,7 +157,7 @@ to go
      ;TODO check how to set them all at once
     ask patches with [pxcor = -30 and pycor = 0]
     [
-      ask patches in-radius (22 - ticks / 100 + 1) ;as time goes on, the habitat fragments become smaller
+      ask patches in-radius (30 - (ticks / 100 + 1) * 3) ;as time goes on, the habitat fragments become smaller
       [
         set habitat? true
         set pcolor 67
@@ -170,7 +170,7 @@ to go
     ]
     ask patches with [pxcor = 5 and pycor = -20]
     [
-      ask patches in-radius (15 - ticks / 100 + 1)
+      ask patches in-radius (20 - (ticks / 100 + 1) * 3)
       [
         set habitat? true
         set pcolor 67
@@ -183,7 +183,7 @@ to go
     ]
     ask patches with [pxcor = 25 and pycor = 25]
     [
-      ask patches in-radius (20 - ticks / 100 + 1)
+      ask patches in-radius (25 - (ticks / 100 + 1) * 3)
       [
         set habitat? true
         set pcolor 67
@@ -207,24 +207,28 @@ to go
   ]
 
   tick
-  export-view (word "fonib" ticks ".png")
+  ;export-view (word "fonib" ticks ".png")
 end
 
 ;;; POLLINATOR PROCEDURES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to search
-  ;search nearest floral resource
+  ;search nearest floral resoure
   let flower max-one-of neighbors [pollinator-resource] ;dont use uphill because bee stays put when there are no pollinator ressources around
   ifelse [pollinator-resource] of flower > pollinator-resource
   [
     move-to flower
+    ;loose some biomass while searching
+    set poll-biomass (poll-biomass - 0.4 ) ;#TODO: ajust to penalize dispersal
   ]
   [
     right (random 181) - 90
-    forward 2
+    let dist-search random 10
+    forward dist-search
+    ;loose some biomass while searching
+    set poll-biomass (poll-biomass - 0.2 * dist-search) ;#TODO: ajust to penalize dispersal
   ]
-  ;loose some biomass while searching
-  set poll-biomass (poll-biomass - 0.5) ;#TODO: ajust to penalize dispersal
+
 end
 
 to pollinate
@@ -235,7 +239,7 @@ to pollinate
     stop
   ] ;too fat, no need
   [
-    ifelse [pollinator-resource] of patch-here > 0
+    ifelse [pollinator-resource] of patch-here > 2 ;plant are dying too easy
       [
         ;Patch looses some floral resource
         ask patch-here
@@ -246,10 +250,10 @@ to pollinate
         ask (min-one-of plants [distance myself]) ;gets the closest plant
           [
             set plant-biomass (plant-biomass - 0.01) ; #TODO use MTE?
-            set visitation-counter (visitation-counter + 1)
+            set visited? true
           ]
         ;Pollinator gains biomass
-        set poll-biomass (poll-biomass + 0.1) ; #TODO use MTE rates
+        set poll-biomass (poll-biomass + 0.4) ; #TODO use MTE rates
         set time-since-last-meal 0
         ; and carries pollen ;TODO might not be necessary (this is supposed to be simple)
         set pollen (pollen + 0.1)
@@ -261,17 +265,17 @@ to pollinate
 end
 
 to poll-reproduce
-  if poll-biomass > 3 and ((remainder ticks 10) = 0)
+  if poll-biomass > 3 and ((remainder ticks 7) = 0)
   [
-    hatch 1 ;1 juvenile 'TODO make it more realistic
+    hatch 1 ;1 juvenile 'TODO make it more realistic: relevan pro Julia: eusocial and social might be different for the quantity of offspring AND eco-evol because socils are clones!
     [
-      set poll-biomass random-normal 10 0.01
+      set poll-biomass random-normal 6 0.01
       set dispersal-capability maximum-dispersal
       set time-since-last-meal 999
     ]
   ]
    ;loose some biomass
-    set poll-biomass (poll-biomass - 0.07)
+    set poll-biomass (poll-biomass - 0.2)
 end
 
 to poll-die
@@ -304,19 +308,20 @@ to plant-grow
 end
 
 to plant-reproduce
-  if (plant-biomass > 10)  and (remainder ticks 50 = 0); and (visitation-counter > 0)
+  if (plant-biomass > 10)  and (ticks > 0 and remainder ticks 150 = 0) and (visited?)
   [
       hatch 1
       [
         ;plant-establish
         set size 5 ;size of the turtle shape, not the plant
-        setxy random-pxcor random-pycor ;#TODO: set a dispersal rate here
+        setxy random-xcor random-ycor ;#TODO: set a dispersal rate here
         set plant-biomass random-normal 10 3
         set resource-FON-R (sqrt((plant-biomass ^ (2 / 3)) / pi) * 3) ;initial-FON-R
-        set visitation-counter 0
+        set visited? false
         set juvenile? true ;will establish a FON in next time step
     ]
    set plant-biomass plant-biomass - 1.5
+    set visited? false ;will only reproduce again if visited
   ]
 end
 
@@ -329,7 +334,7 @@ to plant-die
   [
     ask patches in-radius resource-FON-R
       [
-          set pollinator-resource (pollinator-resource - 1)
+        set pollinator-resource 0
           set FON-sum (FON-sum - exp(-(distance myself))) ; the total FON there should decrease
           set pcolor scale-color green FON-sum 10 0
           set n-FONs n-FONs - 1
@@ -427,7 +432,7 @@ INPUTBOX
 191
 70
 n-plants
-70.0
+200.0
 1
 0
 Number
@@ -438,7 +443,7 @@ INPUTBOX
 105
 70
 n-pollinators
-20.0
+40.0
 1
 0
 Number
