@@ -28,6 +28,7 @@ plants-own
   juvenile?
   Fa
   C
+  flowering?
 ]
 
 pollinators-own
@@ -52,8 +53,6 @@ patches-own
 
 
 to setup
-
-;setup
   clear-all
 
   set-default-shape pollinators "bee_fonib"
@@ -136,6 +135,7 @@ to go
   [
     plant-establish ;recruitment is pop level. Individuals establish
     plant-grow
+    flower
     plant-reproduce
     get-old
     plant-die
@@ -149,7 +149,7 @@ to go
   ]
 
   ;;; DISTURBANCE every 1 years #TODO maybe even less
-  if (ticks > 0 and remainder ticks 50 = 0)
+  if (ticks > 0 and remainder ticks 50 = 0 and ticks < 200) ;the disturbance stops, but the debt will still be paid
   [
     ask patches
     [set habitat? false]
@@ -168,7 +168,7 @@ to go
         ;set n-FONs 0
       ]
     ]
-    ask patches with [pxcor = 5 and pycor = -20]
+    ask patches with [pxcor = 20 and pycor = -20]
     [
       ask patches in-radius (20 - (ticks / 100 + 1) * 3)
       [
@@ -206,6 +206,12 @@ to go
     ]
   ]
 
+  ask patches with [habitat? = true]
+  [
+    set plant-resource (plant-resource + (0.1 * (count neighbors with [habitat? = true])/(count neighbors))) ;a patch habitat benefits from being surrounded by others
+  ]
+  ; if I make this advantage dependent on the whole amount of habitat patches, it slows down a lot
+
   tick
   ;export-view (word "fonib" ticks ".png")
 end
@@ -214,19 +220,19 @@ end
 
 to search
   ;search nearest floral resoure
-  let flower max-one-of neighbors [pollinator-resource] ;dont use uphill because bee stays put when there are no pollinator ressources around
-  ifelse [pollinator-resource] of flower > pollinator-resource
+  let closestflower max-one-of neighbors [pollinator-resource] ;dont use uphill because bee stays put when there are no pollinator ressources around
+  ifelse [pollinator-resource] of closestflower > pollinator-resource
   [
-    move-to flower
+    move-to closestflower
     ;loose some biomass while searching
-    set poll-biomass (poll-biomass - 0.4 ) ;#TODO: ajust to penalize dispersal
+    set poll-biomass (poll-biomass - 0.3 ) ;#TODO: ajust to penalize dispersal
   ]
   [
     right (random 181) - 90
     let dist-search random 10
     forward dist-search
     ;loose some biomass while searching
-    set poll-biomass (poll-biomass - 0.2 * dist-search) ;#TODO: ajust to penalize dispersal
+    set poll-biomass (poll-biomass - 0.1 * dist-search) ;#TODO: ajust to penalize dispersal
   ]
 
 end
@@ -265,13 +271,16 @@ to pollinate
 end
 
 to poll-reproduce
-  if poll-biomass > 3 and ((remainder ticks 7) = 0)
+  if poll-biomass > 3 and (5 < random 11)
   [
     hatch 1 ;1 juvenile 'TODO make it more realistic: relevan pro Julia: eusocial and social might be different for the quantity of offspring AND eco-evol because socils are clones!
     [
       set poll-biomass random-normal 6 0.01
       set dispersal-capability maximum-dispersal
       set time-since-last-meal 999
+      setxy random-xcor random-ycor
+      if (not [habitat?] of patch-here)
+      [die]
     ]
   ]
    ;loose some biomass
@@ -279,7 +288,7 @@ to poll-reproduce
 end
 
 to poll-die
-  if poll-biomass < 1 ;or (remainder [age] 14 0) #TODO densiy indeendent mortality
+  if (ticks > 0 and random 11 > 5) or poll-biomass < 1 ;or (remainder [age] 14 0) #TODO densiy indeendent mortality
   [die]
 end
 
@@ -291,10 +300,6 @@ to plant-establish
   [
     set juvenile? false
 
-    ask patches in-radius resource-FON-R
-    [
-      set plant-resource plant-resource - 0.01
-    ]
   ]
 end
 
@@ -303,12 +308,22 @@ to plant-grow
 
   ask patches in-radius resource-FON-R
   [
-    set pollinator-resource pollinator-resource + 1
+    set plant-resource plant-resource - (0.001 * plant-resource)
+  ]
+end
+
+to flower
+  if remainder ticks 30 = 0
+  [
+    ask patches in-radius resource-FON-R
+    [
+      set pollinator-resource pollinator-resource + 2
+    ]
   ]
 end
 
 to plant-reproduce
-  if (plant-biomass > 10)  and (ticks > 0 and remainder ticks 150 = 0) and (visited?)
+  if (plant-biomass > 10)  and (ticks > 0 and remainder ticks 50 = 0) and (visited?)
   [
       hatch 1
       [
@@ -326,15 +341,21 @@ to plant-reproduce
 end
 
 to get-old
-  set plant-biomass plant-biomass - 0.5
+  set plant-biomass (plant-biomass - 0.1)
 end
 
 to plant-die
-  if plant-biomass < 5.5 ;or (remainder ticks 365 != 0)
+  if (ticks > 0 and remainder ticks 50 = 0) or plant-biomass < 5.5  or ([plant-resource] of patch-here <= 0)
   [
     ask patches in-radius resource-FON-R
       [
-        set pollinator-resource 0
+        ifelse n-FONs > 0
+        [
+          set pollinator-resource (pollinator-resource - (pollinator-resource / n-FONs)) ;n-FONs in case it goes to 0
+        ]
+        [
+          set pollinator-resource 0
+        ]
           set FON-sum (FON-sum - exp(-(distance myself))) ; the total FON there should decrease
           set pcolor scale-color green FON-sum 10 0
           set n-FONs n-FONs - 1
@@ -346,8 +367,8 @@ end
 GRAPHICS-WINDOW
 210
 10
-1128
-929
+1028
+829
 -1
 -1
 10.0
@@ -360,10 +381,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--45
-45
--45
-45
+-40
+40
+-40
+40
 1
 1
 1
@@ -432,7 +453,7 @@ INPUTBOX
 191
 70
 n-plants
-200.0
+300.0
 1
 0
 Number
@@ -443,17 +464,17 @@ INPUTBOX
 105
 70
 n-pollinators
-40.0
+60.0
 1
 0
 Number
 
 MONITOR
-1245
-301
-1403
-346
-Abundance pollinators
+1238
+263
+1396
+308
+NIL
 count pollinators
 17
 1
@@ -464,7 +485,7 @@ PLOT
 10
 1773
 255
-Populations
+Populations monitoring
 Time
 Abundance
 0.0
@@ -479,23 +500,12 @@ PENS
 "Plants" 1.0 0 -13840069 true "" "plot count plants"
 
 MONITOR
-1193
-388
-1287
-433
+1136
+262
+1230
+307
 NIL
 count plants
-17
-1
-11
-
-MONITOR
-1142
-499
-1427
-544
-NIL
-(sum [resource-FON-R] of plants) / plants
 17
 1
 11
