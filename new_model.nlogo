@@ -55,7 +55,7 @@ patches-own
 to setup
   clear-all
 
-  set-default-shape pollinators "bee_fonib"
+  set-default-shape pollinators "my_bee"
   set-default-shape plants "flower"
 
   set wrong-C 0
@@ -66,7 +66,7 @@ to setup
   ask patches
   [
     set habitat? true
-    set pcolor 67
+    set pcolor 66
     set pollinator-resource 0
     set plant-resource 10
     set temperature random-normal mean-temperature 25
@@ -144,7 +144,7 @@ to go
   ask patches ;just maintaining fragmented viasualization
   [
     ifelse habitat?
-    [set pcolor 67]
+    [set pcolor 66]
     [set pcolor 36]
   ]
 
@@ -160,7 +160,7 @@ to go
       ask patches in-radius (30 - (ticks / 100 + 1) * 3) ;as time goes on, the habitat fragments become smaller
       [
         set habitat? true
-        set pcolor 67
+        set pcolor 66
         ;set pollinator-resource 0
         ;set plant-resource 10
         ;set temperature random-normal mean-temperature 5
@@ -173,7 +173,7 @@ to go
       ask patches in-radius (20 - (ticks / 100 + 1) * 3)
       [
         set habitat? true
-        set pcolor 67
+        set pcolor 66
         ;set pollinator-resource 0
         ;set plant-resource 10
         ;set temperature random-normal mean-temperature 5
@@ -186,7 +186,7 @@ to go
       ask patches in-radius (25 - (ticks / 100 + 1) * 3)
       [
         set habitat? true
-        set pcolor 67
+        set pcolor 66
 ;        set pollinator-resource 0
 ;        set plant-resource 10
 ;        set temperature random-normal mean-temperature 5
@@ -323,7 +323,7 @@ to flower
 end
 
 to plant-reproduce
-  if (plant-biomass > 10)  and (ticks > 0 and remainder ticks 50 = 0) and (visited?)
+  if (plant-biomass > 10) and (ticks > 0 and remainder ticks 50 = 0) and (visited?)
   [
       hatch 1
       [
@@ -345,7 +345,7 @@ to get-old
 end
 
 to plant-die
-  if (ticks > 0 and remainder ticks 50 = 0) or plant-biomass < 5.5  or ([plant-resource] of patch-here <= 0)
+  if plant-biomass < 5.5  or ([plant-resource] of patch-here <= 0) or 3 > random 1000
   [
     ask patches in-radius resource-FON-R
       [
@@ -587,28 +587,6 @@ Polygon -7500403 true true 120 75 45 105 15 150 15 210 30 210 60 195 105 105 120
 Polygon -16777216 false false 120 75 45 105 15 150 15 210 30 210 60 195 105 105 120 90
 Polygon -16777216 true false 135 300 165 300 180 285 120 285
 
-bee_fonib
-true
-0
-Polygon -6459832 true false 120 75 105 90 105 120 135 150 165 150 195 120 195 90 180 75 120 75 120 75
-Polygon -1184463 true false 152 149 105 165 75 195 67 211 74 234 85 252 100 264 116 276 134 286 150 285 167 285 182 278 206 260 220 242 226 218 225 195 195 165
-Polygon -7500403 true true 151 69 119 74 105 90 90 75 90 60 90 45 103 33 120 45 135 30 150 30 165 30 180 45 197 32 210 45 210 60 210 75 195 90 180 75
-Polygon -16777216 true false 70 185 74 171 223 172 224 186
-Polygon -16777216 true false 67 211 71 226 224 226 225 211 67 211
-Polygon -16777216 true false 91 257 106 269 195 269 211 255
-Line -1 false 45 135 15 165
-Line -1 false 15 165 30 195
-Line -1 false 30 195 60 195
-Line -1 false 90 165 135 90
-Line -1 false 165 90 210 165
-Line -1 false 210 165 240 195
-Line -1 false 240 195 270 195
-Line -1 false 285 165 255 135
-Line -1 false 270 195 285 165
-Line -1 false 255 135 165 90
-Line -1 false 135 90 45 135
-Line -1 false 60 195 90 165
-
 box
 false
 0
@@ -759,6 +737,28 @@ line half
 true
 0
 Line -7500403 true 150 0 150 150
+
+my_bee
+true
+0
+Polygon -6459832 true false 120 75 105 90 105 120 135 150 165 150 195 120 195 90 180 75 120 75 120 75
+Polygon -1184463 true false 152 149 105 165 75 195 67 211 74 234 85 252 100 264 116 276 134 286 150 285 167 285 182 278 206 260 220 242 226 218 225 195 195 165
+Polygon -7500403 true true 151 69 119 74 105 90 90 75 90 60 90 45 103 33 120 45 135 30 150 30 165 30 180 45 197 32 210 45 210 60 210 75 195 90 180 75
+Polygon -16777216 true false 70 185 74 171 223 172 224 186
+Polygon -16777216 true false 67 211 71 226 224 226 225 211 67 211
+Polygon -16777216 true false 91 257 106 269 195 269 211 255
+Line -1 false 45 135 15 165
+Line -1 false 15 165 30 195
+Line -1 false 30 195 60 195
+Line -1 false 90 165 135 90
+Line -1 false 165 90 210 165
+Line -1 false 210 165 240 195
+Line -1 false 240 195 270 195
+Line -1 false 285 165 255 135
+Line -1 false 270 195 285 165
+Line -1 false 255 135 165 90
+Line -1 false 135 90 45 135
+Line -1 false 60 195 90 165
 
 pentagon
 false
