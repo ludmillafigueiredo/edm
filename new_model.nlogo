@@ -98,20 +98,30 @@ to setup
     set juvenile? false ;they start mature
 
     ;setting up the FON: same as the plant-establish function
-    ask patches in-radius resource-FON-R
-      [
-        set n-FONs (n-FONs + 1) ;new individual, new FON
-        set FON-sum FON-sum + exp(-(distance myself))
-        ;set pcolor scale-color orange FON-sum 1 0
-        set pollinator-resource (pollinator-resource + 1)
+;    ask patches in-radius resource-FON-R
+;      [
+;        set n-FONs (n-FONs + 1) ;new individual, new FON
+;        set FON-sum FON-sum + exp(-(distance myself))
+;        ;set pcolor scale-color orange FON-sum 1 0
+;        set pollinator-resource (pollinator-resource + 1)
+;
+;        ;procedure for ploting avg FON in the plot
+;        if n-FONs >= 1 ;check if there is any FON in the patchs
+;      [
+;        ifelse n-FONs = 1
+;        [set nonself-avgFa (FON-sum - exp(-(distance myself))) / n-FONs]
+;        [set nonself-avgFa 0]
+;      ]
+;    ]
 
-        ;procedure for ploting avg FON in the plot
-        if n-FONs >= 1 ;check if there is any FON in the patchs
-      [
-        ifelse n-FONs = 1
-        [set nonself-avgFa (FON-sum - exp(-(distance myself))) / n-FONs]
-        [set nonself-avgFa 0]
-      ]
+    ;setting simplified FON
+    let FON exp(-(plant-biomass / max_biomass))
+    ask neighbors
+    [
+      let r (distance myself)
+      set FON-sum (FON-sum +  FON * distance myself) ;adds
+        ;decide on normalization rule for biomass: here, simple proportion
+      set pcolor scale-color green FON-sum 1 0
     ]
   ]
 
@@ -292,7 +302,12 @@ to poll-die
   [die]
 end
 
-;;; PLANT PROCEDURES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;; PLANT PROCEDURES ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 to plant-establish
   let suitability ([FON-sum] of patch-here < 0.8) ;suitable if total FON < 0.8
 
@@ -309,6 +324,15 @@ to plant-grow
   ask patches in-radius resource-FON-R
   [
     set plant-resource plant-resource - (0.001 * plant-resource)
+  ]
+
+  let FON exp(-(plant-biomass / max_biomass))
+  ask neighbors
+  [
+    let r (distance myself)
+    set FON-sum (FON-sum +  FON * distance myself) ;adds
+      ;decide on normalization rule for biomass: here, simple proportion
+    set pcolor scale-color green FON-sum 1 0
   ]
 end
 
@@ -431,16 +455,16 @@ INPUTBOX
 163
 207
 maximum-dispersal
-5.0
+8.0
 1
 0
 Number
 
 INPUTBOX
 55
-80
+84
 162
-140
+144
 mean-temperature
 25.0
 1
@@ -453,7 +477,7 @@ INPUTBOX
 191
 70
 n-plants
-300.0
+150.0
 1
 0
 Number
@@ -464,7 +488,7 @@ INPUTBOX
 105
 70
 n-pollinators
-60.0
+30.0
 1
 0
 Number
@@ -509,6 +533,28 @@ count plants
 17
 1
 11
+
+INPUTBOX
+54
+210
+163
+270
+max_biomass
+20.0
+1
+0
+Number
+
+INPUTBOX
+54
+273
+163
+333
+c-FON
+NIL
+1
+0
+String
 
 @#$#@#$#@
 ## WHAT IS IT?
