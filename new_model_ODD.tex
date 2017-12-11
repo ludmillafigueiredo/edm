@@ -1,0 +1,238 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{geometry}
+\geometry{
+ a4paper,
+ %total={170mm,257mm},
+ left=19.1mm,
+ top=25.4mm,
+ right =19.1mm
+ }
+\usepackage[rightcaption]{sidecap} % for figures
+\usepackage{wrapfig} % for figures
+\usepackage{graphicx}
+\usepackage{sidecap}
+\usepackage{amsmath} %equation
+\usepackage{textcomp} %single quotes
+
+\title{\textbf{Mechanisms of extinction debt}\\
+  \large An individual-based modeling approach}
+\author{Ludmilla Figueiredo}
+
+\begin{document}
+
+\maketitle
+\section{Introduction}
+The concept of extinction debt encompasses the idea that some species or local populations are doomed to extinction even after habitat perturbation has ceased. However, species do not occur isolated, and thus extinction debt implies that biotic interactions and ecological functions will also be lost over time. In that context, prediction accuracy is essential to plan effective conservation efforts if we are to conserve community and ecosystem processes but the understanding of how extinctions cascade through trophic levels remains limited. At the same time, ecological and environmental processes complicate the task: species traits and demographic processes affect the extent and timing of delayed extinctions, whereas climate or land use change alter environmental conditions constantly. Statistical methods most commonly used for the detection of extinction debts are limited in capturing such dynamical changes due to their static nature. Alternatively, mechanistic models allow detailing and testing possible processes that lead to extinction at population and species levels. To that end, we develop an eco-evolutionary, spatially-explicit, individual-based model combined with the Field-Of-Neighborhood approach (FON) to simulate the dynamics of a plant-pollinator metacommunity.
+\subsection{Study questions}
+With this model, we aim at answering the following questions:
+\begin{enumerate}
+\item How does habitat spatial configuration (area and connectivity) affect the rate and order of species extinctions?
+\item How different habitat perturbations affect the occurrence, duration and magnitude of extinction debts?
+\item What is the impact of decreasing abundance of a species on network structure over time?
+\item How effective are conservation measures once an extinction debt has been detected?
+\end{enumerate}
+\subsection{Experimental design}
+At first, the species pool used and the duration of simulations will emulate the species composition and the time scale of the extinction debt detected at the fragments of calcareous grasslands around the city of Göttingen \cite{Krauss1, Krauss2}. We have data on species diversity and habitat change in the area, which will allow validation of the model. Because loss of habitat area and connectivity are the main threats to biodiversity in that system, those will be explored first. However, the model will be general enough to allow the simulation of other types of fragmented systems and habitat changes, such as temperature variation, species extinctions and  invasions.
+\section{Model description}
+This is an eco-evolutionary, spatially-explicit, individual-based model written in Julia. The model description follows the ODD protocol (Overview, Design concepts, Detail) for describing agent-based models \cite{ODD1,ODD2,ABMbook}.
+
+\section{Overview}
+\subsection{Purpose}
+The model is designed to simulate the effects of habitat perturbation on a metacommunity of plants and pollinators. It will monitor how species diversity and abundances, community functional composition and interaction networks change over time.
+
+\subsection{Entities, state variables and scales}
+Plants, pollinators and habitat patches are the entities of the model. The Julia type-system allows the creation of user-defined composite types, which can have several fields that store different kinds of information. When an object is created, it will hold all that information. Those objects can also be matrices and arrays where each element is an object of the specified type. In the model, we use this feature to create a type for each entity: plant individuals are of type \textit{Plant}, pollinators are of type \textit{Pollinator} and grid cells are of type \textit{WordCell}.  The fields of these types correspond to the relevant features of each entity (Table \ref{Table1}). Those are traits whose values and/or distribution in the (meta)population can change over time, or that are necessary for individual identification. Other species-specific traits that might be necessary for individual parametrization in the model are given as input for the model and are specified in the \textit{Details} section. \\
+Plant individuals are modelled by an Field-Of-Neighborhood (FON) inspired approach. The Field-Of-Neighborhood (FON) expands on the idea of a plant having a Zone-Of-Influence, a region around its stem where it exploits resources. When ZOIs overlap, there is resource competition.  A FON is a scalar field inside a plant's ZOI that indicates the strength of competitive pressure it exerts against potential neighbors \cite{IBMbook, BergerHildebrandt2000}. In the model, plants do not  .Plants have two FONs: one representing resource competition during vegetative growth and one representing the floral resources it offers for pollination. The radii of these hereinafter called \textquotesingle competition\textquotesingle and \textquotesingle pollination FONs\textquotesingle are calculated according to the biomass proportion allocated to vegetative and floral growth, respectively. Growth and reproductive rates will be species or functional-type-specific.\\
+The state variables of the entities are listed in \ref{State variables table}. They are traits for living organisms (from here on called \textit{individuals}) and environmental conditions, for patches. All indidividuals have a body size (biomass) and a genotype that will determine the other traits. The biological rates and times are calculated according to the Metabolic Theory of Ecology \cite{Brown_MTE_2004}. Genotype will determine traits related to dispersal, reproductive strategy, niche tolerance. %TODO technically, they will be varied in the different scenarios. How much of this kind of details comes here and how much is in the TRACE?
+%TODO make a table out of it
+\textbf{Plants}
+\begin{itemize}
+ \item body size (biomass)
+ \item genotype %TODO definir o que esse genotype faz!!!
+ \item reproductive strategy
+ \item dispersal ability %TODO biologically, it means how far it can disperse or not. Technically, just whether
+\end{itemize}
+\textbf{Herbivores}
+\textbf{Pollinators}
+Each grid cell represents a \(0.5\times0.5 cm^{2}\) habitat area. This size allows enough resolution for the dynamical projection of each individual\textquotesingle s FONs.
+
+\begin{table}[]
+\caption{List of types (entities) and the features they possess in the model.}
+\label{Table1}
+\begin{tabular}{p{5cm}p{11cm}}%{ll}
+\textbf{Feature} & \textbf{\begin{tabular}[c]{@{}l@{}}Description and justification\end{tabular}} \\ \cline{1-2}
+\textbf{Plants} &  \\
+\begin{tabular}[c]{@{}l@{}}Identification number\end{tabular} &
+\begin{tabular}[c]{@{}l@{}}Individual identification for recovering information\end{tabular} \\
+Species &
+\begin{tabular}[c]{@{}l@{}}Allows species-specific parametrization of metabolic rates\end{tabular} \\
+\begin{tabular}[c]{@{}l@{}}Plant functional type*\end{tabular} & \begin{tabular}[c]{@{}l@{}}Allows species-specific parametrization of metabolic rates and \\the inclusion of other functional traits\end{tabular}\\
+Body mass  & \begin{tabular}[c]{@{}l@{}}Necessary for calculating metabolic rates and FON and ZOI \\ projections\end{tabular}\\
+Genotype* & \begin{tabular}[c]{@{}l@{}}Necessary for exploring evolutionary dynamics\end{tabular} \\
+\begin{tabular}[c]{@{}l@{}}Pollen availability*\end{tabular} & \begin{tabular}[c]{@{}l@{}}Characterizes where the pollen is offered \end{tabular} \\
+\begin{tabular}[c]{@{}l@{}}Pollen dispersal kernel*\end{tabular} & \begin{tabular}[c]{@{}l@{}}Used for dispersal of anemophilous species\end{tabular}  \\
+Location  & \begin{tabular}[c]{@{}l@{}}Necessary for the projection of the ZOI and the FON\end{tabular}\\ &  \\
+\textbf{Pollinators} &  \\
+\begin{tabular}[c]{@{}l@{}}Identification number\end{tabular} &
+\begin{tabular}[c]{@{}l@{}}Individual identification for recovering information\end{tabular}\\
+Species & \begin{tabular}[c]{@{}l@{}}Allows species-specific parametrization of metabolic rates\end{tabular}\\
+Body mass &
+\begin{tabular}[c]{@{}l@{}}Necessary for calculating metabolic rates\end{tabular}\\
+Genotype*  & \begin{tabular}[c]{@{}l@{}}Necessary for exploring evolutionary dynamics\end{tabular} \\
+\begin{tabular}[c]{@{}l@{}}List of mutualistic partners\end{tabular} & \begin{tabular}[c]{@{}l@{}}Controls the pollination process\end{tabular} \\
+\begin{tabular}[c]{@{}l@{}}Dispersal kernel parameters*\end{tabular} & \begin{tabular}[c]{@{}l@{}}Control the dispersal\end{tabular} \\
+\begin{tabular}[c]{@{}l@{}}Carried 	pollen\end{tabular} & \begin{tabular}[c]{@{}l@{}}List of	individuals whose pollen is being carried by the pollinator\end{tabular} \\
+Location & \begin{tabular}[c]{@{}l@{}}Used as a reference for dispersal\end{tabular} \\
+&  \\
+\textbf{WordCell} &  \\
+Suitability  &
+\begin{tabular}[c]{@{}l@{}}Label used	for explorations of landscape configuration, with no \\
+ biological  meaning\end{tabular}\\
+\begin{tabular}[c]{@{}l@{}}Competition FONs\end{tabular} &
+ \begin{tabular}[c]{@{}l@{}}List of individuals whose competition FON falls in that cell and \\
+ the respective values\end{tabular} \\
+\begin{tabular}[c]{@{}l@{}}Pollination	FONs\end{tabular}  &
+\begin{tabular}[c]{@{}l@{}}List of	individuals whose pollination FON falls in that cell and \\
+ the	respective values\end{tabular} \\
+Temperature &
+\begin{tabular}[c]{@{}l@{}}Used to	verify species tolerance and calculate individuals metabolic \\ rates\end{tabular} \\
+Precipitation  &
+\begin{tabular}[c]{@{}l@{}}Used to verify species tolerance\end{tabular}  \\
+Plant  & \begin{tabular}[c]{@{}l@{}}If any plant individual is established in the cell (its stem is \\ located there), a plant object containing its is stored in the cell\’s \\\textit{Plant} field\end{tabular} \\
+\cline{1-2}
+\begin{tabular}[c]{@{}l@{}}*Individual traits whose distribution in the populations will be	monitored
+\end{tabular}
+\end{tabular}
+\end{table}
+
+\subsection{Process overview and scheduling}
+Competition for resources is the major driver of population dynamics. Pollination is critical for both pollinators (resource acquisition) and plants (reproduction), and dispersal gives rise to metacommunity dynamics.\\
+As schematically depicted in Figure \ref{Figure1}, at each time step, seed recruitment (competition and germination) happens and adult plants establish their competition and pollination FONs. The overlap of competition FONs will penalize its growth. If visited by a pollinator or successful in pollen dispersal, a plant’s floral resources decreases, plant reproduction takes place and seeds are produced. At last, those seeds disperse. In paralell, pollinators disperse while searching for floral resources. Once they find some (they reach a FON of a partner), they feed, grow and reproduce.
+\begin{figure}[h!]
+ \caption{Causal diagram of the main processes modelled. Plants and pollinators have independent cycles that are connected by pollination.}
+ \centering
+ \label{Figure1}
+\includegraphics[width=\textwidth]{fonib_causal}
+\end{figure}
+\section{Design concepts}
+\textbf{Basic principle:} The model is based on representing local interactions between plants and pollinators: plant competition is modelled via the Field-Of-Neigborhood approach and pollination is represented by pollen transfer and resource acquisition by the pollinator. Pollinator competition is not explicitly modelled but is implicitly included, since pollinators deplet the amount of floral resources available.\\
+\textbf{Emergence:} Species diversity  and abundance is a result of individual local interactions: intra-guild competiton for resources and pollination.\\
+\textbf{Adaptation:} At the individual level, plants and pollinators will grow according to resource availability. At the populaiton level, microevolutionary changes might affect local adaptation.\\
+\textbf{Prediction:} The model will predict species extinctions, their time frame and the consequences of conservation measures (efficiency in decreasing extinctions).\\
+\textbf{Sensing:} Pollinators can sense the offer of floral resources to a certain degree by staying in a FON of pollination once it finds one.\\
+\textbf{Interactions:} \textit{Plant competition} is represented by the FON overlap that affects plant growth. \textit{Pollination} is modelled as i) pollinator biomass growth once it visits a plant’s pollination FON,  ii) focal plant floral resource reduction as result of a pollinator visit and iii) plant reproduction, once the pollinator visits other individuals holding the focal plant\textquotesingle s pollen.\\
+\textbf{Stochasticity:} All processes include some level of stochasticity.\\
+\textbf{Observations:} In order to identify the mechanisms of extinction, we will verify species diversity and abundances, phenotype and genotype distribution, and network structure, therefore, the abundance of each species, ii) the patches occupied by them and iii) a quantitative (weighted) matrix of interactions between plants and pollinators are stored for each time step.\\
+
+\section{Details}
+\subsection{Initialization}
+Landscape configuration will be initialized with the model. It can be of three different kinds: i) simple artificial landscape, with no specific spatial configuration of habitat distribution, ii) artificial landscape with different habitat connectivities (e.g. the ones analyzed by Pascual-Hortal & Saura \cite{PascualHorta}) and iii) landscape configuration of a real study site (G\"ottingen calcareous grasslands, for example). Plants and butterflies are randomly placed in the cells identified as “suitable”. This suitability label, as mentioned in Table \ref{Table1} is only a device for configuring different types of habitat spatial organization.
+Plants and pollinators are placed in the landscape according to its temperature and precipitation ranges. Each individual receives an ID and is characterized by the features listed in \ref{Table1}. Being an spatially-explicit model, each individual's location is important because it affects how it willIf the feature is a parameter, it is read from a separate file that is fed to model (more details on \textit{Inputs}). If the parameter is a variable, it is calculated by the \textit{Submodels} further detailed below.
+
+\subsection{Inputs}
+The model takes the following files in order to initialize and vary the landscape (during experiments that require it): %apresentar global parameters antes
+\begin{enumerate}
+ \item a list of names of plants and pollinators species that can occupy the landscape along with species-specific parameters such as
+ \par\begin{itemize}
+ \par \item minimal and maximal biomass
+ \par \item specie\textquotesingle s proportionality constant $b_o$ \cite{MTE} %explicar melhor
+ \par \item temperature and precipitation tolerance
+ \par \item functional type
+ \par \item pollination syndrome (for plants)
+ \par \item dispersal kernel parameters
+ \par \item interaction network matrix %conferir livro Marco
+ \par\end{itemize}
+ \item  a file for setting the landscape configuration. This could be
+ \par \begin{itemize}
+ \par \item a single file with artificial or real alndscape information
+ \par \item a series of files simulating variation of global parameters such as temperature,  precipitation and habitat area and connectivityover time
+ \par \end{itemize}
+\end{enumerate}
+For simulating the dynamics of real study systems, a GIS file with habitat configuration and climatic information must be prepared to initialize the landscape.
+
+\subsection{Submodels}
+\subsubsection{Plant and pollinator growth}
+An individual’s growth rate in biomass (B) follows the Metabolic Theory of Ecology \cite{MTE},
+\begin{equation}
+ r = b_o . B^{-1/4}. e^{{-E}/{kT}}
+\end{equation}
+
+%TODO We can check population energy level (Ernest et al 2003EcoLetters). Would it be possible to combine it on a network approach? Energy network, or something
+
+\subsubsection{Plant competition}
+For a plant, the area an individual occupies is allometrically related to its biomass, as calculated by \cite{Weiner}. To model competition, we use the individual\textquotesingle s vegetative biomass to calculate the area it occupies,
+\begin{equation}
+ A = c. B^{2/3}
+\end{equation}
+
+From an individual\textquotesingle s area, we calculate the radius (R) of its circular ZOI. For every cell around the focal plant original location, we calculate its distance $r$ to the individual\textquotesingle s central location and adapt Berger \& Hildenbrandt (2000) implementation for mangrove forests to calculate the FON in the cell:
+\begin{itemize}
+ \item for $r = 0$, $FON(x,y) = 1$ (plant’s location)
+ \item for $0 < r ≤ R$,  $FON(x,y) = e^{-c.r} $
+ \item for $r > R$, $FON(x,y) = 0$
+\end{itemize}}
+Figure \ref{Figure2} shows how the FON is projected onto a grid of cells. It is calculated for each grid cell whose distance to the center of the Plant $r$ is smaller then the ZOI radium (thicker black line). Currently, the algorithm calculates values for one quadrant of the circular area and projects it to the other three quadrants.
+\begin{figure}[h!]
+ \caption{Schematic representation of the FON projection around a plant stem.}
+ \centering
+ \label{Figure2}
+\includegraphics[width=0.25\textwidth]{fonib_projection}
+\end{figure}
+
+The value calculated for a given cell is stored alongside the ID of the individual projecting it. Once the FONs of all individuals have been calculated, each individual\textquotesingle s growth rate will be update as
+\begin{equation}
+ r\textquotesingle = r.C
+\end{equation}
+where r is the growth rate from equation 1 calculated in the absence of competition. \textit{C} is  the \textit{correction factor} that accounts for competition inside an individual\textquotesingle s FON. We use the same calculation of C as Berger \& Hildenbrandt (2000)\cite{BergerHildebrandt2000}
+\begin{equation}
+ C = 1 - 2.F_A
+\end{equation}
+where $F_A$ is the sum of all the FONs that overlap with the focal plant\textquotesingle s FON.
+
+\subsubsection{Plant reproduction}
+From an individual's floral resource biomass, we do the same calculations we did for the resource FON to obtain a pollination FON that is projected in a separate grid. Pollinators will roam in this grind and consume floral resources once they are at a partner\texquotesingle s FON. This specificity is possible because the grid stores the pollination FON alongside with the individual\textquotesingle s ID, whose species can be retrived from its respective plant object. Once a pollinator visits a plant, it will "hold" its pollen. Reproduction will happen as a function of how often pollinator holding a focal plant species\textquotesingle s pollen visits another individual of the same species.
+
+\subsubsection{Plant and pollinator dispersal}
+Both plant and pollinator dispersal will be modelled by a dispersal kernel.
+
+\medskip
+
+\begin{thebibliography}{9}
+ \bibitem{Krauss1}
+ Krauss, Jochen, Alexandra-Maria Klein, Ingolf Steffan-Dewenter, and Teja Tscharntke. \textit{Effects of Habitat Area, Isolation, and Landscape Diversity on Plant Species Richness of Calcareous Grasslands.} Biodiversity and Conservation 13, no. 8 (2004): 1427–1439.
+
+
+ \bibitem{Krauss2}
+ Krauss, Jochen, Ingolf Steffan-Dewenter, and Teja Tscharntke. \textit{How Does Landscape Context Contribute to Effects of Habitat Fragmentation on Diversity and Population Density of Butterflies?} Journal of Biogeography 30, no. 6 (June 1, 2003): 889–900. \texttt{https://doi.org/10.1046/j.1365-2699.2003.00878.x.}
+
+
+ \bibitem{ODD1}
+ Grimm, Volker, Uta Berger, Finn Bastiansen, Sigrunn Eliassen, Vincent Ginot, Jarl Giske, John Goss-Custard, et al.\textit{A Standard Protocol for Describing Individual-Based and Agent-Based Models.} Ecological Modelling 198, no. 1 (September 15, 2006): 115–26. \texttt{https://doi.org/10.1016/j.ecolmodel.2006.04.023.}
+
+ \bibitem{ODD2}
+ Grimm, Volker, Uta Berger, Donald L. DeAngelis, J. Gary Polhill, Jarl Giske, and Steven F. Railsback. \textit{The ODD Protocol: A Review and First Update.} Ecological Modelling 221, no. 23 (November 24, 2010): 2760–68. \texttt{https://doi.org/10.1016/j.ecolmodel.2010.08.019.}
+
+ \bibitem{ABMbook}
+ Railsback, Steven F., and Volker Grimm. \textit{Agent-Based and Individual-Based Modeling: A Practical Introduction}. Princeton University Press, 2011.
+
+ \bibitem{IBMbook}
+ Grimm, Volker, and Steven F. Railsback. \textit{Examples} In \textit{Individual-Based Modeling and Ecology}, 1st ed., 199–217. Princeton Series in Theoretical and Computational Biology. Princeton University Press, 2005. \texttt{http://press.princeton.edu/titles/8108.html}
+
+ \bibitem{BergerHildebrandt2000}
+ Berger, Uta, and Hanno Hildenbrandt. \textit{A New Approach to Spatially Explicit Modelling of Forest Dynamics: Spacing, Ageing and Neighbourhood Competition of Mangrove Trees}. Ecological Modelling 132, no. 3 (August 5, 2000): 287–302. \texttt{https://doi.org/10.1016/S0304-38000000298-2.}
+
+ \bibitem{PascualHorta}
+ Pascual-Hortal, Lucía, and Santiago Saura. \textit{Comparison and Development of New Graph-Based Landscape Connectivity Indices: Towards the Priorization of Habitat Patches and Corridors for Conservation.} Landscape Ecology 21, no. 7 (October 1, 2006): 959–67. \texttt{https://doi.org/10.1007/s10980-006-0013-z.}
+
+ \bibitem{MTE}
+ Brown, James H., James F. Gillooly, Andrew P. Allen, Van M. Savage, and Geoffrey B. West. \textit{Toward a Metabolic Theory of Ecology.} Ecology 85, no. 7 (2004): 1771–1789.
+
+ \bibitem{Weiner}
+ Weiner, J., P. Stoll, H. Muller‐Landau, and A. Jasentuliyana. \textit{The Effects of Density, Spatial Pattern, and Competitive Symmetry on Size Variation in Simulated Plant Populations.} The American Naturalist 158, no. 4 (October 1, 2001): 438–50. \texttt{https://doi.org/10.1086/321988.}
+
+\end{thebibliography}
+
+\end{document}
