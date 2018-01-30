@@ -15,11 +15,11 @@ globals
 [
   wrong-C
   wrong-FONsum
+  max_plantbiomass
 ]
 
 breed [plants plant] ;#TODO: add others according to pollination syndrome later
 breed [pollinators pollinator]
-breed [herbivores herbivor]
 
 plants-own
 [
@@ -38,15 +38,6 @@ pollinators-own
   dispersal-capability ;maximum distance of dispersal
   time-since-last-meal
   pollen ;for now, a float value that varies as the pollinator visits flowers
-  juvenile? ;keeps track of who reproduced and who didnt
-]
-
-herbivores-own
-[
-  herb-biomass
-  dispersal-capability ;maximum distance of dispersal
-  time-since-last-meal
-  juvenile? ;keeps track of who reproduced and who didnt
 ]
 
 patches-own
@@ -67,9 +58,9 @@ to setup
 
   set-default-shape pollinators "my_bee"
   set-default-shape plants "flower"
-  set-default-shape herbivores "butterfly"
 
   set wrong-C 0
+  set max_plantbiomass 30
 
   ;;; Habitat: fragmented landscape ;;
 
@@ -95,18 +86,6 @@ to setup
     set dispersal-capability maximum-dispersal
     set time-since-last-meal 999
     set pollen 0
-    set juvenile? true
-  ]
-
-  create-herbivores n-herbivores
-  [
-    set size 3
-    set color 2
-    set poll-biomass random-normal 10 0.01
-    set dispersal-capability maximum-dispersal
-    set time-since-last-meal 999
-    set pollen 0
-    set juvenile? true
   ]
 
   ;;; Plants ;;;
@@ -138,7 +117,7 @@ to setup
 ;    ]
 
     ;setting simplified FON
-    let FON exp(-(plant-biomass / max_biomass))
+    let FON exp(-(plant-biomass / max_plantbiomass))
     ask neighbors
     [
       let r (distance myself)
@@ -161,16 +140,6 @@ to go
     pollinate
     poll-reproduce
     poll-die
-  ]
-
-  ; Herbivores ;;;
-  ask herbivores
-  [
-    herb-search
-    ;disperse ;TODO after a time without a meal, it will "search" farther
-    forage
-    herb-reproduce
-    herb-die
   ]
 
   ;;; Plants ;;;
@@ -200,7 +169,7 @@ to go
      ;TODO check how to set them all at once
     ask patches with [pxcor = -30 and pycor = 0]
     [
-      ask patches in-radius (30 - (ticks / 100 + 1) * 6) ;as time goes on, the habitat fragments become smaller
+      ask patches in-radius (30 - (ticks / 100 + 1) * 3) ;as time goes on, the habitat fragments become smaller
       [
         set habitat? true
         set pcolor 66
@@ -213,7 +182,7 @@ to go
     ]
     ask patches with [pxcor = 20 and pycor = -20]
     [
-      ask patches in-radius (20 - (ticks / 100 + 1) * 5)
+      ask patches in-radius (20 - (ticks / 100 + 1) * 3)
       [
         set habitat? true
         set pcolor 66
@@ -245,7 +214,7 @@ to go
       set n-FONs 0
       set pcolor 36
       set FON-sum 0
-      set plant-resource plant-resource - 7
+      set plant-resource  plant-resource - 5
     ]
   ]
 
@@ -258,87 +227,6 @@ to go
   tick
   ;export-view (word "fonib" ticks ".png")
 end
-
-
-;;;;;;;;;;;;;;;;
-;;;HERBIVORES;;;
-;;;;;;;;;;;;;;;;
-
-to herb-search
-  ;search nearest floral resoure
-  let closestflower max-one-of neighbors [pollinator-resource] ;dont use uphill because bee stays put when there are no pollinator ressources around
-  ifelse [pollinator-resource] of closestflower > pollinator-resource
-  [
-    move-to closestflower
-    ;loose some biomass while searching
-    set herb-biomass (herb-biomass - 0.3 ) ;#TODO: ajust to penalize dispersal
-  ]
-  [
-    right (random 181) - 90
-    let dist-search random 10
-    forward dist-search
-    ;loose some biomass while searching
-    set herb-biomass (herb-biomass - 0.1 * dist-search) ;#TODO: ajust to penalize dispersal
-  ]
-
-end
-
-to forage
-  ; check for floral resources around
-  ifelse herb-biomass > 10
-  [
-    set time-since-last-meal time-since-last-meal + 1
-    stop
-  ] ;too fat, no need
-  [
-    ifelse [pollinator-resource] of patch-here > 2 ;plant are dying too easy
-      [
-        ;Patch looses some floral resource
-        ask patch-here
-        [
-          set pollinator-resource pollinator-resource - 0.5
-        ]
-        ;Plant looses biomass and "registers2 the visit
-        ask (min-one-of plants [distance myself]) ;gets the closest plant
-          [
-            set plant-biomass (plant-biomass - 0.01) ; #TODO use MTE?
-            set visited? true
-          ]
-        ;Pollinator gains biomass
-        set herb-biomass (herb-biomass + 1) ; #TODO use MTE rates
-        set time-since-last-meal 0
-        ; and carries pollen ;TODO might not be necessary (this is supposed to be simple)
-      ]
-      [
-      stop
-      ]
-    ]
-end
-
-to herb-reproduce
-  if (remainder ticks 14 = 0)
-  [
-    hatch 1 ;1 juvenile 'TODO make it more realistic: relevan pro Julia: eusocial and social might be different for the quantity of offspring AND eco-evol because socils are clones!
-    [
-      set herb-biomass random-normal 6 0.01
-      set dispersal-capability maximum-dispersal
-      set time-since-last-meal 999
-      setxy random-xcor random-ycor
-      if (not [habitat?] of patch-here)
-      [die]
-      set juvenile? true
-    ]
-  ]
-   ;loose some biomass
-    set herb-biomass (poll-biomass - 0.2)
-    set juvenile? false
-end
-
-to herb-die
-  if ticks > 0 and (remainder ticks 14 = 0) and juvenile? = false; remainder [age] 14 0) #TODO densiy indeendent mortality
-  [die]
-end
-
 
 ;;; POLLINATOR PROCEDURES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -383,7 +271,7 @@ to pollinate
             set visited? true
           ]
         ;Pollinator gains biomass
-        set poll-biomass (poll-biomass + 1) ; #TODO use MTE rates
+        set poll-biomass (poll-biomass + 0.4) ; #TODO use MTE rates
         set time-since-last-meal 0
         ; and carries pollen ;TODO might not be necessary (this is supposed to be simple)
         set pollen (pollen + 0.1)
@@ -395,7 +283,7 @@ to pollinate
 end
 
 to poll-reproduce
-  if (remainder ticks 7 = 0)
+  if poll-biomass > 3 and (5 < random 11)
   [
     hatch 1 ;1 juvenile 'TODO make it more realistic: relevan pro Julia: eusocial and social might be different for the quantity of offspring AND eco-evol because socils are clones!
     [
@@ -405,29 +293,22 @@ to poll-reproduce
       setxy random-xcor random-ycor
       if (not [habitat?] of patch-here)
       [die]
-      set juvenile? true
     ]
   ]
    ;loose some biomass
     set poll-biomass (poll-biomass - 0.2)
-    set juvenile? false
 end
 
 to poll-die
-  if ticks > 0 and (remainder ticks 7 = 0) and juvenile? = false; remainder [age] 14 0) #TODO densiy indeendent mortality
+  if (ticks > 0 and random 11 > 5) or poll-biomass < 1 ;or (remainder [age] 14 0) #TODO densiy indeendent mortality
   [die]
 end
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;
-;;; PLANT PROCEDURES ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;
-
-
+;;; PLANT PROCEDURES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 to plant-establish
-  let suitability ([FON-sum] of patch-here < 0.8 and habitat?) ;suitable if total FON < 0.8
-  if (juvenile? and suitability)
+  let suitability ([FON-sum] of patch-here < 0.8) ;suitable if total FON < 0.8
 
+  if (juvenile? and suitability)
   [
     set juvenile? false
 
@@ -442,30 +323,10 @@ to plant-grow
     set plant-resource plant-resource - (0.001 * plant-resource)
   ]
 
-  let FON exp(-(plant-biomass / max_biomass))
-
-  ;1.erase old Neighborhood
+  let FON exp(-(plant-biomass / max_plantbiomass))
   ask neighbors
   [
-    ifelse n-FONs >= 1
-    [
-      ifelse n-FONs = 1
-      [set nonself-avgFa (FON-sum - exp(-(distance myself)))] ;avoid division by zero
-      [set nonself-avgFa (FON-sum - exp(-(distance myself))) / (n-FONs - 1)]
-    ]
-    [set nonself-avgFa 0]
-
-    set n-FONs (n-FONs - 1)
-    set FON-sum FON-sum - exp(-(distance myself))
-    ;no need to worry about changing the old color
-
-    set pollinator-resource (pollinator-resource - 1)
-  ]
-
- ;2.set the new one
- ask neighbors
-  [
-  let r (distance myself)
+    let r (distance myself)
     set FON-sum (FON-sum +  FON * distance myself) ;adds
       ;decide on normalization rule for biomass: here, simple proportion
     set pcolor scale-color green FON-sum 1 0
@@ -527,11 +388,11 @@ end
 GRAPHICS-WINDOW
 210
 10
-1028
-829
+1070
+871
 -1
 -1
-10.0
+12.0
 1
 10
 1
@@ -541,10 +402,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--40
-40
--40
-40
+-35
+35
+-35
+35
 1
 1
 1
@@ -587,20 +448,20 @@ NIL
 
 INPUTBOX
 54
-219
+147
 163
-279
+207
 maximum-dispersal
-10.0
+5.0
 1
 0
 Number
 
 INPUTBOX
 55
-156
+80
 162
-216
+140
 mean-temperature
 25.0
 1
@@ -613,7 +474,7 @@ INPUTBOX
 191
 70
 n-plants
-150.0
+300.0
 1
 0
 Number
@@ -624,16 +485,16 @@ INPUTBOX
 105
 70
 n-pollinators
-25.0
+60.0
 1
 0
 Number
 
 MONITOR
-1238
-263
-1396
-308
+1311
+485
+1469
+530
 NIL
 count pollinators
 17
@@ -641,10 +502,10 @@ count pollinators
 11
 
 PLOT
-1136
-10
-1773
-255
+1209
+232
+1846
+477
 Populations monitoring
 Time
 Abundance
@@ -660,48 +521,15 @@ PENS
 "Plants" 1.0 0 -13840069 true "" "plot count plants"
 
 MONITOR
-1136
-262
-1230
-307
+1209
+484
+1303
+529
 NIL
 count plants
 17
 1
 11
-
-INPUTBOX
-54
-282
-163
-342
-max_biomass
-20.0
-1
-0
-Number
-
-INPUTBOX
-54
-345
-163
-405
-c-FON
-0
-1
-0
-String
-
-INPUTBOX
-61
-72
-153
-132
-n-herbivores
-0.0
-1
-0
-Number
 
 @#$#@#$#@
 ## WHAT IS IT?
