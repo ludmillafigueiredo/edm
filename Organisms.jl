@@ -53,6 +53,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
 -`parent_s::Organism`
 -`quant::Int64` is nb of new individuals or offspring to be created
 """
+
 function newOrgs!(landscape::Array{Setworld.WorldCell, N} where N,
     fgroups::Array{String, N} where N,
     sps::Array{String, N} where N,
@@ -65,46 +66,36 @@ function newOrgs!(landscape::Array{Setworld.WorldCell, N} where N,
     dispsd::Array{Float64, N} where N,
     radius::Array{Int64, N} where N,
     IDcounter::Int64)
-    #TODO store all organisms somewhere for quick recovery or leave it  in the
-    # TODO verify how it works alongside projecting the plants in the landscape, or if one trumps the other
-    organisms = []
     # TODO optimize the for loops
-    for f in 1:length(fgroups)
-        for frag in 1:size(landscape, 3)
-            # 1.draw rdm locations
-            # TODO use instead IDcounter, figure out how to call the global
-            #while IDcounter <= (IDcounter + init_abund[f])
-                # x = rand(1:size(landscape,1),1)[1]
-                # y = rand(1:size(landscape,2),1)[1]
-                XYs = hcat(rand(1:size(landscape,1),init_abund[f]),
-                rand(1:size(landscape,2),init_abund[f]))
-                # go through each x,y pair and place an org there
-                #TODO might need outerconstructor for diffrent types of fgroups: insects dont have a radius, for example
-                #for cell in eachindex(landscape[X,Y,frag])
-                for r in 1:size(XYs,1)
-                    push!(landscape[XYs[r,1],XYs[r,2],frag].orgs, Organism(string(fgroups[f],
-                    IDcounter + 1),
-                    # [rand(1:size(mylandscape,1)) rand(1:size(mylandscape,2)) frag],
-                    [XYs[r,1] XYs[r,2] frag],
-                    sps[f],
-                    init_stage[f],
-                    false,
-                    fgroups[f],
-                    [genotypes[f] "fillingERROR"],
-                    rand(srand(123), Distributions.Normal(biomassμ[f],biomasssd[f])),
-                    [dispμ dispsd],
-                    radius[f]
-                    )
-                    )
-                    #lanscape[X,Y,frag].orgs
-                    IDcounter += 1
-                end
-            #end
+    orgs = []
+    for frag in 1:size(landscape,3)
+        for f in 1:length(fgroups)
+            # go through each x,y pair and place an org there
+            #TODO might need outerconstructor for diffrent types of fgroups: insects dont have a radius, for example
+            #for cell in eachindex(landscape[X,Y,frag])
+            XYs = hcat(rand(1:size(landscape,1), init_abund[f]),
+            rand(1:size(landscape,2), init_abund[f]))
+            for i in 1:init_abund[f]
+                neworg = Organism(string(fgroups[f], IDcounter + 1),
+                [XYs[i,1] XYs[i,2] frag],
+                sps[f],
+                init_stage[f],
+                false,
+                fgroups[f],
+                [genotypes[f] "fillingERROR"],
+                rand(srand(123), Distributions.Normal(biomassμ[f],biomasssd[f])),
+                [dispμ dispsd],
+                radius[f])
+
+                push!(orgs, neworg)
+                #lanscape[X,Y,frag].orgs
+                IDcounter += 1
+            end
         end
     end
     #TODO different fgroups have different metabolic rates. Think if orgs should have a field for it  or what
     #TODO different stages have different biomass allocation for growht, reproduction, etc. Should there be a function to change those as stages change?
-    return organisms
+    return orgs #TODO or make sure that it has varied in the global scope as well rather export it?
 end
 
 # function newOrgs()

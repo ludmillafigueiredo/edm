@@ -50,11 +50,11 @@ end
 # TODO worth keeping this function? just 3 lines
 
 mylandscape = landscape_init(false, pxlength, pylength, n_frags, pmeantemp, ptempsd, pmeanprec, pprecsd)
-println("Here is the landscape:")
-write("/mylandscape",mylandscape)
+#println("Here is the landscape:")
+#write("/mylandscape",mylandscape)
 
 
-newOrgs!(mylandscape,
+orgs = newOrgs!(mylandscape,
 fgroups,
 sps,
 init_stage,
