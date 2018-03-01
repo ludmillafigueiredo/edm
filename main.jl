@@ -1,23 +1,20 @@
 #!/usr/bin/env julia
 
-# ArgParse propery #TODO
-
-# Get model directory and include in the
-cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/")
+# Get model directory and include it
+cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
 EDDir = pwd()
 push!(LOAD_PATH,EDDir)
 
-
 global IDcounter = Int64(0)
 
-# Load model packages
+# Load Julia & model packages
 using Distributions
 using Setworld
 #using Organisms
 
-#TODO when reading for more files, consider another input format to handle multiple entries: read as array might be enough
-
-mutable struct simparams #TODO put all landscape.in values in here
+#TODO julia struct style: caps
+#Parameter storage:
+mutable struct simpars #TODO put all landscape.in values in here
     pxlength::Int64
     pylength::Int64
     pmeantemp::Float64
@@ -25,71 +22,83 @@ mutable struct simparams #TODO put all landscape.in values in here
     pmeanprec::Float64
     pprecsd::Float64
     n_frags::Int64
-    simsettings() = new()
+    simpars() = new()
 end
 
+mutable struct initorgvalues
+    fgroups
+    sps
+    init_stage
+    init_abund
+    #genotypes #TODO initialie those in functions
+    biomassμ
+    biomasssd
+    dispμ
+    dispshp
+    radius
+    initorgvalues() = new() #TODO check if new() is necessary
+end
+
+"""
+    read_initials(simparams, initorgs)
+Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
+"""
+function read_initials!(simparams, initorgs)
+    #TODO dictionnary
 begin
     env = open("landscape_init.in")
-    readline(env); pxlength = parse(Int64,readline(env))
-    readline(env); pylength = parse(Int64,readline(env))
-    readline(env); pmeantemp = parse(Float64,readline(env))
-    readline(env); ptempsd = parse(Float64,readline(env))
-    readline(env); pmeanprec = parse(Float64,readline(env))
-    readline(env); pprecsd = parse(Float64,readline(env))
-    readline(env); n_frags = parse(Int64,readline(env))
+    readline(env); simparams.pxlength = parse(Int64,readline(env))
+    readline(env); simparams.pylength = parse(Int64,readline(env))
+    readline(env); simparams.pmeantemp = parse(Float64,readline(env))
+    readline(env); simparams.ptempsd = parse(Float64,readline(env))
+    readline(env); simparams.pmeanprec = parse(Float64,readline(env))
+    readline(env); simparams.pprecsd = parse(Float64,readline(env))
+    readline(env); simparams.n_frags = parse(Int64,readline(env))
     close(env)
 end
 
-mutable struct orgparams
-    #TODO collect org parameters here
-end
-
-# read in which oganisms are going to be simulated
 begin
     orgf = open("organisms.in")
-    readline(orgf); fgroups = [readline(orgf)] #doest need parse for string
-    readline(orgf); sps = [readline(orgf)]
-    readline(orgf); init_stage = [readline(orgf)]
-    readline(orgf); init_abund = [parse(Int64,readline(orgf))]
-    readline(orgf); genotypes = [readline(orgf)]
-    readline(orgf); biomassμ = [parse(Float64,readline(orgf))]
-    readline(orgf); biomasssd = [parse(Float64,readline(orgf))]
-    readline(orgf); dispμ = [parse.(Float64,readline(orgf))]
-    readline(orgf); dispsd = [parse.(Float64,readline(orgf))]
-    readline(orgf); radius = [parse(Int64,readline(orgf))]
+    readline(orgf); initorgs.fgroups = [readline(orgf)] #doest need parse for string
+    readline(orgf); initorgs.sps = [readline(orgf)]
+    readline(orgf); initorgs.init_stage = [readline(orgf)]
+    readline(orgf); initorgs.init_abund = [parse(Int64,readline(orgf))]
+    #readline(orgf); genotypes = [readline(orgf)]
+    readline(orgf); initorgs.biomassμ = [parse(Float64,readline(orgf))]
+    readline(orgf); initorgs.biomasssd = [parse(Float64,readline(orgf))]
+    readline(orgf); initorgs.dispμ = [parse.(Float64,readline(orgf))]
+    readline(orgf); initorgs.dispshp = [parse.(Float64,readline(orgf))]
+    readline(orgf); initorgs.radius = [parse(Int64,readline(orgf))]
     close(orgf)
 end
+end
 
-# Initialize individuals #TODO do proper simulation initialization
-# TODO worth keeping this function? just 3 lines
 
-mylandscape= landscape_init(false, pxlength, pylength, n_frags, pmeantemp, ptempsd, pmeanprec, pprecsd)
-#println("Here is the landscape:")
-#write("/mylandscape",mylandscape)
+function read_landscape()
+    try
+        #read and store initial conditions in dictionnary
+    catch
+        #read new conditions and change dictionnary
+        # there should be some control for when this change happens
+    end
+end
 
-#neighbors = neighborhood(mylandscape)
+#TODO Store organisms parameters that regulate model run: Might interfere with the initialization values??
+mutable struct orgpars
+end
 
-#TODO use the structs with parameters for it!
-orgs_init = newOrgs!(mylandscape,
-fgroups,
-sps,
-init_stage,
-init_abund,
-biomassμ,
-biomasssd,
-genotypes,
-dispμ,
-dispsd,
-radius,
-IDcounter)
+"""
+"""
+function simulate()
+#   INITIALIZATION
+    simparams = simpars()
+    initorgs = initorgvalues()
+    read_initials!(simparams,initorgs)
 
-writedlm("mylandscape",dump(mylandscape))
+    mylandscape= landscape_init(false, simparams)
+    orgs_init = newOrgs(mylandscape, initorgs)
 
-function simulation(
-    orgs_init::Array{Organisms.Organism,N} where N,
-    neighborhood::Array{Dict, N} where N,
-    landscape::Array{Setworld.WorldCell, N} where N
-    )
+# MODEL RUN
     for t in 1:timesteps
         #competition on 2 steps: reflects on compterm
         projmass!()
@@ -99,3 +108,5 @@ function simulation(
         dispersion!()
     end
 end
+
+writedlm("mylandscape",dump(mylandscape))

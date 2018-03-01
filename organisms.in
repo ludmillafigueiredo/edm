@@ -6,8 +6,6 @@ init_stage::Array{String}
 a
 init_abund::Array{Int64}
 5
-genotypes::Array{String}
-[A A]
 biomassμ::Array{Float64}
 100
 biomasssd::Array{Float64}

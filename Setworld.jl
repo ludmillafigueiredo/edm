@@ -34,7 +34,7 @@ mutable struct WorldCell
 end
 
 # Functions
-function landscape_init(fragmentation::Bool, xlength::Int, ylength::Int, n_frags::Int, meantemp::Float64, tempsd::Float64, meanprec::Float64,precsd::Float64) #TODO GIS file and control how fragments become unsuitable
+function landscape_init(fragmentation::Bool, simpars) #TODO GIS file and control how fragments become unsuitable
 	#TODO if fragmentation is false, no need for n_frags
 	# landscape = Array{WorldCell}(xlength,ylength, n_frags)
 	# fill!(landscape,WorldCell())
@@ -44,18 +44,18 @@ function landscape_init(fragmentation::Bool, xlength::Int, ylength::Int, n_frags
 	fragmentation = false # for now, always false: TODO implement fragmentation
 
 	if fragmentation == false
-		for frag in 1:n_frags
+		for frag in 1:simpars.n_frags
 			#fragment_init!(landscape[:,:,f],fragmentation,xlength,ylength)
-			for y in 1:ylength, x in 1:xlength
+			for y in 1:simpars.pylength, x in 1:simpars.pxlength
 				newcell = WorldCell()
 				newcell.avail = true
-				newcell.temp = rand(Normal(meantemp,tempsd),1)[1]
-				newcell.precpt = rand(Normal(meanprec,precsd),1)[1]
+				newcell.temp = rand(Normal(simpars.pmeantemp,simpars.ptempsd),1)[1]
+				newcell.precpt = rand(Normal(simpars.pmeanprec,simpars.pprecsd),1)[1]
 				newcell.neighs = Dict()
 				push!(landscape,newcell)
 			end
 		end
-		landscape = reshape(landscape, xlength, ylength) #! x inner loops matches reshape order
+		landscape = reshape(landscape, simpars.pxlength, simpars.pylength) #! x inner loops matches reshape order
 	else
 		# TODO represent fragmentation: will depend on writing a funciton to read txt input: store them in a mutable struct makes it easier to call, wherever size they have
 	end

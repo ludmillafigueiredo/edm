@@ -20,15 +20,15 @@ Organisms have the same attributes, whose specific values differ according to fu
 mutable struct Organism
     ID::String
     #sp::String
-    location::Array{Int64,2} # (fragment, x, y)
+    location::Array{Int64,2} # (fragment, x, y)#TODO use tuple
     sp::String
-    stage::String #j,s,a
+    stage::String #j,s,a #TODO seed = embryo
     age::Int64 # controls passing stages
     reped::Bool # reproduced?
     fgroup::String # Determines whether individual is a plant, insect, through functional group characterization
     genotype::Array{String,2}
     biomass::Float64
-    disp::Array{Float64,2} #dispersal kernel parameters (mean and shape)
+    disp::Array{Float64,2} #dispersal kernel parameters (mean and shape) TODO tuple
     radius::Int64
     #Organism() = new()
 end
@@ -55,38 +55,29 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
 -`quant::Int64` is nb of new individuals or offspring to be created
 """
 
-function newOrgs!(landscape::Array{Any, N} where N,
-    fgroups::Array{String, N} where N,
-    sps::Array{String, N} where N,
-    init_stage::Array{String, N} where N,
-    init_abund::Array{Int64, N} where N,
-    biomassμ::Array{Float64, N} where N,
-    biomasssd::Array{Float64, N} where N,
-    genotypes::Array{String, N} where N,
-    dispμ::Array{Float64, N} where N,
-    dispsd::Array{Float64, N} where N,
-    radius::Array{Int64, N} where N)
-    # TODO optimize the for loops
+function newOrgs(landscape::Array{Any, N} where N,
+    initorgs)
+    # TODO optimize the for loops?
     orgs = []
     for frag in 1:size(landscape,3)
-        for f in 1:length(fgroups)
+        for f in 1:length(initorgs.fgroups)
             # go through each x,y pair and place an org there
             #TODO might need outerconstructor for diffrent types of fgroups: insects dont have a radius, for example
             #for cell in eachindex(landscape[X,Y,frag])
-            XYs = hcat(rand(1:size(landscape,1), init_abund[f]),
-            rand(1:size(landscape,2), init_abund[f]))
-            for i in 1:init_abund[f]
-                neworg = Organism(string(fgroups[f], IDcounter + 1),
+            XYs = hcat(rand(1:size(landscape,1), initorgs.init_abund[f]),            rand(1:size(landscape,2), initorgs.init_abund[f])) #TODO indent it properly
+            for i in 1:initorgs.init_abund[f]
+                neworg = Organism( #TODO indent it tp Organsnim
+                string(initorgs.fgroups[f], IDcounter + 1),
                 [XYs[i,1] XYs[i,2] frag],
-                sps[f],
-                init_stage[f],
-                false,
-                fgroups[f],
+                initorgs.sps[f],
+                initorgs.init_stage[f],
                 0,
-                [genotypes[f] "fillingERROR"],
-                rand(Distributions.Normal(biomassμ[f],biomasssd[f])),
-                [dispμ dispsd],
-                radius[f])
+                false,
+                initorgs.fgroups[f],
+                ["placeholder" "placeholder"], #initialize with function
+                rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f])),
+                [initorgs.dispμ initorgs.dispshp],
+                initorgs.radius[f])
 
                 push!(orgs, neworg)
                 #lanscape[X,Y,frag].orgs
@@ -119,7 +110,7 @@ function projvegmass!(landscape::Array{Any, N} where N,
         projmass = /(org[o].biomass, ((2*r+1)^2))
 
         for j in (y-r):(y+r), i in (x-r):(x+r)
-            (i =< 0 || i > size(landscape[:,:,frag],1) || j =< 0 || i > size(landscape[:,:,frag],2)) && continue #check boundaries
+            (i =< 0 || i > size(landscape[:,:,frag],1) || j =< 0 || j > size(landscape[:,:,frag],2)) && continue #check boundaries
             if haskey(landscape[i,j,frag].neighs,fg)
                 landscape[i,j,frag].neighs[fg] += projmass # +1 because the center is a cell, not a point
             else
