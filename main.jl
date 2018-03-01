@@ -7,16 +7,27 @@ cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/")
 EDDir = pwd()
 push!(LOAD_PATH,EDDir)
 
-# Load modules:
-# General
-global ED_SEED =srand(123456789) # set seed for randomisation
+
+global IDcounter = Int64(0)
 
 # Load model packages
 using Distributions
 using Setworld
-using Organisms
+#using Organisms
 
 #TODO when reading for more files, consider another input format to handle multiple entries: read as array might be enough
+
+mutable struct simparams #TODO put all landscape.in values in here
+    pxlength::Int64
+    pylength::Int64
+    pmeantemp::Float64
+    ptempsd::Float64
+    pmeanprec::Float64
+    pprecsd::Float64
+    n_frags::Int64
+    simsettings() = new()
+end
+
 begin
     env = open("landscape_init.in")
     readline(env); pxlength = parse(Int64,readline(env))
@@ -29,8 +40,11 @@ begin
     close(env)
 end
 
+mutable struct orgparams
+    #TODO collect org parameters here
+end
+
 # read in which oganisms are going to be simulated
-# TODO stores it in some kind of
 begin
     orgf = open("organisms.in")
     readline(orgf); fgroups = [readline(orgf)] #doest need parse for string
@@ -49,12 +63,14 @@ end
 # Initialize individuals #TODO do proper simulation initialization
 # TODO worth keeping this function? just 3 lines
 
-mylandscape = landscape_init(false, pxlength, pylength, n_frags, pmeantemp, ptempsd, pmeanprec, pprecsd)
+mylandscape= landscape_init(false, pxlength, pylength, n_frags, pmeantemp, ptempsd, pmeanprec, pprecsd)
 #println("Here is the landscape:")
 #write("/mylandscape",mylandscape)
 
+#neighbors = neighborhood(mylandscape)
 
-orgs = newOrgs!(mylandscape,
+#TODO use the structs with parameters for it!
+orgs_init = newOrgs!(mylandscape,
 fgroups,
 sps,
 init_stage,
@@ -66,3 +82,20 @@ dispμ,
 dispsd,
 radius,
 IDcounter)
+
+writedlm("mylandscape",dump(mylandscape))
+
+function simulation(
+    orgs_init::Array{Organisms.Organism,N} where N,
+    neighborhood::Array{Dict, N} where N,
+    landscape::Array{Setworld.WorldCell, N} where N
+    )
+    for t in 1:timesteps
+        #competition on 2 steps: reflects on compterm
+        projmass!()
+        checkcompetition!()
+        growth!(orgs::Array{Organisms.Organism, N} where N)
+        reproduction!()
+        dispersion!()
+    end
+end

@@ -1,0 +1,20 @@
+fgroupss::Array{String}
+autotroph
+sps::Array{String}
+none
+init_stage::Array{String}
+a
+init_abund::Array{Int64}
+5
+genotypes::Array{String}
+[A A]
+biomassμ::Array{Float64}
+100
+biomasssd::Array{Float64}
+1
+dispμ::Array{Float64}
+2
+dispsd::Array{Float64}
+0.1
+radius::Array{Int64}
+1

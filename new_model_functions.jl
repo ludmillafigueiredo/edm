@@ -3,12 +3,26 @@
 
 # chmod u+x <file> make it executable with ./file
 # also check chmod744 <file>: 3 type of permission level: user, group and other - 744 refers to each one of them; also true for ls
-# Loading packages
-using DataFrames # for reading data
-using Distributions
-using DifferentialEquations
 
-# Composition of types
+__precompile()__ #__precompile creates precompile version to reduce loading time
+#TODO check the cache stuff for dependencies
+
+module EDmodel
+
+# Load packages
+using DataFrames # for reading data
+# using Distributions
+# using DifferentialEquations
+
+export #types & functions
+Plant, Pollinator, WordCell, Seed,
+
+# import?
+# The import keyword supports all the same syntax as using, but only operates on a single name at a time. It does not add modules to be searched the way using does. import also differs from using in that functions must be imported using import to be extended with new methods. To do this, import the base of the fct and rewrite it new one with new method(Base.namefunction). Use importall for all functions in a model.
+
+# ---------------------------------------------
+#				Composition of types
+# ---------------------------------------------
 mutable struct Plant
 	id::String
 	sp::String
@@ -45,7 +59,7 @@ mutable struct WordCell
 	temperature::Float64
 	precipitation::Float64
 	#plants_id_list::Set #Which individuals compete in that area easier to check for which other plant individuals have FONs in that cell #TODO should the world landscape hold this info or is the matriz of competition neighborhoods enough?
-	plant # or type Any, because it must hold something if not occupied
+	plant::Any # or type Any, because it must hold something if not occupied
 end
 
 mutable struct Seed
@@ -54,6 +68,11 @@ mutable struct Seed
 	size::Float64 #TODO mass?
 end
 
+# Outer constructors for default values
+Plant() = Plant(nothing,nothing,nothing,nothing,0,0,nothing,nothing,(0,0),(0,0),0)
+Pollinator() = Pollinator(nothing,nothing,nothing,0,0,nothing,[0,0])
+WordCell() = WordCell(0,0,0,0,0,nothing)
+
 # Constants
 const Boltz = 8.617e-5# Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
 const Ea = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
@@ -61,13 +80,9 @@ const plant_growthrate = exp(25.2) # plant biomass production (Ernest et al. 200
 #TODO reproduction
 #TODO allocation to floral growth: if metabolic rate is the rate of allocation to maintenance, reproduction and growth, then, how would it be modelled? Does allocation to
 
-#TODO should globals come here to?
-
-# Outer constructors for default values
-Plant() = Plant(nothing,nothing,nothing,nothing,0,0,nothing,nothing,(0,0),(0,0),0)
-Pollinator() = Pollinator(nothing,nothing,nothing,0,0,nothing,[0,0])
-WordCell() = WordCell(0,0,0,0,0,nothing)
-
+# ---------------------------------------------
+#				    Functions
+# ---------------------------------------------
 function landscape_init(fragments_file)
 	#TODO make it possible to choose fragmetns size
 	'''
@@ -120,6 +135,32 @@ function fragment_init(xlength, ylength) #TODO read x and y length from external
 
 		### Pollinators are stored in the pollinator matrix
 		pollinators_matrix[x,y]] = createPollinator(x,y)
+	end
+	return fragment
+end
+
+function fragment_init!(landscape::Array{WordCell},
+	fragmentation::Bool,
+	xlength::Int64,
+	ylength::Int64) #TODO read x and y length from external file
+	# '''
+	# Set environmental conditions on cells of fragments. The fragments are either random or x and y map to a spatial configuration. Initial environmental conditions are read from temp_prec file
+	# '''
+	# Create basic fragment environmental conditions
+	fragment = Array{WordCell}(xlength,ylength)
+	fill!(fragment,WordCell())
+
+	# # Create the 4 matrices that keep track of each fragment: #TODO if metacommunity structure is implicit, might not be necessary
+	# #TODO should they be a 3d structure like landscape or a sparse matriz? Does global make sense in each of these cases?
+	# global res_FONs_matrix = Matrix{Dict}(size(fragment))
+	# global poll_FONs_matrix = Matrix{Dict}(size(fragment))
+	# global pollinators_matrix = Matrix{Pollinator}(size(fragment)) #TODO it should include herbivores, later
+
+	for y in 1:ylength, x in 1:xlength
+		fragment[x,y].suitability = true
+		fragment[x,y].temperature = rand(Normal(meantemp,tempsd),1)[1] #TODO whole fragment is getting the same values
+		fragment[x,y].precipitation = rand(Normal(meanprec,precsd),1)[1]
+		#TODO map different means for different patchs?
 	end
 	return fragment
 end
@@ -204,14 +245,17 @@ function pollination()
 end
 
 function plant_reproduction()
-	#Ludwig: according to MTE, correct would be to  subtract offspring from mother
+	# give
 end
 
 function pollinator_reproduction()
 end
 
 function seed_dipersal()
+	# wind
+	# pollinator dispersed
 end
 
 function seed_establishment()
+end
 end
