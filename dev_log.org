@@ -1,40 +1,63 @@
-* Code (general)
+* Code (general Julia)
 ** TODO Check arguments order in functions
 ** TODO Read "Eval of julia code"
-** Fields in Arrays [0/1]
-   - [ ] element-wise change is not possible for arrays nor dict of mutable structs: ONLY POSSIBLE IF STRUCTS ARE BUILT INDIVIDUALLY: NO FILL!!
-* World
-*** DONE Create multi fragment landscape 
+** Fields in Arrays [1/1]
+   - [X] element-wise change is not possible for arrays nor dict of mutable structs: ONLY POSSIBLE IF STRUCTS ARE BUILT INDIVIDUALLY: NO FILL!!
+** TODO check necessity new() in structs 
+
+* main.jl
+*** TODO test *simulate()* for reading and creating initial conditions
+** Unity tests
+
+* Fileprep.jl
+** DONE *lengthstocell()* and *areatocell* convert/calculates real fragment sizes to grid cell side lengths <2018-03-02 Fr>
+** TODO *out_landscape()* prepare output that characterize output for both unity tests and visualization
+
+* Setworld.jl
+*** DONE Create multi fragment landscape structure (not simulated yet) 
 *** DONE Whole fragment is getting the same temperature and preciptation
     - [X] because assignment of one field changes all the fields of the array!
-*** TODO Change names so that temperature and preciptation can be called niche dimensions
-*** TODO work on updatelandscape!()
+*** DONE Change names so that temperature and preciptation can be called niche dimensions: no need
+*** TODO Initialize
+    DEADLINE: <2018-03-02 Fr>
+*readinlandscp* Initial landscape conditions are read from *landscpinit* file and stored in Dict
+*landscape_init()* create landscape with 
+*** Change during simulation
+DEADLINE: <2018-03-02 Fr>
+*update_landscape!* changes the dictionnary values
+*** TODO create landscapes wiht n_frags > 1
 
-* Organisms
+* Organisms.jl
 Initialization spreads organisms in the landscape (fragments, later): newOrg() is called
 During simulation, after reproduction (and dispersion?) new organisms will only establish once it has checked local grid viability and fitness values?
 ** mutable struct [0/3]
 - [ ] Genotype must control some traits
 - [ ] Genotype defines species
 - [ ] Traits should matching for interaction to happen. Evolutionary change would cause traits to (mis)match (Beyond species Poisot)
+- [ ] Biomass is a dictionary with compartments that get the allocations (Surv, Veg(growth), Reprod)
 ** TODO should IDcount remain global and count the total number of individuals, or should count each type of funcitonal group? Containers for individuals of each group can already do it, so having a counter for each might not be necessary 
 ** TODO think this organism definition through: how broad is it going to be?
 ** Implementation of single species model
-*** Single species [2/3] 				     :initialization:
+*** Single species [3/3] 				     :initialization:
 Organisms are stored in an array of n_frags (read from simulation file). All organisms are stored in this array and are updated together (each fragment - it could be possible to have simulations where there is some desynchronization between fragments!).
 *newOrg()* will have multiple methods: One for initialization, where individuals always establish and another where it depends on the individuals fitness in the grid and establishment!() is called.  
-- Initialize a certain number of organism [3/3]
-   - [X] get fct types and abundances from input file
-   - [X] create orgs somewhere ('organisms' Array)
-   - [X] properly index individuals in the WordCell landscape
-     - [X] create bunch of locations and draw from them <2018-02-21 Mi>
-     - [X] all cells get the same quantity (init_abund) of organisms, the locations are rdm, though. The loop inside XYs is causing it. --> because the *landscape.orgs* field was initialized with empty orgs, *push!()* would add the same orgs to  all the cells! Individuals are now stored in *orgs* array, instead. Even ig that is not the real problem, it makes indexation easier <2018-02-22 Do>
-     - [X] create different arrays for different fct groups: <2018-02-23 Fr> For now, not necessary, as functional group should be available as field of orgs array.
+*** Initialize a certain number of organism [3/3]
+  - [X] get fct types and abundances from input file
+  - [X] create orgs somewhere ('organisms' Array)
+  - [X] properly index individuals in the WordCell landscape
+    - [X] create bunch of locations and draw from them <2018-02-21 Mi>
+    - [X] all cells get the same quantity (init_abund) of organisms, the locations are rdm, though. The loop inside XYs is causing it. --> because the *landscape.orgs* field was initialized with empty orgs, *push!()* would add the same orgs to  all the cells! Individuals are now stored in *orgs* array, instead. Even ig that is not the real problem, it makes indexation easier <2018-02-22 Do>
+    - [X] create different arrays for different fct groups: <2018-02-23 Fr> For now, not necessary, as functional group should be available as field of orgs array.
 - [X] correct IDcounter: global in Organisms module, exported and called in newOrgs!()
 - [X] check ERROR with method on function newOrgs(): why push! nao funciona? Because all arry's contents had been initialized at the same time <2018-02-26 Mo>.
-*** Update organisms: [0/2]
-- [ ] Simultaneous or independent update?
-- [ ] Consider making a mutable struct where each field stores the individuals of a functional group, therefore, when updating the organisms, I wouldn't have to go through all of them, just through the group affected by the function in question
+*** Compete [1/2]
+- [ ] Vegetative biomass (=(1- *reprod*) x biomass) is projected to calculate competition
+- [ ] The landscape cell has a maximum biomass of each *fgroup* it can sustain. If that max is attained, the organism in question DOES WHAT? HOW IT CAN BE PENALIZED?
+- [ ] HOW CAN THIS BE MADE REALISTIC?????
+- [X] Initialize a 'competition landscape' for the plants: *.neighs* field in the landscape holds a dictionnary with sum of biomass projected by each individual
+- [ ] Competition = growth rate is penalized by superpositioning of 
+  - During initialization, one input file gives the functional types and their initial abundances, vegmass, reprodmass
+NOTES:
 *** Allocation:
 Parameters values might be specific to each functional group, but general mechanism must be the same:
 REFERENCES:
@@ -45,9 +68,10 @@ REFERENCES:
 - Weiner et al. 2001: Plant growth
 - Lin et al. J of Ecol. 2012: MTE for plants and interaction
 - Nestel et al. J Insect Physiol. 2016: Resource allocation in insects
-- Boggs Func. Ecol. 2009: 
+- Boggs Func. Ecol. 2009: Review 
     DEADLINE: <2018-03-02 Fr>
 - [ ] Divide biomass GAIN according to allocation to survival, growth and reproduction. The allocation will depend on the stage:
+  - [ ] *allocation()* sorts things into the *biomass Dictionnary*
 *REFERENCE:* For insects, nutrient allocation is a function of AGE & SEX (Boggs Func. Ecol. 2009)
   1. juvenile: gain goes to growth
   2. adult: gain goes to reproduction during reproductive phase
@@ -57,20 +81,14 @@ REFERENCES:
   *growth* = (1-surv)
   *reprod* = (1-surv) -> Only exists during reproductive season, controlled by *age* and *fgroup* (gives the duration of reproductive season)
 - [ ] Biomass GAIN depends on competition
-*** Compete [1/2]
-- [ ] Vegetative biomass (=(1- *reprod*) x biomass) is projected to calculate competition
-- [ ] The landscape cell has a maximum biomass of each *fgroup* it can sustain. If that max is attained, the organism in question DOES WHAT? HOW IT CAN BE PENALIZED?
-- [ ] HOW CAN THIS BE MADE REALISTIC?????
-- [X] Initialize a 'competition landscape' for the plants: *.neighs* field in the landscape holds a dictionnary with sum of biomass projected by each individual
-- [ ] Competition = growth rate is penalized by superpositioning of 
-  - During initialization, one input file gives the functional types and their initial abundances, vegmass, reprodmass
-NOTES:
+*** Update organisms: [0/2]
+ - [ ] Simultaneous or independent update?
+ - [ ] Consider making a mutable struct where each field stores the individuals of a functional group, therefore, when updating the organisms, I wouldn't have to go through all of them, just through the group affected by the function in question
 ***  Make them grow [0/0]
 - [ ] Calculate 
-*** Create organisms of different functional groups [0/0]
+*** TODO Create organisms of different functional groups
 *** TODO Think about how to store multiple types of organisms: Dictionnaries, high dim arry, mutable structures?
-- [ ] *populate()* calls *newOrgs()* to create new individuals inside the landscape.
-- [ ] 
+- Eventhough they are more rigid, structs are easier to call and the fields have more flexibility to store different kinds of information on the functional group parameters 
 *** TODO Consider creating unmutable structs to store info about funcitonal types, instead of tables?
 ***  Decide on newOrgs!() is called between reproduction and establishment: Are new individuals created right after reproduction?
 *** TODO Adjust initial abundance to realistic observed densities
@@ -79,5 +97,12 @@ NOTES:
 ** Growth
 ** Reproduction [0/1]
  - [ ] How to "measure" reproductive investment? How to account for it as a field of Organism()? Floral mass might be useful for plants, but not for heterotrophs
-** DOCUMENTATION
-*** TODO list object variables in the calc sheet
+** Interactions
+*** TODO Interactions modelled "by" the *outcomes* (Tikhonov et al. 2017, Spiesman & Inouye 2014) 8[0/1]
+ - [ ] Is it possible to integrate interaction outcomes and MTE? The patterns would lead to enregy flux across community levels
+** Evolutionary dynamics
+Juliano's suggestion: Create a function of trait distribution change depending on abundance or temperature, so that the time 
+* Observation model
+*Different from Virtual Ecologist approach* : OM always exists, VE verifies parametrization algorithm and data sampling method
+* DOCUMENTATION
+*** TODO Update TRACE

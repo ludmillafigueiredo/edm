@@ -12,6 +12,7 @@ const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if 
 const Ea = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
 const Cgrowth = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
 const Cfertil = exp(26.0)
+const tK = 273.15 # °C to K converter
 const Cmortal = exp(19.2)
 
 """
@@ -30,7 +31,7 @@ mutable struct Organism
     biomass::Float64
     disp::Array{Float64,2} #dispersal kernel parameters (mean and shape) TODO tuple
     radius::Int64
-    #Organism() = new()
+    Organism() = new()
 end
 
 
@@ -56,31 +57,28 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
 """
 
 function newOrgs(landscape::Array{Any, N} where N,
-    initorgs)
-    # TODO optimize the for loops?
+                initorgs::Array{Organism, N} where N)
     orgs = []
     for frag in 1:size(landscape,3)
-        for f in 1:length(initorgs.fgroups)
-            # go through each x,y pair and place an org there
-            #TODO might need outerconstructor for diffrent types of fgroups: insects dont have a radius, for example
-            #for cell in eachindex(landscape[X,Y,frag])
-            XYs = hcat(rand(1:size(landscape,1), initorgs.init_abund[f]),            rand(1:size(landscape,2), initorgs.init_abund[f])) #TODO indent it properly
+        for f in 1:length(initorgs.fgroups) #TODO check the organisms file format: so far, all fragments get the same sps
+
+            XYs = hcat(rand(1:size(landscape,1), initorgs.init_abund[f]),rand(1:size(landscape,2), initorgs.init_abund[f]))
+
             for i in 1:initorgs.init_abund[f]
-                neworg = Organism( #TODO indent it tp Organsnim
-                string(initorgs.fgroups[f], IDcounter + 1),
-                [XYs[i,1] XYs[i,2] frag],
-                initorgs.sps[f],
-                initorgs.init_stage[f],
-                0,
-                false,
-                initorgs.fgroups[f],
-                ["placeholder" "placeholder"], #initialize with function
-                rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f])),
-                [initorgs.dispμ initorgs.dispshp],
-                initorgs.radius[f])
+                neworg = Organism(string(initorgs.fgroups[f], IDcounter + 1),
+                                    [XYs[i,1] XYs[i,2] frag],
+                                    initorgs.sps[f],
+                                    initorgs.init_stage[f],
+                                    0,
+                                    false,
+                                    initorgs.fgroups[f],
+                                    ["placeholder" "placeholder"], #initialize with function
+                                    rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f])),
+                                    [initorgs.dispμ initorgs.dispshp],
+                                    initorgs.radius[f])
 
                 push!(orgs, neworg)
-                #lanscape[X,Y,frag].orgs
+
                 global IDcounter += 1
             end
         end
@@ -96,9 +94,8 @@ end
 # end
 
 """
-    projmass!(landscape,orgs)
-Projects the mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism `radius`.
-
+    projvegmass!(landscape,orgs)
+Projects the mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
 """
 function projvegmass!(landscape::Array{Any, N} where N,
     orgs::Array{Any,N} where N)
@@ -109,10 +106,12 @@ function projvegmass!(landscape::Array{Any, N} where N,
         fg = orgs[o].fgroup
         projmass = /(org[o].biomass, ((2*r+1)^2))
 
-        for j in (y-r):(y+r), i in (x-r):(x+r)
+        for j in (y-r):(y+r), i in (x-r):(x+r) #usar a funcao da FON Q trabalha com quadrantes?
             (i =< 0 || i > size(landscape[:,:,frag],1) || j =< 0 || j > size(landscape[:,:,frag],2)) && continue #check boundaries
-            if haskey(landscape[i,j,frag].neighs,fg)
-                landscape[i,j,frag].neighs[fg] += projmass # +1 because the center is a cell, not a point
+            if fg == "autotroph" && i == x && j == y #"mark" steming point for plants
+                landscape[i,j,frag].neighs[fg] = fgpars["autotrophsmax"]
+            elseif haskey(landscape[i,j,frag].neighs,fg)
+                landscape[i,j,frag].neighs[fg] += projmass
             else
                 landscape[i,j,frag].neighs[fg] = projmass
             end
@@ -121,10 +120,12 @@ function projvegmass!(landscape::Array{Any, N} where N,
 
 end
 
-# """
-# """
+"""
+    checkcompetition!()
+
+"""
 function checkcompetition!(orgs::Array{Any,N} where N,
-    landscape::Array{Any, N} where N)
+                        landscape::Array{Any, N} where N)
 
     while o <= length(orgs)
         x, y, frag = orgs[o].location
@@ -132,36 +133,93 @@ function checkcompetition!(orgs::Array{Any,N} where N,
         #r = org.radius
         # 2. Look for neighbors in the area
         for j in (y-r):(y+r), i in (x-r):(x+r)
-            (i == x && j == y) && continue #no self competition
             if landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
                 nbsum += landscape[i,j,frag].neighs
                 nnbs += 1
             end
         end
-        org[o].compterm = nbsum/nnbs # ratio of mass of neighs in nb of cells. TODO It should ne normalized somehow
+        org[o].compterm = (nbsum - orgs[o].biomass)/nnbs # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
         o += 1
     end
 end
 
-# """
-# Individuals grow according to constraints from the MTE: local temperature affects biomass production rate. All individuals in a
-# """
-function grow!(orgs::Array{Any,N} where N,
+"""
+    allocate!()
+Determines energy allocation to survival(reserve), growth or reproduction, according to the developmental `stage` of the organism and its limits.
+"""
+function allocate!(orgs::Array{Any,N} where N,
     landscape,
     Ea,
     Boltz.,
     OrgsRef) #TODO organize this file to serve as refenrece of max size for different functional groups
+
     for o in 1:length(orgs)
-        # dont grow beyond max size
-        if orgs[o].biomass < #TODO check OrgsRef
-            T = landscape[orgs[o].location].temp
-            grown_mass += Cgrowth * organism.vegmass^(3/4) * exp(-Ea/(Boltz*T))
-        else
-            continue
+
+        T = landscape[orgs[o].location].temp + tK
+
+        # Resource assimilation: #TODO check if resource allocation would be the same as growth
+        # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance
+        grown_mass += org[o].compterm * (Cgrowth * organism.vegmass^(3/4) * exp(-Ea/(Boltz*T)))
+
+        # Allocation pseudocode:
+        # total_assimilation = available + complement
+        # when current < min
+        # min = current + complement
+        # complement = min - current
+        # available = total_assimilation - complement
+
+        #Resource allocation schedule
+        # TODO each stage has a priority of allocation, which is limited by a trade-off.
+        if (org[o].stage == "e")  #TODO accountant for resistant stages?
+            # embryos only store
+            org[o].biomass["surv"] += grown_mass #TODO !!!!isnt it only for adults?
+        elseif stage == "j"
+            if org[o].biomass["surv"] < OrgsRef[string("minbiomass",org[o])] # if the minimum biomass is not attained, it must store first and then grow
+                complmt = -(OrgsRef[string("minbiomass",org[o])], org[o].biomass["vegstruct"])
+                org[o].biomass["surv"] += complmt
+                org[o].biomass["vegstruct"] += (grown_mass - complmt)
+            else
+                org[o].biomass["vegstruct"] += grown_mass
+            end
+        elseif stage == "a"
+            if org[o].biomass["reprd"] < OrgsRef[string("maxbiomass",org[o])] # if the minimum biomass is not attained, it must store first and then grow
+                complmt = -(OrgsRef[string("maxbiomass",org[o])], org[o].biomass["vegstruct"])
+                org[o].biomass["reprd"] += complmt
+                org[o].biomass["vegstruct"] += (grown_mass - complmt)
+            else
+                org[o].biomass["vegstruct"] += grown_mass
+            end
         end
+
     end
+
 end
 
+"""
+    store!()
+Biomass gain is store in survival compartment
+"""
+function store!(org::Organism, grown_mass::Float64)
+    # put org.biomass["surv"] += grown_mass here?
+    # if so, check if this function needs more arguments than just `orgs`, it the only one allocate!() needs on it own, do I have to always pass those to the allocate!()
+end
+
+"""
+    grow!()
+Biomass growth is added to the vegetative mass of the individual.
+"""
+function grow!(orgs::Array{Any,N} where N,
+    landscape,
+    Ea,
+    Boltz.,
+    OrgsRef) #TODO organize this file to serve as refenrece of max/min size for different functional groups
+    org.biomass["vegstruct"] += grown_mass
+end
+
+"""
+    reproduction()
+Not to be confused with the `reproduce!` function. Here, biomass gain is allocated to the reproduction compartment
+"""
 
 # """
 # Individuals reproduce with a fertility rate according to the MTE.

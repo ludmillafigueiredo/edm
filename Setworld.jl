@@ -1,3 +1,4 @@
+landscape_init
 """
 This module contains the type of the cell and functions for setting up initial environmental conditions and changing it when necessary.
 
@@ -34,32 +35,24 @@ mutable struct WorldCell
 end
 
 # Functions
-function landscape_init(fragmentation::Bool, simpars) #TODO GIS file and control how fragments become unsuitable
-	#TODO if fragmentation is false, no need for n_frags
-	# landscape = Array{WorldCell}(xlength,ylength, n_frags)
-	# fill!(landscape,WorldCell())
+function landscape_init(simpars)
+
 	landscape = []
-	#TODO built an outeer constructor with values not filled by the for loop
 
-	fragmentation = false # for now, always false: TODO implement fragmentation
-
-	if fragmentation == false
-		for frag in 1:simpars.n_frags
-			#fragment_init!(landscape[:,:,f],fragmentation,xlength,ylength)
-			for y in 1:simpars.pylength, x in 1:simpars.pxlength
-				newcell = WorldCell()
-				newcell.avail = true
-				newcell.temp = rand(Normal(simpars.pmeantemp,simpars.ptempsd),1)[1]
-				newcell.precpt = rand(Normal(simpars.pmeanprec,simpars.pprecsd),1)[1]
-				newcell.neighs = Dict()
-				push!(landscape,newcell)
-			end
+	for frag in 1:simpars.n_frags
+		for y in 1:simpars.pylength[frag], x in 1:simpars.pxlength[frag]
+			newcell = WorldCell()
+			newcell.avail = true
+			newcell.temp = rand(Normal(simpars.pmeantemp[frag],simpars.ptempsd[frag]),1)[1]
+			newcell.precpt = rand(Normal(simpars.pmeanprec[frag],simpars.pprecsd[frag]),1)[1]
+			newcell.neighs = Dict()
+			push!(landscape,newcell)
 		end
-		landscape = reshape(landscape, simpars.pxlength, simpars.pylength) #! x inner loops matches reshape order
-	else
-		# TODO represent fragmentation: will depend on writing a funciton to read txt input: store them in a mutable struct makes it easier to call, wherever size they have
 	end
-    return landscape
+
+	landscape = reshape(landscape, simpars.pxlength, simpars.pylength) #! x in inner loops matches reshape order
+
+	return landscape
 end
 
 # function read_envcond()
@@ -75,18 +68,16 @@ end
 # 	return neighborhood
 # end
 
-#TODO create matrix with Connectivity between fragments
-#TODO function to update landscape when changing envoronmental conditions
+#TODO create/read in matrix with Connectivity between fragments
 
-#TODO
 """
-Update landscape with individualsavailability locations.
+Update landscape with individuals availability locations.
 """
 function updatelandscape!()
 end
 
-# Unity test #TODO
-# check
-# landscape_init(false, 5,5, 1)
-# landscape_init(false,5,5,2)
+#TODO Unity test
+
+
+
 end
