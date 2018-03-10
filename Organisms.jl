@@ -9,7 +9,7 @@ export newOrgs!, Organism, IDcounter
 
  #TODO check UNITS
 const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
-const Ea = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
+const aE = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
 const Cgrowth = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
 const Cfertil = exp(26.0)
 const tK = 273.15 # °C to K converter
@@ -66,16 +66,16 @@ function newOrgs(landscape::Array{Any, N} where N,
 
             for i in 1:initorgs.init_abund[f]
                 neworg = Organism(string(initorgs.fgroups[f], IDcounter + 1),
-                                    [XYs[i,1] XYs[i,2] frag],
-                                    initorgs.sps[f],
-                                    initorgs.init_stage[f],
-                                    0,
-                                    false,
-                                    initorgs.fgroups[f],
-                                    ["placeholder" "placeholder"], #initialize with function
-                                    rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f])),
-                                    [initorgs.dispμ initorgs.dispshp],
-                                    initorgs.radius[f])
+                                  [XYs[i,1] XYs[i,2] frag],
+                                  initorgs.sps[f],
+                                  initorgs.init_stage[f],
+                                  0,
+                                  false,
+                                  initorgs.fgroups[f],
+                                  ["placeholder" "placeholder"], #initialize with function
+                                  rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f])),
+                                  [initorgs.dispμ initorgs.dispshp],
+                                  initorgs.radius[f])
 
                 push!(orgs, neworg)
 
@@ -145,11 +145,11 @@ end
 
 """
     allocate!()
-Determines energy allocation to survival(reserve), growth or reproduction, according to the developmental `stage` of the organism and its limits.
+Calculates biomass gain according to MTE rate and allocates it growth or reproduction, according to the developmental `stage` of the organism.
 """
 function allocate!(orgs::Array{Any,N} where N,
     landscape,
-    Ea,
+    aE,
     Boltz.,
     OrgsRef) #TODO organize this file to serve as refenrece of max size for different functional groups
 
@@ -158,36 +158,21 @@ function allocate!(orgs::Array{Any,N} where N,
         T = landscape[orgs[o].location].temp + tK
 
         # Resource assimilation: #TODO check if resource allocation would be the same as growth
-        # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance
-        grown_mass += org[o].compterm * (Cgrowth * organism.vegmass^(3/4) * exp(-Ea/(Boltz*T)))
-
-        # Allocation pseudocode:
-        # total_assimilation = available + complement
-        # when current < min
-        # min = current + complement
-        # complement = min - current
-        # available = total_assimilation - complement
+        # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
+        # Any cost related to insufficient minimal biomass goes into the survival probability function
+        grown_mass += org[o].compterm * (Cgrowth * organism.vegmass^(3/4) * exp(-aE/(Boltz*T)))
 
         #Resource allocation schedule
-        # TODO each stage has a priority of allocation, which is limited by a trade-off.
+        #TODO make it more ellaborate and includde trade-offs
         if (org[o].stage == "e")  #TODO accountant for resistant stages?
-            # embryos only store
-            org[o].biomass["surv"] += grown_mass #TODO !!!!isnt it only for adults?
+            # embryos only consume reserves:
+            org[o].biomass -=
         elseif stage == "j"
-            if org[o].biomass["surv"] < OrgsRef[string("minbiomass",org[o])] # if the minimum biomass is not attained, it must store first and then grow
-                complmt = -(OrgsRef[string("minbiomass",org[o])], org[o].biomass["vegstruct"])
-                org[o].biomass["surv"] += complmt
-                org[o].biomass["vegstruct"] += (grown_mass - complmt)
-            else
-                org[o].biomass["vegstruct"] += grown_mass
-            end
+            # juveniles grow
+            org[o].biomass["vegstruct"] += grown_mass
         elseif stage == "a"
-            if org[o].biomass["reprd"] < OrgsRef[string("maxbiomass",org[o])] # if the minimum biomass is not attained, it must store first and then grow
-                complmt = -(OrgsRef[string("maxbiomass",org[o])], org[o].biomass["vegstruct"])
-                org[o].biomass["reprd"] += complmt
-                org[o].biomass["vegstruct"] += (grown_mass - complmt)
-            else
-                org[o].biomass["vegstruct"] += grown_mass
+            # adults reproduce
+            org[o].biomass["reprd"] += grown_mass
             end
         end
 
@@ -196,29 +181,24 @@ function allocate!(orgs::Array{Any,N} where N,
 end
 
 """
-    store!()
-Biomass gain is store in survival compartment
+    survive!()
+Organism survival depends on total biomass, according to MTE rate.
 """
-function store!(org::Organism, grown_mass::Float64)
-    # put org.biomass["surv"] += grown_mass here?
-    # if so, check if this function needs more arguments than just `orgs`, it the only one allocate!() needs on it own, do I have to always pass those to the allocate!()
+function survive!()
+    indxs = []
+    for o in orgs
+        mort = Cmortal * (org[o].biomass["reprd"] + biomass["vegstruct"])^(-1/4)*exp(-aE/)
+        if rand() > rand(PoissonBinomial(mort)) # successes are death events, because the consequence to modelled it to be taken out
+            push!(indxs, o)
+        end
+    end
+    deleteat!(orgs, indxs)
+    return orgs
 end
 
 """
-    grow!()
-Biomass growth is added to the vegetative mass of the individual.
-"""
-function grow!(orgs::Array{Any,N} where N,
-    landscape,
-    Ea,
-    Boltz.,
-    OrgsRef) #TODO organize this file to serve as refenrece of max/min size for different functional groups
-    org.biomass["vegstruct"] += grown_mass
-end
+    reproducce!()
 
-"""
-    reproduction()
-Not to be confused with the `reproduce!` function. Here, biomass gain is allocated to the reproduction compartment
 """
 
 # """
