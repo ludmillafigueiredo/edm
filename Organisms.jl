@@ -1,5 +1,10 @@
 module Organisms
 
+"""
+This module contains the
+
+Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the rangge of search).
+"""
 #using
 using Distributions
 using Setworld
@@ -15,12 +20,8 @@ const Cfertil = exp(26.0)
 const tK = 273.15 # °C to K converter
 const Cmortal = exp(19.2)
 
-"""
-Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the rangge of search).
-"""
 mutable struct Organism
     ID::String
-    #sp::String
     location::Array{Int64,2} # (fragment, x, y)#TODO use tuple
     sp::String
     stage::String #j,s,a #TODO seed = embryo
@@ -57,8 +58,8 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
 """
 
 function newOrgs(landscape::Array{Any, N} where N,
-                initorgs::Array{Organism, N} where N)
-    orgs = []
+                initorgs::InitOrgs)
+    orgs = Organism[]
     for frag in 1:size(landscape,3)
         for f in 1:length(initorgs.fgroups) #TODO check the organisms file format: so far, all fragments get the same sps
 
@@ -74,7 +75,7 @@ function newOrgs(landscape::Array{Any, N} where N,
                                   initorgs.fgroups[f],
                                   ["placeholder" "placeholder"], #initialize with function
                                   rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f])),
-                                  [initorgs.dispμ initorgs.dispshp],
+                                  [initorgs.dispμ[f] initorgs.dispshp[f]],
                                   initorgs.radius[f])
 
                 push!(orgs, neworg)
@@ -124,8 +125,7 @@ end
     checkcompetition!()
 
 """
-function checkcompetition!(orgs::Array{Any,N} where N,
-                        landscape::Array{Any, N} where N)
+function checkcompetition!(orgs::Array{Any,N} where N, landscape::Array{Any, N} where N)
 
     while o <= length(orgs)
         x, y, frag = orgs[o].location
@@ -141,6 +141,7 @@ function checkcompetition!(orgs::Array{Any,N} where N,
         org[o].compterm = (nbsum - orgs[o].biomass)/nnbs # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
         o += 1
     end
+
 end
 
 """
@@ -155,7 +156,7 @@ function allocate!(orgs::Array{Any,N} where N,
 
     for o in 1:length(orgs)
 
-        T = landscape[orgs[o].location].temp + tK
+        T = landscape[orgs[o].location].temp + tK #(conversion to K)
 
         # Resource assimilation: #TODO check if resource allocation would be the same as growth
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
@@ -175,7 +176,6 @@ function allocate!(orgs::Array{Any,N} where N,
             org[o].biomass["reprd"] += grown_mass
             end
         end
-
     end
 
 end
@@ -184,9 +184,9 @@ end
     survive!()
 Organism survival depends on total biomass, according to MTE rate.
 """
-function survive!()
+function survive!(orgs)
     indxs = []
-    for o in orgs
+    for o in 1:length(orgs)
         mort = Cmortal * (org[o].biomass["reprd"] + biomass["vegstruct"])^(-1/4)*exp(-aE/)
         if rand() > rand(PoissonBinomial(mort)) # successes are death events, because the consequence to modelled it to be taken out
             push!(indxs, o)
@@ -197,9 +197,51 @@ function survive!()
 end
 
 """
-    reproducce!()
+    reproduce!()
+Assigns proper reproduction mode according to the organism functional group.
+"""
+function reproduce!()
+    #TODO expand choice of functional groups
+    if "plant"
+        reproduce!()
+    elseif "insect"
+        mate!()
+    end
+
+    offspring = []
+    push!(offspring, Cfertil * org.biomass["reprd"]^(-1/4) * exp(-aE/(Boltz*T)))
+end
 
 """
+    mate!()
+Insects reproduce if another one is found in the immediate vicinity.
+"""
+function mate!(org::Organism)
+    x, y, frag = orgs.location #another org of same sp should match the locations of focus
+    sp = org.sp
+
+     # 1. check in the location field of orgs array:
+     # 1.a inside same frag, look for locaions inside the squared area.
+     # 2. when matching, differentiate between autotrphsa and the rest
+
+    for o in 1:length(orgs) #look for partners
+        #TODO optimize indexation of field location in arrray
+        #TODO memory-wise, is it better to put all
+        # 1:1 sex-ratio,
+        if frag == orgs[o].location[3]
+            if orgs[o].location[1:2] in collect(Iterators.product(x-1:x+1,y-1:y+1))
+                #check sp, self and already reproduced
+                if sp == orgs[o].sp && !(Base.isequal(org, orgs[o])) && org.reprd == false && orgs[o].reprd =
+                    #TODO add stochasticity
+                    org.reprd = true
+                    orgs[o].reprd = true
+                end
+            end
+        end
+    end
+end
+
+
 
 # """
 # Individuals reproduce with a fertility rate according to the MTE.

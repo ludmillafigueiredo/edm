@@ -21,7 +21,7 @@ module Setworld
 
 using Distributions
 
-export WorldCell, landscape_init, neighborhood
+export WorldCell, landscape_init
 
 #Types
 mutable struct WorldCell
@@ -30,27 +30,30 @@ mutable struct WorldCell
 	#pollinationFONs::Dict  separate Dict matrix
 	temp::Float64
 	precpt::Float64
-	neighs::Dict
-	WorldCell() = new()
+	neighs::Dict{String,Int64}
+	WorldCell() = new() #if this is included, and WorldCell object must be initialized as WordCell() and then completed
 end
+
+#WorldCell() = WorldCell(false, 0.0, 0.0, Dict())
 
 # Functions
 function landscape_init(simpars)
 
 	landscape = []
 
-	for frag in 1:simpars.n_frags
-		for y in 1:simpars.pylength[frag], x in 1:simpars.pxlength[frag]
+	for frag in 1:simpars.nfrags
+		for y in 1:simpars.fylength[frag], x in 1:simpars.fxlength[frag]
 			newcell = WorldCell()
 			newcell.avail = true
-			newcell.temp = rand(Normal(simpars.pmeantemp[frag],simpars.ptempsd[frag]),1)[1]
-			newcell.precpt = rand(Normal(simpars.pmeanprec[frag],simpars.pprecsd[frag]),1)[1]
+			newcell.temp = rand(Normal(simpars.fmeantemp[frag],simpars.ftempsd[frag]),1)[1]
+			newcell.precpt = rand(Normal(simpars.fmeanprec[frag],simpars.fprecsd[frag]),1)[1]
 			newcell.neighs = Dict()
 			push!(landscape,newcell)
 		end
 	end
 
-	landscape = reshape(landscape, simpars.pxlength, simpars.pylength) #! x in inner loops matches reshape order
+	landscape = reshape(landscape, (simpars.fxlength[1], simpars.fylength[1], simpars.nfrags)) # reshaping is easier then going through every index of a 3D landscap, creating a WordCell cell there and parameterizing it. x in inner loops matches reshape order
+	#TODO check
 
 	return landscape
 end
@@ -78,6 +81,5 @@ end
 
 #TODO Unity test
 
-
-
+#module end!
 end

@@ -16,7 +16,7 @@ using Setworld
 #Simulation parameters storage:
 mutable struct Simpars #TODO put all landscape.in values in here
     fxlength::Tuple{Int64}
-    fylenght::Tuple{Int64}
+    fylength::Tuple{Int64}
     fmeantemp::Tuple{Float64}
     ftempsd::Tuple{Float64}
     fmeanprec::Tuple{Float64}
@@ -31,27 +31,16 @@ mutable struct InitOrgs
     fgroups::Tuple{String}
     sps::Tuple{String}
     init_stage::Tuple{String}
-    init_abund::Tuple{String}
+    init_abund::Tuple{Int64}
     #genotypes #TODO initialie those in functions
     biomassμ::Tuple{Float64}
     biomasssd::Tuple{Float64}
     dispμ::Tuple{Float64}
     dispshp::Tuple{Float64}
-    radius::Tuple{Float64}
+    radius::Tuple{Int64}
     InitOrgs() = new() #TODO check if new() is necessary
 end
 
-#Dictionnary stores functional groups parameters
-"""
-    fgpars()
-Stores functional groups parameters in a dictionnary that is consulted for every function involving organism's simulation.
-    !!!! Better than struct in this case because it is possible to write general funcitons that match the strings identifying the fg og the organism and the key in the dictionnary
-"""
-function fgparsdict()
-    fgpars = Dict()
-    # parse files in EDDir/functionalgroups and for each file, create an entry in the file with the first 3 letters of the group and the parametr it controls. takes the parameters of a list
-    return fgpars
-end
 
 """
     read_initials(simparams, initorgs)
@@ -62,43 +51,44 @@ function read_initials()
     simparams = Simpars()
     begin
         env = open("landscape_init.in")
-        readline(env); simparams.fxlength = parse(Int64,readline(env))
-        readline(env); simparams.fylength = parse(Int64,readline(env))
-        readline(env); simparams.fmeantemp = parse(Float64,readline(env))
-        readline(env); simparams.ftempsd = parse(Float64,readline(env))
-        readline(env); simparams.fmeanprec = parse(Float64,readline(env))
-        readline(env); simparams.fprecsd = parse(Float64,readline(env))
-        readline(env); simparams.n_frags = parse(Int64,readline(env))
+        readline(env); simparams.fxlength = tuple(parse(Int64,readline(env)))
+        readline(env); simparams.fylength = tuple(parse(Int64,readline(env)))
+        readline(env); simparams.fmeantemp = tuple(parse(Float64,readline(env)))
+        readline(env); simparams.ftempsd = tuple(parse(Float64,readline(env)))
+        readline(env); simparams.fmeanprec = tuple(parse(Float64,readline(env)))
+        readline(env); simparams.fprecsd = tuple(parse(Float64,readline(env)))
+        readline(env); simparams.nfrags = parse(Int64,readline(env))
         close(env)
     end
     #verify that
-    simparams.n_frags == length(simparams.fxlength)
+    simparams.nfrags == length(simparams.fxlength)
 
     initorgs = InitOrgs()
     begin
         #TODO check the organisms file format: so far, all fragments get the same sps
         orgf = open("organisms.in")
-        readline(orgf); initorgs.fgroups = [readline(orgf)] #doest need parse for string
-        readline(orgf); initorgs.sps = [readline(orgf)]
-        readline(orgf); initorgs.init_stage = [readline(orgf)]
-        readline(orgf); initorgs.init_abund = [parse(Int64,readline(orgf))]
-        #readline(orgf); genotypes = [readline(orgf)]
-        readline(orgf); initorgs.biomassμ = [parse(Float64,readline(orgf))]
-        readline(orgf); initorgs.biomasssd = [parse(Float64,readline(orgf))]
-        readline(orgf); initorgs.dispμ = [parse.(Float64,readline(orgf))]
-        readline(orgf); initorgs.dispshp = [parse.(Float64,readline(orgf))]
-        readline(orgf); initorgs.radius = [parse(Int64,readline(orgf))]
+        readline(orgf); initorgs.fgroups = tuple(readline(orgf)) #doest need parse for string
+        readline(orgf); initorgs.sps = tuple(readline(orgf))
+        readline(orgf); initorgs.init_stage = tuple(readline(orgf))
+        readline(orgf); initorgs.init_abund = tuple(parse(Int64,readline(orgf)))
+        #readline(orgf); genotypes = (readline(orgf))
+        readline(orgf); initorgs.biomassμ = tuple(parse(Float64,readline(orgf)))
+        readline(orgf); initorgs.biomasssd = tuple(parse(Float64,readline(orgf)))
+        readline(orgf); initorgs.dispμ = tuple(parse.(Float64,readline(orgf)))
+        readline(orgf); initorgs.dispshp = tuple(parse.(Float64,readline(orgf)))
+        readline(orgf); initorgs.radius = tuple(parse(Int64,readline(orgf)))
+        #check why if parsed into tuple, becomes a float
         close(orgf)
     end
-    return initorgs, simparams
+    return simparams, initorgs
 end
 
 # function read_landscape()
 #     #read and store initial conditions in dictionnary
 #     # for nas linhas do input
 #     file = open(readcsv, "landscpinit.csv")
-#     map(x,y -> Dict(x => y), file[1,1:end],file[2:end,1:end])
-#     landpars = Dict{Any,Float64}(file[1,1:end],file[2:end,1:end])
+#     map(x,y -> Dict(x => y), file(1,1:end),file(2:end,1:end))
+#     landpars = Dict{Any,Float64}(file(1,1:end),file(2:end,1:end))
 #
 #     #Alternative
 #     file = readlines("landscpinit.csv")
@@ -111,17 +101,14 @@ end
 #     end
 # end
 
-#TODO Store organisms parameters that regulate model run: Might interfere with the initialization values??
-mutable struct orgpars
-end
 
 """
 """
 function simulate()
 #   INITIALIZATION
-    read_initials()
+    simparams, initorgs = read_initials()
 
-    mylandscape= landscape_init(false, simparams)
+    mylandscape= landscape_init(simparams)
     orgs_init = newOrgs(mylandscape, initorgs)
 
     # INITIALIZATION ": multidimensional
@@ -150,3 +137,19 @@ function simulate()
 end
 
 simulate()
+
+#TODO Store organisms parameters that regulate model run: Might interfere with the initialization values??
+mutable struct orgpars
+end
+
+#Dictionnary stores functional groups parameters
+"""
+    fgpars()
+Stores functional groups parameters in a dictionnary that is consulted for every function involving organism's simulation.
+    !!!! Better than struct in this case because it is possible to write general funcitons that match the strings identifying the fg og the organism and the key in the dictionnary
+"""
+function fgparsdict()
+    fgpars = Dict()
+    # parse files in EDDir/functionalgroups and for each file, create an entry in the file with the first 3 letters of the group and the parametr it controls. takes the parameters of a list
+    return fgpars
+end

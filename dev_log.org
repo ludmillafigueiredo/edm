@@ -20,8 +20,11 @@
 *** DONE Change names so that temperature and preciptation can be called niche dimensions: no need
 *** TODO Initialize
     DEADLINE: <2018-03-02 Fr>
-*readinlandscp* Initial landscape conditions are read from *landscpinit* file and stored in Dict
-*landscape_init()* create landscape with 
+*readinlandscp* Initial landscape conditions are read from *landscpinit* file and stored in Dict: so far, *read_initials()* is doing it
+*landscape_init()* create landscape with WHICH DIMENSIONS?
+- Reshaping in landscape should use max fragment dimensions? For square fragments, easy, but if shape varies, it is problematic.
+- Find another type of structure to hold the landscape structure OR use a 1D array, and elaborate an indexation to identify x,y and frag? 
+  -> Inside the fragments loop, reshape each fragment and append it to some 3D structure?
 *** Change during simulation
 DEADLINE: <2018-03-02 Fr>
 *update_landscape!* changes the dictionnary values
