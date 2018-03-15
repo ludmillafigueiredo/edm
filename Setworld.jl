@@ -30,8 +30,13 @@ mutable struct WorldCell
 	#pollinationFONs::Dict  separate Dict matrix
 	temp::Float64
 	precpt::Float64
-	neighs::Dict{String,Int64}
-	WorldCell() = new() #if this is included, and WorldCell object must be initialized as WordCell() and then completed
+	neighs::Dict{String,Int64} #
+	stem::Bool #steming point of plant
+	#WorldCell() = new() #if this is included, and WorldCell object must be initialized as WordCell() and then completed
+end
+
+mutable struct PollCell
+	floralres::Dict() #ind => amount of floral resource projected in the cell
 end
 
 #WorldCell() = WorldCell(false, 0.0, 0.0, Dict())
@@ -39,21 +44,20 @@ end
 # Functions
 function landscape_init(simpars)
 
-	landscape = []
+	landscape = WorldCell[]
 
 	for frag in 1:simpars.nfrags
 		for y in 1:simpars.fylength[frag], x in 1:simpars.fxlength[frag]
-			newcell = WorldCell()
-			newcell.avail = true
-			newcell.temp = rand(Normal(simpars.fmeantemp[frag],simpars.ftempsd[frag]),1)[1]
-			newcell.precpt = rand(Normal(simpars.fmeanprec[frag],simpars.fprecsd[frag]),1)[1]
-			newcell.neighs = Dict()
+			newcell = WorldCell(true,
+								rand(Normal(simpars.fmeantemp[frag],simpars.ftempsd[frag]),1)[1],
+								rand(Normal(simpars.fmeanprec[frag],simpars.fprecsd[frag]),1)[1],
+								Dict())
 			push!(landscape,newcell)
 		end
 	end
 
 	landscape = reshape(landscape, (simpars.fxlength[1], simpars.fylength[1], simpars.nfrags)) # reshaping is easier then going through every index of a 3D landscap, creating a WordCell cell there and parameterizing it. x in inner loops matches reshape order
-	#TODO check
+	#TODO check reshaping for landscape with frags of different sizes
 
 	return landscape
 end
