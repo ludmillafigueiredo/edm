@@ -51,7 +51,8 @@ function landscape_init(simpars)
 			newcell = WorldCell(true,
 								rand(Normal(simpars.fmeantemp[frag],simpars.ftempsd[frag]),1)[1],
 								rand(Normal(simpars.fmeanprec[frag],simpars.fprecsd[frag]),1)[1],
-								Dict())
+								Dict(),
+								false)
 			push!(landscape,newcell)
 		end
 	end

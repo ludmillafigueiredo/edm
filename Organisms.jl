@@ -32,13 +32,13 @@ mutable struct Organism
     biomass::Float64
     disp::Array{Float64,2} #dispersal kernel parameters (mean and shape) TODO tuple
     radius::Int64
-    Organism() = new()
+    #Organism() = new()
 end
 
 
 """
     newOrg(fgroups, init_abund, biomassμ, biomasssd)
-newOrg() creates new `init_abund` individuals of each  functional group (`fgroups`), with biomass (`biomassμ` +- `biomasssd`). It is called during the initialization and all  the Organism's values are read from an parameter file for the especific functional group. All organisms, from all funcitonal groups, are stored in the same array.
+newOrg() creates new `init_abund` individuals of each  functional group (`fgroups`), with biomass (N(`biomassμ`,`biomasssd`)). It is called during the initialization and all  the Organisms parameters are read from an parameter file, for the specific functional group. All organisms, from all funcitonal groups, are stored in the same array.
 #TODO those two take very different arguments. Still diffrentiate just methods?
     newOrg(parents, reprmode)
  newOrg() generates offspringn, after reproduction. For offspring creation, the `genotype` field is filled according to parental genotype and mode of reproduction and the other fields are copied from the parents.
@@ -99,7 +99,7 @@ end
 Projects the mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
 """
 function projvegmass!(landscape::Array{Any, N} where N,
-    orgs::Array{Any,N} where N)
+    orgs::Array{Organism,N} where N)
 
     for o in 1:length(orgs)
         x, y, frag = orgs[o].location
@@ -109,8 +109,8 @@ function projvegmass!(landscape::Array{Any, N} where N,
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #usar a funcao da FON Q trabalha com quadrantes?
             (i =< 0 || i > size(landscape[:,:,frag],1) || j =< 0 || j > size(landscape[:,:,frag],2)) && continue #check boundaries
-            if fg == "autotroph" && i == x && j == y #"mark" steming point for plants
-                landscape[i,j,frag].neighs[fg] = fgpars["autotrophsmax"]
+            if fg == "plant" && i == x && j == y #"mark" steming point for plants
+                landscape[i,j,frag].neighs[fg] = fgpars["plant"]
             elseif haskey(landscape[i,j,frag].neighs,fg)
                 landscape[i,j,frag].neighs[fg] += projmass
             else
@@ -122,36 +122,35 @@ function projvegmass!(landscape::Array{Any, N} where N,
 end
 
 """
-    checkcompetition!()
-
+    compete!(orgs,landscape)
+Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
 """
-function checkcompetition!(orgs::Array{Any,N} where N, landscape::Array{Any, N} where N)
+function compete!(orgs::Array{Any,N} where N, landscape::Array{Any, N} where N)
 
     while o <= length(orgs)
         x, y, frag = orgs[o].location
         fg = orgs[o].fgroup
         #r = org.radius
         # 2. Look for neighbors in the area
-        for j in (y-r):(y+r), i in (x-r):(x+r)
+        for j in (y-r):(y+r), i in (x-r):(x+r) #TODO filter!() this area?
             if landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
-                nbsum += landscape[i,j,frag].neighs
-                nnbs += 1
+                nbsum += landscape[i,j,frag].neighs - orgs[o].biomass/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
             end
         end
-        org[o].compterm = (nbsum - orgs[o].biomass)/nnbs # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
+        org[o].compterm = (orgs[o].biomass - nbsum)/orgs[o].biomass # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
         o += 1
     end
 
 end
 
 """
-    allocate!()
+    allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and allocates it growth or reproduction, according to the developmental `stage` of the organism.
 """
 function allocate!(orgs::Array{Any,N} where N,
     landscape,
     aE,
-    Boltz.,
+    Boltz,
     OrgsRef) #TODO organize this file to serve as refenrece of max size for different functional groups
 
     for o in 1:length(orgs)
@@ -187,9 +186,11 @@ Organism survival depends on total biomass, according to MTE rate.
 function survive!(orgs)
     indxs = []
     for o in 1:length(orgs)
-        mort = Cmortal * (org[o].biomass["reprd"] + biomass["vegstruct"])^(-1/4)*exp(-aE/)
+        mort = Cmortal * (orgs[o].biomass["reprd"] + biomass["vegstruct"])^(-1/4)*exp(-aE/)
         if rand() > rand(PoissonBinomial(mort)) # successes are death events, because the consequence to modelled it to be taken out
             push!(indxs, o)
+        else
+            orgs[o].age += 1
         end
     end
     deleteat!(orgs, indxs)
@@ -198,59 +199,120 @@ end
 
 """
     reproduce!()
-Assigns proper reproduction mode according to the organism functional group.
+Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
 function reproduce!()
-    #TODO expand choice of functional groups
-    if "plant"
-        reproduce!()
-    elseif "insect"
-        mate!()
+    # if # pollination depending plants
+    #     pollination()
+    # elseif "insect"
+    #     parents_genes = mate!()
+    # end
+
+    # Clonal reproduction
+    offspring = Organism[]
+    noffsprg = round(Cfertil * org.biomass["reprd"]^(-1/4) * exp(-aE/(Boltz*T))) #TODO stochasticity!
+    for n in 1:noffsprg
+        #TODO check for a quicker way of creating several objects of composite-type
+        embryo = Organism(string(org.fgroups, IDcounter + 1),
+                          [], #location is given according to functional group and dispersal strategy, in disperse!()
+                          org.sp,
+                          "e",
+                          0,
+                          false,
+                          org.fgroup,
+                          ["placeholder" "placeholder"], #come from function
+                          rand(Distributions.Normal(OrgsRef.biomassμ[org.fgroup],OrgsRef.biomasssd[org.fgroup])),
+                          [OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
+                          OrgsRef.radius[f])
+        push!(offspring, embryo)
     end
 
-    offspring = []
-    push!(offspring, Cfertil * org.biomass["reprd"]^(-1/4) * exp(-aE/(Boltz*T)))
+    # TODO Wind pollination
+
+    # TODO gamete production and fertilization
+    # parents_genes[1] and parents_genes[2]
+
+    # TODO pollination
 end
+
+"""
+    disperse!()
+Butterflies, bees and seeds can/are disperse(d).
+"""
+function disperse!()
+# Seeds (Bullock et al. JEcol 2017)
+# Get seeds from org storage
+dispersing = filter.(orgs, (orgs.fgroup = "plant" && orgs.stage == "e")
+# Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
+a = 2.5e-6
+b = 0.1888
+
+for d in dispersing
+# Dispersal distance from kernel:
+    dist = rand(findDISTRIBUTIONNNNN)
+# Check for available habitat (inside or inter fragment)
+
+end
+
+if in disp_dist <= border
+    location = (rand(fxlength) rand(fylength) frag)
+else #inter frag dispersal
+    newfrag = max(filter(x -> x <= disp_dist, connectivity_matrix[frag_line])) #goes to the closest
+    location = (rand(fxlength) rand(fylength) newfrag)
+end
+
+end
+
+"""
+    emerge!()
+Germination for seeds, emergency for eggs.
+"""
+
+"""
+    pollination!()
+Simulates plant-insect encounters and effective pollen transfer.
+"""
+#TODO find a not too cumbersome way of modelling pollen transfer: store interactions and check for last individual visit of a plant, within a time frame? (last one, for starters)
+
 
 """
     mate!()
 Insects reproduce if another one is found in the immediate vicinity.
 """
 function mate!(org::Organism)
-    x, y, frag = orgs.location #another org of same sp should match the locations of focus
+    x, y, frag = org.location #another org of same sp should match the locations of focus
     sp = org.sp
 
-     # 1. check in the location field of orgs array:
-     # 1.a inside same frag, look for locaions inside the squared area.
-     # 2. when matching, differentiate between autotrphsa and the rest
+    # 1. check in the location field of orgs array:
+    # 1.a inside same frag, look for locaions inside the squared area.
+    # 2. when matching, differentiate between autotrphsa and the rest
+    if org.stage == "a"
 
-    for o in 1:length(orgs) #look for partners
-        #TODO optimize indexation of field location in arrray
-        #TODO memory-wise, is it better to put all
-        # 1:1 sex-ratio,
-        if frag == orgs[o].location[3]
-            if orgs[o].location[1:2] in collect(Iterators.product(x-1:x+1,y-1:y+1))
-                #check sp, self and already reproduced
-                if sp == orgs[o].sp && !(Base.isequal(org, orgs[o])) && org.reprd == false && orgs[o].reprd =
-                    #TODO add stochasticity
-                    org.reprd = true
-                    orgs[o].reprd = true
+        for o in 1:length(orgs) #look for partners
+            #TODO optimize indexation of field location in arrray
+            #TODO memory-wise, is it better to put all ifs together?
+            # 1:1 sex-ratio,
+            if frag == orgs[o].location[3]
+                if orgs[o].location[1:2] in collect(Iterators.product(x-1:x+1,y-1:y+1))
+                    #check sp, self and already reproduced
+                    if sp == orgs[o].sp && !(Base.isequal(org, orgs[o])) && org.reprd == false && orgs[o].reprd =
+                        #TODO add stochasticity
+                        org.reprd = true
+                        orgs[o].reprd = true
+
+                        parents_genes = [org.genotype, orgs[o].reprd]
+                    end
                 end
             end
         end
+
+    else
+        continue
     end
+    return parents_genes #TODO check if it conflicts with modifying orgs
 end
 
 
 
-# """
-# Individuals reproduce with a fertility rate according to the MTE.
-# When offspring is produced, they are generated
-# """
-# function reproduce!()
-#
-# end
-#
-#
 
 end

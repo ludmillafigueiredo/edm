@@ -9,6 +9,7 @@ global IDcounter = Int64(0)
 
 # Load Julia & model packages
 using Distributions
+using JLD
 using Setworld
 #using Organisms
 
