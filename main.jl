@@ -117,23 +117,23 @@ function simulate()
     #read_orgs()
 
 # MODEL RUN
-    # for t in 1:timesteps
-    #     #competition on 2 steps: reflects on compterm
-    #     projmass!()
-    #     checkcompetition!()
-    #     growth!(orgs::Array{Organisms.Organism, N} where N)
-    #     reproduction!()
-    #     dispersion!()
-    #
-    #     # Disturbances:
-    #     ## Dynamical landscape change
-    #     if t #something
-    #         function update_landscape!()
-    #
-    #     ## Invasion
-    #     read_orgs(invasivefile)
-    #     # Output:
-    # end
+    for t in 1:timesteps
+        #competition on 2 steps: reflects on compterm
+        projmass!()
+        allocate!()
+        reproduce!()
+        disperse!()
+
+        # Disturbances:
+        ## Dynamical landscape change
+        # if t #something
+        #     function update_landscape!()
+        # end
+        ## Invasion
+        # read_orgs(invasivefile)
+        
+        # Output:
+    end
     return mylandscape, orgs_init
 end
 

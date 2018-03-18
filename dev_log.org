@@ -81,7 +81,7 @@ Organisms are stored in an array of n_frags (read from simulation file). All org
 ** TODO Create organisms of different functional groups
 During initialization, one input file gives the functional types and their initial abundances, vegmass, reprodmass
 - [ ] input file format
-*** OrgsRef format: how the program stores that information?
+*** OrgsRef format: is that information stored?
 - [ ] Organize dummy data in the ideal input/reference format
    DEADLINE: <2018-03-15 Do>
 *** OrgsRef: [1/2] 
@@ -89,19 +89,35 @@ During initialization, one input file gives the functional types and their initi
 - [X] How to store multiple types of organisms: single array. Might be necessary to chage it, if calling specific fct types reveals itself to be important and can't be done otherwise
 - Eventhough they are more rigid, structs are easier to call and the fields have more flexibility to store different kinds of information on the functional group parameters 
 ** Life-cycle
-*** TODO Compete [2/4]
- Competition is biomass-based: overlap of area gives rise to *compterm* that penalizes growth
- - [ ] Vegetative biomass is projected to calculate competition: *compterm* = 
- - [ ] The landscape cell has a maximum biomass of each *fgroup* it can sustain. If that max is attained, the organism in question DOES WHAT? HOW IT CAN BE PENALIZED?
- - [X] Initialize a 'competition landscape' for the plants: *.neighs* field in the landscape holds a dictionnary with sum of biomass projected by each individual of a functional group
- - [X] Competition arises form growth rate being penalized by overlapping  
+*** TODO Compete [4/5]
+ Competition is biomass-based: overlap of area gives rise to /compterm/ that penalizes growth
+ - [X] Vegetative biomass is projected to calculate competition /compterm/: *projectvegmass!()*
+ - [ ] The landscape cell has biomass carrying capacity of each /.fgroup/ it can sustain. If that max is attained, the organism in question DOES WHAT? HOW IT CAN BE PENALIZED?
+ - [X] Initialize a 'competition landscape' for the plants: /.neighs/ field in the landscape holds a dictionnary with sum of biomass projected by each individual of a functional group
+ - [X] Competition arises form growth rate being penalized by overlapping 
+ - [X] When competition is too strong (/compterm/ <= 1) individual has an increased probability of dying 
 *** DONE Growth
     Inside allocation, calculated according to MTE 
-*** Allocation [1/2]
- Parameters values might be specific to each functional group, but general mechanism must be the same:
+*** Allocation [1/1]
+- [X] Divide biomass GAIN according to allocation to survival, growth and reproduction. The allocation will depend on the stage:
+ - [X] sorts things into the individual's /biomass/ Dictionnary
+ For _embryos_:
+ - [ ] Only consume reserve = decrease biomass
+     SCHEDULED: <2018-03-18 So>
+ For _juveniles_:
+ - Biomass goes into /growth/ dictionnary entry: this is used in *projvegmass!()* for plants
+ For _adults_:
+ - Biomass goes into /reprod/ dictionnary entry: this is used in *projrepmass!()* for plants
+ - [ ] TODO Only exists during reproductive season, controlled by *age* and *fgroup* (gives the duration of reproductive season): for annuals, it should arise from stage transitions, but how about perennials?
+     SCHEDULED: <2018-03-18 So>
+- [X] Biomass gain depends on competition: normalize *compterm* 
+- [ ] *allocation()* disentangled from *survive!()*, which is based on whole body mass. The MTE is based on dry weights, which means that underlying energetic budget doesn't need to be taking into account if the most important functions in the model (growth and reprodction), can be modelled via the biomass allocated to those structures. Other life-history traits, such as survival, will depend on the resulting total biomass. *Resistance structures are NOT being taken into account*, any accumulatiion of biomass should reflect in the mass-dependent survival function. 
+**** Complex allocation
+- [ ] The allocation rules should give rise to the appropriate growth curve (von Bertalanfy for insects, for example)
+Parameters values might be specific to each functional group, but general mechanism must be the same fo plants and insects, at least.
  *REFERENCES*:
  -Irlich et al. 2009: Why MTE doenst fit for insect
- - Wenk & Falster 2015:Reproductive allocation schedules in plants -> Find something similar for insects
+ - Wenk & Falster 2015: Reproductive allocation schedules in plants -> Find something similar for insects
  - Janczur: Good model of allocation (general)
  - Weiß & Jeltsch 2015: ZOI
  - Weiner et al. 2001: Plant growth
@@ -109,26 +125,12 @@ During initialization, one input file gives the functional types and their initi
  - Nestel et al. J Insect Physiol. 2016: Resource allocation in insects
  - Boggs Func. Ecol. 2009: Review 
  - For insects, nutrient allocation is a function of AGE & SEX (Boggs Func. Ecol. 2009)
-     DEADLINE: <2018-03-02 Fr>
- - [X] Divide biomass GAIN according to allocation to survival, growth and reproduction. The allocation will depend on the stage:
-   - [X] *allocation()* sorts things into the individual's *biomass Dictionnary* 
-   - [X] *allocation()* disentangled from *survive!()*, which is based on whole bady mass:
- The MTE is based on dry weights, which means that underlying energetic budget doesn't need to be taking into account if the most important functions in the model (growth and reprodction), can be modelled via the biomass allocated to those structures. Other life-history traits, such as survival, will depend on the resulting total biomass. *Resistance structures are NOT being taken into account*, any accumulatiion of biomass should reflect in the mass-dependent survival function. 
-   - juvenile: gain goes to growth
-   - adult: gain goes to reproduction during reproductive phase
-   For _embryos_:
-   Only consume biomass
-   For _juveniles_:
-   *growth*
-   For _adults_:
-   *reprod* = (1-surv) -> Only exists during reproductive season, controlled by *age* and *fgroup* (gives the duration of reproductive season)
- - [ ] Biomass GAIN depends on competition: normalize *compterm* 
- - [ ] The allocation rules should give rise to the appropriate growth curve(von Bertalanfy for insects, for example)
 *** Update organisms: [0/2]
   - [ ] Simultaneous or independent update?
   - [ ] Consider making a mutable struct where each field stores the individuals of a functional group, therefore, when updating the organisms, I wouldn't have to go through all of them, just through the group affected by the function in question
 *** TODO Adjust initial abundance to realistic observed densities
 *** TODO Check MTE units!!!
+    DEADLINE: <2018-03-19 Mo>
 *** Reproduction [1/1]
 - [X] fertility is calculated according to MTE, which depends on TOTAL biomass: The allocation of biomass to reproduction and growth allows controlling competition, and the rates are affected indirectly, if competition decreases due to total biomass reduction due to competition or herbivory.
 - [ ] sort out different kinds of reproduction: clonal, wind and animal pollination

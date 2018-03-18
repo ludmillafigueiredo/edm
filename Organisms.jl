@@ -127,7 +127,7 @@ end
 Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
 """
 function compete(org::Any,N where N, landscape::Array{Any, N} where N)
-    
+
     x, y, frag = orgs[o].location
     fg = orgs[o].fgroup
     #r = org.radius
@@ -144,13 +144,15 @@ end
 
 """
     allocate!(orgs, landscape, aE, Boltz, OrgsRef)
-Calculates biomass gain according to MTE rate and allocates it growth or reproduction, according to the developmental `stage` of the organism.
+Calculates biomass gain according to MTE rate and depending on competition. If competition is too strong, individual has a probability of dying. If not, gains is allocated to growth or reproduction, according to the developmental `stage` of the organism.
 """
 function allocate!(orgs::Array{Any,N} where N,
     landscape,
     aE,
     Boltz,
     OrgsRef) #TODO organize this file to serve as refenrece of max size for different functional groups
+
+    nogrowth = []
 
     for o in 1:length(orgs)
 
@@ -177,33 +179,40 @@ function allocate!(orgs::Array{Any,N} where N,
             end
         end
     else
-        survive!
+        push!(nogrowth,o)
     end
-end
-
+    return nogrowth
 end
 
 """
-    survive!()
+    survive!(ors, nogrowth)
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
+plants in nogrwth are subjected to two probability rates
 """
 function survive!(orgs)
-    indxs = []
+
+    deaths = []
+
     for o in 1:length(orgs)
-        if org[o].compterm == 0
-            mortalrate = OrgsRef[compeb_0] #TODO verify scheduling of this function: should compterm = 0 go through both
-        else
-            mortalrate = OrgsRef[b_0MTE]
+        mortalrate = plants_mB #TODO call it from OrgsRef
+        mB = mortalrate * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/)
+        mprob = 1 - e^(-mB*orgs[o].age)
+
+        # "weaker individuals" have two "ways" of dying
+        if o in nogrowth
+            compmortrate = plants_mB #TODO use different b_0 for mortality consequence of competition
+            cmB = compmortrate * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/)
+            cmprob =  1 - e^(-cmB*orgs[o].age)
+            mprob += cmprob
         end
-        mrate = mortalrate * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/) #TODO convert rate to probability
-        mprob = 1 - e^(-mrate*orgs[o].age)
-        if mprob > rand(PoissonBinomial(mprob)) # successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
-            push!(indxs, o)
+
+        if mprob > rand(PoissonBinomial(cmprob)) # successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
+            push!(deaths, o)
         else
             orgs[o].age += 1
         end
     end
-    deleteat!(orgs, indxs)
+    deleteat!(orgs, deaths)
     return orgs
 end
 
@@ -244,10 +253,10 @@ function reproduce!(orgs)
 
         # TODO Wind pollination
 
+        # TODO pollination
+
         # TODO gamete production and fertilization
         # parents_genes[1] and parents_genes[2]
-
-        # TODO pollination
     end
 
 end
