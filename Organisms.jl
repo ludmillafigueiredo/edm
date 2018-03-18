@@ -15,23 +15,23 @@ export newOrgs!, Organism, IDcounter
  #TODO check UNITS
 const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
 const aE = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
-const Cgrowth = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
-const Cfertil = exp(26.0)
+const plants_gB = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
+const plants_fB = exp(26.0) # fertility rate
 const tK = 273.15 # °C to K converter
-const Cmortal = exp(19.2)
+const plants_mB = exp(19.2)
 
 mutable struct Organism
     ID::String
-    location::Array{Int64,2} # (fragment, x, y)#TODO use tuple
+    location::Tuple{Int64} # (x,y,frag)
     sp::String
-    stage::String #j,s,a #TODO seed = embryo
-    age::Int64 # controls passing stages
+    stage::String #e,j,a
+    age::Int64 # controls passing stages, phenology and
     reped::Bool # reproduced?
-    fgroup::String # Determines whether individual is a plant, insect, through functional group characterization
+    fgroup::String # Plant, insect or more precise functional group
     genotype::Array{String,2}
-    biomass::Float64
-    disp::Array{Float64,2} #dispersal kernel parameters (mean and shape) TODO tuple
-    radius::Int64
+    biomass::Dict()
+    disp::Tuple{Float64,2} #dispersal kernel parameters (a and b) TODO tuple
+    radius::Array{Int64,2} # reproductive and vegetative area of influence. Not Tuple because not
     #Organism() = new()
 end
 
@@ -109,7 +109,8 @@ function projvegmass!(landscape::Array{Any, N} where N,
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #usar a funcao da FON Q trabalha com quadrantes?
             (i =< 0 || i > size(landscape[:,:,frag],1) || j =< 0 || j > size(landscape[:,:,frag],2)) && continue #check boundaries
-            if fg == "plant" && i == x && j == y #"mark" steming point for plants
+            # TODO projection outside boundaries are not being taken into account: edge effects come up, because "realized biomass" i smaller
+            if fg == "plant" && i == x && j == y #TODO center steming point has stronger biomass ~ way too close to FON again
                 landscape[i,j,frag].neighs[fg] = fgpars["plant"]
             elseif haskey(landscape[i,j,frag].neighs,fg)
                 landscape[i,j,frag].neighs[fg] += projmass
@@ -122,25 +123,23 @@ function projvegmass!(landscape::Array{Any, N} where N,
 end
 
 """
-    compete!(orgs,landscape)
+    compete(orgs,landscape)
 Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
 """
-function compete!(orgs::Array{Any,N} where N, landscape::Array{Any, N} where N)
-
-    while o <= length(orgs)
-        x, y, frag = orgs[o].location
-        fg = orgs[o].fgroup
-        #r = org.radius
-        # 2. Look for neighbors in the area
-        for j in (y-r):(y+r), i in (x-r):(x+r) #TODO filter!() this area?
-            if landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
-                nbsum += landscape[i,j,frag].neighs - orgs[o].biomass/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
-            end
+function compete(org::Any,N where N, landscape::Array{Any, N} where N)
+    
+    x, y, frag = orgs[o].location
+    fg = orgs[o].fgroup
+    #r = org.radius
+    # 2. Look for neighbors in the area
+    for j in (y-r):(y+r), i in (x-r):(x+r) #TODO filter!() this area?
+        if landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
+            nbsum += landscape[i,j,frag].neighs - orgs[o].biomass/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
         end
-        org[o].compterm = (orgs[o].biomass - nbsum)/orgs[o].biomass # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
-        o += 1
     end
+    compterm = /(orgs[o].biomass - nbsum,orgs[o].biomass) # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
 
+    return compterm
 end
 
 """
@@ -160,34 +159,45 @@ function allocate!(orgs::Array{Any,N} where N,
         # Resource assimilation: #TODO check if resource allocation would be the same as growth
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
-        grown_mass += org[o].compterm * (Cgrowth * organism.vegmass^(3/4) * exp(-aE/(Boltz*T)))
+        compterm = compete(orgs[o])
+        if compterm > 0
+            grown_mass += compterm * (Cgrowth * organism.vegmass^(3/4) * exp(-aE/(Boltz*T)))
 
-        #Resource allocation schedule
-        #TODO make it more ellaborate and includde trade-offs
-        if (org[o].stage == "e")  #TODO accountant for resistant stages?
-            # embryos only consume reserves:
-            org[o].biomass -=
-        elseif stage == "j"
-            # juveniles grow
-            org[o].biomass["vegstruct"] += grown_mass
-        elseif stage == "a"
-            # adults reproduce
-            org[o].biomass["reprd"] += grown_mass
+            #Resource allocation schedule
+            #TODO make it more ellaborate and includde trade-offs
+            if (org[o].stage == "e")  #TODO accountant for resistant stages?
+                # embryos only consume reserves:
+                org[o].biomass -=
+            elseif stage == "j"
+                # juveniles grow
+                org[o].biomass["vegstruct"] += grown_mass
+            elseif stage == "a"
+                # adults reproduce
+                org[o].biomass["reprd"] += grown_mass
             end
         end
+    else
+        survive!
     end
+end
 
 end
 
 """
     survive!()
-Organism survival depends on total biomass, according to MTE rate.
+Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 """
 function survive!(orgs)
     indxs = []
     for o in 1:length(orgs)
-        mort = Cmortal * (orgs[o].biomass["reprd"] + biomass["vegstruct"])^(-1/4)*exp(-aE/)
-        if rand() > rand(PoissonBinomial(mort)) # successes are death events, because the consequence to modelled it to be taken out
+        if org[o].compterm == 0
+            mortalrate = OrgsRef[compeb_0] #TODO verify scheduling of this function: should compterm = 0 go through both
+        else
+            mortalrate = OrgsRef[b_0MTE]
+        end
+        mrate = mortalrate * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/) #TODO convert rate to probability
+        mprob = 1 - e^(-mrate*orgs[o].age)
+        if mprob > rand(PoissonBinomial(mprob)) # successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
             push!(indxs, o)
         else
             orgs[o].age += 1
@@ -201,38 +211,45 @@ end
     reproduce!()
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
-function reproduce!()
+function reproduce!(orgs)
     # if # pollination depending plants
     #     pollination()
     # elseif "insect"
     #     parents_genes = mate!()
     # end
 
-    # Clonal reproduction
-    offspring = Organism[]
-    noffsprg = round(Cfertil * org.biomass["reprd"]^(-1/4) * exp(-aE/(Boltz*T))) #TODO stochasticity!
-    for n in 1:noffsprg
-        #TODO check for a quicker way of creating several objects of composite-type
-        embryo = Organism(string(org.fgroups, IDcounter + 1),
-                          [], #location is given according to functional group and dispersal strategy, in disperse!()
-                          org.sp,
-                          "e",
-                          0,
-                          false,
-                          org.fgroup,
-                          ["placeholder" "placeholder"], #come from function
-                          rand(Distributions.Normal(OrgsRef.biomassμ[org.fgroup],OrgsRef.biomasssd[org.fgroup])),
-                          [OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
-                          OrgsRef.radius[f])
-        push!(offspring, embryo)
+    reproducing <- filter.(x -> x.stage == "a", orgs)
+
+    for o in 1:reproducing
+
+        # Clonal reproduction
+        offspring = Organism[]
+        rrate = round(Cfertil * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T))) #TODO stochasticity!
+        rprob = 1 - e^(-rrate*orgs[o].age)
+        for n in 1:noffsprg
+            #TODO check for a quicker way of creating several objects of composite-type
+            embryo = Organism(string(reproducing[o].fgroups, IDcounter + 1),
+                              [], #location is given according to functional group and dispersal strategy, in disperse!()
+                              reproducing[o].sp,
+                              "e",
+                              0,
+                              false,
+                              reproducing[o].fgroup,
+                              ["placeholder" "placeholder"], #come from function
+                              rand(Distributions.Normal(OrgsRef.biomassμ[reproducing[o].fgroup],OrgsRef.biomasssd[reproducing[o].fgroup])),
+                              [OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
+                              OrgsRef.radius[f])
+            push!(offspring, embryo)
+        end
+
+        # TODO Wind pollination
+
+        # TODO gamete production and fertilization
+        # parents_genes[1] and parents_genes[2]
+
+        # TODO pollination
     end
 
-    # TODO Wind pollination
-
-    # TODO gamete production and fertilization
-    # parents_genes[1] and parents_genes[2]
-
-    # TODO pollination
 end
 
 """
@@ -244,15 +261,16 @@ function disperse!()
 # Get seeds from org storage
 dispersing = filter.(orgs, (orgs.fgroup = "plant" && orgs.stage == "e")
 # Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
-a = 2.5e-6
-b = 0.1888
 
-for d in dispersing
-# Dispersal distance from kernel:
-    dist = rand(findDISTRIBUTIONNNNN)
-# Check for available habitat (inside or inter fragment)
+    for d in dispersing
+    # Dispersal distance from kernel:
+    #acho q nao preciso de muito mais q Natahn et al. 2012 pra usar a pdf com as distancias da
+    a = 2.5e-6
+    b = 0.1888
+        dist = rand(Bullock_DISTRIBUTION)
+    # Check for available habitat (inside or inter fragment)
 
-end
+    end
 
 if in disp_dist <= border
     location = (rand(fxlength) rand(fylength) frag)
@@ -264,9 +282,18 @@ end
 end
 
 """
+    fitness(fgroup)
+Calculates fitness for the functional group in
+"""
+function fitness()
+end
+
+"""
     emerge!()
 Germination for seeds, emergency for eggs.
 """
+function emerge!()
+end
 
 """
     pollination!()

@@ -47,6 +47,7 @@ DEADLINE: <2018-03-02 Fr>
 * Organisms.jl
 Initialization spreads organisms in the landscape (fragments, later): newOrg() is called
 During simulation, after reproduction (and dispersion?) new organisms will only establish once it has checked local grid viability and fitness values?
+** MTE rates to individual probabilites
 ** TODO mutable struct [1/5]
    SCHEDULED: <2018-03-14 Mi>
 - [ ] .sex field, for controlling sex-ratio, for insects
@@ -77,7 +78,7 @@ Organisms are stored in an array of n_frags (read from simulation file). All org
    - [ ] clonal reproduction
    - [ ] wind reproduction (see *reproduction()*)
  - [ ] 
-* TODO Create organisms of different functional groups
+** TODO Create organisms of different functional groups
 During initialization, one input file gives the functional types and their initial abundances, vegmass, reprodmass
 - [ ] input file format
 *** OrgsRef format: how the program stores that information?
