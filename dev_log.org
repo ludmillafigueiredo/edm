@@ -133,9 +133,15 @@ Parameters values might be specific to each functional group, but general mechan
  7. Boggs Func. Ecol. 2009: Review 
  8. For insects, nutrient allocation is a function of AGE & SEX (Boggs Func. Ecol. 2009)
 *** TODO Adjust initial abundance to realistic observed densities
-*** TODO Reproduction [1/3]
+*** TODO Emergency [0/2]
+    DEADLINE: <2018-03-29 Do>
+- [-] emergency rate differentiates between functional groups
+  - [X] plants and insects, hard coded
+  - [ ] according to the list of fgroups from the input
+- [ ] Seed bank
+*** TODO Reproduction [1/2]
     DEADLINE: <2018-03-23 Fr>
-- [ ] reproduction probability depends on finding partners inside [[Pollination][pollen dispersal kernel]]
+- [ ] reproduction depends on finding partners inside [[Pollination][pollen dispersal kernel]]
 - [X] fertility is calculated according to MTE, which depends on TOTAL biomass: The allocation of biomass to reproduction and growth allows controlling competition, and the rates are affected indirectly, if competition decreases due to total biomass reduction due to competition or herbivory.
 ****  Decide on newOrgs!() is called between reproduction and establishment: Are new individuals created right after reproduction?
 *** Dispersal [1/4]

@@ -15,10 +15,10 @@ export newOrgs!, Organism, IDcounter
  #TODO check UNITS
 const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
 const aE = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
-const plants_gB = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
-const plants_fB = exp(26.0) # fertility rate
+const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
+const plants_fb0 = exp(26.0) # fertility rate
 const tK = 273.15 # °C to K converter
-const plants_mB = exp(19.2)
+const plants_mb0 = exp(19.2)
 
 mutable struct Organism
     ID::String
@@ -161,7 +161,7 @@ function allocate!(orgs::Array{Any,N} where N,
         # Any cost related to insufficient minimal biomass goes into the survival probability function
         compterm = compete(orgs[o])
         if compterm > 0
-            grown_mass += compterm * (Cgrowth * organism.vegmass^(3/4) * exp(-aE/(Boltz*T)))
+            grown_mass += (1 - compterm) * (Cgrowth * organism.vegmass^(3/4) * exp(-aE/(Boltz*T)))
 
             #Resource allocation schedule
             #TODO make it more ellaborate and includde trade-offs
@@ -328,7 +328,7 @@ Butterflies, bees and seeds can/are disperse(d).
 function disperse!(orgs)
     # Seeds (Bullock et al. JEcol 2017)
     # Get seeds from org storage
-    dispersing = filter.(orgs, (orgs.fgroup = "plant" && orgs.stage == "e") #TODO include insects
+    dispersing = filter.(x -> (x.fgroup = "plant" && x.stage == "e"), orgs) #TODO include insects
     # Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
 
     for d in dispersing
@@ -345,17 +345,7 @@ function disperse!(orgs)
     end
 
     #TODO check border
-    if
-        check
-    end
 
-end
-
-"""
-    fitness(fgroup)
-Calculates fitness for the functional group in
-"""
-function fitness()
 end
 
 """
@@ -363,6 +353,38 @@ end
 Germination for seeds, emergency for eggs.
 """
 function emerge!()
+    embryos = filter.( x -> x.stage == "e", orgs)
+    deaths = []
+
+    for o in 1:length(embryos)
+        if embryos[o].fgroup in ["plants"] #TODO sould be more dynamics and read from inputed fgroups
+            germb0 = plants_gb0 #TODO call it from OrgsRe
+        elseif embryos[o].fgroup in ["insects"]
+            germb0 = plants_gb0 #TODO call it from OrgsRe
+        end
+
+        gB = germb0 * (sum(values(embryos[o].biomass)))^(-1/4)*exp(-aE/Boltz*T)
+        gprob = 1 - e^(-gB*embryos[o].age) #TODO this age thing
+
+        if gprob > rand(PoissonBinomial(gprob)) # successes are germinations
+            embryos[o].stage = "j"
+            embryos[o].age = 1
+        else
+            if (embryos[o].fgroup in ["plants"] &&  embryos[o].age <= 52) #TODO seed bank of one year. Make it more complex (count age)
+                continue
+            else
+                push!(deaths, o)
+            end
+        end
+    end
+    deleteat!(orgs, deaths)
+end
+
+"""
+    fitness(fgroup)
+Calculates fitness for the functional group in
+"""
+function fitness()
 end
 
 """
