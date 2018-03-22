@@ -84,8 +84,8 @@ function newOrgs(landscape::Array{Any, N} where N,
             end
         end
     end
-    #TODO different fgroups have different metabolic rates. Think if orgs should have a field for it  or what
-    #TODO different stages have different biomass allocation for growht, reproduction, etc. Should there be a function to change those as stages change?
+    #TODO different fgroups have different metabolic rates. Get it form OrgsRef
+
     return orgs #TODO or make sure that it has varied in the global scope as well rather export it?
 end
 
@@ -105,11 +105,9 @@ function projvegmass!(landscape::Array{Any, N} where N,
         x, y, frag = orgs[o].location
         r = orgs[o].radius
         fg = orgs[o].fgroup
-        projmass = /(org[o].biomass, ((2*r+1)^2))
+        projmass = /(org[o].biomass["growth"], ((2*r+1)^2))
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #usar a funcao da FON Q trabalha com quadrantes?
-            (i =< 0 || i > size(landscape[:,:,frag],1) || j =< 0 || j > size(landscape[:,:,frag],2)) && continue #check boundaries
-            # TODO projection outside boundaries are not being taken into account: edge effects come up, because "realized biomass" i smaller
             if fg == "plant" && i == x && j == y #TODO center steming point has stronger biomass ~ way too close to FON again
                 landscape[i,j,frag].neighs[fg] = fgpars["plant"]
             elseif haskey(landscape[i,j,frag].neighs,fg)
@@ -217,10 +215,24 @@ function survive!(orgs)
 end
 
 """
+    meanExP(a,b)
+Draws a mean dispersed distance from the Exponential Power dispersal kernel.
+"""
+function meanExP(a::Float64,b::Float64)
+    dist = Fileprep.lengthtocell(rand(a*(Distribution.Gamma(3/b))/(Distribution.Gamma(2/b))))
+    return dist
+end
+
+"""
+    checkboundaries(x,y)
+Verifies whether current polen/seed location `(x,y)` is inside a habitat fragment. In case it is, the process (reproduction or emergency/germination) proceeds. Otherwise, it is stopped and the Organism in case dies"""
+
+"""
     reproduce!()
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
 function reproduce!(orgs)
+    #TODO sort out reproduction mode (pollination or not) according to funcitonal group
     # if # pollination depending plants
     #     pollination()
     # elseif "insect"
@@ -232,27 +244,44 @@ function reproduce!(orgs)
     for o in 1:reproducing
 
         # Clonal reproduction
-        offspring = Organism[]
-        rrate = round(Cfertil * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T))) #TODO stochasticity!
-        rprob = 1 - e^(-rrate*orgs[o].age)
-        for n in 1:noffsprg
-            #TODO check for a quicker way of creating several objects of composite-type
-            embryo = Organism(string(reproducing[o].fgroups, IDcounter + 1),
-                              [], #location is given according to functional group and dispersal strategy, in disperse!()
-                              reproducing[o].sp,
-                              "e",
-                              0,
-                              false,
-                              reproducing[o].fgroup,
-                              ["placeholder" "placeholder"], #come from function
-                              rand(Distributions.Normal(OrgsRef.biomassμ[reproducing[o].fgroup],OrgsRef.biomasssd[reproducing[o].fgroup])),
-                              [OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
-                              OrgsRef.radius[f])
-            push!(offspring, embryo)
+
+        # Find partners: Wind pollination
+        θ = rand([0,0.5π,π,1.5π]) #get radian angle of distribution
+        dist =  meanExP(2.3,0.44) #mean distance from the exponential power (Nathan et al. 2012), a = 2.3 and b = 0.44 according to Hardy et al. 2004.
+        #TODO check boundaries
+        #TODO check for possiblity dispersing to other patchs (compare dist with matriyes sizes and call possible fragmetns in the third index of location)
+        #TODO which filter should come first?
+        posptner = filter(x -> x.location .== (round(Int64, reproducing[o] + dist*sin(theta), RoundNearestTiesAway), round(Int64, reproducing[o] + dist*cos(theta), RoundNearestTiesAway), reproducing[o]), orgs)
+
+        if  length(posptner) => 1
+
+            ptners = filter(x -> x.fgroup .== reproducing[o].fgroup)
+
+            if length(ptners) > 1
+
+                #produce offsprings: newOrgs with it?
+                offspring = Organism[]
+                offsB = round(Cfertil * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T))) #TODO stochasticity!
+                for n in 1:noffsprg
+                    #TODO check for a quicker way of creating several objects of composite-type
+                    embryo = Organism(string(reproducing[o].fgroups, IDcounter + 1),
+                                      [], #location is given according to functional group and dispersal strategy, in disperse!()
+                                      reproducing[o].sp,
+                                      "e",
+                                      0,
+                                      false,
+                                      reproducing[o].fgroup,
+                                      ["placeholder" "placeholder"], #come from function
+                                      rand(Distributions.Normal(OrgsRef.biomassμ[reproducing[o].fgroup],OrgsRef.biomasssd[reproducing[o].fgroup])),
+                                      [OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
+                                      OrgsRef.radius[f])
+                    push!(offspring, embryo)
+            else
+                continue
+            end
+        else
+            continue
         end
-
-        # TODO Wind pollination
-
         # TODO pollination
 
         # TODO gamete production and fertilization
@@ -261,32 +290,37 @@ function reproduce!(orgs)
 
 end
 
+
 """
     disperse!()
 Butterflies, bees and seeds can/are disperse(d).
 """
-function disperse!()
-# Seeds (Bullock et al. JEcol 2017)
-# Get seeds from org storage
-dispersing = filter.(orgs, (orgs.fgroup = "plant" && orgs.stage == "e")
-# Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
+function disperse!(orgs)
+    # Seeds (Bullock et al. JEcol 2017)
+    # Get seeds from org storage
+    dispersing = filter.(orgs, (orgs.fgroup = "plant" && orgs.stage == "e") #TODO include insects
+    # Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
 
     for d in dispersing
-    # Dispersal distance from kernel:
-    #acho q nao preciso de muito mais q Natahn et al. 2012 pra usar a pdf com as distancias da
-    a = 2.5e-6
-    b = 0.1888
-        dist = rand(Bullock_DISTRIBUTION)
-    # Check for available habitat (inside or inter fragment)
-
+        # Dispersal distance from kernel:
+        #acho q nao preciso de muito mais q Natahn et al. 2012 pra usar a pdf com as distancias da
+        if d.fgroup == "wind"
+            #Exp, herbs + appendage #TODO LogSech distribution
+            dist = meanExP(4.7e-5,0.2336) #higher 9th percentile than ant (when comparing + appendage and 10-36 mg)
+            # Check for available habitat (inside or inter fragment)
+        elseif d.fgroup == "ant"
+            #ExPherbs, 10-36 mg
+            dist = meanExP(0.3726,1.1615)
+        end
     end
 
-if in disp_dist <= border
-    location = (rand(fxlength) rand(fylength) frag)
-else #inter frag dispersal
-    newfrag = max(filter(x -> x <= disp_dist, connectivity_matrix[frag_line])) #goes to the closest
-    location = (rand(fxlength) rand(fylength) newfrag)
-end
+    #TODO check border
+    if in disp_dist <= border
+        location = (rand(fxlength) rand(fylength) frag)
+    else #inter frag dispersal
+        newfrag = max(filter(x -> x <= disp_dist, connectivity_matrix[frag_line])) #goes to the closest
+        location = (rand(fxlength) rand(fylength) newfrag)
+    end
 
 end
 

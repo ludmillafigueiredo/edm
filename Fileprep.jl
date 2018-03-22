@@ -9,10 +9,15 @@ Convert fragments real length values give in `realxlen` and `realylen` from m to
 1 m = 100 cm, 3 cm of cell side size
 """
 
-function lengthstocell(realylen::Array{Float64,2}, realylen::Array{Float64,2})
-  xlength = round(Int64,()(realxlen.*100)./3), RoundNearestTiesAway)
-  ylength = round(Int64,((realylen.*100)./3, RoundNearestTiesAway)
+function gridsizes(realylen::Array{Float64,2}, realylen::Array{Float64,2})
+  xlength = round(Int64,((realxlen.*100)./3), RoundNearestTiesAway)
+  ylength = round(Int64,((realylen.*100)./3), RoundNearestTiesAway)
   return xlength, ylength
+end
+
+function lengthtocell(d::Float64)
+  cellcdist = round(Int64,((realxlen.*100)./3), RoundNearestTiesAway)
+  return celldist
 end
 
 """

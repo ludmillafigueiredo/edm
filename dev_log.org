@@ -1,27 +1,31 @@
 * Code (general Julia)
 ** TODO Check arguments order in functions
+   SCHEDULED: <2018-03-18 So> DEADLINE: <2018-03-28 Mi>
 ** TODO Read "Eval of julia code"
+   SCHEDULED: <2018-03-18 So> DEADLINE: <2018-03-28 Mi>
 ** Fields in Arrays [1/1]
    - [X] element-wise change is not possible for arrays nor dict of mutable structs: ONLY POSSIBLE IF STRUCTS ARE BUILT INDIVIDUALLY: NO FILL!!
 ** TODO check necessity new() in structs 
-
+   DEADLINE: <2018-03-28 Mi>
 * main.jl
-*** TODO test *simulate()* for reading and creating initial conditions
+** TODO test *simulate()* for reading and creating initial conditions
+   DEADLINE: <2018-03-24 Sa> SCHEDULED: <2018-03-18 So>
+- [ ] better format for initorgs: Dictionnary or different structure
+  - [ ] verify if it can take initilization info on [[Organisms.jl][multiple functional groups]]
 ** Unity tests
-
 * Fileprep.jl
 ** DONE *lengthstocell()* and *areatocell* convert/calculates real fragment sizes to grid cell side lengths CLOSED: <2018-03-02 Fr>
-** TODO *out_landscape()* prepare output that characterize output for both unity tests and visualization
-   DEADLINE: <2018-03-18 So> SCHEDULED: <2018-03-14 Mi>
+** Temperature & precipitation: German weather station (South station in Göttingen is quite representative) and Kathrin, from EU climate project, with more micro scale measurements, on a subset of the fragments
+- [ ] Species temperature and optimum temperature and precipitation values 
+** TODO *out_landscape()* prepare output that characterize output for both unity tests and visualization [0/2]
+   DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-14 Mi>
 - [ ] individuals information
 - [ ] interaction matrix (*pollination!()*)
-- [ ] Temperature & precipitation: German weather station (South station in Göttingen is quite representative) and Kathrin, from EU climate project, with more micro scale measurements, on a subset of the fragments
-- [ ] Species temperature and optimum temperature and precipitation values 
 * Parametrization
-  DEADLINE: <2018-03-27 Di> SCHEDULED: <2018-03-14 Mi>
+  DEADLINE: <2018-03-28 Mi> SCHEDULED: <2018-03-14 Mi>
 - [ ] Trait values:  LEDA database, Annetta Leinjärtner, Bernhard Hoiß
 Type of data: Annual/perennial, dispersal mode, dispersal parameters, seed mass, seed number, 
-  - [ ] herbs: LEDA/TRY, LEDA probably more uniform
+  - [ ] herbs: LEDA/TRY, LEDA probably more uniform, Lina Wieß
   - [ ] butterflies: Jochen
   - [ ] bees:
 - [ ] Clustering analysis for functional groups
@@ -33,23 +37,25 @@ Type of data: Annual/perennial, dispersal mode, dispersal parameters, seed mass,
     - [X] because assignment of one field changes all the fields of the array!
 *** DONE Change names so that temperature and preciptation can be called niche dimensions: no need
 *** TODO Initialize
-    DEADLINE: <2018-03-02 Fr>
+    DEADLINE: <2018-03-30 Fr>
 *readinlandscp* Initial landscape conditions are read from *landscpinit* file and stored in Dict: so far, *read_initials()* is doing it
 *landscape_init()* create landscape with WHICH DIMENSIONS?
 - Reshaping in landscape should use max fragment dimensions? For square fragments, easy, but if shape varies, it is problematic.
 - Find another type of structure to hold the landscape structure OR use a 1D array, and elaborate an indexation to identify x,y and frag? 
   -> Inside the fragments loop, reshape each fragment and append it to some 3D structure?
 *** Change during simulation
-DEADLINE: <2018-03-02 Fr>
-*update_landscape!* changes the dictionnary values
-*** TODO create landscapes wiht n_frags > 1
+DEADLINE: <2018-03-28 Mi>
+
+*** TODO create landscapes with n_frags > 1
 
 * Organisms.jl
 Initialization spreads organisms in the landscape (fragments, later): newOrg() is called
 During simulation, after reproduction (and dispersion?) new organisms will only establish once it has checked local grid viability and fitness values?
-** MTE rates to individual probabilites
-** TODO mutable struct [1/5]
-   SCHEDULED: <2018-03-14 Mi>
+** TODO MTE rates to individual probabilites
+Mortality is probability, what about the others?
+   DEADLINE: <2018-03-23 Fr>
+** TODO mutable struct [1/6]
+   DEADLINE: <2018-03-30 Fr> SCHEDULED: <2018-03-14 Mi>
 - [ ] .sex field, for controlling sex-ratio, for insects
 - [ ] Genotype must control some traits
 - [ ] Traits should match for interaction to happen. Microevolutionary change would cause traits to (mis)match
@@ -57,98 +63,118 @@ During simulation, after reproduction (and dispersion?) new organisms will only 
 - [ ] Genotype defines species?
 - [ ] Interaction field: Plants have a list of visitors and pollinators have a list of IDs of pollen. Pollen decay should eliminate pollen after certain time step.
   - [ ] verify pollen decay
-*** TODO Define/Justify Organism characterization: how broad is it going to be?
-Main attribute: It must be able to represent plants and insects.
-   DEADLINE: <2018-03-14 Mi> SCHEDULED: <2018-03-14 Mi>
 ** TODO use length(orgs) for IDcounter 
-   SCHEDULED: <2018-03-15 Do>
-** DONE Simulate single plant species/functional group [3/3] :initialization:
+   DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-08 Do>
+** TODO Simulate single plant species/functional group [3/4] :initialization:
 Organisms are stored in an array of n_frags (read from simulation file). All organisms are stored in this array and are updated together (each fragment - it could be possible to have simulations where there is some desynchronization between fragments!).
 *newOrg()* will have multiple methods: One for initialization, where individuals always establish and another where it depends on the individuals fitness in the grid and establishment!() is called.  
  - [X] Initialize a certain number of organisms
    - [X] get fct types and abundances from input file
    - [X] create orgs somewhere ('organisms' Array)
    - [X] properly index individuals in the WordCell landscape
-     - [X] create bunch of locations and draw from them <2018-02-21 Mi>
-     - [X] all cells get the same quantity (init_abund) of organisms, the locations are rdm, though. The loop inside XYs is causing it. --> because the *landscape.orgs* field was initialized with empty orgs, *push!()* would add the same orgs to  all the cells! Individuals are now stored in *orgs* array, instead. Even ig that is not the real problem, it makes indexation easier <2018-02-22 Do>
-     - [X] create different arrays for different fct groups: <2018-02-23 Fr> For now, not necessary, as functional group should be available as field of orgs array.
+     - [X] create bunch of locations and draw from them CLOSED <2018-02-21 Mi>
+     - [X] all cells get the same quantity (init_abund) of organisms, the locations are rdm, though. The loop inside XYs is causing it. --> because the *landscape.orgs* field was initialized with empty orgs, *push!()* would add the same orgs to  all the cells! Individuals are now stored in *orgs* array, instead. Even ig that is not the real problem, it makes indexation easier CLOSED <2018-02-22 Do>
+     - [X] create different arrays for different fct groups: For now, not necessary, as functional group should be available as field of orgs array. CLOSED <2018-02-23 Fr> 
  - [X] correct IDcounter: global in Organisms module, exported and called in newOrgs!()
  - [X] check ERROR with method on function newOrgs(): why push! nao funciona? Because all arry's contents had been initialized at the same time <2018-02-26 Mo>.
  - [ ] Simulate single functional group
-   - [ ] clonal reproduction
-   - [ ] wind reproduction (see *reproduction()*)
- - [ ] 
+   - [ ] reproduction: pollinator independent = use reproduction probability
+   - [ ] wind reproduction (see *reproduction()*): Bullock et al. 2017
+   - [ ] ant reproduction: Bullock et al. 2017
 ** TODO Create organisms of different functional groups
 During initialization, one input file gives the functional types and their initial abundances, vegmass, reprodmass
 - [ ] input file format
-*** OrgsRef format: is that information stored?
-- [ ] Organize dummy data in the ideal input/reference format
-   DEADLINE: <2018-03-15 Do>
 *** OrgsRef: [1/2] 
 - [ ] come up with structure (dict or composite type) to store the parameters of different species/fgroups, instead of tables?
 - [X] How to store multiple types of organisms: single array. Might be necessary to chage it, if calling specific fct types reveals itself to be important and can't be done otherwise
 - Eventhough they are more rigid, structs are easier to call and the fields have more flexibility to store different kinds of information on the functional group parameters 
+**** OrgsRef format: is that information stored?
+- [ ] Organize dummy data in the ideal input/reference format
+   DEADLINE: <2018-03-23 Fr>
 ** Life-cycle
+*** TODO Check MTE units & probabilities!!!
+    DEADLINE: <2018-03-23 Fr>
 *** TODO Compete [4/5]
  Competition is biomass-based: overlap of area gives rise to /compterm/ that penalizes growth
  - [X] Vegetative biomass is projected to calculate competition /compterm/: *projectvegmass!()*
+Projection outside boundaries are not being taken into account: *edge effects* come up, because "realized biomass" i smaller
  - [ ] The landscape cell has biomass carrying capacity of each /.fgroup/ it can sustain. If that max is attained, the organism in question DOES WHAT? HOW IT CAN BE PENALIZED?
  - [X] Initialize a 'competition landscape' for the plants: /.neighs/ field in the landscape holds a dictionnary with sum of biomass projected by each individual of a functional group
  - [X] Competition arises form growth rate being penalized by overlapping 
  - [X] When competition is too strong (/compterm/ <= 1) individual has an increased probability of dying 
 *** DONE Growth
     Inside allocation, calculated according to MTE 
-*** Allocation [1/1]
-- [X] Divide biomass GAIN according to allocation to survival, growth and reproduction. The allocation will depend on the stage:
- - [X] sorts things into the individual's /biomass/ Dictionnary
- For _embryos_:
- - [ ] Only consume reserve = decrease biomass
-     SCHEDULED: <2018-03-18 So>
- For _juveniles_:
- - Biomass goes into /growth/ dictionnary entry: this is used in *projvegmass!()* for plants
- For _adults_:
- - Biomass goes into /reprod/ dictionnary entry: this is used in *projrepmass!()* for plants
- - [ ] TODO Only exists during reproductive season, controlled by *age* and *fgroup* (gives the duration of reproductive season): for annuals, it should arise from stage transitions, but how about perennials?
-     SCHEDULED: <2018-03-18 So>
+*** TODO Allocation [2/3]
+    DEADLINE: <2018-03-28 Mi>
+- [-] Divide biomass GAIN according to allocation to survival, growth and reproduction. The allocation will depend on the stage:
+  - [X] sorts things into the individual's /biomass/ Dictionnary
+  For _embryos_:
+  - [ ] Only consume reserve = decrease biomass
+      SCHEDULED: <2018-03-18 So>
+  For _juveniles_:
+  - Biomass goes into /growth/ dictionnary entry: this is used in *projvegmass!()* for plants
+  For _adults_:
+  - Biomass goes into /reprod/ dictionnary entry: this is used in *projrepmass!()* for plants
+  - [ ] TODO Only exists during reproductive season, controlled by *age* and *fgroup* (gives the duration of reproductive season): for annuals, it should arise from stage transitions, but how about perennials?
+      SCHEDULED: <2018-03-18 So>
 - [X] Biomass gain depends on competition: normalize *compterm* 
-- [ ] *allocation()* disentangled from *survive!()*, which is based on whole body mass. The MTE is based on dry weights, which means that underlying energetic budget doesn't need to be taking into account if the most important functions in the model (growth and reprodction), can be modelled via the biomass allocated to those structures. Other life-history traits, such as survival, will depend on the resulting total biomass. *Resistance structures are NOT being taken into account*, any accumulatiion of biomass should reflect in the mass-dependent survival function. 
-**** Complex allocation
+- [X] *allocation()* disentangled from *survive!()*, which is based on whole body mass. The MTE is based on dry weights, which means that underlying energetic budget doesn't need to be taking into account if the most important functions in the model (growth and reprodction), can be modelled via the biomass allocated to those structures. Other life-history traits, such as survival, will depend on the resulting total biomass. *Resistance structures are NOT being taken into account*, any accumulatiion of biomass should reflect in the mass-dependent survival function. 
+**** TODO Complex allocation
 - [ ] The allocation rules should give rise to the appropriate growth curve (von Bertalanfy for insects, for example)
 Parameters values might be specific to each functional group, but general mechanism must be the same fo plants and insects, at least.
  *REFERENCES*:
  -Irlich et al. 2009: Why MTE doenst fit for insect
- - Wenk & Falster 2015: Reproductive allocation schedules in plants -> Find something similar for insects
- - Janczur: Good model of allocation (general)
- - Weiß & Jeltsch 2015: ZOI
- - Weiner et al. 2001: Plant growth
- - Lin et al. J of Ecol. 2012: MTE for plants and interaction
- - Nestel et al. J Insect Physiol. 2016: Resource allocation in insects
- - Boggs Func. Ecol. 2009: Review 
- - For insects, nutrient allocation is a function of AGE & SEX (Boggs Func. Ecol. 2009)
-*** Update organisms: [0/2]
-  - [ ] Simultaneous or independent update?
-  - [ ] Consider making a mutable struct where each field stores the individuals of a functional group, therefore, when updating the organisms, I wouldn't have to go through all of them, just through the group affected by the function in question
+ 1. Wenk & Falster 2015: Reproductive allocation schedules in plants -> Find something similar for insects
+ 2. Janczur: Good model of allocation (general)
+ 3. Weiß & Jeltsch 2015: ZOI
+ 4. Weiner et al. 2001: Plant growth
+ 5. Lin et al. J of Ecol. 2012: MTE for plants and interaction
+ 6. Nestel et al. J Insect Physiol. 2016: Resource allocation in insects
+ 7. Boggs Func. Ecol. 2009: Review 
+ 8. For insects, nutrient allocation is a function of AGE & SEX (Boggs Func. Ecol. 2009)
 *** TODO Adjust initial abundance to realistic observed densities
-*** TODO Check MTE units!!!
-    DEADLINE: <2018-03-19 Mo>
-*** Reproduction [1/1]
+*** TODO Reproduction [1/3]
+    DEADLINE: <2018-03-23 Fr>
+- [ ] reproduction probability depends on finding partners inside [[Pollination][pollen dispersal kernel]]
 - [X] fertility is calculated according to MTE, which depends on TOTAL biomass: The allocation of biomass to reproduction and growth allows controlling competition, and the rates are affected indirectly, if competition decreases due to total biomass reduction due to competition or herbivory.
-- [ ] sort out different kinds of reproduction: clonal, wind and animal pollination
 ****  Decide on newOrgs!() is called between reproduction and establishment: Are new individuals created right after reproduction?
-** Dispersal
+*** Dispersal [0/3]
+    SCHEDULED: <2018-03-18 So>
 - [ ] Connectivity matrix: 
   - [ ] Eucledian distances
+  - [ ] Use Saura & Pascual-Hortal's probability?
 - [ ] Sort out Saura & Pascual-Hortal's probability of connectivity(landscape property) and dispersal kernel (organism property): there might not be a way of combining, since they are properties of different entities.
+- [ ] Find distribution from PDF
 [[https://www.researchgate.net/post/Which_connectivity_index_should_I_use_to_compare_different_networks_of_protected_areas][connectivity_discussion]] Probability of connectivity
-*** Density-independent mortality 
-*** Inter-specific interactions
+*** TODO Update organisms: [0/2]
+  - [ ] Simultaneous or independent update?
+  - [ ] Consider making a mutable struct where each field stores the individuals of a functional group, therefore, when updating the organisms, I wouldn't have to go through all of them, just through the group affected by the function in question 
+*** DONE Density-independent mortality: *survive!()* [2/2]
+    CLOSED: [2018-03-18 So 20:54]
+Not totally independent because depends on biomass, which affects individuals biomass and the mortality rate/probability consequently
+- [X] Probability of dying from MTE rate
+- [X] Deleting from structure with deleteat!() avoids mixing up indices in orgs array
+*** TODO Density-dependent mortality: *survive!()* [1/2]
+- [X] *compete()* adds a probability of dying
+- [ ] differentiate b_0 from density-independent/MTE rate
+*** TODO Inter-specific interactions [0/2]
+- [ ] Input of interaction matrix to control pollination and 
+- [ ] Interaction matrix of frequency
 **** TODO Interactions modelled "by" the *outcomes* (Tikhonov et al. 2017, Spiesman & Inouye 2014) 8[0/1]
   - [ ] Is it possible to integrate interaction outcomes and MTE? The patterns would lead to enregy flux across community levels
+*** Germination
 *** Pollination
+**** DONE Wind pollination [2/2]
+     CLOSED: [2018-03-21 Mi 10:22] DEADLINE: <2018-03-20 Di> SCHEDULED: <2018-03-20 Di>
+     - CLOSING NOTE [2018-03-21 Mi 10:22] \\
+       Wind and pollen dispersal are using mean distances of the dispersal kernel PDFs to find future landning place. IT might be to narrowing, but is simpler, for now...
+- [X] Dispersal kernel parameters (Nathan et al. 2012)
+- [X] Finding partners inside it: draws a distance from exponential power mean and checks for partner there
+**** Animal pollination [0/4]
 - [ ] PollCell is a "pollination landscape cell" that stores 
-**** Attraction of reproductive areas: Visitation frequency as a measure of attraction and/or patch flower density as a quadratic function with an optimum (if too high, there are dillution effects)
-**** "Register" visit on interaction matrix and on both plant and insect
-**** ENERGY TRANFERS
+- [ ]  Attraction of reproductive areas: Visitation frequency as a measure of attraction and/or patch flower density as a quadratic function with an optimum (if too high, there are dillution effects)
+- [ ] "Register" visit on interaction matrix and on both plant and insect
+- [ ]  ENERGY TRANFERS
 ** Evolutionary dynamics
 Juliano's suggestion: Create a function of trait distribution change depending on abundance or temperature, so that the time 
 * Observation model
@@ -157,3 +183,9 @@ Juliano's suggestion: Create a function of trait distribution change depending o
  - How VE verification of sampling method and this hierarchical model?
 * DOCUMENTATION
 *** TODO Update TRACE
+Describe wind pollen dispersal and seed dispersal submodels
+    DEADLINE: <2018-03-23 Fr>
+*** TODO Define/Justify Organism characterization: how broad is it going to be?[0/1]
+Main attribute: It must be able to represent plants and insects
+- [ ] PowerPoint & TRACE!
+   DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-14 Mi>
