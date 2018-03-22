@@ -138,13 +138,15 @@ Parameters values might be specific to each functional group, but general mechan
 - [ ] reproduction probability depends on finding partners inside [[Pollination][pollen dispersal kernel]]
 - [X] fertility is calculated according to MTE, which depends on TOTAL biomass: The allocation of biomass to reproduction and growth allows controlling competition, and the rates are affected indirectly, if competition decreases due to total biomass reduction due to competition or herbivory.
 ****  Decide on newOrgs!() is called between reproduction and establishment: Are new individuals created right after reproduction?
-*** Dispersal [0/3]
+*** Dispersal [1/4]
     SCHEDULED: <2018-03-18 So>
+- [X] Mean distances from Exponential Power dispersal kernels: wind pollination, wind and ant seed dispersal.
 - [ ] Connectivity matrix: 
   - [ ] Eucledian distances
   - [ ] Use Saura & Pascual-Hortal's probability?
+  - [ ] somehow should inform between fragments dispersal
 - [ ] Sort out Saura & Pascual-Hortal's probability of connectivity(landscape property) and dispersal kernel (organism property): there might not be a way of combining, since they are properties of different entities.
-- [ ] Find distribution from PDF
+- [ ] Find distribution from PDF for LogSech
 [[https://www.researchgate.net/post/Which_connectivity_index_should_I_use_to_compare_different_networks_of_protected_areas][connectivity_discussion]] Probability of connectivity
 *** TODO Update organisms: [0/2]
   - [ ] Simultaneous or independent update?
@@ -154,6 +156,7 @@ Parameters values might be specific to each functional group, but general mechan
 Not totally independent because depends on biomass, which affects individuals biomass and the mortality rate/probability consequently
 - [X] Probability of dying from MTE rate
 - [X] Deleting from structure with deleteat!() avoids mixing up indices in orgs array
+- [ ] Check scheduling of deaths: do seeds die when not germinated or are they stored and killed later?
 *** TODO Density-dependent mortality: *survive!()* [1/2]
 - [X] *compete()* adds a probability of dying
 - [ ] differentiate b_0 from density-independent/MTE rate

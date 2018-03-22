@@ -224,8 +224,27 @@ function meanExP(a::Float64,b::Float64)
 end
 
 """
-    checkboundaries(x,y)
-Verifies whether current polen/seed location `(x,y)` is inside a habitat fragment. In case it is, the process (reproduction or emergency/germination) proceeds. Otherwise, it is stopped and the Organism in case dies"""
+    checkboundaries(source,dest)
+`source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
+"""
+function checkboundaries(source::Tuple{Int64}, new::Tuple{Int64})
+    #check inside frag
+    sx = source[1]
+    sy = source[2]
+    sf = source[3]
+    dx = dest[1]
+    dy = dest[2]
+
+    if (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2])
+        inbound = true
+    #elseif (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2]) #TODO check ouside frag: how to detect the direction of neighboring fragments? use a matrix dependent probability?
+        #inbound = true
+    else
+        inbound = false
+    end
+
+    return inbound
+end
 
 """
     reproduce!()
