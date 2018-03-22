@@ -224,20 +224,18 @@ function meanExP(a::Float64,b::Float64)
 end
 
 """
-    checkboundaries(source,dest)
+    checkboundaries(sourcefrag,dest)
 `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
 """
-function checkboundaries(source::Tuple{Int64}, new::Tuple{Int64})
+function checkboundaries(sourcefrag::Tuple{Int64}, xdest::Int64, ydest::Int64, fdest::Int64)
     #check inside frag
-    sx = source[1]
-    sy = source[2]
-    sf = source[3]
-    dx = dest[1]
-    dy = dest[2]
 
-    if (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2])
+    if checkbounds(Bool, landscape[:,:,sourcefrag], xdest, ydest, fdest)
+    #if (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2])
         inbound = true
-    #elseif (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2]) #TODO check ouside frag: how to detect the direction of neighboring fragments? use a matrix dependent probability?
+    #elseif (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2])
+    #TODO check ouside frag (more complex than checkbounds): how to detect the direction of neighboring fragments? use a matrix dependent probability?
+        # -> compare dist with matriyes sizes and call possible fragmetns in the third index of location)
         #inbound = true
     else
         inbound = false
@@ -267,48 +265,61 @@ function reproduce!(orgs)
         # Find partners: Wind pollination
         θ = rand([0,0.5π,π,1.5π]) #get radian angle of distribution
         dist =  meanExP(2.3,0.44) #mean distance from the exponential power (Nathan et al. 2012), a = 2.3 and b = 0.44 according to Hardy et al. 2004.
-        #TODO check boundaries
-        #TODO check for possiblity dispersing to other patchs (compare dist with matriyes sizes and call possible fragmetns in the third index of location)
-        #TODO which filter should come first?
-        posptner = filter(x -> x.location .== (round(Int64, reproducing[o] + dist*sin(theta), RoundNearestTiesAway), round(Int64, reproducing[o] + dist*cos(theta), RoundNearestTiesAway), reproducing[o]), orgs)
+        #new location
+        xdest = round(Int64, reproducing[o] + dist*sin(theta), RoundNearestTiesAway)
+        ydest = round(Int64, reproducing[o] + dist*cos(theta), RoundNearestTiesAway)
+        fdest = reproducing[o].location[3] #TODO is landing inside the same fragment as the source, for now
 
-        if  length(posptner) => 1
+        #check boundaries
+        if checkboundaries(reproducing[o], xdest, ydest, fdest) #check if it lands somewhere
 
-            ptners = filter(x -> x.fgroup .== reproducing[o].fgroup)
+            # check for partners there #TODO make it less exact
+            posptner = filter(x -> x.location .== (pollenland, reproducing[o]), orgs)
 
-            if length(ptners) > 1
+            if  length(posptner) => 1
 
-                #produce offsprings: newOrgs with it?
-                offspring = Organism[]
-                offsB = round(Cfertil * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T))) #TODO stochasticity!
-                for n in 1:noffsprg
-                    #TODO check for a quicker way of creating several objects of composite-type
-                    embryo = Organism(string(reproducing[o].fgroups, IDcounter + 1),
-                                      [], #location is given according to functional group and dispersal strategy, in disperse!()
-                                      reproducing[o].sp,
-                                      "e",
-                                      0,
-                                      false,
-                                      reproducing[o].fgroup,
-                                      ["placeholder" "placeholder"], #come from function
-                                      rand(Distributions.Normal(OrgsRef.biomassμ[reproducing[o].fgroup],OrgsRef.biomasssd[reproducing[o].fgroup])),
-                                      [OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
-                                      OrgsRef.radius[f])
-                    push!(offspring, embryo)
+                ptners = filter(x -> x.fgroup .== reproducing[o].fgroup)
+
+                if length(ptners) > 1
+
+                    #produce offsprings: newOrgs with it?
+                    offspring = Organism[]
+                    offsB = round(Cfertil * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T))) #TODO stochasticity!
+                    for n in 1:noffsprg
+                        #TODO check for a quicker way of creating several objects of composite-type
+                        embryo = Organism(string(reproducing[o].fgroups, IDcounter + 1),
+                        [], #location is given according to functional group and dispersal strategy, in disperse!()
+                        reproducing[o].sp,
+                        "e",
+                        0,
+                        false,
+                        reproducing[o].fgroup,
+                        ["placeholder" "placeholder"], #come from function
+                        rand(Distributions.Normal(OrgsRef.biomassμ[reproducing[o].fgroup],OrgsRef.biomasssd[reproducing[o].fgroup])),
+                        [OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
+                        OrgsRef.radius[f])
+                        push!(offspring, embryo)
+                    else
+                        continue
+                    end
+                else
+                    continue
+                end
+                # TODO pollination
             else
                 continue
             end
+
         else
             continue
-        end
-        # TODO pollination
 
-        # TODO gamete production and fertilization
-        # parents_genes[1] and parents_genes[2]
+            # TODO gamete production and fertilization
+            # parents_genes[1] and parents_genes[2]
+        end
+
     end
 
 end
-
 
 """
     disperse!()
@@ -334,11 +345,8 @@ function disperse!(orgs)
     end
 
     #TODO check border
-    if in disp_dist <= border
-        location = (rand(fxlength) rand(fylength) frag)
-    else #inter frag dispersal
-        newfrag = max(filter(x -> x <= disp_dist, connectivity_matrix[frag_line])) #goes to the closest
-        location = (rand(fxlength) rand(fylength) newfrag)
+    if
+        check
     end
 
 end
@@ -400,8 +408,6 @@ function mate!(org::Organism)
     end
     return parents_genes #TODO check if it conflicts with modifying orgs
 end
-
-
 
 
 end
