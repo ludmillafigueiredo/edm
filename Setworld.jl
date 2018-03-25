@@ -31,7 +31,7 @@ mutable struct WorldCell
 	temp::Float64
 	precpt::Float64
 	neighs::Dict{String,Int64} #
-	stem::Bool #steming point of plant
+	#stem::Bool #steming point of plant
 	#WorldCell() = new() #if this is included, and WorldCell object must be initialized as WordCell() and then completed
 end
 

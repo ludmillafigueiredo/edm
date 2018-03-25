@@ -9,7 +9,7 @@
    DEADLINE: <2018-03-28 Mi>
 * main.jl
 ** TODO test *simulate()* for reading and creating initial conditions
-   DEADLINE: <2018-03-24 Sa> SCHEDULED: <2018-03-18 So>
+   DEADLINE: <2018-03-30 Fr> SCHEDULED: <2018-03-18 So>
 - [ ] better format for initorgs: Dictionnary or different structure
   - [ ] verify if it can take initilization info on [[Organisms.jl][multiple functional groups]]
 ** Unity tests

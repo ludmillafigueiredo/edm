@@ -3,7 +3,7 @@ module Organisms
 """
 This module contains the
 
-Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the rangge of search).
+Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
 """
 #using
 using Distributions
@@ -12,7 +12,7 @@ using Setworld
 #export
 export newOrgs!, Organism, IDcounter
 
- #TODO check UNITS
+ #TODO CHECK units
 const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
 const aE = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
 const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
@@ -21,7 +21,7 @@ const tK = 273.15 # °C to K converter
 const plants_mb0 = exp(19.2)
 
 mutable struct Organism
-    ID::String
+    id::String
     location::Tuple{Int64} # (x,y,frag)
     sp::String
     stage::String #e,j,a
@@ -29,7 +29,7 @@ mutable struct Organism
     reped::Bool # reproduced?
     fgroup::String # Plant, insect or more precise functional group
     genotype::Array{String,2}
-    biomass::Dict()
+    biomass::Dict
     disp::Tuple{Float64,2} #dispersal kernel parameters (a and b) TODO tuple
     radius::Array{Int64,2} # reproductive and vegetative area of influence. Not Tuple because not
     #Organism() = new()
@@ -66,17 +66,17 @@ function newOrgs(landscape::Array{Any, N} where N,
             XYs = hcat(rand(1:size(landscape,1), initorgs.init_abund[f]),rand(1:size(landscape,2), initorgs.init_abund[f]))
 
             for i in 1:initorgs.init_abund[f]
-                neworg = Organism(string(initorgs.fgroups[f], IDcounter + 1),
-                                  [XYs[i,1] XYs[i,2] frag],
+                neworg = Organism(string(initorgs.fgroups[f][1:3], IDcounter + 1),
+                                  (XYs[i,1] XYs[i,2] frag),
                                   initorgs.sps[f],
                                   initorgs.init_stage[f],
                                   0,
                                   false,
                                   initorgs.fgroups[f],
                                   ["placeholder" "placeholder"], #initialize with function
-                                  rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f])),
-                                  [initorgs.dispμ[f] initorgs.dispshp[f]],
-                                  initorgs.radius[f])
+                                  Dict("veg" => rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f]))),
+                                  (initorgs.dispμ[f] initorgs.dispshp[f]),
+                                  [initorgs.radius[f]])
 
                 push!(orgs, neworg)
 
