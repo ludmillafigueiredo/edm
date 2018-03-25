@@ -119,11 +119,11 @@ function simulate()
 # MODEL RUN
     for t in 1:timesteps
         #competition on 2 steps: reflects on compterm
-        projmass!()
+        projvegmass!()
         allocate!()
         reproduce!()
         disperse!()
-
+        survive!()
         # Disturbances:
         ## Dynamical landscape change
         # if t #something
@@ -131,7 +131,7 @@ function simulate()
         # end
         ## Invasion
         # read_orgs(invasivefile)
-        
+
         # Output:
     end
     return mylandscape, orgs_init

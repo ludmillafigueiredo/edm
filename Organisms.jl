@@ -10,7 +10,7 @@ using Distributions
 using Setworld
 
 #export
-export newOrgs!, Organism, IDcounter
+export newOrgs!, Organism
 
  #TODO CHECK units
 const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
@@ -53,7 +53,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
     `init` initialization of the model
     `sex` sexual reproduction
     `clone` assexual reproduction
-`parent_s::Organism`
+`parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
 `quant::Int64` is nb of new individuals or offspring to be created
 """
 
@@ -66,7 +66,7 @@ function newOrgs(landscape::Array{Any, N} where N,
             XYs = hcat(rand(1:size(landscape,1), initorgs.init_abund[f]),rand(1:size(landscape,2), initorgs.init_abund[f]))
 
             for i in 1:initorgs.init_abund[f]
-                neworg = Organism(string(initorgs.fgroups[f][1:3], IDcounter + 1),
+                neworg = Organism(string(initorgs.fgroups[f][1:3], length(orgs) + 1),
                                   (XYs[i,1] XYs[i,2] frag),
                                   initorgs.sps[f],
                                   initorgs.init_stage[f],
@@ -80,7 +80,7 @@ function newOrgs(landscape::Array{Any, N} where N,
 
                 push!(orgs, neworg)
 
-                global IDcounter += 1
+                #global IDcounter += 1
             end
         end
     end
@@ -89,9 +89,26 @@ function newOrgs(landscape::Array{Any, N} where N,
 
 end
 
-# function newOrgs()
-#     # TODO arguments are quite different. Should it be a different function?
-#     # # TODO For the reproduction method of this fct: The genotype and individual location depends on the group of reproduction
+# function newOrgs(reprmode::String, parent_s::Array{Organism, N} where N, quant:Int64)
+# TODO integrate it with reproduce!()
+#     #     # TODO arguments are quite different. Should it be a different function?
+#     #     # # TODO For the reproduction method of this fct: The genotype and individual location depends on the group of reproduction
+#     for i in 1:quant
+#         neworg = Organism(string(parent_s[1].fgroup[1:3], length(orgs) + 1),
+#                           (XYs[i,1] XYs[i,2] frag),
+#                           initorgs.sps[f],
+#                           initorgs.init_stage[f],
+#                           0,
+#                           false,
+#                           initorgs.fgroups[f],
+#                           ["placeholder" "placeholder"], #initialize with function
+#                           Dict("veg" => rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f]))),
+#                           (initorgs.dispμ[f] initorgs.dispshp[f]),
+#                           [initorgs.radius[f]])
+#         push!(orgs, neworg)
+#
+#         #global IDcounter += 1
+#     end
 # end
 
 """
@@ -261,8 +278,6 @@ function reproduce!(orgs)
 
     for o in 1:reproducing
 
-        # Clonal reproduction
-
         # Find partners: Wind pollination
         θ = rand([0,0.5π,π,1.5π]) #get radian angle of distribution
         dist =  meanExP(2.3,0.44) #mean distance from the exponential power (Nathan et al. 2012), a = 2.3 and b = 0.44 according to Hardy et al. 2004.
@@ -288,7 +303,7 @@ function reproduce!(orgs)
                     offsB = round(Cfertil * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T))) #TODO stochasticity!
                     for n in 1:noffsprg
                         #TODO check for a quicker way of creating several objects of composite-type
-                        embryo = Organism(string(reproducing[o].fgroups, IDcounter + 1),
+                        embryo = Organism(string(reproducing[o].fgroups, length(orgs) + 1),
                         [], #location is given according to functional group and dispersal strategy, in disperse!()
                         reproducing[o].sp,
                         "e",
@@ -307,6 +322,7 @@ function reproduce!(orgs)
                     continue
                 end
                 # TODO pollination
+                # TODO Clonal reproduction
             else
                 continue
             end

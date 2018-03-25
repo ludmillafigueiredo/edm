@@ -63,8 +63,10 @@ Mortality is probability, what about the others?
 - [ ] Genotype defines species?
 - [ ] Interaction field: Plants have a list of visitors and pollinators have a list of IDs of pollen. Pollen decay should eliminate pollen after certain time step.
   - [ ] verify pollen decay
-** TODO use length(orgs) for IDcounter 
-   DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-08 Do>
+** DONE use length(orgs) for IDcounter 
+   CLOSED: [2018-03-25 So 20:00] DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-08 Do>
+   - CLOSING NOTE [2018-03-25 So 20:00] \\
+     Uglier, but more straight forward
 ** TODO Simulate single plant species/functional group [3/4] :initialization:
 Organisms are stored in an array of n_frags (read from simulation file). All organisms are stored in this array and are updated together (each fragment - it could be possible to have simulations where there is some desynchronization between fragments!).
 *newOrg()* will have multiple methods: One for initialization, where individuals always establish and another where it depends on the individuals fitness in the grid and establishment!() is called.  
@@ -143,6 +145,7 @@ Parameters values might be specific to each functional group, but general mechan
     DEADLINE: <2018-03-23 Fr>
 - [ ] reproduction depends on finding partners inside [[Pollination][pollen dispersal kernel]]
 - [X] fertility is calculated according to MTE, which depends on TOTAL biomass: The allocation of biomass to reproduction and growth allows controlling competition, and the rates are affected indirectly, if competition decreases due to total biomass reduction due to competition or herbivory.
+- [ ] use newOrgs 2nd method for creating the orgs and handling genetics of fertilization
 ****  Decide on newOrgs!() is called between reproduction and establishment: Are new individuals created right after reproduction?
 *** Dispersal [1/4]
     SCHEDULED: <2018-03-18 So>
@@ -171,7 +174,12 @@ Not totally independent because depends on biomass, which affects individuals bi
 - [ ] Interaction matrix of frequency
 **** TODO Interactions modelled "by" the *outcomes* (Tikhonov et al. 2017, Spiesman & Inouye 2014) 8[0/1]
   - [ ] Is it possible to integrate interaction outcomes and MTE? The patterns would lead to enregy flux across community levels
-*** Germination
+*** DONE Germination [2/2]
+    CLOSED: [2018-03-25 So 19:36] SCHEDULED: <2018-03-25 So>
+    - CLOSING NOTE [2018-03-25 So 19:36] \\
+      v0.1 has a prototype of seed bank. Make a more realistic one next
+- [X] germination rate turned into probability
+- [X] one-year seed bank for seeds
 *** Pollination
 **** DONE Wind pollination [2/2]
      CLOSED: [2018-03-21 Mi 10:22] DEADLINE: <2018-03-20 Di> SCHEDULED: <2018-03-20 Di>
@@ -192,9 +200,9 @@ Juliano's suggestion: Create a function of trait distribution change depending o
  - How VE verification of sampling method and this hierarchical model?
 * DOCUMENTATION
 *** TODO Update TRACE
-Describe wind pollen dispersal and seed dispersal submodels
+Describe wind pollen dispersal, seed dispersal, reproduction and germination submodels
     DEADLINE: <2018-03-23 Fr>
 *** TODO Define/Justify Organism characterization: how broad is it going to be?[0/1]
 Main attribute: It must be able to represent plants and insects
 - [ ] PowerPoint & TRACE!
-   DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-14 Mi>
+   DEADLINE: <2018-03-30 Fr> SCHEDULED: <2018-03-14 Mi>
