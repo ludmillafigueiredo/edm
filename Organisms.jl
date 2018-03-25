@@ -38,10 +38,10 @@ end
 
 """
     newOrg(fgroups, init_abund, biomassμ, biomasssd)
-newOrg() creates new `init_abund` individuals of each  functional group (`fgroups`), with biomass (N(`biomassμ`,`biomasssd`)). It is called during the initialization and all  the Organisms parameters are read from an parameter file, for the specific functional group. All organisms, from all funcitonal groups, are stored in the same array.
-#TODO those two take very different arguments. Still diffrentiate just methods?
+newOrg() creates new `init_abund` individuals of each  functional group (`fgroups`), with biomass (N(`biomassμ`,`biomasssd`)). It is called during the initialization and all  the Organisms parameters are read from a parameter file, for the specific functional group. All organisms, from all funcitonal groups, are stored in the same array `orgs` thathte function returns.
+
     newOrg(parents, reprmode)
- newOrg() generates offspringn, after reproduction. For offspring creation, the `genotype` field is filled according to parental genotype and mode of reproduction and the other fields are copied from the parents.
+ newOrg() generates offspringn, after reproduc- newOrg() generates offspringn, after reproduction. For offspring creation, the `genotype` field is filled according to parental genotype and mode of reproduction and the other fields are copied from the parents.
 # Methods
 1. Upon initialization: `newOrg(fgroups, init_abund, biomassμ, landscape)`
 `fgroups` list of funcitonal groups to be simulated
@@ -49,12 +49,12 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
 `biomassμ` mean biomass
 
 # Arguments:
--`reprmode::String` specificies how the new organisms are generated:
+`reprmode::String` specificies how the new organisms are generated:
     `init` initialization of the model
     `sex` sexual reproduction
     `clone` assexual reproduction
--`parent_s::Organism`
--`quant::Int64` is nb of new individuals or offspring to be created
+`parent_s::Organism`
+`quant::Int64` is nb of new individuals or offspring to be created
 """
 
 function newOrgs(landscape::Array{Any, N} where N,
@@ -85,8 +85,8 @@ function newOrgs(landscape::Array{Any, N} where N,
         end
     end
     #TODO different fgroups have different metabolic rates. Get it form OrgsRef
+   return orgs #TODO or make sure that it has varied in the global scope as well rather export it?
 
-    return orgs #TODO or make sure that it has varied in the global scope as well rather export it?
 end
 
 # function newOrgs()
@@ -140,6 +140,8 @@ function compete(org::Any,N where N, landscape::Array{Any, N} where N)
     return compterm
 end
 
+
+
 """
     allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. If competition is too strong, individual has a probability of dying. If not, gains is allocated to growth or reproduction, according to the developmental `stage` of the organism.
@@ -166,6 +168,7 @@ function allocate!(orgs::Array{Any,N} where N,
             #Resource allocation schedule
             #TODO make it more ellaborate and includde trade-offs
             if (org[o].stage == "e")  #TODO accountant for resistant stages?
+
                 # embryos only consume reserves:
                 org[o].biomass -=
             elseif stage == "j"
