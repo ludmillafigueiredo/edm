@@ -107,10 +107,8 @@ function projvegmass!(landscape::Array{Any, N} where N,
         fg = orgs[o].fgroup
         projmass = /(org[o].biomass["growth"], ((2*r+1)^2))
 
-        for j in (y-r):(y+r), i in (x-r):(x+r) #usar a funcao da FON Q trabalha com quadrantes?
-            if fg == "plant" && i == x && j == y #TODO center steming point has stronger biomass ~ way too close to FON again
-                landscape[i,j,frag].neighs[fg] = fgpars["plant"]
-            elseif haskey(landscape[i,j,frag].neighs,fg)
+        for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
+            if haskey(landscape[i,j,frag].neighs,fg)
                 landscape[i,j,frag].neighs[fg] += projmass
             else
                 landscape[i,j,frag].neighs[fg] = projmass
@@ -156,7 +154,7 @@ function allocate!(orgs::Array{Any,N} where N,
 
     for o in 1:length(orgs)
 
-        T = landscape[orgs[o].location].temp + tK #(conversion to K)
+        T = landscape[orgs[o].location].temp
 
         # Resource assimilation: #TODO check if resource allocation would be the same as growth
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
