@@ -1,4 +1,3 @@
-module Setworld
 """
 This module contains the type of the cell and functions for setting up initial environmental conditions and changing it when necessary.
 
@@ -36,7 +35,7 @@ mutable struct WorldCell
 end
 
 mutable struct PollCell
-	floralres::Dict() #ind => amount of floral resource projected in the cell
+	floralres::Dict #ind => amount of floral resource projected in the cell
 end
 
 #WorldCell() = WorldCell(false, 0.0, 0.0, Dict())
@@ -85,5 +84,4 @@ end
 
 #TODO Unity test
 
-#module end!
 end
