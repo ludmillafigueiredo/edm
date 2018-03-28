@@ -22,6 +22,7 @@ using Distributions
 
 export WorldCell, landscape_init, update_landscape!
 
+const tK = 273.15 # °C to K converter
 #Types
 mutable struct WorldCell
 	avail::Bool

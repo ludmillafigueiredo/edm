@@ -22,7 +22,7 @@ const plants_mb0 = exp(19.2)
 
 mutable struct Organism
     id::String
-    location::Tuple{Int64} # (x,y,frag)
+    location::Tuple # (x,y,frag)
     sp::String
     stage::String #e,j,a
     age::Int64 # controls passing stages, phenology and
@@ -30,7 +30,7 @@ mutable struct Organism
     fgroup::String # Plant, insect or more precise functional group
     genotype::Array{String,2}
     biomass::Dict
-    disp::Tuple{Float64,2} #dispersal kernel parameters (a and b) TODO tuple
+    disp::Tuple #dispersal kernel parameters (a and b) TODO tuple
     radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
     #Organism() = new()
 end
@@ -57,7 +57,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
 `quant::Int64` is nb of new individuals or offspring to be created
 """
 
-function newOrgs(landscape::Array{Any,3},initorgs::InitOrgs)
+function newOrgs(landscape::Array{Setworld.WorldCell,3},initorgs::InitOrgs)
 
     orgs = Organism[]
     for frag in 1:size(landscape,3)
@@ -68,7 +68,7 @@ function newOrgs(landscape::Array{Any,3},initorgs::InitOrgs)
 
             for i in 1:initorgs.init_abund[f]
                 neworg = Organism(string(initorgs.fgroups[f][1:3], length(orgs) + 1),
-                                  (XYs[i,1] XYs[i,2] frag),
+                                  (XYs[i,1], XYs[i,2], frag),
                                   initorgs.sps[f],
                                   initorgs.init_stage[f],
                                   0,
@@ -77,7 +77,7 @@ function newOrgs(landscape::Array{Any,3},initorgs::InitOrgs)
                                   ["placeholder" "placeholder"], #initialize with function
                                   Dict("veg" => rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f]))),
                                   (initorgs.dispμ[f], initorgs.dispshp[f]),
-                                  [initorgs.radius[f]])
+                                  initorgs.radius[f])
 
                 push!(orgs, neworg)
 

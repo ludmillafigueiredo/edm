@@ -7,8 +7,6 @@ push!(LOAD_PATH,EDDir)
 
 global IDcounter = Int64(0)
 
-const tK = 273.15 # °C to K converter
-
 # Load Julia & model packages
 using Distributions
 using JLD
