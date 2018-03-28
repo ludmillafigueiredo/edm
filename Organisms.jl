@@ -31,7 +31,7 @@ mutable struct Organism
     genotype::Array{String,2}
     biomass::Dict
     disp::Tuple{Float64,2} #dispersal kernel parameters (a and b) TODO tuple
-    radius::Array{Int64,2} # reproductive and vegetative area of influence. Not Tuple because not
+    radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
     #Organism() = new()
 end
 
@@ -57,13 +57,14 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
 `quant::Int64` is nb of new individuals or offspring to be created
 """
 
-function newOrgs(landscape::Array{Any, N} where N,
-                initorgs::InitOrgs)
+function newOrgs(landscape::Array{Any,3},initorgs::InitOrgs)
+
     orgs = Organism[]
     for frag in 1:size(landscape,3)
         for f in 1:length(initorgs.fgroups) #TODO check the organisms file format: so far, all fragments get the same sps
 
-            XYs = hcat(rand(1:size(landscape,1), initorgs.init_abund[f]),rand(1:size(landscape,2), initorgs.init_abund[f]))
+            XYs = hcat(rand(1:size(landscape,1),initorgs.init_abund[f]),
+                       rand(1:size(landscape,2),initorgs.init_abund[f]))
 
             for i in 1:initorgs.init_abund[f]
                 neworg = Organism(string(initorgs.fgroups[f][1:3], length(orgs) + 1),
@@ -75,7 +76,7 @@ function newOrgs(landscape::Array{Any, N} where N,
                                   initorgs.fgroups[f],
                                   ["placeholder" "placeholder"], #initialize with function
                                   Dict("veg" => rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f]))),
-                                  (initorgs.dispμ[f] initorgs.dispshp[f]),
+                                  (initorgs.dispμ[f], initorgs.dispshp[f]),
                                   [initorgs.radius[f]])
 
                 push!(orgs, neworg)
@@ -85,7 +86,8 @@ function newOrgs(landscape::Array{Any, N} where N,
         end
     end
     #TODO different fgroups have different metabolic rates. Get it form OrgsRef
-   return orgs #TODO or make sure that it has varied in the global scope as well rather export it?
+    #TODO or make sure that it has varied in the global scope as well rather export it?
+   return orgs
 
 end
 

@@ -1,4 +1,4 @@
-landscape_init
+module Setworld
 """
 This module contains the type of the cell and functions for setting up initial environmental conditions and changing it when necessary.
 
@@ -19,11 +19,9 @@ landscape_init() creates a multidimensional array composed of habitat grid cells
 """
 module Setworld
 
-const tK = 273.15 # °C to K converter
-
 using Distributions
 
-export WorldCell, landscape_init
+export WorldCell, landscape_init, update_landscape!
 
 #Types
 mutable struct WorldCell
@@ -53,8 +51,7 @@ function landscape_init(simpars)
 			newcell = WorldCell(true,
 								rand(Normal(simpars.fmeantemp[frag],simpars.ftempsd[frag]),1)[1] + tK,
 								rand(Normal(simpars.fmeanprec[frag],simpars.fprecsd[frag]),1)[1],
-								Dict(),
-								false)
+								Dict())
 			push!(landscape,newcell)
 		end
 	end

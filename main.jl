@@ -7,6 +7,8 @@ push!(LOAD_PATH,EDDir)
 
 global IDcounter = Int64(0)
 
+const tK = 273.15 # °C to K converter
+
 # Load Julia & model packages
 using Distributions
 using JLD
@@ -109,7 +111,7 @@ function simulate()
 #   INITIALIZATION
     simparams, initorgs = read_initials()
 
-    mylandscape= landscape_init(simparams)
+    mylandscape = landscape_init(simparams)
     orgs_init = newOrgs(mylandscape, initorgs)
 
     # INITIALIZATION ": multidimensional
