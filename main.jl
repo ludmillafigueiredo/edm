@@ -119,7 +119,7 @@ function simulate(timesteps)
     for t in 1:timesteps
         #competition on 2 steps: reflects on compterm
         projvegmass!(mylandscape,orgs)
-        allocate!(mylandscape, orgs, aE,Boltz,OrgsRef)
+        nogrowth = allocate!(mylandscape, orgs, aE,Boltz) #TODO check if there is no better way to keep track of individuals that are not growing  
         reproduce!()
         disperse!()
         survive!()

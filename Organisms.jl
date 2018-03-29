@@ -35,7 +35,6 @@ mutable struct Organism
     #Organism() = new()
 end
 
-
 """
     newOrg(fgroups, init_abund, biomassμ, biomasssd)
 newOrg() creates new `init_abund` individuals of each  functional group (`fgroups`), with biomass (N(`biomassμ`,`biomasssd`)). It is called during the initialization and all  the Organisms parameters are read from a parameter file, for the specific functional group. All organisms, from all funcitonal groups, are stored in the same array `orgs` thathte function returns.
@@ -56,7 +55,6 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
 `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
 `quant::Int64` is nb of new individuals or offspring to be created
 """
-
 function newOrgs(landscape::Array{Setworld.WorldCell,3},initorgs::InitOrgs)
 
     orgs = Organism[]
@@ -162,46 +160,49 @@ end
 
 """
     allocate!(orgs, landscape, aE, Boltz, OrgsRef)
-Calculates biomass gain according to MTE rate and depending on competition. If competition is too strong, individual has a probability of dying. If not, gains is allocated to growth or reproduction, according to the developmental `stage` of the organism.
+Calculates biomass gain according to MTE rate and depending on competition. If competition is too strong, individual has a higher probability of dying. If not, gains is allocated to growth or reproduction, according to the developmental `stage` of the organism.
 """
 function allocate!(landscape::Array{Setworld.WorldCell, 3},
-    orgs::Array{Organism,N} where N
+    orgs::Array{Organism,N} where N,
     aE,
-    Boltz,
-    OrgsRef) #TODO organize this object to serve as reference of max size for different functional groups
+    Boltz) #TODO organize this object to serve as reference of max size for different functional groups
 
     nogrowth = []
 
     for o in 1:length(orgs)
 
-        T = landscape[orgs[o].location].temp
+        T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
         # Resource assimilation: #TODO check if resource allocation would be the same as growth
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
         compterm = compete(landscape, orgs[o])
         if compterm > 0
-            grown_mass += (1 - compterm) * (plants_gb0 * sum(values(orgs[o].biomass))^(3/4) * exp(-aE/(Boltz*T)))
+            grown_mass = (1 - compterm) * (plants_gb0 * sum(values(orgs[o].biomass))^(3/4) * exp(-aE/(Boltz*T)))
 
             #Resource allocation schedule
             #TODO make it more ellaborate and includde trade-offs
-            if (org[o].stage == "e")  #TODO accountant for resistant stages?
+            if orgs[o].stage == "e"  #TODO accountant for resistant stages?
                 # embryos only consume reserves: TODO realistic
-                org[o].biomass["veg"] -= 0.01*org[o].biomass["veg"]
-            elseif stage == "j"
+                orgs[o].biomass["veg"] -= 0.01*org[o].biomass["veg"]
+            elseif orgs[o].stage == "j"
                 # juveniles grow
-                org[o].biomass["vegstruct"] += grown_mass
-            elseif stage == "a"
-                # adults reproduce
-                org[o].biomass["reprd"] += grown_mass
+                orgs[o].biomass["veg"] += grown_mass
+            elseif orgs[o].stage == "a" #TODO make it more complex. adults are investing everything in repoductiove biomass
+                # adults reproduc
+                if haskey(orgs[o].biomass,"reprd")
+                    orgs[o].biomass["reprd"] += grown_mass
+                else
+                    orgs[o].biomass["reprd"] = grown_mass
+                end
             end
-
         else
             push!(nogrowth,o)
         end
     end
     return nogrowth
 end
+
 """
     survive!(ors, nogrowth)
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
