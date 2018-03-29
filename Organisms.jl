@@ -118,7 +118,6 @@ end
 Projects the mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
 """
 function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N)
-
     for o in 1:length(orgs)
         x, y, frag = orgs[o].location
         r = orgs[o].radius
@@ -126,7 +125,7 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
-            if !checkbounds(Bool,landscape[:,:,frag], j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
+            if !checkbounds(Bool,landscape[:,:,frag],j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
                 continue
             else
                 if haskey(landscape[i,j,frag].neighs,fg)
@@ -137,42 +136,39 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
             end
         end
     end
-
 end
 
 """
-    compete(orgs,landscape)
+    compete(landscape, orgs)
 Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
 """
-function compete(org::Any,N where N, landscape::Array{Any, N} where N)
-
-    x, y, frag = orgs[o].location
-    fg = orgs[o].fgroup
+function compete(landscape::Array{Setworld.WorldCell, 3},
+    org::Organism)
+    x, y, frag = org.location
+    fg = org.fgroup
     #r = org.radius
     # 2. Look for neighbors in the area
+    nbsum = 0
     for j in (y-r):(y+r), i in (x-r):(x+r) #TODO filter!() this area?
-        if !checkbounds(landscape[:,:frag], j,i)
+        if !checkbounds(Bool,landscape[:,:,frag],j,i)
             continue
         else landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
-            nbsum += landscape[i,j,frag].neighs - orgs[o].biomass/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
+            nbsum += landscape[i,j,frag].neighs[fg] - orgs[o].biomass["veg"]/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
         end
     end
-    compterm = /(orgs[o].biomass - nbsum,orgs[o].biomass) # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
-
+    compterm = /(orgs[o].biomass["veg"] - nbsum, orgs[o].biomass["veg"]) # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
     return compterm
 end
-
-
 
 """
     allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. If competition is too strong, individual has a probability of dying. If not, gains is allocated to growth or reproduction, according to the developmental `stage` of the organism.
 """
-function allocate!(orgs::Array{Any,N} where N,
-    landscape,
+function allocate!(landscape::Array{Setworld.WorldCell, 3},
+    orgs::Array{Organism,N} where N
     aE,
     Boltz,
-    OrgsRef) #TODO organize this file to serve as refenrece of max size for different functional groups
+    OrgsRef) #TODO organize this object to serve as reference of max size for different functional groups
 
     nogrowth = []
 
@@ -183,16 +179,15 @@ function allocate!(orgs::Array{Any,N} where N,
         # Resource assimilation: #TODO check if resource allocation would be the same as growth
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
-        compterm = compete(orgs[o])
+        compterm = compete(landscape, orgs[o])
         if compterm > 0
-            grown_mass += (1 - compterm) * (Cgrowth * organism.vegmass^(3/4) * exp(-aE/(Boltz*T)))
+            grown_mass += (1 - compterm) * (plants_gb0 * sum(values(orgs[o].biomass))^(3/4) * exp(-aE/(Boltz*T)))
 
             #Resource allocation schedule
             #TODO make it more ellaborate and includde trade-offs
             if (org[o].stage == "e")  #TODO accountant for resistant stages?
-
-                # embryos only consume reserves:
-                org[o].biomass -=
+                # embryos only consume reserves: TODO realistic
+                org[o].biomass["veg"] -= 0.01*org[o].biomass["veg"]
             elseif stage == "j"
                 # juveniles grow
                 org[o].biomass["vegstruct"] += grown_mass
@@ -200,13 +195,13 @@ function allocate!(orgs::Array{Any,N} where N,
                 # adults reproduce
                 org[o].biomass["reprd"] += grown_mass
             end
+
+        else
+            push!(nogrowth,o)
         end
-    else
-        push!(nogrowth,o)
     end
     return nogrowth
 end
-
 """
     survive!(ors, nogrowth)
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
