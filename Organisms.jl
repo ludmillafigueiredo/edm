@@ -204,68 +204,31 @@ function allocate!(landscape::Array{Setworld.WorldCell,3},
 end
 
 """
-    survive!(ors, nogrowth,landscape)
-Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
-plants in nogrwth are subjected to two probability rates
-"""
-function survive!(orgs::Array{Organism,N} where N, nogrowth::Array{Int64,N} where N,landscape::Array{Setworld.WorldCell,3})
-
-    deaths = Int64[]
-
-    for o in 1:length(orgs)
-
-        T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
-
-        mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
-        mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/T)
-        mprob = 1 - e^(-mB*orgs[o].age)
-
-        # individuals that didnt grow have
-        if o in 1:length(nogrowth)
-            compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
-            cmB = compmortconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/T)
-            cmprob =  1 - e^(-cmB*orgs[o].age)
-            mprob += cmprob
-        end
-
-        if rand() < mprob
-            #mprob > rand(PoissonBinomial([mprob]),1)[1] # successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
-            push!(deaths, o)
-        else
-            orgs[o].age += 1
-        end
-    end
-    deleteat!(orgs, deaths)
-    return orgs
-end
-
-"""
     meanExP(a,b)
 Draws a mean dispersed distance from the Exponential Power dispersal kernel.
 """
 function meanExP(a::Float64,b::Float64)
-    dist = Fileprep.lengthtocell(rand(a*(Distribution.Gamma(3/b))/(Distribution.Gamma(2/b))))
+    dist = Fileprep.lengthtocell(a*rand(Distributions.Gamma(3/b))/rand(Distributions.Gamma(2/b)))
     return dist
 end
 
 """
-    checkboundaries(sourcefrag,dest)
+    checkboundaries(sourcefrag,xdest, ydest, fdest)
 `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
 """
-function checkboundaries(sourcefrag::Tuple{Int64}, xdest::Int64, ydest::Int64, fdest::Int64)
+function checkboundaries(landscape::Array{Setworld.WorldCell,3}, xdest::Int64, ydest::Int64, fdest::Int64)
     #check inside frag
-
-    if checkbounds(Bool, landscape[:,:,sourcefrag], xdest, ydest, fdest)
+    if checkbounds(Bool, landscape[:,:,fdest], xdest, ydest)
     #if (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2])
         inbound = true
     #elseif (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2])
     #TODO check ouside frag (more complex than checkbounds): how to detect the direction of neighboring fragments? use a matrix dependent probability?
-        # -> compare dist with matriyes sizes and call possible fragmetns in the third index of location)
+        # -> to find fdest: compare dist with matriyes sizes and call possible fragmetns in the third index of location)
+        # and checkbounds(landscape[:,:,:], xdest, ydest, fdest)
         #inbound = true
     else
         inbound = false
     end
-
     return inbound
 end
 
@@ -273,7 +236,7 @@ end
     reproduce!()
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
-function reproduce!(orgs)
+function reproduce!(orgs,landscape)
     #TODO sort out reproduction mode (pollination or not) according to funcitonal group
     # if # pollination depending plants
     #     pollination()
@@ -281,27 +244,27 @@ function reproduce!(orgs)
     #     parents_genes = mate!()
     # end
 
-    reproducing <- filter.(x -> x.stage == "a", orgs)
+    reproducing = filter(x -> x.stage == "a", orgs)
 
-    for o in 1:reproducing
+    for o in 1:length(reproducing)
 
         # Find partners: Wind pollination
         θ = rand([0,0.5π,π,1.5π]) #get radian angle of distribution
         dist =  meanExP(2.3,0.44) #mean distance from the exponential power (Nathan et al. 2012), a = 2.3 and b = 0.44 according to Hardy et al. 2004.
         #new location
-        xdest = round(Int64, reproducing[o] + dist*sin(theta), RoundNearestTiesAway)
-        ydest = round(Int64, reproducing[o] + dist*cos(theta), RoundNearestTiesAway)
+        xdest = round(Int64, reproducing[o].location[1] + dist*sin(θ), RoundNearestTiesAway)
+        ydest = round(Int64, reproducing[o].location[2] + dist*cos(θ), RoundNearestTiesAway)
         fdest = reproducing[o].location[3] #TODO is landing inside the same fragment as the source, for now
 
         #check boundaries
-        if checkboundaries(reproducing[o], xdest, ydest, fdest) #check if it lands somewhere
+        if checkboundaries(landscape, xdest, ydest, fdest) #check if it lands inside the same fragment or outside
 
-            # check for partners there #TODO make it less exact
-            posptner = filter(x -> x.location .== (pollenland, reproducing[o]), orgs)
+            # check for partners to be pollinated there: look in location and sp #TODO make it less exact?
+            posptner = filter(x -> x.location == (xdest,ydest,fdest) , orgs)
 
             if  length(posptner) => 1
 
-                ptners = filter(x -> x.fgroup .== reproducing[o].fgroup)
+                ptners = filter(x -> x.fgroup == reproducing[o].fgroup)
 
                 if length(ptners) > 1
 
@@ -371,6 +334,43 @@ function disperse!(orgs)
     #TODO check border
 
 end
+
+"""
+    survive!(ors, nogrowth,landscape)
+Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
+plants in nogrwth are subjected to two probability rates
+"""
+function survive!(orgs::Array{Organism,N} where N, nogrowth::Array{Int64,N} where N,landscape::Array{Setworld.WorldCell,3})
+
+    deaths = Int64[]
+
+    for o in 1:length(orgs)
+
+        T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
+
+        mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
+        mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/T)
+        mprob = 1 - e^(-mB*orgs[o].age)
+
+        # individuals that didnt grow have
+        if o in 1:length(nogrowth)
+            compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
+            cmB = compmortconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/T)
+            cmprob =  1 - e^(-cmB*orgs[o].age)
+            mprob += cmprob
+        end
+
+        if rand() < mprob
+            #mprob > rand(PoissonBinomial([mprob]),1)[1] # TODO should use a more ellaboratedistribution model? successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
+            push!(deaths, o)
+        else
+            orgs[o].age += 1
+        end
+    end
+    deleteat!(orgs, deaths)
+    return orgs
+end
+
 
 """
     emerge!()

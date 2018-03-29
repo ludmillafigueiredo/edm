@@ -1,7 +1,13 @@
 module Fileprep
 
-# 10 fragments of 5 ha area: 5.10⁴ m² = 5.10⁴.10⁴ = 5.10⁸ cm² (Max. Goettigen fragment area)
-# nb of x and y cells (3cm side): √5.10⁸ / 3 = 74500
+"""
+This module contains functions related to converting between input, model and output units and formats
+
+# Example:
+A fragment of 5 ha area: 5.10⁴ m² = 5.10⁴.10⁴ = 5.10⁸ cm² (Mühlenberg area): nb of x and y cells (3cm side): √5.10⁸ / 3 = 74500
+grid
+areatocell(50000)
+"""
 
 """
   gridsizes(realxlen, realylen)
@@ -15,8 +21,12 @@ function gridsizes(realylen::Array{Float64,2}, realylen::Array{Float64,2})
   return xlength, ylength
 end
 
+"""
+  lengthtocell(d)
+Converts distance values from m to cell size.
+"""
 function lengthtocell(d::Float64)
-  cellcdist = round(Int64,((realxlen.*100)./3), RoundNearestTiesAway)
+  celldist = round(Int64,((d.*100)./3), RoundNearestTiesAway)
   return celldist
 end
 
@@ -24,7 +34,15 @@ end
   areatocell(area)
 Calculate the side length of a square grid of a fragment of `area` m².
 1 m² = 10000 cm², 3 cm of cell side size
+# 2 methods:
+- single fragment
+- multiple fragments
 """
+function areatocell(area::Float64)
+  side = round(Int64,((sqrt.(area*10000))/3), RoundNearestTiesAway)
+  return side
+end
+
 function areatocell(area::Array{Float64,2})
   side = round(Int64,((sqrt.(area.*10000))./3), RoundNearestTiesAway)
   return side

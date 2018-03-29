@@ -11,6 +11,7 @@ srand(123)
 using Distributions
 using JLD
 using Setworld
+using Fileprep
 #using Organisms
 
 #Simulation parameters storage:
@@ -142,7 +143,7 @@ simulate()
 mutable struct orgpars
 end
 
-#Dictionnary stores functional groups parameters
+#Dictionnary stores functio2nal groups parameters
 """
     fgpars()
 Stores functional groups parameters in a dictionnary that is consulted for every function involving organism's simulation.
