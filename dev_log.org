@@ -1,4 +1,4 @@
-* Code (general Julia)
+++* Code (general Julia)
 ** TODO Check arguments order in functions
    SCHEDULED: <2018-03-18 So> DEADLINE: <2018-03-28 Mi>
 ** TODO Read "Eval of julia code"
@@ -54,6 +54,7 @@ During simulation, after reproduction (and dispersion?) new organisms will only 
 ** TODO MTE rates to individual probabilites
 Mortality is probability, what about the others?
    DEADLINE: <2018-03-23 Fr>
+** TODO check probability models for trnasitions
 ** TODO mutable struct [1/6]
    DEADLINE: <2018-03-30 Fr> SCHEDULED: <2018-03-14 Mi>
 - [ ] .sex field, for controlling sex-ratio, for insects

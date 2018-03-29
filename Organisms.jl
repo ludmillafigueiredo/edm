@@ -162,12 +162,12 @@ end
     allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. If competition is too strong, individual has a higher probability of dying. If not, gains is allocated to growth or reproduction, according to the developmental `stage` of the organism.
 """
-function allocate!(landscape::Array{Setworld.WorldCell, 3},
+function allocate!(landscape::Array{Setworld.WorldCell,3},
     orgs::Array{Organism,N} where N,
     aE,
     Boltz) #TODO organize this object to serve as reference of max size for different functional groups
 
-    nogrowth = []
+    nogrowth = Int64[]
 
     for o in 1:length(orgs)
 
@@ -204,28 +204,32 @@ function allocate!(landscape::Array{Setworld.WorldCell, 3},
 end
 
 """
-    survive!(ors, nogrowth)
+    survive!(ors, nogrowth,landscape)
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 plants in nogrwth are subjected to two probability rates
 """
-function survive!(orgs)
+function survive!(orgs::Array{Organism,N} where N, nogrowth::Array{Int64,N} where N,landscape::Array{Setworld.WorldCell,3})
 
-    deaths = []
+    deaths = Int64[]
 
     for o in 1:length(orgs)
-        mortalrate = plants_mB #TODO call it from OrgsRef
-        mB = mortalrate * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/)
+
+        T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
+
+        mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
+        mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/T)
         mprob = 1 - e^(-mB*orgs[o].age)
 
-        # "weaker individuals" have two "ways" of dying
-        if o in nogrowth
-            compmortrate = plants_mB #TODO use different b_0 for mortality consequence of competition
-            cmB = compmortrate * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/)
+        # individuals that didnt grow have
+        if o in 1:length(nogrowth)
+            compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
+            cmB = compmortconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/T)
             cmprob =  1 - e^(-cmB*orgs[o].age)
             mprob += cmprob
         end
 
-        if mprob > rand(PoissonBinomial(cmprob)) # successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
+        if rand() < mprob
+            #mprob > rand(PoissonBinomial([mprob]),1)[1] # successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
             push!(deaths, o)
         else
             orgs[o].age += 1

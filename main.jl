@@ -5,7 +5,7 @@ cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in
 EDDir = pwd()
 push!(LOAD_PATH,EDDir)
 
-global IDcounter = Int64(0)
+srand(123)
 
 # Load Julia & model packages
 using Distributions
@@ -119,10 +119,10 @@ function simulate(timesteps)
     for t in 1:timesteps
         #competition on 2 steps: reflects on compterm
         projvegmass!(mylandscape,orgs)
-        nogrowth = allocate!(mylandscape, orgs, aE,Boltz) #TODO check if there is no better way to keep track of individuals that are not growing  
+        nogrowth = allocate!(mylandscape, orgs, aE,Boltz) #TODO check if there is no better way to keep track of individuals that are not growing
         reproduce!()
         disperse!()
-        survive!()
+        survive!(orgs,nogrowth,mylandscape)
         # Disturbances:
         ## Dynamical landscape change
         # if t #something
