@@ -30,7 +30,7 @@ mutable struct WorldCell
 	#pollinationFONs::Dict  separate Dict matrix
 	temp::Float64
 	precpt::Float64
-	neighs::Dict{String,Int64} #
+	neighs::Dict{String,Float64} #
 	#stem::Bool #steming point of plant
 	#WorldCell() = new() #if this is included, and WorldCell object must be initialized as WordCell() and then completed
 end

@@ -126,7 +126,7 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
-            if !checkbounds(landscape[:,:,frag], j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
+            if !checkbounds(Bool,landscape[:,:,frag], j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
                 continue
             else
                 if haskey(landscape[i,j,frag].neighs,fg)
