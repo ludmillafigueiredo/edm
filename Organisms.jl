@@ -117,20 +117,23 @@ end
     projvegmass!(landscape,orgs)
 Projects the mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
 """
-function projvegmass!(landscape::Array{Any, N} where N,
-    orgs::Array{Organism,N} where N)
+function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N)
 
     for o in 1:length(orgs)
         x, y, frag = orgs[o].location
         r = orgs[o].radius
         fg = orgs[o].fgroup
-        projmass = /(org[o].biomass["growth"], ((2*r+1)^2))
+        projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
-            if haskey(landscape[i,j,frag].neighs,fg)
-                landscape[i,j,frag].neighs[fg] += projmass
+            if !checkbounds(landscape[:,:,frag], j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
+                continue
             else
-                landscape[i,j,frag].neighs[fg] = projmass
+                if haskey(landscape[i,j,frag].neighs,fg)
+                    landscape[i,j,frag].neighs[fg] += projmass
+                else
+                    landscape[i,j,frag].neighs[fg] = projmass
+                end
             end
         end
     end
@@ -148,7 +151,9 @@ function compete(org::Any,N where N, landscape::Array{Any, N} where N)
     #r = org.radius
     # 2. Look for neighbors in the area
     for j in (y-r):(y+r), i in (x-r):(x+r) #TODO filter!() this area?
-        if landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
+        if !checkbounds(landscape[:,:frag], j,i)
+            continue
+        else landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs - orgs[o].biomass/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
         end
     end

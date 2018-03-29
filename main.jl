@@ -104,7 +104,7 @@ end
 
 """
 """
-function simulate()
+function simulate(timesteps)
 #   INITIALIZATION
     simparams, initorgs = read_initials()
 
