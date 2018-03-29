@@ -13,7 +13,6 @@ using JLD
 using Setworld
 #using Organisms
 
-#TODO julia struct style: caps
 #Simulation parameters storage:
 mutable struct Simpars #TODO put all landscape.in values in here
     fxlength::Tuple{Int64}
@@ -110,7 +109,7 @@ function simulate()
     simparams, initorgs = read_initials()
 
     mylandscape = landscape_init(simparams)
-    orgs_init = newOrgs(mylandscape, initorgs)
+    orgs = newOrgs(mylandscape, initorgs)
 
     # INITIALIZATION ": multidimensional
     #read_landscape()
@@ -119,7 +118,7 @@ function simulate()
 # MODEL RUN
     for t in 1:timesteps
         #competition on 2 steps: reflects on compterm
-        projvegmass!()
+        projvegmass!(mylandscape,orgs)
         allocate!()
         reproduce!()
         disperse!()
