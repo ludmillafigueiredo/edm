@@ -19,6 +19,7 @@ const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TO
 const plants_fb0 = exp(26.0) # fertility rate
 const tK = 273.15 # °C to K converter
 const plants_mb0 = exp(19.2)
+const seedmassµ =
 
 # Initial organisms parametrization
 mutable struct InitOrgs
@@ -265,59 +266,31 @@ function reproduce(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism
 
     for o in 1:length(reproducing)
 
-        # Find partners: Wind pollination
-        θ = rand([0,0.5π,π,1.5π]) #get radian angle of distribution
-        dist =  meanExP(2.3,0.44) #mean distance from the exponential power (Nathan et al. 2012), a = 2.3 and b = 0.44 according to Hardy et al. 2004.
-        #new location
-        xdest = round(Int64, reproducing[o].location[1] + dist*sin(θ), RoundNearestTiesAway)
-        ydest = round(Int64, reproducing[o].location[2] + dist*cos(θ), RoundNearestTiesAway)
-        fdest = reproducing[o].location[3] #TODO is landing inside the same fragment as the source, for now
+        offsprgB = round(plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway) #TODO stochasticity!
 
-        T = landscape[reproducing[o].location[1], reproducing[o].location[2], reproducing[o].location[3]].temp
+        # TODO there should be a realized number of offsprings that depends on the reproductive mass? offsprgB * seedmassµ
 
-        # TODO pollination
-        # TODO Clonal reproduction
+        for n in 1:offsprgB
+            #TODO check for a quicker way of creating several objects of composite-type
+            embryo = Organism(string(reproducing[o].fgroup[1:3], length(orgs) + length(offspring) + 1),
+            (), #location is given according to functional group and dispersal strategy, in disperse!()
+            reproducing[o].sp,
+            "e",
+            0,
+            false,
+            reproducing[o].fgroup,
+            ["placeholder" "placeholder"], #come from function
+            #rand(Distributions.Normal(OrgsRef.seedbiomassμ[reproducing[o].fgroup],OrgsRef.biomasssd[reproducing[o].fgroup])),
+            #[OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
+            #OrgsRef.radius[f])
+            Dict("veg" => reproducing[o].biomass["veg"]*0.01), #TODO use seed size for the fgroup
+            reproducing[o].disp,
+            reproducing[o].radius) # could be 0, should depend on biomass
 
-        #check boundaries
-        if checkboundaries(landscape, xdest, ydest, fdest) #check if it lands inside the same fragment or outside
-
-            # check for partners to be pollinated there: look in location and sp #TODO make it less exact?
-            posptner = filter(x -> (x.sp == reproducing[o].sp && x.location == (xdest,ydest,fdest)) , orgs) #tested for different sp #TODO could check inside PollCell for the same sp
-
-            if  length(posptner) >= 1
-
-                #produce offsprings: newOrgs with it?
-                offsprgB = Int64(5 + round(plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway)) #TODO stochasticity!
-                for n in 1:offsprgB
-                    #TODO check for a quicker way of creating several objects of composite-type
-                    embryo = Organism(string(reproducing[o].fgroup[1:3], length(orgs) + length(offspring) + 1),
-                    (), #location is given according to functional group and dispersal strategy, in disperse!()
-                    reproducing[o].sp,
-                    "e",
-                    0,
-                    false,
-                    reproducing[o].fgroup,
-                    ["placeholder" "placeholder"], #come from function
-                    #rand(Distributions.Normal(OrgsRef.seedbiomassμ[reproducing[o].fgroup],OrgsRef.biomasssd[reproducing[o].fgroup])),
-                    #[OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
-                    #OrgsRef.radius[f])
-                    Dict("veg" => reproducing[o].biomass["veg"]*0.01), #TODO use seed size for the fgroup
-                    reproducing[o].disp,
-                    reproducing[o].radius) # could be 0, should depend on biomass
-
-                    push!(offspring, embryo)
-                end
-            else
-                continue
-            end
-
-        else
-            continue
-
-            # TODO gamete production and fertilization
-            # parents_genes[1] and parents_genes[2]
+            push!(offspring, embryo)
         end
 
+        reproducing[o].biomass["repr"] -= offsprgB*seedmass
     end
 
     return offspring
