@@ -20,9 +20,23 @@ module Setworld
 
 using Distributions
 
-export WorldCell, landscape_init, update_landscape!
+export Simpars, WorldCell, landscape_init, update_landscape!
 
 const tK = 273.15 # °C to K converter
+
+#Simulation parameters storage:
+mutable struct Simpars #TODO put all landscape.in values in here
+    fxlength::Tuple{Int64}
+    fylength::Tuple{Int64}
+    fmeantemp::Tuple{Float64}
+    ftempsd::Tuple{Float64}
+    fmeanprec::Tuple{Float64}
+    fprecsd::Tuple{Float64}
+    nfrags::Int64
+    timesteps::Int64
+    Simpars() = new() #necessary
+end
+
 #Types
 mutable struct WorldCell
 	avail::Bool

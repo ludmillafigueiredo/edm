@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 
-# Get model directory and include it
+# Get model directory and include it in Julia's loading path
 cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
 EDDir = pwd()
 push!(LOAD_PATH,EDDir)
@@ -12,35 +12,14 @@ using Distributions
 using JLD
 using Setworld
 using Fileprep
-#using Organisms
+using Organisms
 
-#Simulation parameters storage:
-mutable struct Simpars #TODO put all landscape.in values in here
-    fxlength::Tuple{Int64}
-    fylength::Tuple{Int64}
-    fmeantemp::Tuple{Float64}
-    ftempsd::Tuple{Float64}
-    fmeanprec::Tuple{Float64}
-    fprecsd::Tuple{Float64}
-    nfrags::Int64
-    timesteps::Int64
-    Simpars() = new() #necessary
-end
-
-# Initial organisms parametrization
-mutable struct InitOrgs
-    fgroups::Tuple{String}
-    sps::Tuple{String}
-    init_stage::Tuple{String}
-    init_abund::Tuple{Int64}
-    #genotypes #TODO initialie those in functions
-    biomassμ::Tuple{Float64}
-    biomasssd::Tuple{Float64}
-    dispμ::Tuple{Float64}
-    dispshp::Tuple{Float64}
-    radius::Tuple{Int64}
-    InitOrgs() = new() #TODO check if new() is necessary
-end
+const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
+const aE = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
+const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
+const plants_fb0 = exp(26.0) # fertility rate
+const tK = 273.15 # °C to K converter
+const plants_mb0 = exp(19.2)
 
 
 """
@@ -49,7 +28,7 @@ Reads in and stores landscape conditions and organisms from `"landscape_init.in"
 """
 function read_initials()
     #TODO dictionnary?
-    simparams = Simpars()
+    simparams = Setworld.Simpars()
     begin
         env = open("landscape_init.in")
         readline(env); simparams.fxlength = tuple(parse(Int64,readline(env)))
@@ -64,7 +43,7 @@ function read_initials()
     #verify that
     simparams.nfrags == length(simparams.fxlength)
 
-    initorgs = InitOrgs()
+    initorgs = Organisms.InitOrgs()
     begin
         #TODO check the organisms file format: so far, all fragments get the same sps
         orgf = open("organisms.in")
@@ -102,10 +81,10 @@ end
 #     end
 # end
 
-
 """
+    simulate!()
 """
-function simulate(timesteps)
+function simulate()
 #   INITIALIZATION
     simparams, initorgs = read_initials()
 
@@ -117,13 +96,13 @@ function simulate(timesteps)
     #read_orgs()
 
 # MODEL RUN
-    for t in 1:timesteps
+    #for t in 1:timesteps
         #competition on 2 steps: reflects on compterm
         projvegmass!(mylandscape,orgs)
         nogrowth = allocate!(mylandscape, orgs, aE,Boltz) #TODO check if there is no better way to keep track of individuals that are not growing
-        reproduce!()
-        disperse!()
-        survive!(orgs,nogrowth,mylandscape)
+
+        #disperse!()
+        #survive!(orgs,nogrowth,mylandscape)
         # Disturbances:
         ## Dynamical landscape change
         # if t #something
@@ -133,7 +112,7 @@ function simulate(timesteps)
         # read_orgs(invasivefile)
 
         # Output:
-    end
+    #end
     return mylandscape, orgs_init
 end
 
@@ -149,8 +128,8 @@ end
 Stores functional groups parameters in a dictionnary that is consulted for every function involving organism's simulation.
     !!!! Better than struct in this case because it is possible to write general funcitons that match the strings identifying the fg og the organism and the key in the dictionnary
 """
-function fgparsdict()
-    fgpars = Dict()
-    # parse files in EDDir/functionalgroups and for each file, create an entry in the file with the first 3 letters of the group and the parametr it controls. takes the parameters of a list
-    return fgpars
-end
+# function fgparsdict()
+#     fgpars = Dict()
+#     # parse files in EDDir/functionalgroups and for each file, create an entry in the file with the first 3 letters of the group and the parametr it controls. takes the parameters of a list
+#     return fgpars
+# end

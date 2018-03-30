@@ -7,15 +7,13 @@ This module contains functions related to converting between input, model and ou
 A fragment of 5 ha area: 5.10⁴ m² = 5.10⁴.10⁴ = 5.10⁸ cm² (Mühlenberg area): nb of x and y cells (3cm side): √5.10⁸ / 3 = 74500
 grid
 areatocell(50000)
-"""
 
-"""
   gridsizes(realxlen, realylen)
 Convert fragments real length values give in `realxlen` and `realylen` from m to the equivalent number of grid cell lengths.
 1 m = 100 cm, 3 cm of cell side size
 """
 
-function gridsizes(realylen::Array{Float64,2}, realylen::Array{Float64,2})
+function gridsizes(realxlen::Array{Float64,2}, realylen::Array{Float64,2})
   xlength = round(Int64,((realxlen.*100)./3), RoundNearestTiesAway)
   ylength = round(Int64,((realylen.*100)./3), RoundNearestTiesAway)
   return xlength, ylength
