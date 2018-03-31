@@ -282,7 +282,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
         for n in 1:offsprgB
             #TODO check for a quicker way of creating several objects of composite-type
             embryo = Organism(string(reproducing[o].fgroup[1:3], length(orgs) + length(offspring) + 1),
-            (), #location is given according to functional group and dispersal strategy, in disperse!()
+            reproducing[o].location, #location is given according to functional group and dispersal strategy, in disperse!()
             reproducing[o].sp,
             "e",
             0,
@@ -312,31 +312,39 @@ Butterflies, bees and seeds can/are disperse(d).
 function disperse!(orgs::Array{Organisms.Organism, N} where N, landscape::Array{Setworld.WorldCell,3})
     # Seeds (Bullock et al. JEcol 2017)
     # Get seeds from org storage
-    dispersing = find(x -> x.stage == "e", orgs) #TODO include insects
+    dispersing = find(x -> x.stage == "e" && x.age == 0, orgs)
+    # takes only seeds not in the seed bank (age>0)
+    #TODO include insects
     # Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
+
+    lost = []
 
     for d in dispersing
         # Dispersal distance from kernel:
-        #acho q nao preciso de muito mais q Natahn et al. 2012 pra usar a pdf com as distancias da
+        #acho q nao preciso de muito mais q dNatahn et al. 2012 pra usar a pdf com as distancias da
         if orgs[d].fgroup == "autotroph" #wind
             #Exp, herbs + appendage #TODO LogSech distribution
-            dist = Fileprep.lengthtocell(meanExP(4.7e-5,0.2336)) #higher 9th percentile than ant (when comparing + appendage and 10-36 mg)
+            dist = Fileprep.lengthtocell(rand(collect(0.388:0.001:3.226))) # Bullock's 50th - 95th percentile for (meanExP(4.7e-5,0.2336)) #higher 9th percentile than ant (when comparing + appendage and 10-36 mg)
             # Check for available habitat (inside or inter fragment)
         elseif orgs[d].fgroup == "ant"
             #ExPherbs, 10-36 mg
-            dist = Fileprep.lengthtocell(meanExP(0.3726,1.1615))
+            dist = Fileprep.lengthtocell(rand(collect(0.499:0.001:1,3056)))
+            #Bullock's 50th - 95th percentile for (meanExP(0.3726,1.1615))
         end
 
         # Find patch
         θ = rand([0,0.5π,π,1.5π]) #get radian angle of distribution
-        xdest = round(Int64, reproducing[o].location[1] + dist*sin(θ), RoundNearestTiesAway)
-        ydest = round(Int64, reproducing[o].location[2] + dist*cos(θ), RoundNearestTiesAway)
-        fdest = reproducing[o].location[3] #TODO is landing inside the same fragment as the source, for now
+        xdest = round(Int64, orgs[d].location[1] + dist*sin(θ), RoundNearestTiesAway)
+        ydest = round(Int64, orgs[d].location[2] + dist*cos(θ), RoundNearestTiesAway)
+        fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
 
         if checkboundaries(landscape, xdest, ydest, fdest)
             orgs[d].location = (xdest, ydest, fdest)
+        else
+            push!(lost,d)
         end
     end
+    deleteat!(orgs,lost)
 end
 
 """
