@@ -309,7 +309,7 @@ end
     disperse!(offspring)
 Butterflies, bees and seeds can/are disperse(d).
 """
-function disperse!(orgs::Array{Organisms.Organism, N} where N, landscape::Array{Setworld.WorldCell,3})
+function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism, N} where N)
     # Seeds (Bullock et al. JEcol 2017)
     # Get seeds from org storage
     dispersing = find(x -> x.stage == "e" && x.age == 0, orgs)
@@ -317,7 +317,7 @@ function disperse!(orgs::Array{Organisms.Organism, N} where N, landscape::Array{
     #TODO include insects
     # Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
 
-    lost = []
+    lost = Int64[]
 
     for d in dispersing
         # Dispersal distance from kernel:
@@ -348,11 +348,46 @@ function disperse!(orgs::Array{Organisms.Organism, N} where N, landscape::Array{
 end
 
 """
-    establish!
-Seeds and larvae establish in patch unoccupied.
+    germinate(org)
+Seeds have a probability of germinating (`gprob`).
 """
-function establish!()
+function germinate(org::Organisms.Organism)
+    gprob = 0.5
+    germ = false
+    if rand() > gprob
+        germ = true
+    end
+    return germ
+end
+
+"""
+    establish!
+Seeds and larvae only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating or going into the seed bank (simulated by `germinate!`).
+"""
+function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organisms.Organism, N} where N)
+    #REFERENCE: May et al. 2009
     #check neighs
+
+    #TODO weekly timing of establishment
+    establishing = find(x -> x.stage == "e", orgs)
+
+    lost = Int64[]
+
+    for o in establishing
+        orgcell = orgs[o].location
+        orgfg= orgs[o].fgroup
+        if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]].neighs,orgfg)
+            push!(lost,o)
+        else
+            if germinate(orgs[o])
+                orgs[o].stage = "j"
+                # the ones that dont germinate but are older than 1 year die
+            elseif orgs[o].age > 52
+                push!(lost,o)
+            end
+        end
+    end
+    deleteat!(orgs,lost)
 end
 
 """

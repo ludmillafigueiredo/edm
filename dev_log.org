@@ -148,15 +148,16 @@ Parameters values might be specific to each functional group, but general mechan
 - [X] fertility is calculated according to MTE, which depends on TOTAL biomass: The allocation of biomass to reproduction and growth allows controlling competition, and the rates are affected indirectly, if competition decreases due to total biomass reduction due to competition or herbivory.
 - [ ] use newOrgs 2nd method for creating the orgs and handling genetics of fertilization
 ****  Decide on newOrgs!() is called between reproduction and establishment: Are new individuals created right after reproduction?
-*** Dispersal [1/4]
+*** Dispersal [0/4]
     SCHEDULED: <2018-03-18 So>
-- [X] Mean distances from Exponential Power dispersal kernels: wind pollination, wind and ant seed dispersal.
+- [ ] Random distances from 50-95th percentiles 
+- [ ] Find distribution from PDF for LogSech
+- [ ] Mean distances from Exponential Power dispersal kernels: wind pollination, wind and ant seed dispersal.
 - [ ] Connectivity matrix: 
   - [ ] Eucledian distances
   - [ ] Use Saura & Pascual-Hortal's probability?
   - [ ] somehow should inform between fragments dispersal
 - [ ] Sort out Saura & Pascual-Hortal's probability of connectivity(landscape property) and dispersal kernel (organism property): there might not be a way of combining, since they are properties of different entities.
-- [ ] Find distribution from PDF for LogSech
 [[https://www.researchgate.net/post/Which_connectivity_index_should_I_use_to_compare_different_networks_of_protected_areas][connectivity_discussion]] Probability of connectivity
 *** TODO Update organisms: [0/2]
   - [ ] Simultaneous or independent update?
