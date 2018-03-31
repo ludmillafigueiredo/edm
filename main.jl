@@ -98,8 +98,10 @@ function simulate()
 # MODEL RUN
     #for t in 1:timesteps
         #competition on 2 steps: reflects on compterm
+        #develop!()
         projvegmass!(mylandscape,orgs)
-        nogrowth = allocate!(mylandscape,orgs,aE,Boltz) #TODO check if there is no better way to keep track of individuals that are not growing
+        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz)
+        #TODO check if there is no better way to keep track of individuals that are not growing
         # offspring = reproduce(mylandscape,orgs)
         reproduce!(mylandscape,orgs)
         if rem(timestep - 22, 52) == 0
@@ -115,6 +117,10 @@ function simulate()
         # read_orgs(invasivefile)
 
         # Output:
+        #orgs
+        save(string("week",t))
+        #network interactions
+        #save(string("week",4*t)) more reasonable interval
     #end
     return mylandscape, orgs_init
 end

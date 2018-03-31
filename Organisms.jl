@@ -10,7 +10,7 @@ using Setworld
 using Fileprep
 
 #export
-export Organism, InitOrgs, newOrgs,  projvegmass!, allocate!, reproduce
+export Organism, InitOrgs, newOrgs,  projvegmass!, compete, allocate!, reproduce!, disperse!, meanExP, checkboundaries
 
  #TODO CHECK units
 const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
@@ -166,7 +166,8 @@ function compete(landscape::Array{Setworld.WorldCell, 3},
     for j in (y-r):(y+r), i in (x-r):(x+r) #TODO filter!() this area?
         if !checkbounds(Bool,landscape[:,:,frag],j,i)
             continue
-        else landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
+        elseif haskey(landscape[i,j,frag].neighs,fg)
+            #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs[fg] - org.biomass["veg"]/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
         end
     end
@@ -176,20 +177,18 @@ end
 
 """
     allocate!(orgs, landscape, aE, Boltz, OrgsRef)
-Calculates biomass gain according to MTE rate and depending on competition. If competition is too strong, individual has a higher probability of dying. If not, gains is allocated to growth or reproduction, according to the developmental `stage` of the organism.
+Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
-function allocate!(landscape::Array{Setworld.WorldCell,3},
-    orgs::Array{Organism,N} where N,
-    aE,
-    Boltz) #TODO organize this object to serve as reference of max size for different functional groups
+function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,N} where N, t::Int64, aE::Float64, Boltz::Float64)
 
     nogrowth = Int64[]
+
+    #plants = filter orgs for fgroups that are plants. Insect allocation biomass allocation is not that important (stage transition is)
 
     for o in 1:length(orgs)
 
         T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
-        # Resource assimilation: #TODO check if resource allocation would be the same as growth
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
         compterm = compete(landscape, orgs[o])
@@ -204,7 +203,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3},
             elseif orgs[o].stage == "j"
                 # juveniles grow
                 orgs[o].biomass["veg"] += grown_mass
-            elseif (orgs[o].stage == "a"  && rem(timestep - 12, 52) == 0) #TODO make it more complex. adults are investing everything in repoductiove biomass
+            elseif (orgs[o].stage == "a"  && rem(t - 12, 52) == 0) #TODO make it more complex. adults are investing everything in repoductiove biomass
                 #
                 # adults reproduc
                 if haskey(orgs[o].biomass,"reprd")
@@ -220,6 +219,15 @@ function allocate!(landscape::Array{Setworld.WorldCell,3},
     return nogrowth
 end
 
+"""
+    develop!()
+Controls individual stage transition.
+"""
+function develop!()
+    #plant growth
+    #insect holometabolic growth
+    #insect hemimetabolic development
+end
 """
     meanExP(a,b)
 Draws a mean dispersed distance from the Exponential Power dispersal kernel.
@@ -250,11 +258,11 @@ function checkboundaries(landscape::Array{Setworld.WorldCell,3}, xdest::Int64, y
 end
 
 """
-    reproduce(landscape,orgs)
+    reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
-function reproduce(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organisms.Organism,N} where N)
-    #TODO sort out reproduction mode (pollination or not) according to funcitonal group
+function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organisms.Organism,N} where N)
+    #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
     #     pollination()
     # elseif "insect"
@@ -270,8 +278,6 @@ function reproduce(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism
         T = landscape[reproducing[o].location[1], reproducing[o].location[2], reproducing[o].location[3]].temp
 
         offsprgB = Int64(5 + round(plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway)) #TODO stochasticity!
-
-        # TODO there should be a realized number of offsprings that depends on the reproductive mass? offsprgB * seedmassµ
 
         for n in 1:offsprgB
             #TODO check for a quicker way of creating several objects of composite-type
@@ -376,7 +382,6 @@ function survive!(orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int
     deleteat!(orgs, deaths)
     return orgs
 end
-
 
 """
     emerge!()
