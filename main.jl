@@ -99,10 +99,13 @@ function simulate()
     #for t in 1:timesteps
         #competition on 2 steps: reflects on compterm
         projvegmass!(mylandscape,orgs)
-        nogrowth = allocate!(mylandscape, orgs, aE,Boltz) #TODO check if there is no better way to keep track of individuals that are not growing
-
-        #disperse!()
-        #survive!(orgs,nogrowth,mylandscape)
+        nogrowth = allocate!(mylandscape,orgs,aE,Boltz) #TODO check if there is no better way to keep track of individuals that are not growing
+        # offspring = reproduce(mylandscape,orgs)
+        reproduce!(mylandscape,orgs)
+        if rem(timestep - 22, 52) == 0
+            disperse!(orgs,mylandscape)
+        end
+        survive!(orgs,nogrowth,mylandscape)
         # Disturbances:
         ## Dynamical landscape change
         # if t #something

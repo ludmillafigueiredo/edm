@@ -19,7 +19,7 @@ const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TO
 const plants_fb0 = exp(26.0) # fertility rate
 const tK = 273.15 # °C to K converter
 const plants_mb0 = exp(19.2)
-const seedmassµ =
+const seedmassµ = 0.8
 
 # Initial organisms parametrization
 mutable struct InitOrgs
@@ -204,7 +204,8 @@ function allocate!(landscape::Array{Setworld.WorldCell,3},
             elseif orgs[o].stage == "j"
                 # juveniles grow
                 orgs[o].biomass["veg"] += grown_mass
-            elseif orgs[o].stage == "a" #TODO make it more complex. adults are investing everything in repoductiove biomass
+            elseif (orgs[o].stage == "a"  && rem(timestep - 12, 52) == 0) #TODO make it more complex. adults are investing everything in repoductiove biomass
+                #
                 # adults reproduc
                 if haskey(orgs[o].biomass,"reprd")
                     orgs[o].biomass["reprd"] += grown_mass
@@ -224,7 +225,7 @@ end
 Draws a mean dispersed distance from the Exponential Power dispersal kernel.
 """
 function meanExP(a::Float64,b::Float64)
-    dist = Fileprep.lengthtocell(a*rand(Distributions.Gamma(3/b))/rand(Distributions.Gamma(2/b)))
+    dist = a*rand(Distributions.Gamma(3/b))/rand(Distributions.Gamma(2/b))
     return dist
 end
 
@@ -252,7 +253,7 @@ end
     reproduce(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
-function reproduce(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N)
+function reproduce(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organisms.Organism,N} where N)
     #TODO sort out reproduction mode (pollination or not) according to funcitonal group
     # if # pollination depending plants
     #     pollination()
@@ -266,7 +267,9 @@ function reproduce(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism
 
     for o in 1:length(reproducing)
 
-        offsprgB = round(plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway) #TODO stochasticity!
+        T = landscape[reproducing[o].location[1], reproducing[o].location[2], reproducing[o].location[3]].temp
+
+        offsprgB = Int64(5 + round(plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway)) #TODO stochasticity!
 
         # TODO there should be a realized number of offsprings that depends on the reproductive mass? offsprgB * seedmassµ
 
@@ -290,37 +293,52 @@ function reproduce(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism
             push!(offspring, embryo)
         end
 
-        reproducing[o].biomass["repr"] -= offsprgB*seedmass
+        reproducing[o].biomass["reprd"] -= offsprgB*seedmassµ
     end
-
-    return offspring
+    append!(orgs, offspring)
+    # return offspring
 end
 
 """
     disperse!(offspring)
 Butterflies, bees and seeds can/are disperse(d).
 """
-function disperse!(orgs)
+function disperse!(orgs::Array{Organisms.Organism, N} where N, landscape::Array{Setworld.WorldCell,3})
     # Seeds (Bullock et al. JEcol 2017)
     # Get seeds from org storage
-    dispersing = filter.(x -> (x.fgroup = "plant" && x.stage == "e"), orgs) #TODO include insects
+    dispersing = find(x -> x.stage == "e", orgs) #TODO include insects
     # Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
 
     for d in dispersing
         # Dispersal distance from kernel:
         #acho q nao preciso de muito mais q Natahn et al. 2012 pra usar a pdf com as distancias da
-        if d.fgroup == "wind"
+        if orgs[d].fgroup == "autotroph" #wind
             #Exp, herbs + appendage #TODO LogSech distribution
-            dist = meanExP(4.7e-5,0.2336) #higher 9th percentile than ant (when comparing + appendage and 10-36 mg)
+            dist = Fileprep.lengthtocell(meanExP(4.7e-5,0.2336)) #higher 9th percentile than ant (when comparing + appendage and 10-36 mg)
             # Check for available habitat (inside or inter fragment)
-        elseif d.fgroup == "ant"
+        elseif orgs[d].fgroup == "ant"
             #ExPherbs, 10-36 mg
-            dist = meanExP(0.3726,1.1615)
+            dist = Fileprep.lengthtocell(meanExP(0.3726,1.1615))
+        end
+
+        # Find patch
+        θ = rand([0,0.5π,π,1.5π]) #get radian angle of distribution
+        xdest = round(Int64, reproducing[o].location[1] + dist*sin(θ), RoundNearestTiesAway)
+        ydest = round(Int64, reproducing[o].location[2] + dist*cos(θ), RoundNearestTiesAway)
+        fdest = reproducing[o].location[3] #TODO is landing inside the same fragment as the source, for now
+
+        if checkboundaries(landscape, xdest, ydest, fdest)
+            orgs[d].location = (xdest, ydest, fdest)
         end
     end
+end
 
-    #TODO check border
-
+"""
+    establish!
+Seeds and larvae establish in patch unoccupied.
+"""
+function establish!()
+    #check neighs
 end
 
 """
@@ -328,7 +346,7 @@ end
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 plants in nogrwth are subjected to two probability rates
 """
-function survive!(orgs::Array{Organism,N} where N, nogrowth::Array{Int64,N} where N,landscape::Array{Setworld.WorldCell,3})
+function survive!(orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N,landscape::Array{Setworld.WorldCell,3})
 
     deaths = Int64[]
 
