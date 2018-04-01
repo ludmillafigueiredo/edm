@@ -110,7 +110,7 @@ end
 """
     simulate!()
 """
-function simulate(timesteps = Int64(10))
+function simulate(timesteps = Int64(20))
 #   INITIALIZATION
     simparams, initorgs = read_initials()
     mylandscape = landscape_init(simparams)
@@ -146,7 +146,7 @@ function simulate(timesteps = Int64(10))
         #outputnetworks()
         #save(string("week",4*t)) more reasonable interval
     end
-   # return mylandscape, orgs_init
+   return mylandscape, orgs
 end
 
 simulate()

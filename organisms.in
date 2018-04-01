@@ -1,11 +1,11 @@
 fgroupss::Tuple{String}
-autotroph
+wind
 sps::Tuple{String}
 none
 init_stage::Tuple{String}
 a
 init_abund::Tuple{Int64}
-5
+10
 biomassμ::Tuple{Float64}
 100
 biomasssd::Tuple{Float64}

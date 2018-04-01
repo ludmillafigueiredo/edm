@@ -138,6 +138,9 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
         fg = orgs[o].fgroup
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
+        #unity test
+        println(orgs[o].id, " has biomass", orgs[o].biomass, " and projects ", projmass)
+
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
             if !checkbounds(Bool,landscape[:,:,frag],j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
                 continue
@@ -156,12 +159,11 @@ end
     compete(landscape, orgs)
 Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
 """
-function compete(landscape::Array{Setworld.WorldCell, 3},
-    org::Organism)
+function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
     x, y, frag = org.location
     fg = org.fgroup
     r = org.radius
-    # 2. Look for neighbors in the area
+    # 2. Look for neighbors in the square area delimited by r
     nbsum = 0
     for j in (y-r):(y+r), i in (x-r):(x+r) #TODO filter!() this area?
         if !checkbounds(Bool,landscape[:,:,frag],j,i)
@@ -192,9 +194,15 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
         compterm = compete(landscape, orgs[o])
-        println(compterm)
+
+        #unity test
+        println(orgs[o].id," compterm: ",compterm)
+
         if compterm > 0
-            grown_mass = (1 - compterm) * (plants_gb0 * sum(values(orgs[o].biomass))^(3/4) * exp(-aE/(Boltz*T)))
+            grown_mass = compterm * (plants_gb0 * sum(values(orgs[o].biomass))^(3/4) * exp(-aE/(Boltz*T)))
+
+            # unity test
+            println(orgs[o].id, " gained ", grown_mass)
 
             #Resource allocation schedule
             #TODO make it more ellaborate and includde trade-offs
@@ -204,7 +212,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
             elseif orgs[o].stage == "j"
                 # juveniles grow
                 orgs[o].biomass["veg"] += grown_mass
-            elseif (orgs[o].stage == "a"  && rem(t - 12, 52) == 0) #TODO make it more complex. adults are investing everything in repoductiove biomass
+            elseif (orgs[o].stage == "a"  && (12 <= rem(t, 52) < 37)) #TODO make more complex: reproductive biomass produciton should last the whole spring and summer
                 #
                 # adults reproduc
                 if haskey(orgs[o].biomass,"reprd")
@@ -212,10 +220,14 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
                 else
                     orgs[o].biomass["reprd"] = grown_mass
                 end
+            else # adults, rest of the year spring
+                orgs[o].biomass["veg"] += grown_mass
             end
         else
             push!(nogrowth,o)
         end
+        # unity test
+        println("individuals not growing:", orgs[o].id, orgs[o].stage)
     end
     return nogrowth
 end
@@ -278,7 +290,9 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
 
         T = landscape[reproducing[o].location[1], reproducing[o].location[2], reproducing[o].location[3]].temp
 
-        offsprgB = Int64(5 + round(plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway)) #TODO stochasticity!
+        offsprgB = round(plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway) #TODO stochasticity
+
+        println("Offspring of ", orgs[o], ": ",offsprgB)
 
         for n in 1:offsprgB
             #TODO check for a quicker way of creating several objects of composite-type
@@ -323,14 +337,16 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
     for d in dispersing
         # Dispersal distance from kernel:
         #acho q nao preciso de muito mais q dNatahn et al. 2012 pra usar a pdf com as distancias da
-        if orgs[d].fgroup == "autotroph" #wind
+        if orgs[d].fgroup == "wind"
             #Exp, herbs + appendage #TODO LogSech distribution
-            dist = Fileprep.lengthtocell(rand(collect(0.388:0.001:3.226))) # Bullock's 50th - 95th percentile for (meanExP(4.7e-5,0.2336)) #higher 9th percentile than ant (when comparing + appendage and 10-36 mg)
+            dist = Fileprep.lengthtocell(meanExP(4.7e-5,0.2336))
+            #(rand(collect(0.388:0.001:3.226))) Bullock's 50th - 95th percentile
+            #higher 9th percentile than ant (when comparing + appendage and 10-36 mg)
             # Check for available habitat (inside or inter fragment)
         elseif orgs[d].fgroup == "ant"
             #ExPherbs, 10-36 mg
-            dist = Fileprep.lengthtocell(rand(collect(0.499:0.001:1,3056)))
-            #Bullock's 50th - 95th percentile for (meanExP(0.3726,1.1615))
+            dist = Fileprep.lengthtocell(meanExP(0.3726,1.1615))
+            #for tests: (rand(collect(0.499:0.001:1,3056))) Bullock's 50th - 95th percentile
         end
 
         # Find patch
@@ -341,8 +357,12 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
 
         if checkboundaries(landscape, xdest, ydest, fdest)
             orgs[d].location = (xdest, ydest, fdest)
+            # unity test
+            println(org[o].id," dispersed ", dist)
         else
             push!(lost,d)
+            #unity test
+            println(org[o].id," dispersed ", dist, " and died")
         end
     end
     deleteat!(orgs,lost)
