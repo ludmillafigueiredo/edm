@@ -12,7 +12,7 @@ using Fileprep
 #export
 export Organism, InitOrgs, newOrgs,  projvegmass!, compete, allocate!, reproduce!, disperse!, meanExP, checkboundaries
 
- #TODO CHECK units
+#TODO CHECK units
 const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
 const aE = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
 const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
@@ -192,6 +192,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
         compterm = compete(landscape, orgs[o])
+        println(compterm)
         if compterm > 0
             grown_mass = (1 - compterm) * (plants_gb0 * sum(values(orgs[o].biomass))^(3/4) * exp(-aE/(Boltz*T)))
 
@@ -269,7 +270,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
     #     parents_genes = mate!()
     # end
 
-    reproducing = filter(x -> x.stage == "a", orgs)
+    reproducing = filter(x -> x.stage == "a" && haskey(x.biomass, "reprd"), orgs)
 
     offspring = Organism[]
 
@@ -362,7 +363,7 @@ end
 
 """
     establish!
-Seeds and larvae only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating or going into the seed bank (simulated by `germinate!`).
+Seeds and larvae only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
 """
 function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organisms.Organism, N} where N)
     #REFERENCE: May et al. 2009
@@ -395,7 +396,7 @@ end
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 plants in nogrwth are subjected to two probability rates
 """
-function survive!(orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N,landscape::Array{Setworld.WorldCell,3})
+function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N)
 
     deaths = Int64[]
 

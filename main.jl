@@ -21,7 +21,6 @@ const plants_fb0 = exp(26.0) # fertility rate
 const tK = 273.15 # °C to K converter
 const plants_mb0 = exp(19.2)
 
-
 """
     read_initials(simparams, initorgs)
 Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
@@ -96,7 +95,7 @@ function simulate()
     #read_orgs()
 
 # MODEL RUN
-    #for t in 1:timesteps
+    for t in 1:timesteps
         #competition on 2 steps: reflects on compterm
         #develop!()
         projvegmass!(mylandscape,orgs)
@@ -107,7 +106,8 @@ function simulate()
         if rem(timestep - 22, 52) == 0
             disperse!(orgs,mylandscape)
         end
-        survive!(orgs,nogrowth,mylandscape)
+        establish!(mylandscape, orgs)
+        survive!(mylandscape, orgs,nogrowth)
         # Disturbances:
         ## Dynamical landscape change
         # if t #something
@@ -118,14 +118,45 @@ function simulate()
 
         # Output:
         #orgs
+        outputorgs()
         save(string("week",t))
         #network interactions
+        #outputnetworks()
         #save(string("week",4*t)) more reasonable interval
     #end
     return mylandscape, orgs_init
 end
 
 simulate()
+
+"""
+    outputorgs()
+Saves a long format table (`.tsv` file) with the organisms field informations.
+"""
+function outputorgs(orgs)
+
+    #mk dir with simulation parameters identifier
+
+    sep = "\t"
+
+    output = open(string("orgsweek",t,".tsv"), "w")
+    print(output, "id", sep)
+    print(output, "location", sep)
+    print(output, "species", sep)
+    print(output, "stage", sep)
+    print(output, "functional_group", sep)
+    print(output, "genotype", sep)
+    print(output, "dispersal_pars", sep)
+    println(output)
+
+    for o in 1:length(orgs)
+        writedlm(output, [orgs[o].id orgs[o].location orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].genotype orgs[o].disp])
+    end
+
+    close(output)
+
+end
+
 
 #TODO Store organisms parameters that regulate model run: Might interfere with the initialization values??
 mutable struct orgpars
