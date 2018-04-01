@@ -1,0 +1,11 @@
+id	location	species	stage	functional_group	genotype	dispersal_pars	
+aut1	(5, 5, 1)	none	a	autotroph	placeholder	placeholder	(2.0, 0.1)
+aut2	(2, 2, 1)	none	a	autotroph	placeholder	placeholder	(2.0, 0.1)
+aut3	(3, 5, 1)	none	a	autotroph	placeholder	placeholder	(2.0, 0.1)
+aut4	(4, 3, 1)	none	a	autotroph	placeholder	placeholder	(2.0, 0.1)
+aut5	(4, 4, 1)	none	a	autotroph	placeholder	placeholder	(2.0, 0.1)
+aut6	(5, 1, 1)	none	e	autotroph	placeholder	placeholder	(2.0, 0.1)
+aut7	(5, 1, 1)	none	e	autotroph	placeholder	placeholder	(2.0, 0.1)
+aut8	(5, 1, 1)	none	e	autotroph	placeholder	placeholder	(2.0, 0.1)
+aut9	(5, 1, 1)	none	e	autotroph	placeholder	placeholder	(2.0, 0.1)
+aut10	(5, 1, 1)	none	e	autotroph	placeholder	placeholder	(2.0, 0.1)

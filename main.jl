@@ -14,9 +14,9 @@ using Setworld
 using Fileprep
 using Organisms
 
-const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
-const aE = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
-const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
+const Boltz = 1.38064852e-23 # Boltzmann constant, 1.38064852e-23 J/K (SI)
+const aE = 0.63 # energy of activation, 0.63eV (MTE - Brown et al. 2004)
+const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to functional group
 const plants_fb0 = exp(26.0) # fertility rate
 const tK = 273.15 # °C to K converter
 const plants_mb0 = exp(19.2)
@@ -81,59 +81,10 @@ end
 # end
 
 """
-    simulate!()
-"""
-function simulate()
-#   INITIALIZATION
-    simparams, initorgs = read_initials()
-
-    mylandscape = landscape_init(simparams)
-    orgs = newOrgs(mylandscape, initorgs)
-
-    # INITIALIZATION ": multidimensional
-    #read_landscape()
-    #read_orgs()
-
-# MODEL RUN
-    for t in 1:timesteps
-        #competition on 2 steps: reflects on compterm
-        #develop!()
-        projvegmass!(mylandscape,orgs)
-        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz)
-        #TODO check if there is no better way to keep track of individuals that are not growing
-        # offspring = reproduce(mylandscape,orgs)
-        reproduce!(mylandscape,orgs)
-        if rem(timestep - 22, 52) == 0
-            disperse!(orgs,mylandscape)
-        end
-        establish!(mylandscape, orgs)
-        survive!(mylandscape, orgs,nogrowth)
-        # Disturbances:
-        ## Dynamical landscape change
-        # if t #something
-        #     function update_landscape!()
-        # end
-        ## Invasion
-        # read_orgs(invasivefile)
-
-        # Output:
-        #orgs
-        outputorgs()
-        save(string("week",t))
-        #network interactions
-        #outputnetworks()
-        #save(string("week",4*t)) more reasonable interval
-    #end
-    return mylandscape, orgs_init
-end
-
-simulate()
-
-"""
     outputorgs()
 Saves a long format table (`.tsv` file) with the organisms field informations.
 """
-function outputorgs(orgs)
+function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
 
     #mk dir with simulation parameters identifier
 
@@ -154,13 +105,51 @@ function outputorgs(orgs)
     end
 
     close(output)
-
 end
 
+"""
+    simulate!()
+"""
+function simulate(timesteps = Int64(10))
+#   INITIALIZATION
+    simparams, initorgs = read_initials()
+    mylandscape = landscape_init(simparams)
+    orgs = newOrgs(mylandscape, initorgs)
 
-#TODO Store organisms parameters that regulate model run: Might interfere with the initialization values??
-mutable struct orgpars
+# MODEL RUN
+    for t in 1:timesteps
+        #develop!()
+        projvegmass!(mylandscape,orgs)
+        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz)
+        #TODO check if there is no better way to keep track of individuals that are not growing
+        reproduce!(mylandscape,orgs)
+        if rem(t - 22, 52) == 0
+            disperse!(orgs,mylandscape)
+        end
+        establish!(mylandscape, orgs)
+        survive!(mylandscape, orgs,nogrowth)
+        ## DISTURBANCES
+        ## Dynamical landscape change
+        # if t #something
+        #     function update_landscape!()
+        # end
+        ## Invasion
+        # read_orgs(invasivefile)
+
+        # Output:
+        #orgs
+        if rem(t,4) == 0
+            outputorgs(orgs,t)
+        end
+        #save(string("week",t))
+        #network interactions
+        #outputnetworks()
+        #save(string("week",4*t)) more reasonable interval
+    end
+   # return mylandscape, orgs_init
 end
+
+simulate()
 
 #Dictionnary stores functio2nal groups parameters
 """

@@ -10,7 +10,7 @@ using Setworld
 using Fileprep
 
 #export
-export Organism, InitOrgs, newOrgs,  projvegmass!, compete, allocate!, reproduce!, disperse!, meanExP, checkboundaries
+export Organism, InitOrgs, newOrgs, projvegmass!, compete, develop!, allocate!, meanExP, checkboundaries, reproduce!, disperse!, germinate, establish!, survive!
 
 #TODO CHECK units
 const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
@@ -427,44 +427,37 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
     return orgs
 end
 
-"""
-    emerge!()
-Germination for seeds, emergency for eggs.
-"""
-function emerge!()
-    embryos = filter.( x -> x.stage == "e", orgs)
-    deaths = []
-
-    for o in 1:length(embryos)
-        if embryos[o].fgroup in ["plants"] #TODO sould be more dynamics and read from inputed fgroups
-            germb0 = plants_gb0 #TODO call it from OrgsRe
-        elseif embryos[o].fgroup in ["insects"]
-            germb0 = plants_gb0 #TODO call it from OrgsRe
-        end
-
-        gB = germb0 * (sum(values(embryos[o].biomass)))^(-1/4)*exp(-aE/Boltz*T)
-        gprob = 1 - e^(-gB*embryos[o].age) #TODO this age thing
-
-        if gprob > rand(PoissonBinomial(gprob)) # successes are germinations
-            embryos[o].stage = "j"
-            embryos[o].age = 1
-        else
-            if (embryos[o].fgroup in ["plants"] &&  embryos[o].age <= 52) #TODO seed bank of one year. Make it more complex (count age)
-                continue
-            else
-                push!(deaths, o)
-            end
-        end
-    end
-    deleteat!(orgs, deaths)
-end
-
-"""
-    fitness(fgroup)
-Calculates fitness for the functional group in
-"""
-function fitness()
-end
+# """
+#     emerge!()
+# Germination for seeds, emergency for eggs.
+# """
+# function emerge!()
+#     embryos = filter.( x -> x.stage == "e", orgs)
+#     deaths = []
+#
+#     for o in 1:length(embryos)
+#         if embryos[o].fgroup in ["plants"] #TODO sould be more dynamics and read from inputed fgroups
+#             germb0 = plants_gb0 #TODO call it from OrgsRe
+#         elseif embryos[o].fgroup in ["insects"]
+#             germb0 = plants_gb0 #TODO call it from OrgsRe
+#         end
+#
+#         gB = germb0 * (sum(values(embryos[o].biomass)))^(-1/4)*exp(-aE/Boltz*T)
+#         gprob = 1 - e^(-gB*embryos[o].age) #TODO this age thing
+#
+#         if gprob > rand(PoissonBinomial(gprob)) # successes are germinations
+#             embryos[o].stage = "j"
+#             embryos[o].age = 1
+#         else
+#             if (embryos[o].fgroup in ["plants"] &&  embryos[o].age <= 52) #TODO seed bank of one year. Make it more complex (count age)
+#                 continue
+#             else
+#                 push!(deaths, o)
+#             end
+#         end
+#     end
+#     deleteat!(orgs, deaths)
+# end
 
 """
     pollination!()

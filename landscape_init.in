@@ -1,7 +1,7 @@
   xlength::Int64
-74500
+500
   ylength::Int64
-74500
+500
   meantemp::Float64
 20.0
   tempsd::Float64
