@@ -15,7 +15,7 @@ using Fileprep
 using Organisms
 
 const Boltz = 1.38064852e-23 # Boltzmann constant, 1.38064852e-23 J/K (SI)
-const aE = 0.63 # energy of activation, 0.63eV (MTE - Brown et al. 2004)
+const aE = 1e-19 # energy of activation, 0.63eV (MTE - Brown et al. 2004)
 const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to functional group
 const plants_fb0 = exp(26.0) # fertility rate
 const tK = 273.15 # °C to K converter
