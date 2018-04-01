@@ -212,22 +212,25 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
             elseif orgs[o].stage == "j"
                 # juveniles grow
                 orgs[o].biomass["veg"] += grown_mass
-            elseif (orgs[o].stage == "a"  && (12 <= rem(t, 52) < 37)) #TODO make more complex: reproductive biomass produciton should last the whole spring and summer
-                #
+            elseif (orgs[o].stage == "a"  && (12 <= rem(t, 52) < 37))
                 # adults reproduc
                 if haskey(orgs[o].biomass,"reprd")
                     orgs[o].biomass["reprd"] += grown_mass
                 else
                     orgs[o].biomass["reprd"] = grown_mass
                 end
+                # unity test
+                println("individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in reprd")
             else # adults, rest of the year spring
                 orgs[o].biomass["veg"] += grown_mass
+                # unity test
+                println("individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in veg")
             end
         else
             push!(nogrowth,o)
+            # unity test
+            println("individuals not growing:", orgs[o].id, orgs[o].stage)
         end
-        # unity test
-        println("individuals not growing:", orgs[o].id, orgs[o].stage)
     end
     return nogrowth
 end
@@ -237,9 +240,9 @@ end
 Controls individual stage transition.
 """
 function develop!()
-    #plant growth
-    #insect holometabolic growth
-    #insect hemimetabolic development
+    #TODO plant growth
+    #TODO insect holometabolic growth
+    #TODO insect hemimetabolic development
 end
 """
     meanExP(a,b)
@@ -283,6 +286,9 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
     # end
 
     reproducing = filter(x -> x.stage == "a" && haskey(x.biomass, "reprd"), orgs)
+
+    #unity test
+    println("Reproducing: $reproducing")
 
     offspring = Organism[]
 
@@ -331,6 +337,9 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
     # takes only seeds not in the seed bank (age>0)
     #TODO include insects
     # Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
+
+    # unity test
+    println("Dispersing: $dispersing")
 
     lost = Int64[]
 
@@ -392,6 +401,9 @@ function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism
     #TODO weekly timing of establishment
     establishing = find(x -> x.stage == "e", orgs)
 
+    # unity test
+    println("Establishing seeds: $establishing")
+
     lost = Int64[]
 
     for o in establishing
@@ -427,6 +439,9 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
         mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
         mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/T)
         mprob = 1 - e^(-mB*orgs[o].age)
+
+        #unity test
+        println(orgs[o].id,"-",orgs[o].stage, "has $mprob chance of dying")
 
         # individuals that didnt grow have
         if o in 1:length(nogrowth)
