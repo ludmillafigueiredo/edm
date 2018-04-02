@@ -52,8 +52,11 @@ DEADLINE: <2018-03-28 Mi>
 Initialization spreads organisms in the landscape (fragments, later): newOrg() is called
 During simulation, after reproduction (and dispersion?) new organisms will only establish once it has checked local grid viability and fitness values?
 ** TODO MTE rates to individual probabilites
+*** Boltz: Chap.2 MTE book <2018-04-02 Mo>
+*** aE: Chap.2 MTE book <2018-04-02 Mo>
+*** plant production growth: Ernet et al. 2003 <2018-04-02 Mo>
 Mortality is probability, what about the others?
-   DEADLINE: <2018-03-23 Fr>
+   DEADLINE: <2018-04-02 Mo>
 ** TODO check probability models for trnasitions
 ** TODO mutable struct [1/6]
    DEADLINE: <2018-03-30 Fr> SCHEDULED: <2018-03-14 Mi>
@@ -163,9 +166,10 @@ Parameters values might be specific to each functional group, but general mechan
   - [ ] Simultaneous or independent update?
   - [ ] Consider making a mutable struct where each field stores the individuals of a functional group, therefore, when updating the organisms, I wouldn't have to go through all of them, just through the group affected by the function in question 
 *** DONE Density-independent mortality: *survive!()* [2/2]
-    CLOSED: [2018-03-18 So 20:54]
+    DEADLINE: <2018-04-02 Mo>
 Not totally independent because depends on biomass, which affects individuals biomass and the mortality rate/probability consequently
 - [X] Probability of dying from MTE rate
+  - [ ] Conversion: pdf() Returns the probability density of distribution d evaluated at x.
 - [X] Deleting from structure with deleteat!() avoids mixing up indices in orgs array
 - [ ] Check scheduling of deaths: do seeds die when not germinated or are they stored and killed later?
 *** TODO Density-dependent mortality: *survive!()* [1/2]

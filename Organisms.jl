@@ -12,14 +12,14 @@ using Fileprep
 #export
 export Organism, InitOrgs, newOrgs, projvegmass!, compete, develop!, allocate!, meanExP, checkboundaries, reproduce!, disperse!, germinate, establish!, survive!
 
-#TODO CHECK units
-const Boltz = 8.617e-5 # Boltzmann constant eV/K (non-SI) 1.38064852e-23 J/K if SI
-const aE = 0.69 # activation energy kJ/mol (non-SI), 0.63eV (MTE - Brown et al. 2004)
-const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to funcitonal group
-const plants_fb0 = exp(26.0) # fertility rate
-const tK = 273.15 # °C to K converter
-const plants_mb0 = exp(19.2)
+#TODO put them in OrgsRef
+const Boltz = 8.62e-5 # Brown & Sibly MTE book chap 2
+const aE = 0.65 # Brown & Sibly MTE book chap 2
+const plants_gb0 = (10^(10.15))/52 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base
+const plants_fb0 = exp(30.0) # fertility rate
+const plants_mb0 = exp(22.0)
 const seedmassµ = 0.8
+const tK = 273.15 # °C to K converter
 
 # Initial organisms parametrization
 mutable struct InitOrgs
@@ -134,7 +134,7 @@ Projects the mass of each organisms stored in `orgs` into the `neighs` field of 
 function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N)
     for o in 1:length(orgs)
         x, y, frag = orgs[o].location
-        r = orgs[o].radius
+        r = orgs[o].radius = round(Int64, sqrt(orgs[o].biomass["veg"]^(2/3)), RoundNearestTiesAway)
         fg = orgs[o].fgroup
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
@@ -296,7 +296,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
 
         T = landscape[reproducing[o].location[1], reproducing[o].location[2], reproducing[o].location[3]].temp
 
-        offsprgB = round(plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway) #TODO stochasticity
+        offsprgB = round(Int64, plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway) #TODO stochasticity
 
         println("Offspring of ", orgs[o], ": ",offsprgB)
 
@@ -437,8 +437,8 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
         T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
         mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
-        mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/T)
-        mprob = 1 - e^(-mB*orgs[o].age)
+        mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/(Boltz*T))
+        mprob = 1 - exp(-mB*orgs[o].age)
 
         #unity test
         println(orgs[o].id,"-",orgs[o].stage, "has $mprob chance of dying")
@@ -446,7 +446,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
         # individuals that didnt grow have
         if o in 1:length(nogrowth)
             compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
-            cmB = compmortconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/T)
+            cmB = compmortconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/Boltz*(T))
             cmprob =  1 - e^(-cmB*orgs[o].age)
             mprob += cmprob
         end

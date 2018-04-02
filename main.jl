@@ -10,13 +10,15 @@ srand(123)
 # Load Julia & model packages
 using Distributions
 using JLD
+using JuliaDB
 using Setworld
 using Fileprep
 using Organisms
 
-const Boltz = 1.38064852e-23 # Boltzmann constant, 1.38064852e-23 J/K (SI)
-const aE = 1e-19 # energy of activation, 0.63eV (MTE - Brown et al. 2004)
-const plants_gb0 = exp(25.2) # plant biomass production (Ernest et al. 2003) #TODO try a way of feeding those according to functional group
+#TODO put them in OrgsRef
+const Boltz = 8.62e-5 # Brown & Sibly MTE book chap 2
+const aE = 0.65 # Brown & Sibly MTE book chap 2
+const plants_gb0 = (10^(10.15))/52 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base
 const plants_fb0 = exp(26.0) # fertility rate
 const tK = 273.15 # °C to K converter
 const plants_mb0 = exp(19.2)
@@ -88,16 +90,16 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
 
     #mk dir with simulation parameters identifier
 
-    sep = "\t"
+    sep = ","
 
-    output = open(string("orgsweek",t,".tsv"), "w")
+    output = open(string("orgsweek",t,".csv"), "w")
     print(output, "id", sep)
     print(output, "location", sep)
     print(output, "species", sep)
     print(output, "stage", sep)
     print(output, "functional_group", sep)
     print(output, "genotype", sep)
-    print(output, "dispersal_pars", sep)
+    print(output, "dispersal_pars")
     println(output)
 
     for o in 1:length(orgs)
@@ -138,9 +140,9 @@ function simulate(timesteps = Int64(20))
 
         # Output:
         #orgs
-        if rem(t,4) == 0
+        #if rem(t,4) == 0
             outputorgs(orgs,t)
-        end
+        #end
         #save(string("week",t))
         #network interactions
         #outputnetworks()
