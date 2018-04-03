@@ -451,7 +451,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
             mprob += cmprob
         end
 
-        if rand() < mprob
+        if rand(Distributions.Binomial(1,mprob),1)
             #mprob > rand(PoissonBinomial([mprob]),1)[1] # TODO should use a more ellaboratedistribution model? successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
             push!(deaths, o)
         else
