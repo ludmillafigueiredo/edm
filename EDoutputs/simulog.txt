@@ -1,0 +1,860 @@
+win1 has biomassDict("veg"=>99.491) and projects 0.8222399057142298
+win2 has biomassDict("veg"=>99.6118) and projects 0.8232381668274842
+win3 has biomassDict("veg"=>99.0844) and projects 0.8188793824842857
+win4 has biomassDict("veg"=>98.3174) and projects 0.8125405061905021
+win5 has biomassDict("veg"=>101.583) and projects 0.839532053584735
+win6 has biomassDict("veg"=>101.443) and projects 0.8383693461473684
+win7 has biomassDict("veg"=>97.6904) and projects 0.8073585892821383
+win8 has biomassDict("veg"=>99.7175) and projects 0.8241115976809236
+win9 has biomassDict("veg"=>99.9139) and projects 0.8257345483759277
+win10 has biomassDict("veg"=>101.123) and projects 0.8357263804432092
+win1 compterm: 1.0
+win1 gained 0.06820906760210547
+individual win1-a grew 0.06820906760210547 in veg
+win2 compterm: 1.0
+win2 gained 0.04382037019126588
+individual win2-a grew 0.04382037019126588 in veg
+win3 compterm: 1.0
+win3 gained 0.06172050701225992
+individual win3-a grew 0.06172050701225992 in veg
+win4 compterm: 1.0
+win4 gained 0.05962775051685012
+individual win4-a grew 0.05962775051685012 in veg
+win5 compterm: 1.0
+win5 gained 0.03877471816658158
+individual win5-a grew 0.03877471816658158 in veg
+win6 compterm: 1.0
+win6 gained 0.05437271218576639
+individual win6-a grew 0.05437271218576639 in veg
+win7 compterm: 1.0
+win7 gained 0.04311364805820381
+individual win7-a grew 0.04311364805820381 in veg
+win8 compterm: 1.0
+win8 gained 0.06742736655257485
+individual win8-a grew 0.06742736655257485 in veg
+win9 compterm: 1.0
+win9 gained 0.05519557815743521
+individual win9-a grew 0.05519557815743521 in veg
+win10 compterm: 1.0
+win10 gained 0.0362719552514983
+individual win10-a grew 0.0362719552514983 in veg
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 0.0 chance of dying
+win2-a has 0.0 chance of dying
+win3-a has 0.0 chance of dying
+win4-a has 0.0 chance of dying
+win5-a has 0.0 chance of dying
+win6-a has 0.0 chance of dying
+win7-a has 0.0 chance of dying
+win8-a has 0.0 chance of dying
+win9-a has 0.0 chance of dying
+win10-a has 0.0 chance of dying
+win1 has biomassDict("veg"=>99.5592) and projects 0.8228036170167267
+win2 has biomassDict("veg"=>99.6556) and projects 0.8236003186472468
+win3 has biomassDict("veg"=>99.1461) and projects 0.8193894693190977
+win4 has biomassDict("veg"=>98.377) and projects 0.8130332975170877
+win5 has biomassDict("veg"=>101.622) and projects 0.8398525058009877
+win6 has biomassDict("veg"=>101.497) and projects 0.838818707405102
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077149004231153
+win8 has biomassDict("veg"=>99.7849) and projects 0.824668848644168
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261907101788818
+win10 has biomassDict("veg"=>101.159) and projects 0.8360261486684282
+win1 compterm: 0.0006851103845927939
+win1 gained 4.675476672774042e-5
+individual win1-a grew 4.675476672774042e-5 in veg
+win2 compterm: 0.0004397179208943605
+win2 gained 1.927495908148023e-5
+individual win2-a grew 1.927495908148023e-5 in veg
+win3 compterm: 0.0006225206131065082
+win3 gained 3.844023664321795e-5
+individual win3-a grew 3.844023664321795e-5 in veg
+win4 compterm: 0.0006061145688512338
+win4 gained 3.6157686317064804e-5
+individual win4-a grew 3.6157686317064804e-5 in veg
+win5 compterm: 0.00038155773072072447
+win5 gained 1.4799028687848614e-5
+individual win5-a grew 1.4799028687848614e-5 in veg
+win6 compterm: 0.000535707243728873
+win6 gained 2.9139564270007123e-5
+individual win6-a grew 2.9139564270007123e-5 in veg
+win7 compterm: 0.0004411347875255926
+win7 gained 1.9025224839151737e-5
+individual win7-a grew 1.9025224839151737e-5 in veg
+win8 compterm: 0.0006757269468340971
+win8 gained 4.558559304576872e-5
+individual win8-a grew 4.558559304576872e-5 in veg
+win9 compterm: 0.000552126521555322
+win9 gained 3.048756819103932e-5
+individual win9-a grew 3.048756819103932e-5 in veg
+win10 compterm: 0.0003585632168289344
+win10 gained 1.300928760148778e-5
+individual win10-a grew 1.300928760148778e-5 in veg
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 2.786881836414068e-12 chance of dying
+win2-a has 1.7883472480662022e-12 chance of dying
+win3-a has 2.5320856522625945e-12 chance of dying
+win4-a has 2.4653612484826226e-12 chance of dying
+win5-a has 1.5517587215185813e-12 chance of dying
+win6-a has 2.1789237081293322e-12 chance of dying
+win7-a has 1.794120407794253e-12 chance of dying
+win8-a has 2.7486901643669626e-12 chance of dying
+win9-a has 2.245648111909304e-12 chance of dying
+win10-a has 1.4581669205426806e-12 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -0.999313950702463
+individuals not growing: win1a
+win2 compterm: -0.9995598953329444
+individuals not growing: win2a
+win3 compterm: -0.9993767042026646
+individuals not growing: win3a
+win4 compterm: -0.9993931505702712
+individuals not growing: win4a
+win5 compterm: -0.9996181510689275
+individuals not growing: win5a
+win6 compterm: -0.9994637187150166
+individuals not growing: win6a
+win7 compterm: -0.9995584759698073
+individuals not growing: win7a
+win8 compterm: -0.9993233596853863
+individuals not growing: win8a
+win9 compterm: -0.9994472637070244
+individuals not growing: win9a
+win10 compterm: -0.9996411796249892
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 5.573652650525673e-12 chance of dying
+win2-a has 3.5766944961324043e-12 chance of dying
+win3-a has 5.0642823268276516e-12 chance of dying
+win4-a has 4.930722496965245e-12 chance of dying
+win5-a has 3.1034064207347e-12 chance of dying
+win6-a has 4.357736393956202e-12 chance of dying
+win7-a has 3.5881297932860434e-12 chance of dying
+win8-a has 5.497269306431463e-12 chance of dying
+win9-a has 4.491407246121071e-12 chance of dying
+win10-a has 2.916333841085361e-12 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -1.9993139507024573
+individuals not growing: win1a
+win2 compterm: -1.9995598953329463
+individuals not growing: win2a
+win3 compterm: -1.9993767042026642
+individuals not growing: win3a
+win4 compterm: -1.999393150570266
+individuals not growing: win4a
+win5 compterm: -1.9996181510689286
+individuals not growing: win5a
+win6 compterm: -1.999463718715016
+individuals not growing: win6a
+win7 compterm: -1.9995584759698
+individuals not growing: win7a
+win8 compterm: -1.9993233596853794
+individuals not growing: win8a
+win9 compterm: -1.9994472637070344
+individuals not growing: win9a
+win10 compterm: -1.9996411796249862
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 8.360534486939741e-12 chance of dying
+win2-a has 5.364930721896144e-12 chance of dying
+win3-a has 7.596367979090246e-12 chance of dying
+win4-a has 7.396083745447868e-12 chance of dying
+win5-a has 4.655165142253281e-12 chance of dying
+win6-a has 6.536660102085534e-12 chance of dying
+win7-a has 5.382250201080296e-12 chance of dying
+win8-a has 8.245959470798425e-12 chance of dying
+win9-a has 6.737055358030375e-12 chance of dying
+win10-a has 4.374500761628042e-12 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -2.999313950702469
+individuals not growing: win1a
+win2 compterm: -2.9995598953329425
+individuals not growing: win2a
+win3 compterm: -2.9993767042026533
+individuals not growing: win3a
+win4 compterm: -2.9993931505702744
+individuals not growing: win4a
+win5 compterm: -2.999618151068936
+individuals not growing: win5a
+win6 compterm: -2.999463718715025
+individuals not growing: win6a
+win7 compterm: -2.9995584759698
+individuals not growing: win7a
+win8 compterm: -2.9993233596853743
+individuals not growing: win8a
+win9 compterm: -2.99944726370702
+individuals not growing: win9a
+win10 compterm: -2.99964117962499
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 1.114741632335381e-11 chance of dying
+win2-a has 7.153277969962346e-12 chance of dying
+win3-a has 1.0128564653655303e-11 chance of dying
+win4-a has 9.86144499393049e-12 chance of dying
+win5-a has 6.206923863771863e-12 chance of dying
+win6-a has 8.715472787912404e-12 chance of dying
+win7-a has 7.176370608874549e-12 chance of dying
+win8-a has 1.0994649635165388e-11 chance of dying
+win9-a has 8.982703469939679e-12 chance of dying
+win10-a has 5.832778704473185e-12 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -3.9993139507024456
+individuals not growing: win1a
+win2 compterm: -3.9995598953329625
+individuals not growing: win2a
+win3 compterm: -3.999376704202665
+individuals not growing: win3a
+win4 compterm: -3.9993931505702607
+individuals not growing: win4a
+win5 compterm: -3.999618151068935
+individuals not growing: win5a
+win6 compterm: -3.999463718715006
+individuals not growing: win6a
+win7 compterm: -3.9995584759698164
+individuals not growing: win7a
+win8 compterm: -3.999323359685395
+individuals not growing: win8a
+win9 compterm: -3.999447263707026
+individuals not growing: win9a
+win10 compterm: -3.9996411796249762
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 1.3934298159767877e-11 chance of dying
+win2-a has 8.941625218028548e-12 chance of dying
+win3-a has 1.2660650305917898e-11 chance of dying
+win4-a has 1.2326806242413113e-11 chance of dying
+win5-a has 7.758571562987981e-12 chance of dying
+win6-a has 1.0894396496041736e-11 chance of dying
+win7-a has 8.970491016668802e-12 chance of dying
+win8-a has 1.374333979953235e-11 chance of dying
+win9-a has 1.1228462604151446e-11 chance of dying
+win10-a has 7.290945625015866e-12 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -4.999313950702463
+individuals not growing: win1a
+win2 compterm: -4.999559895332955
+individuals not growing: win2a
+win3 compterm: -4.999376704202658
+individuals not growing: win3a
+win4 compterm: -4.9993931505702704
+individuals not growing: win4a
+win5 compterm: -4.999618151068923
+individuals not growing: win5a
+win6 compterm: -4.999463718715019
+individuals not growing: win6a
+win7 compterm: -4.999558475969816
+individuals not growing: win7a
+win8 compterm: -4.999323359685381
+individuals not growing: win8a
+win9 compterm: -4.9994472637070295
+individuals not growing: win9a
+win10 compterm: -4.999641179624984
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 1.6721068973879483e-11 chance of dying
+win2-a has 1.072997246609475e-11 chance of dying
+win3-a has 1.5192735958180492e-11 chance of dying
+win4-a has 1.4792167490895736e-11 chance of dying
+win5-a has 9.310330284506563e-12 chance of dying
+win6-a has 1.3073209181868606e-11 chance of dying
+win7-a has 1.0764500402160593e-11 chance of dying
+win8-a has 1.649191894159685e-11 chance of dying
+win9-a has 1.347411071606075e-11 chance of dying
+win10-a has 8.749112545558546e-12 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -5.9993139507024695
+individuals not growing: win1a
+win2 compterm: -5.999559895332952
+individuals not growing: win2a
+win3 compterm: -5.999376704202644
+individuals not growing: win3a
+win4 compterm: -5.999393150570273
+individuals not growing: win4a
+win5 compterm: -5.999618151068915
+individuals not growing: win5a
+win6 compterm: -5.999463718715017
+individuals not growing: win6a
+win7 compterm: -5.999558475969823
+individuals not growing: win7a
+win8 compterm: -5.999323359685366
+individuals not growing: win8a
+win9 compterm: -5.99944726370702
+individuals not growing: win9a
+win10 compterm: -5.999641179624976
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 1.950795081029355e-11 chance of dying
+win2-a has 1.2518319714160953e-11 chance of dying
+win3-a has 1.772493263274555e-11 chance of dying
+win4-a has 1.7257528739378358e-11 chance of dying
+win5-a has 1.0862089006025144e-11 chance of dying
+win6-a has 1.5252132889997938e-11 chance of dying
+win7-a has 1.2558620809954846e-11 chance of dying
+win8-a has 1.9240609105963813e-11 chance of dying
+win9-a has 1.5719758827970054e-11 chance of dying
+win10-a has 1.0207279466101227e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -6.999313950702438
+individuals not growing: win1a
+win2 compterm: -6.999559895332964
+individuals not growing: win2a
+win3 compterm: -6.999376704202656
+individuals not growing: win3a
+win4 compterm: -6.999393150570279
+individuals not growing: win4a
+win5 compterm: -6.999618151068921
+individuals not growing: win5a
+win6 compterm: -6.999463718715024
+individuals not growing: win6a
+win7 compterm: -6.999558475969794
+individuals not growing: win7a
+win8 compterm: -6.9993233596853655
+individuals not growing: win8a
+win9 compterm: -6.999447263707036
+individuals not growing: win9a
+win10 compterm: -6.999641179624998
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 2.229483264670762e-11 chance of dying
+win2-a has 1.4306666962227155e-11 chance of dying
+win3-a has 2.0257018285008144e-11 chance of dying
+win4-a has 1.9723001010163443e-11 chance of dying
+win5-a has 1.2413736705241263e-11 chance of dying
+win6-a has 1.7430945575824808e-11 chance of dying
+win7-a has 1.4352741217749099e-11 chance of dying
+win8-a has 2.1989299270330775e-11 chance of dying
+win9-a has 1.7965406939879358e-11 chance of dying
+win10-a has 1.1665446386643907e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -7.99931395070248
+individuals not growing: win1a
+win2 compterm: -7.999559895332945
+individuals not growing: win2a
+win3 compterm: -7.99937670420265
+individuals not growing: win3a
+win4 compterm: -7.999393150570259
+individuals not growing: win4a
+win5 compterm: -7.999618151068907
+individuals not growing: win5a
+win6 compterm: -7.999463718714997
+individuals not growing: win6a
+win7 compterm: -7.999558475969814
+individuals not growing: win7a
+win8 compterm: -7.9993233596853965
+individuals not growing: win8a
+win9 compterm: -7.999447263707034
+individuals not growing: win9a
+win10 compterm: -7.999641179625001
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 2.5081603460819224e-11 chance of dying
+win2-a has 1.6094903187990894e-11 chance of dying
+win3-a has 2.27892149595732e-11 chance of dying
+win4-a has 2.2188362258646066e-11 chance of dying
+win5-a has 1.3965495426759844e-11 chance of dying
+win6-a has 1.960986928395414e-11 chance of dying
+win7-a has 1.6146861625543352e-11 chance of dying
+win8-a has 2.4737989434697738e-11 chance of dying
+win9-a has 2.0211166074091125e-11 chance of dying
+win10-a has 1.3123613307186588e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -8.999313950702469
+individuals not growing: win1a
+win2 compterm: -8.99955989533293
+individuals not growing: win2a
+win3 compterm: -8.999376704202673
+individuals not growing: win3a
+win4 compterm: -8.999393150570251
+individuals not growing: win4a
+win5 compterm: -8.999618151068958
+individuals not growing: win5a
+win6 compterm: -8.999463718715004
+individuals not growing: win6a
+win7 compterm: -8.99955847596979
+individuals not growing: win7a
+win8 compterm: -8.999323359685395
+individuals not growing: win8a
+win9 compterm: -8.999447263707056
+individuals not growing: win9a
+win10 compterm: -8.999641179624964
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 2.7868485297233292e-11 chance of dying
+win2-a has 1.7883250436057097e-11 chance of dying
+win3-a has 2.5321300611835795e-11 chance of dying
+win4-a has 2.465372350712869e-11 chance of dying
+win5-a has 1.5517254148278425e-11 chance of dying
+win6-a has 2.178868196978101e-11 chance of dying
+win7-a has 1.7940871011035142e-11 chance of dying
+win8-a has 2.7486568576762238e-11 chance of dying
+win9-a has 2.245681418600043e-11 chance of dying
+win10-a has 1.458189125003173e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -9.999313950702435
+individuals not growing: win1a
+win2 compterm: -9.999559895332935
+individuals not growing: win2a
+win3 compterm: -9.999376704202676
+individuals not growing: win3a
+win4 compterm: -9.999393150570299
+individuals not growing: win4a
+win5 compterm: -9.999618151068937
+individuals not growing: win5a
+win6 compterm: -9.999463718715024
+individuals not growing: win6a
+win7 compterm: -9.999558475969815
+individuals not growing: win7a
+win8 compterm: -9.999323359685377
+individuals not growing: win8a
+win9 compterm: -9.999447263707006
+individuals not growing: win9a
+win10 compterm: -9.999641179624984
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 3.065536713364736e-11 chance of dying
+win2-a has 1.96715976841233e-11 chance of dying
+win3-a has 2.7853497286400852e-11 chance of dying
+win4-a has 2.711908475561131e-11 chance of dying
+win5-a has 1.7068901847494544e-11 chance of dying
+win6-a has 2.3967605677910342e-11 chance of dying
+win7-a has 1.9734991418829395e-11 chance of dying
+win8-a has 3.02352587411292e-11 chance of dying
+win9-a has 2.4702462297909733e-11 chance of dying
+win10-a has 1.6040058170574412e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -10.99931395070249
+individuals not growing: win1a
+win2 compterm: -10.999559895332984
+individuals not growing: win2a
+win3 compterm: -10.999376704202678
+individuals not growing: win3a
+win4 compterm: -10.99939315057027
+individuals not growing: win4a
+win5 compterm: -10.99961815106895
+individuals not growing: win5a
+win6 compterm: -10.999463718715033
+individuals not growing: win6a
+win7 compterm: -10.999558475969842
+individuals not growing: win7a
+win8 compterm: -10.999323359685388
+individuals not growing: win8a
+win9 compterm: -10.999447263707031
+individuals not growing: win9a
+win10 compterm: -10.99964117962498
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 3.3442137947758965e-11 chance of dying
+win2-a has 2.14599449321895e-11 chance of dying
+win3-a has 3.038558293866345e-11 chance of dying
+win4-a has 2.9584446004093934e-11 chance of dying
+win5-a has 1.8620660569013125e-11 chance of dying
+win6-a has 2.6146418363737212e-11 chance of dying
+win7-a has 2.1529111826623648e-11 chance of dying
+win8-a has 3.298394890549616e-11 chance of dying
+win9-a has 2.69482214321215e-11 chance of dying
+win10-a has 1.7498225091117092e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -11.99931395070244
+individuals not growing: win1a
+win2 compterm: -11.999559895332983
+individuals not growing: win2a
+win3 compterm: -11.999376704202666
+individuals not growing: win3a
+win4 compterm: -11.999393150570267
+individuals not growing: win4a
+win5 compterm: -11.999618151068907
+individuals not growing: win5a
+win6 compterm: -11.999463718714996
+individuals not growing: win6a
+win7 compterm: -11.999558475969822
+individuals not growing: win7a
+win8 compterm: -11.999323359685343
+individuals not growing: win8a
+win9 compterm: -11.99944726370703
+individuals not growing: win9a
+win10 compterm: -11.999641179624987
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 3.6229019784173033e-11 chance of dying
+win2-a has 2.3248292180255703e-11 chance of dying
+win3-a has 3.291766859092604e-11 chance of dying
+win4-a has 3.2049807252576556e-11 chance of dying
+win5-a has 2.0172419290531707e-11 chance of dying
+win6-a has 2.8325342071866544e-11 chance of dying
+win7-a has 2.33232322344179e-11 chance of dying
+win8-a has 3.5732639069863126e-11 chance of dying
+win9-a has 2.9193869544030804e-11 chance of dying
+win10-a has 1.8956392011659773e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -12.999313950702446
+individuals not growing: win1a
+win2 compterm: -12.999559895332963
+individuals not growing: win2a
+win3 compterm: -12.99937670420265
+individuals not growing: win3a
+win4 compterm: -12.999393150570276
+individuals not growing: win4a
+win5 compterm: -12.999618151068926
+individuals not growing: win5a
+win6 compterm: -12.999463718715027
+individuals not growing: win6a
+win7 compterm: -12.9995584759698
+individuals not growing: win7a
+win8 compterm: -12.999323359685404
+individuals not growing: win8a
+win9 compterm: -12.999447263707014
+individuals not growing: win9a
+win10 compterm: -12.999641179624962
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 3.90159016205871e-11 chance of dying
+win2-a has 2.5036639428321905e-11 chance of dying
+win3-a has 3.54498652654911e-11 chance of dying
+win4-a has 3.451516850105918e-11 chance of dying
+win5-a has 2.1724178012050288e-11 chance of dying
+win6-a has 3.0504265779995876e-11 chance of dying
+win7-a has 2.511724161990969e-11 chance of dying
+win8-a has 3.8481218211927626e-11 chance of dying
+win9-a has 3.143951765594011e-11 chance of dying
+win10-a has 2.0414558932202453e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -13.999313950702494
+individuals not growing: win1a
+win2 compterm: -13.999559895332945
+individuals not growing: win2a
+win3 compterm: -13.999376704202625
+individuals not growing: win3a
+win4 compterm: -13.999393150570222
+individuals not growing: win4a
+win5 compterm: -13.999618151068956
+individuals not growing: win5a
+win6 compterm: -13.999463718715047
+individuals not growing: win6a
+win7 compterm: -13.999558475969781
+individuals not growing: win7a
+win8 compterm: -13.999323359685352
+individuals not growing: win8a
+win9 compterm: -13.999447263707063
+individuals not growing: win9a
+win10 compterm: -13.99964117962498
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 4.180278345700117e-11 chance of dying
+win2-a has 2.6824875654085645e-11 chance of dying
+win3-a has 3.798195091775369e-11 chance of dying
+win4-a has 3.69805297495418e-11 chance of dying
+win5-a has 2.3275825711266407e-11 chance of dying
+win6-a has 3.2683078465822746e-11 chance of dying
+win7-a has 2.6911362027703944e-11 chance of dying
+win8-a has 4.122990837629459e-11 chance of dying
+win9-a has 3.3685276790151875e-11 chance of dying
+win10-a has 2.1872725852745134e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -14.999313950702419
+individuals not growing: win1a
+win2 compterm: -14.999559895332938
+individuals not growing: win2a
+win3 compterm: -14.99937670420269
+individuals not growing: win3a
+win4 compterm: -14.999393150570288
+individuals not growing: win4a
+win5 compterm: -14.999618151068908
+individuals not growing: win5a
+win6 compterm: -14.99946371871504
+individuals not growing: win6a
+win7 compterm: -14.999558475969812
+individuals not growing: win7a
+win8 compterm: -14.999323359685372
+individuals not growing: win8a
+win9 compterm: -14.999447263706996
+individuals not growing: win9a
+win10 compterm: -14.999641179625007
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 4.4589554271112775e-11 chance of dying
+win2-a has 2.8613222902151847e-11 chance of dying
+win3-a has 4.051414759231875e-11 chance of dying
+win4-a has 3.9445890998024424e-11 chance of dying
+win5-a has 2.4827584432784988e-11 chance of dying
+win6-a has 3.486200217395208e-11 chance of dying
+win7-a has 2.8705482435498197e-11 chance of dying
+win8-a has 4.397859854066155e-11 chance of dying
+win9-a has 3.593092490206118e-11 chance of dying
+win10-a has 2.3330892773287815e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -15.999313950702438
+individuals not growing: win1a
+win2 compterm: -15.999559895332917
+individuals not growing: win2a
+win3 compterm: -15.99937670420265
+individuals not growing: win3a
+win4 compterm: -15.99939315057022
+individuals not growing: win4a
+win5 compterm: -15.99961815106895
+individuals not growing: win5a
+win6 compterm: -15.999463718715072
+individuals not growing: win6a
+win7 compterm: -15.999558475969849
+individuals not growing: win7a
+win8 compterm: -15.999323359685409
+individuals not growing: win8a
+win9 compterm: -15.999447263707061
+individuals not growing: win9a
+win10 compterm: -15.999641179624989
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 4.737643610752684e-11 chance of dying
+win2-a has 3.040157015021805e-11 chance of dying
+win3-a has 4.3046233244581344e-11 chance of dying
+win4-a has 4.191125224650705e-11 chance of dying
+win5-a has 2.637934315430357e-11 chance of dying
+win6-a has 3.704081485977895e-11 chance of dying
+win7-a has 3.049960284329245e-11 chance of dying
+win8-a has 4.672717768272605e-11 chance of dying
+win9-a has 3.817657301397048e-11 chance of dying
+win10-a has 2.4789170716132958e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -16.9993139507025
+individuals not growing: win1a
+win2 compterm: -16.999559895332933
+individuals not growing: win2a
+win3 compterm: -16.99937670420269
+individuals not growing: win3a
+win4 compterm: -16.999393150570246
+individuals not growing: win4a
+win5 compterm: -16.999618151068915
+individuals not growing: win5a
+win6 compterm: -16.99946371871498
+individuals not growing: win6a
+win7 compterm: -16.99955847596985
+individuals not growing: win7a
+win8 compterm: -16.999323359685366
+individuals not growing: win8a
+win9 compterm: -16.99944726370703
+individuals not growing: win9a
+win10 compterm: -16.999641179625012
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 5.016331794394091e-11 chance of dying
+win2-a has 3.218991739828425e-11 chance of dying
+win3-a has 4.557831889684394e-11 chance of dying
+win4-a has 4.437661349498967e-11 chance of dying
+win5-a has 2.7930990853519688e-11 chance of dying
+win6-a has 3.921973856790828e-11 chance of dying
+win7-a has 3.229361222878424e-11 chance of dying
+win8-a has 4.9475867847093014e-11 chance of dying
+win9-a has 4.042222112587979e-11 chance of dying
+win10-a has 2.6247337636675638e-11 chance of dying
+win1 has biomassDict("veg"=>99.5593) and projects 0.8228040034197575
+win2 has biomassDict("veg"=>99.6557) and projects 0.8236004779444293
+win3 has biomassDict("veg"=>99.1462) and projects 0.8193897870070038
+win4 has biomassDict("veg"=>98.3771) and projects 0.8130335963409416
+win5 has biomassDict("veg"=>101.622) and projects 0.83985262810701
+win6 has biomassDict("veg"=>101.497) and projects 0.8388189482279472
+win7 has biomassDict("veg"=>97.7335) and projects 0.8077150576563785
+win8 has biomassDict("veg"=>99.785) and projects 0.8246692253846064
+win9 has biomassDict("veg"=>99.9691) and projects 0.8261909621422553
+win10 has biomassDict("veg"=>101.159) and projects 0.8360262561832017
+win1 compterm: -17.99931395070241
+individuals not growing: win1a
+win2 compterm: -17.99955989533292
+individuals not growing: win2a
+win3 compterm: -17.999376704202643
+individuals not growing: win3a
+win4 compterm: -17.99939315057029
+individuals not growing: win4a
+win5 compterm: -17.99961815106896
+individuals not growing: win5a
+win6 compterm: -17.999463718714978
+individuals not growing: win6a
+win7 compterm: -17.999558475969774
+individuals not growing: win7a
+win8 compterm: -17.999323359685413
+individuals not growing: win8a
+win9 compterm: -17.999447263706987
+individuals not growing: win9a
+win10 compterm: -17.99964117962492
+individuals not growing: win10a
+Reproducing: Organisms.Organism[]
+Establishing seeds: Int64[]
+win1-a has 5.2950088758052516e-11 chance of dying
+win2-a has 3.3978264646350453e-11 chance of dying
+win3-a has 4.8110515571408996e-11 chance of dying
+win4-a has 4.684197474347229e-11 chance of dying
+win5-a has 2.948274957503827e-11 chance of dying
+win6-a has 4.139855125373515e-11 chance of dying
+win7-a has 3.4087732636578494e-11 chance of dying
+win8-a has 5.2224558011459976e-11 chance of dying
+win9-a has 4.2667980260091554e-11 chance of dying
+win10-a has 2.770550455721832e-11 chance of dying

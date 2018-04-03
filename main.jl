@@ -93,7 +93,7 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
 
     sep = ","
 
-    output = open(string("orgsweek",t,".csv"), "w")
+    output = open(string("EDoutputs/orgsweek",t,".csv"), "w")
     print(output, "id", sep)
     print(output, "location", sep)
     print(output, "species", sep)
@@ -119,18 +119,26 @@ function simulate(timesteps = Int64(20))
     mylandscape = landscape_init(simparams)
     orgs = newOrgs(mylandscape, initorgs)
 
+    try
+        mkdir("EDoutputs")
+    catch
+        println("Error in creating output folder (EDoutputs), assuming it already exists")
+    end
+    
+    simulog = open("EDoutputs/simulog.txt","w")
+
 # MODEL RUN
     for t in 1:timesteps
         #develop!()
-        projvegmass!(mylandscape,orgs)
-        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz)
+        projvegmass!(mylandscape,orgs,simulog)
+        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz, simulog)
         #TODO check if there is no better way to keep track of individuals that are not growing
-        reproduce!(mylandscape,orgs)
+        reproduce!(mylandscape,orgs,simulog)
         if rem(t - 22, 52) == 0
-            disperse!(orgs,mylandscape)
+            disperse!(orgs,mylandscape,simulog)
         end
-        establish!(mylandscape, orgs)
-        survive!(mylandscape, orgs,nogrowth)
+        establish!(mylandscape, orgs,simulog)
+        survive!(mylandscape, orgs,nogrowth,simulog)
         ## DISTURBANCES
         ## Dynamical landscape change
         # if t #something
@@ -149,7 +157,8 @@ function simulate(timesteps = Int64(20))
         #outputnetworks()
         #save(string("week",4*t)) more reasonable interval
     end
-   return mylandscape, orgs
+
+    close(simulog)
 end
 
 simulate()
