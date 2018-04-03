@@ -51,15 +51,13 @@ DEADLINE: <2018-03-28 Mi>
 * Organisms.jl
 Initialization spreads organisms in the landscape (fragments, later): newOrg() is called
 During simulation, after reproduction (and dispersion?) new organisms will only establish once it has checked local grid viability and fitness values?
-** TODO MTE rates to individual probabilites
-*** Boltz: Chap.2 MTE book <2018-04-02 Mo>
-*** aE: Chap.2 MTE book <2018-04-02 Mo>
-*** plant production growth: Ernet et al. 2003 <2018-04-02 Mo>
-Mortality is probability, what about the others?
    DEADLINE: <2018-04-02 Mo>
-** TODO check probability models for trnasitions
+** DONE check probability models for transitions
+   CLOSED: [2018-04-03 Di 10:25]
+   - CLOSING NOTE [2018-04-03 Di 10:25] \\
+     p = 1 - exp(-rt)
 ** TODO mutable struct [1/6]
-   DEADLINE: <2018-03-30 Fr> SCHEDULED: <2018-03-14 Mi>
+   DEADLINE: <2018-04-30 Mo> SCHEDULED: <2018-03-14 Mi>
 - [ ] .sex field, for controlling sex-ratio, for insects
 - [ ] Genotype must control some traits
 - [ ] Traits should match for interaction to happen. Microevolutionary change would cause traits to (mis)match
@@ -99,7 +97,9 @@ During initialization, one input file gives the functional types and their initi
    DEADLINE: <2018-03-23 Fr>
 ** Life-cycle
 *** TODO Check MTE units & probabilities!!!
-    DEADLINE: <2018-03-23 Fr>
+**** Boltz: Chap.2 MTE book <2018-04-02 Mo>
+**** aE: Chap.2 MTE book <2018-04-02 Mo>
+**** plant production growth: Ernet et al. 2003 <2018-04-02 Mo>
 *** TODO Compete [4/5]
  Competition is biomass-based: overlap of area gives rise to /compterm/ that penalizes growth
  - [X] Vegetative biomass is projected to calculate competition /compterm/: *projectvegmass!()*
@@ -142,7 +142,7 @@ Parameters values might be specific to each functional group, but general mechan
 *** TODO Emergency [0/2]
     DEADLINE: <2018-03-29 Do>
 - [-] emergency rate differentiates between functional groups
-  - [X] plants and insects, hard coded
+  - [X] plants germinate: hard coded, 0.5 probability
   - [ ] according to the list of fgroups from the input
 - [ ] Seed bank
 *** TODO Reproduction [1/2]

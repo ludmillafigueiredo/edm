@@ -16,8 +16,8 @@ export Organism, InitOrgs, newOrgs, projvegmass!, compete, develop!, allocate!, 
 const Boltz = 8.62e-5 # Brown & Sibly MTE book chap 2
 const aE = 0.65 # Brown & Sibly MTE book chap 2
 const plants_gb0 = (10^(10.15))/52 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base
+const plants_mb0 = 5.522 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
 const plants_fb0 = exp(30.0) # fertility rate
-const plants_mb0 = exp(22.0)
 const seedmassµ = 0.8
 const tK = 273.15 # °C to K converter
 
@@ -345,7 +345,6 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
 
     for d in dispersing
         # Dispersal distance from kernel:
-        #acho q nao preciso de muito mais q dNatahn et al. 2012 pra usar a pdf com as distancias da
         if orgs[d].fgroup == "wind"
             #Exp, herbs + appendage #TODO LogSech distribution
             dist = Fileprep.lengthtocell(meanExP(4.7e-5,0.2336))
@@ -392,7 +391,7 @@ end
 
 """
     establish!
-Seeds and larvae only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
+Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
 """
 function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organisms.Organism, N} where N)
     #REFERENCE: May et al. 2009
@@ -438,7 +437,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
 
         mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
         mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/(Boltz*T))
-        mprob = 1 - exp(-mB*orgs[o].age)
+        mprob = 1 - exp(-mB*orgs[o].age/5)
 
         #unity test
         println(orgs[o].id,"-",orgs[o].stage, "has $mprob chance of dying")
@@ -451,7 +450,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
             mprob += cmprob
         end
 
-        if rand(Distributions.Binomial(1,mprob),1)
+        if rand(Distributions.Binomial(1,mprob),1) == 1
             #mprob > rand(PoissonBinomial([mprob]),1)[1] # TODO should use a more ellaboratedistribution model? successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
             push!(deaths, o)
         else

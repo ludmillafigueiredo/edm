@@ -1,5 +1,11 @@
 id,location,species,stage,functional_group,genotype,dispersal_pars
 win1	(106, 231, 1)	none	a	wind	placeholder	placeholder	(2.0, 0.1)
+win2	(339, 379, 1)	none	a	wind	placeholder	placeholder	(2.0, 0.1)
+win3	(249, 276, 1)	none	a	wind	placeholder	placeholder	(2.0, 0.1)
+win4	(302, 78, 1)	none	a	wind	placeholder	placeholder	(2.0, 0.1)
 win5	(225, 460, 1)	none	a	wind	placeholder	placeholder	(2.0, 0.1)
+win6	(336, 462, 1)	none	a	wind	placeholder	placeholder	(2.0, 0.1)
+win7	(16, 389, 1)	none	a	wind	placeholder	placeholder	(2.0, 0.1)
+win8	(40, 302, 1)	none	a	wind	placeholder	placeholder	(2.0, 0.1)
 win9	(75, 244, 1)	none	a	wind	placeholder	placeholder	(2.0, 0.1)
 win10	(446, 327, 1)	none	a	wind	placeholder	placeholder	(2.0, 0.1)

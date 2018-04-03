@@ -19,9 +19,10 @@ using Organisms
 const Boltz = 8.62e-5 # Brown & Sibly MTE book chap 2
 const aE = 0.65 # Brown & Sibly MTE book chap 2
 const plants_gb0 = (10^(10.15))/52 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base
-const plants_fb0 = exp(26.0) # fertility rate
+const plants_mb0 = 5.522 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
+const plants_fb0 = exp(30.0) # fertility rate
+const seedmassµ = 0.8
 const tK = 273.15 # °C to K converter
-const plants_mb0 = exp(19.2)
 
 """
     read_initials(simparams, initorgs)
