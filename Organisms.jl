@@ -244,8 +244,13 @@ end
     develop!()
 Controls individual stage transition.
 """
-function develop!()
+function develop!(orgs::Array{Organism,N} where N)
     #TODO plant growth
+    juvs = find(x->x.stage == "j",orgs)
+
+    for j in juvs
+        orgs[j].stage = "a"
+    end
     #TODO insect holometabolic growth
     #TODO insect hemimetabolic development
 end
@@ -399,7 +404,7 @@ end
     establish!
 Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
 """
-function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organisms.Organism, N} where N, simulog::IOStream)
+function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organisms.Organism, N} where N, t::Int64, simulog::IOStream)
     #REFERENCE: May et al. 2009
     #check neighs
 
@@ -439,28 +444,32 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
 
     for o in 1:length(orgs)
 
-        T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
-
-        mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
-        mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/(Boltz*T))
-        mprob = 1 - exp(-mB*orgs[o])
-
-        #unity test
-        println(simulog,orgs[o].id,"-",orgs[o].stage, " has $mprob chance of dying")
-
-        # individuals that didnt grow have
-        if o in 1:length(nogrowth)
-            compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
-            cmB = compmortconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/Boltz*(T))
-            cmprob =  1 - e^(-cmB*orgs[o])
-            mprob += cmprob
-        end
-
-        if rand(Distributions.Binomial(1,mprob),1) == 1
-            #mprob > rand(PoissonBinomial([mprob]),1)[1] # TODO should use a more ellaboratedistribution model? successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
+        if orgs[o].age == 52 # annual plants die
             push!(deaths, o)
         else
-            orgs[o].age += 1
+            T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
+
+            mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
+            mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/(Boltz*T))
+            mprob = 1 - exp(-mB*orgs[o])
+
+            #unity test
+            println(simulog,orgs[o].id,"-",orgs[o].stage, " has $mprob chance of dying")
+
+            # individuals that didnt grow have
+            if o in 1:length(nogrowth)
+                compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
+                cmB = compmortconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/Boltz*(T))
+                cmprob =  1 - e^(-cmB*orgs[o])
+                mprob += cmprob
+            end
+
+            if rand(Distributions.Binomial(1,mprob),1) == 1
+                #mprob > rand(PoissonBinomial([mprob]),1)[1] # TODO should use a more ellaboratedistribution model? successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
+                push!(deaths, o)
+            else
+                orgs[o].age += 1
+            end
         end
     end
     deleteat!(orgs, deaths)

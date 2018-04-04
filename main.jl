@@ -43,12 +43,12 @@ function read_initials()
     #     close(env)
     # end
     simparams = Setworld.Simpars()
-    simparams.fxlength = (500)
-    simparams.fylength = (500)
-    simparams.fmeantemp = (20.0)
-    simparams.ftempsd = (1.0)
-    simparams.fmeanprec = (100.0)
-    simparams.fprecsd = 1.0
+    simparams.fxlength = Tuple(500)
+    simparams.fylength = Tuple(500)
+    simparams.fmeantemp = Tuple(20.0)
+    simparams.ftempsd = Tuple(1.0)
+    simparams.fmeanprec = Tuple(100.0)
+    simparams.fprecsd = Tuple(1.0)
     simparams.nfrags = 1
     simparams.timesteps = 52
     #verify that: TODO not a real test
@@ -155,12 +155,15 @@ function simulate()
         projvegmass!(mylandscape,orgs,simulog)
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz, simulog)
         #TODO check if there is no better way to keep track of individuals that are not growing
+        if rem(t, 52) == 12
+            develop!(orgs)
+        end
         reproduce!(mylandscape,orgs,simulog)
         if (25 <= rem(t, 52) < 37) == 0
             disperse!(mylandscape,orgs,simulog)
             establish!(mylandscape,orgs,simulog)
         end
-        survive!(mylandscape, orgs,nogrowth,simulog)
+        survive!(mylandscape,orgs,nogrowth, t,simulog)
         ## DISTURBANCES
         ## Dynamical landscape change
         # if t #something
