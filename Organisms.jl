@@ -165,11 +165,13 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
     # 2. Look for neighbors in the square area delimited by r
     nbsum = 0
     for j in (y-r):(y+r), i in (x-r):(x+r) #TODO filter!() this area?
-        if !checkbounds(Bool,landscape[:,:,frag],j,i)
+        if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
         elseif haskey(landscape[i,j,frag].neighs,fg)
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs[fg] - org.biomass["veg"]/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
+        else !haskey(landscape[i,j,frag].neighs,fg) #there is no competition
+            nbsum += 0
         end
     end
     compterm = /(org.biomass["veg"] - nbsum, org.biomass["veg"]) # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
@@ -214,7 +216,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
 
                 #unity test
                 println(simulog,"individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in veg")
-            elseif (orgs[o].stage == "a"  && (12 <= rem(t, 52) < 37))
+            elseif (orgs[o].stage == "a"  && (12 <= rem(t, 52) < 25))
                 # adults reproduc
                 if haskey(orgs[o].biomass,"reprd")
                     orgs[o].biomass["reprd"] += grown_mass

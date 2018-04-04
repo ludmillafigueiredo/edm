@@ -39,6 +39,7 @@ win10 compterm: 1.0
 win10 gained 0.0362719552514983
 individual win10-a grew 0.0362719552514983 in veg
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 0.0 chance of dying
 win2-a has 0.0 chance of dying
@@ -91,6 +92,7 @@ win10 compterm: 0.0003585632168289344
 win10 gained 1.300928760148778e-5
 individual win10-a grew 1.300928760148778e-5 in veg
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 2.786881836414068e-12 chance of dying
 win2-a has 1.7883472480662022e-12 chance of dying
@@ -133,6 +135,7 @@ individuals not growing: win9a
 win10 compterm: -0.9996411796249892
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 5.573652650525673e-12 chance of dying
 win2-a has 3.5766944961324043e-12 chance of dying
@@ -175,6 +178,7 @@ individuals not growing: win9a
 win10 compterm: -1.9996411796249862
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 8.360534486939741e-12 chance of dying
 win2-a has 5.364930721896144e-12 chance of dying
@@ -217,6 +221,7 @@ individuals not growing: win9a
 win10 compterm: -2.99964117962499
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 1.114741632335381e-11 chance of dying
 win2-a has 7.153277969962346e-12 chance of dying
@@ -259,6 +264,7 @@ individuals not growing: win9a
 win10 compterm: -3.9996411796249762
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 1.3934298159767877e-11 chance of dying
 win2-a has 8.941625218028548e-12 chance of dying
@@ -301,6 +307,7 @@ individuals not growing: win9a
 win10 compterm: -4.999641179624984
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 1.6721068973879483e-11 chance of dying
 win2-a has 1.072997246609475e-11 chance of dying
@@ -343,6 +350,7 @@ individuals not growing: win9a
 win10 compterm: -5.999641179624976
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 1.950795081029355e-11 chance of dying
 win2-a has 1.2518319714160953e-11 chance of dying
@@ -385,6 +393,7 @@ individuals not growing: win9a
 win10 compterm: -6.999641179624998
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 2.229483264670762e-11 chance of dying
 win2-a has 1.4306666962227155e-11 chance of dying
@@ -427,6 +436,7 @@ individuals not growing: win9a
 win10 compterm: -7.999641179625001
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 2.5081603460819224e-11 chance of dying
 win2-a has 1.6094903187990894e-11 chance of dying
@@ -469,6 +479,7 @@ individuals not growing: win9a
 win10 compterm: -8.999641179624964
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 2.7868485297233292e-11 chance of dying
 win2-a has 1.7883250436057097e-11 chance of dying
@@ -511,6 +522,7 @@ individuals not growing: win9a
 win10 compterm: -9.999641179624984
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 3.065536713364736e-11 chance of dying
 win2-a has 1.96715976841233e-11 chance of dying
@@ -553,6 +565,7 @@ individuals not growing: win9a
 win10 compterm: -10.99964117962498
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 3.3442137947758965e-11 chance of dying
 win2-a has 2.14599449321895e-11 chance of dying
@@ -595,6 +608,7 @@ individuals not growing: win9a
 win10 compterm: -11.999641179624987
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 3.6229019784173033e-11 chance of dying
 win2-a has 2.3248292180255703e-11 chance of dying
@@ -637,6 +651,7 @@ individuals not growing: win9a
 win10 compterm: -12.999641179624962
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 3.90159016205871e-11 chance of dying
 win2-a has 2.5036639428321905e-11 chance of dying
@@ -679,6 +694,7 @@ individuals not growing: win9a
 win10 compterm: -13.99964117962498
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 4.180278345700117e-11 chance of dying
 win2-a has 2.6824875654085645e-11 chance of dying
@@ -721,6 +737,7 @@ individuals not growing: win9a
 win10 compterm: -14.999641179625007
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 4.4589554271112775e-11 chance of dying
 win2-a has 2.8613222902151847e-11 chance of dying
@@ -763,6 +780,7 @@ individuals not growing: win9a
 win10 compterm: -15.999641179624989
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 4.737643610752684e-11 chance of dying
 win2-a has 3.040157015021805e-11 chance of dying
@@ -805,6 +823,7 @@ individuals not growing: win9a
 win10 compterm: -16.999641179625012
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 5.016331794394091e-11 chance of dying
 win2-a has 3.218991739828425e-11 chance of dying
@@ -847,6 +866,7 @@ individuals not growing: win9a
 win10 compterm: -17.99964117962492
 individuals not growing: win10a
 Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
 Establishing seeds: Int64[]
 win1-a has 5.2950088758052516e-11 chance of dying
 win2-a has 3.3978264646350453e-11 chance of dying

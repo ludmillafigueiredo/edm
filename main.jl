@@ -29,19 +29,27 @@ const tK = 273.15 # °C to K converter
 Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
 """
 function read_initials()
-    #TODO dictionnary?
-    simparams = Setworld.Simpars()
-    begin
-        env = open("landscape_init.in")
-        readline(env); simparams.fxlength = tuple(parse(Int64,readline(env)))
-        readline(env); simparams.fylength = tuple(parse(Int64,readline(env)))
-        readline(env); simparams.fmeantemp = tuple(parse(Float64,readline(env)))
-        readline(env); simparams.ftempsd = tuple(parse(Float64,readline(env)))
-        readline(env); simparams.fmeanprec = tuple(parse(Float64,readline(env)))
-        readline(env); simparams.fprecsd = tuple(parse(Float64,readline(env)))
-        readline(env); simparams.nfrags = parse(Int64,readline(env))
-        close(env)
-    end
+    #TODO change simulation input: dictionnary?
+    # simparams = Setworld.Simpars()
+    # begin
+    #     env = open("landscape_init.in")
+    #     readline(env); simparams.fxlength = tuple(parse(Int64,readline(env)))
+    #     readline(env); simparams.fylength = tuple(parse(Int64,readline(env)))
+    #     readline(env); simparams.fmeantemp = tuple(parse(Float64,readline(env)))
+    #     readline(env); simparams.ftempsd = tuple(parse(Float64,readline(env)))
+    #     readline(env); simparams.fmeanprec = tuple(parse(Float64,readline(env)))
+    #     readline(env); simparams.fprecsd = tuple(parse(Float64,readline(env)))
+    #     readline(env); simparams.nfrags = parse(Int64,readline(env))
+    #     close(env)
+    # end
+    simparams = Setworld.Simpars(
+    simparams.fxlength = 74500,
+    simparams.fylength = 74500,
+    simparams.fmeantemp = 20.0,
+    simparams.ftempsd = 1.0,
+    simparams.fmeanprec = 100.0,
+    simparams.fprecsd = 1.0,
+    simparams.nfrags = 1)
     #verify that
     simparams.nfrags == length(simparams.fxlength)
 
@@ -103,8 +111,9 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
     print(output, "dispersal_pars")
     println(output)
 
+    #TODO change writedlm
     for o in 1:length(orgs)
-        writedlm(output, [orgs[o].id orgs[o].location orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].genotype orgs[o].disp])
+        writedlm(output, [orgs[o].id orgs[o].location orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].biomass orgs[o].radius orgs[o].genotype orgs[o].disp])
     end
 
     close(output)
@@ -124,7 +133,7 @@ function simulate(timesteps = Int64(20))
     catch
         println("Error in creating output folder (EDoutputs), assuming it already exists")
     end
-    
+
     simulog = open("EDoutputs/simulog.txt","w")
 
 # MODEL RUN
@@ -134,10 +143,10 @@ function simulate(timesteps = Int64(20))
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz, simulog)
         #TODO check if there is no better way to keep track of individuals that are not growing
         reproduce!(mylandscape,orgs,simulog)
-        if rem(t - 22, 52) == 0
-            disperse!(orgs,mylandscape,simulog)
+        if (25 <= rem(t, 52) < 37) == 0
+            disperse!(mylandscape,orgs,simulog)
+            establish!(mylandscape,orgs,simulog)
         end
-        establish!(mylandscape, orgs,simulog)
         survive!(mylandscape, orgs,nogrowth,simulog)
         ## DISTURBANCES
         ## Dynamical landscape change
@@ -150,7 +159,7 @@ function simulate(timesteps = Int64(20))
         # Output:
         #orgs
         #if rem(t,4) == 0
-            outputorgs(orgs,t)
+        outputorgs(orgs,t)
         #end
         #save(string("week",t))
         #network interactions
