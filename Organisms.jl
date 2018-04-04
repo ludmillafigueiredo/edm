@@ -73,7 +73,9 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
 function newOrgs(landscape::Array{Setworld.WorldCell,3},initorgs::Organisms.InitOrgs)
 
     orgs = Organism[]
+
     for frag in 1:size(landscape,3)
+
         for f in 1:length(initorgs.fgroups) #TODO check the organisms file format: so far, all fragments get the same sps
 
             XYs = hcat(rand(1:size(landscape,1),initorgs.init_abund[f]),
@@ -82,12 +84,12 @@ function newOrgs(landscape::Array{Setworld.WorldCell,3},initorgs::Organisms.Init
             for i in 1:initorgs.init_abund[f]
                 neworg = Organism(string(initorgs.fgroups[f][1:3], length(orgs) + 1),
                                   (XYs[i,1], XYs[i,2], frag),
-                                  initorgs.sps[f],
+                                  initorgs.sps[f], #TODO in order to have redundant species, this should take a rdm? sps inside the sps pool of that fragment OR o input the sps teria que ser casado com o de funcitonal group e abundance (cada linha eh uma sp, com abundancia etc...)
                                   initorgs.init_stage[f],
                                   0,
                                   false,
                                   initorgs.fgroups[f],
-                                  ["placeholder" "placeholder"], #initialize with function
+                                  ["" ""], #initialize with function
                                   Dict("veg" => rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f]))),
                                   (initorgs.dispμ[f], initorgs.dispshp[f]),
                                   initorgs.radius[f])
@@ -226,12 +228,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
 
                 # unity test
                 println(simulog,"individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in reprd")
-
-            else # adults, rest of the year spring
-                orgs[o].biomass["veg"] += grown_mass
-
-                # unity test
-                println(simulog,"individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in veg")
+                # adults only produce reproductive biomass
             end
         else
             push!(nogrowth,o)
@@ -329,7 +326,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
             push!(offspring, embryo)
         end
 
-        reproducing[o].biomass["reprd"] -= offsprgB*seedmassµ
+        reproducing[o].biomass["reprd"] -= (offsprgB * seedmassµ)
     end
     append!(orgs, offspring)
     # return offspring
@@ -446,7 +443,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
 
         mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
         mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/(Boltz*T))
-        mprob = 1 - exp(-mB*orgs[o].age/5)
+        mprob = 1 - exp(-mB*orgs[o])
 
         #unity test
         println(simulog,orgs[o].id,"-",orgs[o].stage, " has $mprob chance of dying")
@@ -455,7 +452,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
         if o in 1:length(nogrowth)
             compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
             cmB = compmortconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/Boltz*(T))
-            cmprob =  1 - e^(-cmB*orgs[o].age)
+            cmprob =  1 - e^(-cmB*orgs[o])
             mprob += cmprob
         end
 

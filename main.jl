@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 # Get model directory and include it in Julia's loading path
-cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
+#cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
 EDDir = pwd()
 push!(LOAD_PATH,EDDir)
 
@@ -42,34 +42,47 @@ function read_initials()
     #     readline(env); simparams.nfrags = parse(Int64,readline(env))
     #     close(env)
     # end
-    simparams = Setworld.Simpars(
-    simparams.fxlength = 74500,
-    simparams.fylength = 74500,
-    simparams.fmeantemp = 20.0,
-    simparams.ftempsd = 1.0,
-    simparams.fmeanprec = 100.0,
-    simparams.fprecsd = 1.0,
-    simparams.nfrags = 1)
-    #verify that
+    simparams = Setworld.Simpars()
+    simparams.fxlength = (500)
+    simparams.fylength = (500)
+    simparams.fmeantemp = (20.0)
+    simparams.ftempsd = (1.0)
+    simparams.fmeanprec = (100.0)
+    simparams.fprecsd = 1.0
+    simparams.nfrags = 1
+    simparams.timesteps = 52
+    #verify that: TODO not a real test
     simparams.nfrags == length(simparams.fxlength)
 
+    # initorgs = Organisms.InitOrgs()
+    # begin
+    #     #TODO check the organisms file format: so far, all fragments get the same sps
+    #     orgf = open("organisms.in")
+    #     readline(orgf); initorgs.fgroups = tuple(readline(orgf)) #doest need parse for string
+    #     readline(orgf); initorgs.sps = tuple(readline(orgf))
+    #     readline(orgf); initorgs.init_stage = tuple(readline(orgf))
+    #     readline(orgf); initorgs.init_abund = tuple(parse(Int64,readline(orgf)))
+    #     #readline(orgf); genotypes = (readline(orgf))
+    #     readline(orgf); initorgs.biomassμ = tuple(parse(Float64,readline(orgf)))
+    #     readline(orgf); initorgs.biomasssd = tuple(parse(Float64,readline(orgf)))
+    #     readline(orgf); initorgs.dispμ = tuple(parse.(Float64,readline(orgf)))
+    #     readline(orgf); initorgs.dispshp = tuple(parse.(Float64,readline(orgf)))
+    #     readline(orgf); initorgs.radius = tuple(parse(Int64,readline(orgf)))
+    #     #check why if parsed into tuple, becomes a float
+    #     close(orgf)
+    # end
     initorgs = Organisms.InitOrgs()
-    begin
-        #TODO check the organisms file format: so far, all fragments get the same sps
-        orgf = open("organisms.in")
-        readline(orgf); initorgs.fgroups = tuple(readline(orgf)) #doest need parse for string
-        readline(orgf); initorgs.sps = tuple(readline(orgf))
-        readline(orgf); initorgs.init_stage = tuple(readline(orgf))
-        readline(orgf); initorgs.init_abund = tuple(parse(Int64,readline(orgf)))
-        #readline(orgf); genotypes = (readline(orgf))
-        readline(orgf); initorgs.biomassμ = tuple(parse(Float64,readline(orgf)))
-        readline(orgf); initorgs.biomasssd = tuple(parse(Float64,readline(orgf)))
-        readline(orgf); initorgs.dispμ = tuple(parse.(Float64,readline(orgf)))
-        readline(orgf); initorgs.dispshp = tuple(parse.(Float64,readline(orgf)))
-        readline(orgf); initorgs.radius = tuple(parse(Int64,readline(orgf)))
-        #check why if parsed into tuple, becomes a float
-        close(orgf)
-    end
+    initorgs.fgroups = ("wind", "ant")
+    initorgs.sps = ("sp1", "sp2")
+    initorgs.init_stage = ("a","a")
+    initorgs.init_abund = (100,100)
+    #genotypes are not initialized with inputs
+    initorgs.biomassμ = (100,100)
+    initorgs.biomasssd = (1,1)
+    initorgs.dispμ = (0,0)
+    initorgs.dispshp = (0,0)
+    initorgs.radius = (0,0)
+
     return simparams, initorgs
 end
 
@@ -122,7 +135,7 @@ end
 """
     simulate!()
 """
-function simulate(timesteps = Int64(20))
+function simulate()
 #   INITIALIZATION
     simparams, initorgs = read_initials()
     mylandscape = landscape_init(simparams)
@@ -137,7 +150,7 @@ function simulate(timesteps = Int64(20))
     simulog = open("EDoutputs/simulog.txt","w")
 
 # MODEL RUN
-    for t in 1:timesteps
+    for t in 1:simprams.timesteps
         #develop!()
         projvegmass!(mylandscape,orgs,simulog)
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz, simulog)
