@@ -9,8 +9,8 @@ srand(123)
 
 # Load Julia & model packages
 using Distributions
-using JLD
-using JuliaDB
+#using JLD
+#using JuliaDB
 using Setworld
 using Fileprep
 using Organisms
