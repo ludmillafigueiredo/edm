@@ -127,7 +127,7 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
 
     #TODO change writedlm
     for o in 1:length(orgs)
-        print(output,
+        println(output,
         orgs[o].id, sep,
         orgs[o].location, sep,
         orgs[o].sp, sep,

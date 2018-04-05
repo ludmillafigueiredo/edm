@@ -177,7 +177,7 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, simulog
             #println(simulog, org.id, " is overlapping with someone in cell ($i,$j).")
 
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
-            nbsum += landscape[i,j,frag].neighs[fg] - org.biomass["veg"]/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
+            nbsum += landscape[i,j,frag].neighs[fg] - 2*org.biomass["veg"]/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
         else #!haskey(landscape[i,j,frag].neighs,fg) #there is no competition
             nbsum += 0
         end
