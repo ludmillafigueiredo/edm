@@ -170,11 +170,11 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, simulog
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
             #unity test
-            println(simulog, orgs.id, " is projecting outside the landscape, because it is at: ", org[o].location)
+            #println(simulog, orgs.id, " is projecting outside the landscape, because it is at: ", org[o].location)
         elseif haskey(landscape[i,j,frag].neighs,fg)
 
             # unity test
-            println(simulog, org.id, " is overlapping with someone in cell ($i,$j).")
+            #println(simulog, org.id, " is overlapping with someone in cell ($i,$j).")
 
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs[fg] - org.biomass["veg"]/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
@@ -311,7 +311,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
     reproducing = filter(x -> x.stage == "a" && haskey(x.biomass, "reprd"), orgs)
 
     #unity test
-    println(simulog,"Reproducing: $reproducing"])
+    println(simulog,"Reproducing: $reproducing")
 
     offspring = Organism[]
 
