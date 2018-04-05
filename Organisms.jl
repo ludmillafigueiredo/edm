@@ -139,7 +139,7 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
         #unity test
-        println(simulog, orgs[o].id, " has biomass", orgs[o].biomass, " and projects ", projmass)
+        #println(simulog, orgs[o].id, " has biomass", orgs[o].biomass, " and projects ", projmass)
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
             if !checkbounds(Bool,landscape[:,:,frag],j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
@@ -183,7 +183,7 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, simulog
         end
 
         # unity test
-        println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
+        #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
 
     end
 
@@ -216,7 +216,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
             grown_mass = compterm * (plants_gb0 * sum(values(orgs[o].biomass))^(3/4) * exp(-aE/(Boltz*T)))
 
             # unity test
-            println(simulog, orgs[o].id, " gained ", grown_mass)
+            #println(simulog, orgs[o].id, " gained ", grown_mass)
 
             #Resource allocation schedule
             #TODO make it more ellaborate and includde trade-offs
@@ -228,7 +228,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
                 orgs[o].biomass["veg"] += grown_mass
 
                 #unity test
-                println(simulog,"individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in veg")
+                #println(simulog,"individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in veg")
             elseif (orgs[o].stage == "a"  && (12 <= rem(t, 52) < 25))
                 # adults reproduc
                 if haskey(orgs[o].biomass,"reprd")
@@ -238,7 +238,9 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
                 end
 
                 # unity test
-                println(simulog,"individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in reprd")
+                if rand() > 0.7
+                    println(simulog,"individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in reprd")
+                end
                 # adults only produce reproductive biomass
             end
         else
@@ -309,7 +311,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
     reproducing = filter(x -> x.stage == "a" && haskey(x.biomass, "reprd"), orgs)
 
     #unity test
-    println(simulog,"Reproducing: $reproducing")
+    println(simulog,"Reproducing: $reproducing"])
 
     offspring = Organism[]
 
@@ -467,7 +469,9 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
             mprob = 1 - exp(-mB)
 
             #unity test
-            println(simulog,orgs[o].id,"-",orgs[o].stage, " has $mprob chance of dying")
+            if rand() > 0.7
+                println(simulog,orgs[o].id,"-",orgs[o].stage, " has $mprob chance of dying")
+            end
 
             # individuals that didnt grow have
             if o in 1:length(nogrowth)
