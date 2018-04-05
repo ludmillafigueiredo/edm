@@ -451,7 +451,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
 
             mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
             mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/(Boltz*T))
-            mprob = 1 - exp(-mB*orgs[o])
+            mprob = 1 - exp(-mB)
 
             #unity test
             println(simulog,orgs[o].id,"-",orgs[o].stage, " has $mprob chance of dying")
@@ -460,7 +460,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
             if o in 1:length(nogrowth)
                 compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
                 cmB = compmortconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/Boltz*(T))
-                cmprob =  1 - e^(-cmB*orgs[o])
+                cmprob =  1 - e^(-cmB)
                 mprob += cmprob
             end
 
