@@ -145,7 +145,7 @@ function simulate()
     try
         mkdir("EDoutputs")
     catch
-        println("Error in creating output folder (EDoutputs), assuming it already exists")
+        println("Error in creating EDoutputs, assuming it already exists")
     end
 
     simulog = open("EDoutputs/simulog.txt","w")
@@ -156,11 +156,13 @@ function simulate()
         projvegmass!(mylandscape,orgs,simulog)
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz, simulog)
         #TODO check if there is no better way to keep track of individuals that are not growing
-        if rem(t, 52) == 12
+        if rem(t, 52) == 12 #juveniles become adults at the beggining of spring (reproductive season)
             develop!(orgs)
         end
-        reproduce!(mylandscape,orgs,simulog)
-        if (25 <= rem(t, 52) < 37) == 0
+        if 12 <= rem(t, 52) < 25 #reproduction happens during spring
+            reproduce!(mylandscape,orgs,simulog)
+        end
+        if 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
             disperse!(mylandscape,orgs,simulog)
             establish!(mylandscape,orgs,t,simulog)
         end
@@ -183,7 +185,6 @@ function simulate()
         #outputnetworks()
         #save(string("week",4*t)) more reasonable interval
     end
-
     close(simulog)
 end
 

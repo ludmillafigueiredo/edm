@@ -82,7 +82,7 @@ function newOrgs(landscape::Array{Setworld.WorldCell,3},initorgs::Organisms.Init
 
             for i in 1:initorgs.init_abund[f]
                 neworg = Organism(string(initorgs.fgroups[f][1:3], length(orgs) + 1),
-                                  (XYs[i,1], XYs[i,2], frag),
+                                  (XYs[i,1],XYs[i,2],frag),
                                   initorgs.sps[f], #TODO in order to have redundant species, this should take a rdm? sps inside the sps pool of that fragment OR o input the sps teria que ser casado com o de funcitonal group e abundance (cada linha eh uma sp, com abundancia etc...)
                                   initorgs.init_stage[f],
                                   0,
@@ -165,16 +165,28 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
     r = org.radius
     # 2. Look for neighbors in the square area delimited by r
     nbsum = 0
+
     for j in (y-r):(y+r), i in (x-r):(x+r) #TODO filter!() this area?
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
+            #unity test
+            println(simulog, orgs[o].id, " is projecting outside the landscape, because it is at: ", org[o].location)
         elseif haskey(landscape[i,j,frag].neighs,fg)
+
+            # unity test
+            println(simulog, orgs[o].id, " is overlapping with someone in cells ($i,$j).")
+
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs[fg] - org.biomass["veg"]/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
         else !haskey(landscape[i,j,frag].neighs,fg) #there is no competition
             nbsum += 0
         end
+
+        # unity test
+        println(simulog, orgs[o].id, " had overlaped $nbsum cells.")
+
     end
+
     compterm = /(org.biomass["veg"] - nbsum, org.biomass["veg"]) # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
     return compterm
 end
@@ -376,7 +388,7 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
         fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
 
         if checkboundaries(landscape, xdest, ydest, fdest)
-            orgs[d].location = (xdest, ydest, fdest)
+            orgs[d].location = (xdest,ydest,fdest)
             # unity test
             println(org[o].id," dispersed ", dist)
         else
