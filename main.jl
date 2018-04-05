@@ -1,4 +1,4 @@
-tuple#!/usr/bin/env julia
+#!/usr/bin/env julia
 
 # Get model directory and include it in Julia's loading path
 #cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
@@ -119,6 +119,8 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
     print(output, "location", sep)
     print(output, "species", sep)
     print(output, "stage", sep)
+    print(output, "biomas", sep)
+    print(output, "radius", sep)
     print(output, "functional_group", sep)
     print(output, "genotype", sep)
     print(output, "dispersal_pars")
@@ -161,9 +163,9 @@ function simulate()
         reproduce!(mylandscape,orgs,simulog)
         if (25 <= rem(t, 52) < 37) == 0
             disperse!(mylandscape,orgs,simulog)
-            establish!(mylandscape,orgs,simulog)
+            establish!(mylandscape,orgs,t,simulog)
         end
-        survive!(mylandscape,orgs,nogrowth, t,simulog)
+        survive!(mylandscape,orgs,nogrowth,simulog)
         ## DISTURBANCES
         ## Dynamical landscape change
         # if t #something
