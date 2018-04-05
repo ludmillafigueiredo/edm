@@ -159,7 +159,7 @@ end
     compete(landscape, orgs)
 Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
 """
-function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
+function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, simulog::IOStream)
     x, y, frag = org.location
     fg = org.fgroup
     r = org.radius
@@ -170,20 +170,20 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
             #unity test
-            println(simulog, orgs[o].id, " is projecting outside the landscape, because it is at: ", org[o].location)
+            println(simulog, orgs.id, " is projecting outside the landscape, because it is at: ", org[o].location)
         elseif haskey(landscape[i,j,frag].neighs,fg)
 
             # unity test
-            println(simulog, orgs[o].id, " is overlapping with someone in cells ($i,$j).")
+            println(simulog, org.id, " is overlapping with someone in cell ($i,$j).")
 
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs[fg] - org.biomass["veg"]/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
-        else !haskey(landscape[i,j,frag].neighs,fg) #there is no competition
+        else #!haskey(landscape[i,j,frag].neighs,fg) #there is no competition
             nbsum += 0
         end
 
         # unity test
-        println(simulog, orgs[o].id, " had overlaped $nbsum cells.")
+        println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
 
     end
 
@@ -207,7 +207,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
 
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
-        compterm = compete(landscape, orgs[o])
+        compterm = compete(landscape, orgs[o], simulog)
 
         #unity test
         println(simulog,orgs[o].id," compterm: ",compterm)

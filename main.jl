@@ -74,7 +74,7 @@ function read_initials()
     initorgs.fgroups = tuple("wind", "ant")
     initorgs.sps = tuple("sp1", "sp2")
     initorgs.init_stage = tuple("a","a")
-    initorgs.init_abund = tuple(100,100)
+    initorgs.init_abund = tuple(10,10)
     #genotypes are not initialized with inputs
     initorgs.biomassμ = tuple(100,100)
     initorgs.biomasssd = tuple(1,1)
@@ -127,7 +127,16 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
 
     #TODO change writedlm
     for o in 1:length(orgs)
-        writedlm(output, [orgs[o].id orgs[o].location orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].biomass orgs[o].radius orgs[o].genotype orgs[o].disp])
+        print(output,
+        orgs[o].id, sep,
+        orgs[o].location, sep,
+        orgs[o].sp, sep,
+        orgs[o].stage, sep,
+        orgs[o].fgroup, sep,
+        sum(values(orgs[o].biomass)), sep,
+        orgs[o].radius, sep,
+        orgs[o].genotype, sep,
+        orgs[o].disp)
     end
 
     close(output)
