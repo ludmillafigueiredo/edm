@@ -600,3 +600,2141 @@ ant200 compterm: 1.0
 ant200 gained 0.04971459127292065
 Reproducing: Organisms.Organism[]
 Dispersing: Int64[]
+Establishing seeds: Int64[]
+win1-a has 1.2308820629414186e-11 chance of dying
+win2-a has 1.332889354443978e-11 chance of dying
+win3-a has 1.0072054301701883e-11 chance of dying
+win4-a has 9.769962616701378e-12 chance of dying
+win5-a has 1.259325976832315e-11 chance of dying
+win6-a has 1.1655232334817356e-11 chance of dying
+win7-a has 1.0610956557854934e-11 chance of dying
+win8-a has 1.0444756171068548e-11 chance of dying
+win9-a has 1.1798007015784151e-11 chance of dying
+win10-a has 1.2006062810598905e-11 chance of dying
+win11-a has 1.153888096183664e-11 chance of dying
+win12-a has 1.275080041551746e-11 chance of dying
+win13-a has 1.0831557872847952e-11 chance of dying
+win14-a has 1.1585399306568434e-11 chance of dying
+win15-a has 1.1198930671696417e-11 chance of dying
+win16-a has 1.2864931342448926e-11 chance of dying
+win17-a has 1.122868464875637e-11 chance of dying
+win18-a has 1.0485057266862441e-11 chance of dying
+win19-a has 1.1427969681676586e-11 chance of dying
+win20-a has 1.0980549802752648e-11 chance of dying
+win21-a has 1.2087109091396542e-11 chance of dying
+win22-a has 1.1103451491578653e-11 chance of dying
+win23-a has 1.1905476604567866e-11 chance of dying
+win24-a has 1.208000366403894e-11 chance of dying
+win25-a has 1.2037482122195797e-11 chance of dying
+win26-a has 1.0542455797235561e-11 chance of dying
+win27-a has 1.0979550602030486e-11 chance of dying
+win28-a has 1.2180811914674905e-11 chance of dying
+win29-a has 1.2188583475847281e-11 chance of dying
+win30-a has 1.2566170326522297e-11 chance of dying
+win31-a has 1.1583178860519183e-11 chance of dying
+win32-a has 1.461097909327691e-11 chance of dying
+win33-a has 1.0257683591419209e-11 chance of dying
+win34-a has 1.237077107418827e-11 chance of dying
+win35-a has 1.1380230091617705e-11 chance of dying
+win36-a has 1.2135625837572661e-11 chance of dying
+win37-a has 1.0907164060824925e-11 chance of dying
+win38-a has 1.0485723400677216e-11 chance of dying
+win39-a has 1.1053602477772984e-11 chance of dying
+win40-a has 1.1827872015146568e-11 chance of dying
+win41-a has 1.1012746270466778e-11 chance of dying
+win42-a has 1.1561085422329143e-11 chance of dying
+win43-a has 1.1212364370294381e-11 chance of dying
+win44-a has 1.0888068224801373e-11 chance of dying
+win45-a has 1.2844614261098286e-11 chance of dying
+win46-a has 1.2449596908936655e-11 chance of dying
+win47-a has 1.0381584480967376e-11 chance of dying
+win48-a has 1.074584865534689e-11 chance of dying
+win49-a has 1.1040168779175019e-11 chance of dying
+win50-a has 1.063815702195825e-11 chance of dying
+win51-a has 8.88522588837759e-12 chance of dying
+win52-a has 1.1710521441443689e-11 chance of dying
+win53-a has 1.2036815988381022e-11 chance of dying
+win54-a has 1.1669887278742408e-11 chance of dying
+win55-a has 1.1357137452705501e-11 chance of dying
+win56-a has 1.1622924844800764e-11 chance of dying
+win57-a has 1.2487455514076373e-11 chance of dying
+win58-a has 1.3003154109014758e-11 chance of dying
+win59-a has 1.2251422099041065e-11 chance of dying
+win60-a has 1.175337605019422e-11 chance of dying
+win61-a has 1.2672973781491237e-11 chance of dying
+win62-a has 1.2169154572916341e-11 chance of dying
+win63-a has 1.2866152587776014e-11 chance of dying
+win64-a has 1.3561707312703675e-11 chance of dying
+win65-a has 1.1915024522579643e-11 chance of dying
+win66-a has 1.2088441359026092e-11 chance of dying
+win67-a has 1.1185719017703377e-11 chance of dying
+win68-a has 1.072819610925535e-11 chance of dying
+win69-a has 9.927836330803075e-12 chance of dying
+win70-a has 1.1715184378147114e-11 chance of dying
+win71-a has 1.1038725489243006e-11 chance of dying
+win72-a has 1.2324696818666325e-11 chance of dying
+win73-a has 1.0407674722046067e-11 chance of dying
+win74-a has 1.1185941062308302e-11 chance of dying
+win75-a has 1.3566703316314488e-11 chance of dying
+win76-a has 1.180988640214764e-11 chance of dying
+win77-a has 1.172117958248009e-11 chance of dying
+win78-a has 1.0650591519834052e-11 chance of dying
+win79-a has 1.1770029395563597e-11 chance of dying
+win80-a has 1.1851741810176009e-11 chance of dying
+win81-a has 1.0972778241580272e-11 chance of dying
+win82-a has 1.2959855411054377e-11 chance of dying
+win83-a has 1.1296075186351118e-11 chance of dying
+win84-a has 1.1206813255171255e-11 chance of dying
+win85-a has 1.113864556145927e-11 chance of dying
+win86-a has 1.1550538303595204e-11 chance of dying
+win87-a has 1.0298428776422952e-11 chance of dying
+win88-a has 1.2407075367093512e-11 chance of dying
+win89-a has 1.0565548436147765e-11 chance of dying
+win90-a has 1.2288947637273395e-11 chance of dying
+win91-a has 1.1704193170203325e-11 chance of dying
+win92-a has 1.2509548952266414e-11 chance of dying
+win93-a has 1.3134937582037765e-11 chance of dying
+win94-a has 1.2558953876862233e-11 chance of dying
+win95-a has 1.2638556867727857e-11 chance of dying
+win96-a has 1.0653811166605465e-11 chance of dying
+win97-a has 1.1637135699515966e-11 chance of dying
+win98-a has 1.2942202864962837e-11 chance of dying
+win99-a has 1.1670109323347333e-11 chance of dying
+win100-a has 1.1436851465873588e-11 chance of dying
+ant101-a has 1.1264100763241913e-11 chance of dying
+ant102-a has 1.1804335287024514e-11 chance of dying
+ant103-a has 1.0002110251150498e-11 chance of dying
+ant104-a has 1.0306200337595328e-11 chance of dying
+ant105-a has 1.3774870133431705e-11 chance of dying
+ant106-a has 9.985678950386045e-12 chance of dying
+ant107-a has 1.2949641359227826e-11 chance of dying
+ant108-a has 1.1521339438047562e-11 chance of dying
+ant109-a has 1.2869372234547427e-11 chance of dying
+ant110-a has 1.3953171951186505e-11 chance of dying
+ant111-a has 1.1717848913406215e-11 chance of dying
+ant112-a has 9.558576152812748e-12 chance of dying
+ant113-a has 9.64872626241231e-12 chance of dying
+ant114-a has 1.246747149963312e-11 chance of dying
+ant115-a has 1.1525003174028825e-11 chance of dying
+ant116-a has 1.227506984946558e-11 chance of dying
+ant117-a has 1.1796008614339826e-11 chance of dying
+ant118-a has 9.724110405784359e-12 chance of dying
+ant119-a has 1.3541390231353034e-11 chance of dying
+ant120-a has 1.1412537581634297e-11 chance of dying
+ant121-a has 1.2108536395771807e-11 chance of dying
+ant122-a has 1.2840173368999785e-11 chance of dying
+ant123-a has 1.2278844607749306e-11 chance of dying
+ant124-a has 1.0717871035126336e-11 chance of dying
+ant125-a has 1.052868903173021e-11 chance of dying
+ant126-a has 1.2613021738161478e-11 chance of dying
+ant127-a has 1.191935439237568e-11 chance of dying
+ant128-a has 1.2829293183358459e-11 chance of dying
+ant129-a has 1.1869727423174936e-11 chance of dying
+ant130-a has 1.0362266600338899e-11 chance of dying
+ant131-a has 1.0608736111805683e-11 chance of dying
+ant132-a has 1.1866063687193673e-11 chance of dying
+ant133-a has 1.2321921261104762e-11 chance of dying
+ant134-a has 1.1250222975434099e-11 chance of dying
+ant135-a has 1.1439516001132688e-11 chance of dying
+ant136-a has 1.1123546528324368e-11 chance of dying
+ant137-a has 1.265854088217111e-11 chance of dying
+ant138-a has 1.2024048423597833e-11 chance of dying
+ant139-a has 1.227107304657693e-11 chance of dying
+ant140-a has 1.2322032283407225e-11 chance of dying
+ant141-a has 1.1266099164686239e-11 chance of dying
+ant142-a has 1.2086109890674379e-11 chance of dying
+ant143-a has 1.1479484030019194e-11 chance of dying
+ant144-a has 1.1201595206955517e-11 chance of dying
+ant145-a has 1.0857537091624181e-11 chance of dying
+ant146-a has 1.0611400647064784e-11 chance of dying
+ant147-a has 1.066990940046253e-11 chance of dying
+ant148-a has 1.2030376694838196e-11 chance of dying
+ant149-a has 1.2714940211822068e-11 chance of dying
+ant150-a has 1.2792766845848291e-11 chance of dying
+ant151-a has 1.3531176179526483e-11 chance of dying
+ant152-a has 1.1994849558050191e-11 chance of dying
+ant153-a has 1.2250422898318902e-11 chance of dying
+ant154-a has 1.1230905094805621e-11 chance of dying
+ant155-a has 1.3215317729020626e-11 chance of dying
+ant156-a has 1.2754908240708573e-11 chance of dying
+ant157-a has 1.1430967283843074e-11 chance of dying
+ant158-a has 1.2119971692925446e-11 chance of dying
+ant159-a has 1.0919154469490877e-11 chance of dying
+ant160-a has 1.0916711978836702e-11 chance of dying
+ant161-a has 1.1751377648749894e-11 chance of dying
+ant162-a has 1.3716805469243809e-11 chance of dying
+ant163-a has 1.2084888645347291e-11 chance of dying
+ant164-a has 1.174282893146028e-11 chance of dying
+ant165-a has 1.0231371305735593e-11 chance of dying
+ant166-a has 1.3257950293166232e-11 chance of dying
+ant167-a has 1.209232713961228e-11 chance of dying
+ant168-a has 1.2252421299763228e-11 chance of dying
+ant169-a has 1.127897775177189e-11 chance of dying
+ant170-a has 1.1761147611366596e-11 chance of dying
+ant171-a has 9.326650562968553e-12 chance of dying
+ant172-a has 1.2773115898312426e-11 chance of dying
+ant173-a has 9.887868301916569e-12 chance of dying
+ant174-a has 1.2051692976911e-11 chance of dying
+ant175-a has 1.229139012792757e-11 chance of dying
+ant176-a has 1.3651191288488462e-11 chance of dying
+ant177-a has 1.1283418643870391e-11 chance of dying
+ant178-a has 1.019773154808945e-11 chance of dying
+ant179-a has 1.1442180536391788e-11 chance of dying
+ant180-a has 1.1978751324193126e-11 chance of dying
+ant181-a has 1.0302980690823915e-11 chance of dying
+ant182-a has 1.3059886505573104e-11 chance of dying
+ant183-a has 1.1696199564426024e-11 chance of dying
+ant184-a has 1.0100476011132287e-11 chance of dying
+ant185-a has 1.2005729743691518e-11 chance of dying
+ant186-a has 1.1939005339911546e-11 chance of dying
+ant187-a has 1.1220135931466757e-11 chance of dying
+ant188-a has 1.272648653127817e-11 chance of dying
+ant189-a has 8.850031818496973e-12 chance of dying
+ant190-a has 1.2489675960125624e-11 chance of dying
+ant191-a has 9.33975119465913e-12 chance of dying
+ant192-a has 1.131206239790572e-11 chance of dying
+ant193-a has 1.1568523916594131e-11 chance of dying
+ant194-a has 1.2759238110504612e-11 chance of dying
+ant195-a has 1.287303597052869e-11 chance of dying
+ant196-a has 1.145150640979864e-11 chance of dying
+ant197-a has 1.3321233005569866e-11 chance of dying
+ant198-a has 1.1852741010898171e-11 chance of dying
+ant199-a has 1.1062040172760135e-11 chance of dying
+ant200-a has 1.0203393685515039e-11 chance of dying
+win1 has biomassDict("veg"=>100.008) and projects 0.8265110255672694
+win2 has biomassDict("veg"=>99.6312) and projects 0.8233980451467123
+win3 has biomassDict("veg"=>101.006) and projects 0.8347604464394525
+win4 has biomassDict("veg"=>101.112) and projects 0.8356365504847444
+win5 has biomassDict("veg"=>99.8453) and projects 0.8251680333059612
+win6 has biomassDict("veg"=>100.59) and projects 0.8313217018246296
+win7 has biomassDict("veg"=>98.8533) and projects 0.8169696759406798
+win8 has biomassDict("veg"=>100.687) and projects 0.8321240279990519
+win9 has biomassDict("veg"=>101.04) and projects 0.8350401524971858
+win10 has biomassDict("veg"=>101.542) and projects 0.8391870154402705
+win11 has biomassDict("veg"=>99.4551) and projects 0.8219432738216764
+win12 has biomassDict("veg"=>99.1235) and projects 0.8192020940475139
+win13 has biomassDict("veg"=>98.6048) and projects 0.8149154488780921
+win14 has biomassDict("veg"=>98.3575) and projects 0.8128718178439905
+win15 has biomassDict("veg"=>99.9767) and projects 0.826253759367453
+win16 has biomassDict("veg"=>100.499) and projects 0.8305669196082452
+win17 has biomassDict("veg"=>100.239) and projects 0.8284202067478869
+win18 has biomassDict("veg"=>100.21) and projects 0.8281814199457509
+win19 has biomassDict("veg"=>100.507) and projects 0.8306364817757274
+win20 has biomassDict("veg"=>101.352) and projects 0.8376225847999029
+win21 has biomassDict("veg"=>100.396) and projects 0.8297155518794233
+win22 has biomassDict("veg"=>100.603) and projects 0.831426129044878
+win23 has biomassDict("veg"=>96.7413) and projects 0.7995151405146543
+win24 has biomassDict("veg"=>99.5804) and projects 0.8229786675781019
+win25 has biomassDict("veg"=>99.1696) and projects 0.8195833120547049
+win26 has biomassDict("veg"=>97.8732) and projects 0.8088696537524924
+win27 has biomassDict("veg"=>100.691) and projects 0.832156146298857
+win28 has biomassDict("veg"=>101.003) and projects 0.8347314669325203
+win29 has biomassDict("veg"=>101.387) and projects 0.8379092418125001
+win30 has biomassDict("veg"=>99.655) and projects 0.823595063338034
+win31 has biomassDict("veg"=>99.7187) and projects 0.8241218654846353
+win32 has biomassDict("veg"=>99.9497) and projects 0.8260305898071164
+win33 has biomassDict("veg"=>98.8034) and projects 0.816557431097789
+win34 has biomassDict("veg"=>99.6525) and projects 0.8235740623024226
+win35 has biomassDict("veg"=>99.5792) and projects 0.8229682018956415
+win36 has biomassDict("veg"=>100.377) and projects 0.8295581428436456
+win37 has biomassDict("veg"=>100.048) and projects 0.8268390369800761
+win38 has biomassDict("veg"=>100.185) and projects 0.8279752034335628
+win39 has biomassDict("veg"=>99.4355) and projects 0.8217809637967253
+win40 has biomassDict("veg"=>99.1671) and projects 0.819562694305325
+win41 has biomassDict("veg"=>99.8535) and projects 0.8252356728264229
+win42 has biomassDict("veg"=>98.7695) and projects 0.8162767879304144
+win43 has biomassDict("veg"=>98.5204) and projects 0.8142178687069104
+win44 has biomassDict("veg"=>99.2581) and projects 0.8203150508322667
+win45 has biomassDict("veg"=>97.4495) and projects 0.805368009872743
+win46 has biomassDict("veg"=>99.6356) and projects 0.8234346648987699
+win47 has biomassDict("veg"=>98.8892) and projects 0.817266408909639
+win48 has biomassDict("veg"=>99.3641) and projects 0.8211907373454475
+win49 has biomassDict("veg"=>100.772) and projects 0.8328267620743472
+win50 has biomassDict("veg"=>98.3818) and projects 0.813072792928174
+win51 has biomassDict("veg"=>101.244) and projects 0.8367255628159257
+win52 has biomassDict("veg"=>98.7516) and projects 0.8161285248354468
+win53 has biomassDict("veg"=>101.007) and projects 0.834767615377884
+win54 has biomassDict("veg"=>99.0495) and projects 0.8185912945856932
+win55 has biomassDict("veg"=>100.516) and projects 0.8307126953593116
+win56 has biomassDict("veg"=>99.6716) and projects 0.8237323869857432
+win57 has biomassDict("veg"=>100.048) and projects 0.8268448981281938
+win58 has biomassDict("veg"=>98.2128) and projects 0.8116759628947255
+win59 has biomassDict("veg"=>99.9599) and projects 0.8261147444008705
+win60 has biomassDict("veg"=>99.151) and projects 0.8194296218039661
+win61 has biomassDict("veg"=>99.0842) and projects 0.8188775183816069
+win62 has biomassDict("veg"=>99.5775) and projects 0.8229541599222994
+win63 has biomassDict("veg"=>99.8534) and projects 0.8252349164511876
+win64 has biomassDict("veg"=>98.5219) and projects 0.8142302392072488
+win65 has biomassDict("veg"=>99.4925) and projects 0.8222521870664009
+win66 has biomassDict("veg"=>98.7238) and projects 0.8158994214031209
+win67 has biomassDict("veg"=>99.0374) and projects 0.8184908207762733
+win68 has biomassDict("veg"=>100.628) and projects 0.8316341370740082
+win69 has biomassDict("veg"=>100.318) and projects 0.8290710369884384
+win70 has biomassDict("veg"=>99.0921) and projects 0.8189432940010642
+win71 has biomassDict("veg"=>99.3295) and projects 0.8209048576937789
+win72 has biomassDict("veg"=>100.085) and projects 0.8271492600032194
+win73 has biomassDict("veg"=>99.1596) and projects 0.8195010063994598
+win74 has biomassDict("veg"=>97.835) and projects 0.8085534751869635
+win75 has biomassDict("veg"=>101.257) and projects 0.8368376394838372
+win76 has biomassDict("veg"=>100.186) and projects 0.8279868696034169
+win77 has biomassDict("veg"=>100.628) and projects 0.8316332769551829
+win78 has biomassDict("veg"=>99.9322) and projects 0.8258857181184459
+win79 has biomassDict("veg"=>101.154) and projects 0.8359819962429627
+win80 has biomassDict("veg"=>100.455) and projects 0.8302047183519483
+win81 has biomassDict("veg"=>100.84) and projects 0.8333850971174426
+win82 has biomassDict("veg"=>100.45) and projects 0.8301663746556175
+win83 has biomassDict("veg"=>99.2158) and projects 0.8199655755369931
+win84 has biomassDict("veg"=>99.6557) and projects 0.8236012342398437
+win85 has biomassDict("veg"=>101.233) and projects 0.8366348411440635
+win86 has biomassDict("veg"=>101.244) and projects 0.836727729592296
+win87 has biomassDict("veg"=>99.9493) and projects 0.8260269955516485
+win88 has biomassDict("veg"=>99.9989) and projects 0.8264369476587247
+win89 has biomassDict("veg"=>98.0127) and projects 0.8100221777456688
+win90 has biomassDict("veg"=>99.878) and projects 0.8254379863509931
+win91 has biomassDict("veg"=>103.025) and projects 0.8514481594484264
+win92 has biomassDict("veg"=>101.0) and projects 0.8347114458679447
+win93 has biomassDict("veg"=>98.6447) and projects 0.8152456227091862
+win94 has biomassDict("veg"=>99.7759) and projects 0.8245938018375125
+win95 has biomassDict("veg"=>99.5027) and projects 0.8223366829700691
+win96 has biomassDict("veg"=>100.08) and projects 0.8271106144168876
+win97 has biomassDict("veg"=>100.827) and projects 0.8332847671402414
+win98 has biomassDict("veg"=>100.67) and projects 0.8319812068170537
+win99 has biomassDict("veg"=>98.881) and projects 0.8171981993126174
+win100 has biomassDict("veg"=>99.5429) and projects 0.822668629995623
+ant101 has biomassDict("veg"=>100.638) and projects 0.8317201137590738
+ant102 has biomassDict("veg"=>101.102) and projects 0.8355532565488917
+ant103 has biomassDict("veg"=>100.875) and projects 0.8336766696450625
+ant104 has biomassDict("veg"=>100.079) and projects 0.8271015082855703
+ant105 has biomassDict("veg"=>100.951) and projects 0.8343036462290994
+ant106 has biomassDict("veg"=>101.048) and projects 0.8351067292303734
+ant107 has biomassDict("veg"=>97.8223) and projects 0.8084488184792387
+ant108 has biomassDict("veg"=>99.9463) and projects 0.8260028879032004
+ant109 has biomassDict("veg"=>98.6559) and projects 0.8153376335795737
+ant110 has biomassDict("veg"=>101.746) and projects 0.8408760003168134
+ant111 has biomassDict("veg"=>98.045) and projects 0.8102890883074427
+ant112 has biomassDict("veg"=>99.6159) and projects 0.8232720366792065
+ant113 has biomassDict("veg"=>102.107) and projects 0.8438636110247366
+ant114 has biomassDict("veg"=>98.6635) and projects 0.8154012271593961
+ant115 has biomassDict("veg"=>99.3652) and projects 0.8211997357328267
+ant116 has biomassDict("veg"=>100.176) and projects 0.827902333292846
+ant117 has biomassDict("veg"=>100.512) and projects 0.8306813793755293
+ant118 has biomassDict("veg"=>101.459) and projects 0.8385019911706891
+ant119 has biomassDict("veg"=>99.2555) and projects 0.8202937142558084
+ant120 has biomassDict("veg"=>99.1071) and projects 0.8190667739484304
+ant121 has biomassDict("veg"=>100.412) and projects 0.8298540632989497
+ant122 has biomassDict("veg"=>99.2463) and projects 0.8202176054802791
+ant123 has biomassDict("veg"=>98.8561) and projects 0.8169924598264747
+ant124 has biomassDict("veg"=>98.7806) and projects 0.8163688692572506
+ant125 has biomassDict("veg"=>99.3318) and projects 0.8209242130655587
+ant126 has biomassDict("veg"=>99.5617) and projects 0.8228240264436867
+ant127 has biomassDict("veg"=>100.273) and projects 0.8287004452091583
+ant128 has biomassDict("veg"=>101.252) and projects 0.8367964910095125
+ant129 has biomassDict("veg"=>99.1853) and projects 0.8197135305735167
+ant130 has biomassDict("veg"=>99.9193) and projects 0.8257791064331512
+ant131 has biomassDict("veg"=>97.9378) and projects 0.8094033444853534
+ant132 has biomassDict("veg"=>99.7958) and projects 0.8247584276056245
+ant133 has biomassDict("veg"=>100.326) and projects 0.8291364000479257
+ant134 has biomassDict("veg"=>99.3815) and projects 0.8213347721998832
+ant135 has biomassDict("veg"=>100.104) and projects 0.8273067642908836
+ant136 has biomassDict("veg"=>99.6457) and projects 0.8235180007829449
+ant137 has biomassDict("veg"=>100.367) and projects 0.8294780805327802
+ant138 has biomassDict("veg"=>98.7889) and projects 0.8164372434053178
+ant139 has biomassDict("veg"=>99.6022) and projects 0.8231588260562005
+ant140 has biomassDict("veg"=>100.249) and projects 0.8285005879805913
+ant141 has biomassDict("veg"=>99.3665) and projects 0.8212103454124462
+ant142 has biomassDict("veg"=>101.127) and projects 0.8357613640840217
+ant143 has biomassDict("veg"=>99.7712) and projects 0.824555344223489
+ant144 has biomassDict("veg"=>100.221) and projects 0.8282745272929687
+ant145 has biomassDict("veg"=>98.8283) and projects 0.8167628431632
+ant146 has biomassDict("veg"=>100.188) and projects 0.8280025518500106
+ant147 has biomassDict("veg"=>101.077) and projects 0.8353473242905622
+ant148 has biomassDict("veg"=>98.5461) and projects 0.8144308809789362
+ant149 has biomassDict("veg"=>101.595) and projects 0.8396289458525065
+ant150 has biomassDict("veg"=>99.8017) and projects 0.8248077760965487
+ant151 has biomassDict("veg"=>101.543) and projects 0.8391979551453617
+ant152 has biomassDict("veg"=>100.164) and projects 0.8278041913072567
+ant153 has biomassDict("veg"=>96.8008) and projects 0.8000066873930988
+ant154 has biomassDict("veg"=>101.338) and projects 0.8375047394678725
+ant155 has biomassDict("veg"=>99.1682) and projects 0.8195720191229032
+ant156 has biomassDict("veg"=>100.501) and projects 0.8305830153303793
+ant157 has biomassDict("veg"=>100.838) and projects 0.8333685923670401
+ant158 has biomassDict("veg"=>99.8091) and projects 0.824868595992539
+ant159 has biomassDict("veg"=>99.6888) and projects 0.8238742221529507
+ant160 has biomassDict("veg"=>99.9111) and projects 0.8257118524482746
+ant161 has biomassDict("veg"=>100.5) and projects 0.8305768523194969
+ant162 has biomassDict("veg"=>100.308) and projects 0.8289891962322554
+ant163 has biomassDict("veg"=>100.724) and projects 0.8324280802134681
+ant164 has biomassDict("veg"=>98.814) and projects 0.8166445576059498
+ant165 has biomassDict("veg"=>100.131) and projects 0.8275314650313726
+ant166 has biomassDict("veg"=>100.064) and projects 0.8269774005684787
+ant167 has biomassDict("veg"=>99.7491) and projects 0.8243724833032067
+ant168 has biomassDict("veg"=>98.8348) and projects 0.8168164525993769
+ant169 has biomassDict("veg"=>100.185) and projects 0.8279738729153563
+ant170 has biomassDict("veg"=>101.448) and projects 0.8384098382159684
+ant171 has biomassDict("veg"=>99.7542) and projects 0.8244149024675538
+ant172 has biomassDict("veg"=>99.9495) and projects 0.8260286982238729
+ant173 has biomassDict("veg"=>99.3062) and projects 0.8207126892015425
+ant174 has biomassDict("veg"=>100.809) and projects 0.8331342102041184
+ant175 has biomassDict("veg"=>100.114) and projects 0.8273921706351073
+ant176 has biomassDict("veg"=>99.6517) and projects 0.8235674002001172
+ant177 has biomassDict("veg"=>100.54) and projects 0.8309107387120003
+ant178 has biomassDict("veg"=>99.2485) and projects 0.8202358508598919
+ant179 has biomassDict("veg"=>99.3153) and projects 0.8207875002718642
+ant180 has biomassDict("veg"=>100.488) and projects 0.8304754861435013
+ant181 has biomassDict("veg"=>100.498) and projects 0.830564292087802
+ant182 has biomassDict("veg"=>101.357) and projects 0.837660256631151
+ant183 has biomassDict("veg"=>100.489) and projects 0.8304872655065805
+ant184 has biomassDict("veg"=>97.9656) and projects 0.8096333039401259
+ant185 has biomassDict("veg"=>99.4249) and projects 0.8216933773749535
+ant186 has biomassDict("veg"=>100.137) and projects 0.827575301715309
+ant187 has biomassDict("veg"=>101.634) and projects 0.8399524484320243
+ant188 has biomassDict("veg"=>99.4577) and projects 0.8219646893631832
+ant189 has biomassDict("veg"=>99.5248) and projects 0.8225193942437695
+ant190 has biomassDict("veg"=>98.4601) and projects 0.8137195549229439
+ant191 has biomassDict("veg"=>97.6151) and projects 0.8067361714741156
+ant192 has biomassDict("veg"=>100.228) and projects 0.8283280783654384
+ant193 has biomassDict("veg"=>99.7656) and projects 0.8245092700358583
+ant194 has biomassDict("veg"=>100.655) and projects 0.8318608597082584
+ant195 has biomassDict("veg"=>100.447) and projects 0.830141289814311
+ant196 has biomassDict("veg"=>100.22) and projects 0.8282606197378739
+ant197 has biomassDict("veg"=>99.3589) and projects 0.8211482916100687
+ant198 has biomassDict("veg"=>100.587) and projects 0.8312977104924778
+ant199 has biomassDict("veg"=>98.6829) and projects 0.8155611219910298
+ant200 has biomassDict("veg"=>99.0462) and projects 0.8185637425799065
+win1 compterm: -1.4209741510746107e-15
+individuals not growing: win1a
+win2 compterm: -1.8542502654472444e-15
+individuals not growing: win2a
+win3 compterm: 2.1103973144368e-15
+win3 gained 1.0561647523047424e-16
+win4 compterm: -1.9676390688262226e-15
+individuals not growing: win4a
+win5 compterm: 1.138629472306556e-15
+win5 gained 7.042832181650511e-17
+win6 compterm: -0.1665420422835552
+individuals not growing: win6a
+win7 compterm: -2.731382315944874e-15
+individuals not growing: win7a
+win8 compterm: -0.26233787504950745
+individuals not growing: win8a
+win9 compterm: 0.0
+individuals not growing: win9a
+win10 compterm: -2.519118392373562e-15
+individuals not growing: win10a
+win11 compterm: 2.0004192216672134e-15
+win11 gained 1.1293051285539643e-16
+win12 compterm: -0.5482727450496758
+individuals not growing: win12a
+win13 compterm: -1.4751102182936384
+individuals not growing: win13a
+win14 compterm: 2.4561884433898833e-15
+win14 gained 1.3768295190747142e-16
+win15 compterm: -0.19738650631261068
+individuals not growing: win15a
+win16 compterm: 4.2421053927715235e-16
+win16 gained 2.6980343000641828e-17
+win17 compterm: -2.1265490508490407e-15
+individuals not growing: win17a
+win18 compterm: 9.926756894525976e-16
+win18 gained 5.1308642455429266e-17
+win19 compterm: -0.06523426847809237
+individuals not growing: win19a
+win20 compterm: -0.1640458939976671
+individuals not growing: win20a
+win21 compterm: -0.8944021275351703
+individuals not growing: win21a
+win22 compterm: -0.8907256253216901
+individuals not growing: win22a
+win23 compterm: -2.2034306982978207e-15
+individuals not growing: win23a
+win24 compterm: 2.5687317648923614e-15
+win24 gained 1.5200582751376327e-16
+win25 compterm: 1.146388205455179e-15
+win25 gained 6.732046835368038e-17
+win26 compterm: -2.1779481974520256e-15
+individuals not growing: win26a
+win27 compterm: 0.0
+individuals not growing: win27a
+win28 compterm: -7.034901938135507e-16
+individuals not growing: win28a
+win29 compterm: 2.3827954930141586e-15
+win29 gained 1.448520152758233e-16
+win30 compterm: 1.1408041210438566e-15
+win30 gained 7.02771805114639e-17
+win31 compterm: -2.850187216470967e-15
+individuals not growing: win31a
+win32 compterm: 0.4545454545454538
+win32 gained 0.032654265881295934
+win33 compterm: -2.0136135701593414e-15
+individuals not growing: win33a
+win34 compterm: -1.1408332114063004e-15
+individuals not growing: win34a
+win35 compterm: -2.7114735665212895e-15
+individuals not growing: win35a
+win36 compterm: -2.406782914699262e-15
+individuals not growing: win36a
+win37 compterm: 0.2727272727272731
+win37 gained 0.014640228407311617
+win38 compterm: -1.13476905882097e-15
+individuals not growing: win38a
+win39 compterm: -1.0004071623151361e-15
+individuals not growing: win39a
+win40 compterm: -0.06700904626230743
+individuals not growing: win40a
+win41 compterm: -2.8463403645331417e-16
+individuals not growing: win41a
+win42 compterm: -1.2949109153259887e-15
+individuals not growing: win42a
+win43 compterm: 1.4424281854369587e-15
+win43 gained 7.838229904978829e-17
+win44 compterm: 2.290731204734463e-15
+win44 gained 1.2178469728866687e-16
+win45 compterm: 2.0415898122558477e-15
+win45 gained 1.2570949995094054e-16
+win46 compterm: -0.5426508318046468
+individuals not growing: win46a
+win47 compterm: -2.730390606050601e-15
+individuals not growing: win47a
+win48 compterm: 1.001126199613529e-15
+win48 gained 5.2584619218070836e-17
+win49 compterm: -1.410198202545768e-16
+individuals not growing: win49a
+win50 compterm: 2.3111353632771352e-15
+win50 gained 1.1898896487153699e-16
+win51 compterm: -2.1054408788887955e-15
+individuals not growing: win51a
+win52 compterm: -1.2951461570730557e-15
+individuals not growing: win52a
+win53 compterm: -9.848436222149358e-16
+individuals not growing: win53a
+win54 compterm: 2.1520827499827093e-15
+win54 gained 1.223708853435543e-16
+win55 compterm: 1.696544390574794e-15
+win55 gained 9.527333315814235e-17
+win56 compterm: 7.128837116668956e-16
+win56 gained 4.0626265497374355e-17
+win57 compterm: -2.8408007488900776e-15
+individuals not growing: win57a
+win58 compterm: 5.787781610389183e-16
+win58 gained 3.636039651070147e-17
+win59 compterm: 1.2794902037306104e-15
+win59 gained 7.708113582654439e-17
+win60 compterm: 2.866508048180428e-15
+win60 gained 1.643289315861603e-16
+win61 compterm: -1.6320536284152958
+individuals not growing: win61a
+win62 compterm: -1.2844041309884502e-15
+individuals not growing: win62a
+win63 compterm: -2.419391527362539e-15
+individuals not growing: win63a
+win64 compterm: 8.654437624812798e-16
+win64 gained 5.688350924866342e-17
+win65 compterm: -1.3695376933468701
+individuals not growing: win65a
+win66 compterm: 7.197276846265724e-16
+win66 gained 4.225341584027224e-17
+win67 compterm: -2.0088571335638643e-15
+individuals not growing: win67a
+win68 compterm: -0.5952896536771244
+individuals not growing: win68a
+win69 compterm: 4.249759371074138e-16
+win69 gained 2.082063987970945e-17
+win70 compterm: 1.7209261908789455e-15
+win70 gained 9.827674604609402e-17
+win71 compterm: 2.146017516954493e-15
+win71 gained 1.1575245832742115e-16
+win72 compterm: -1.8458410320963e-15
+individuals not growing: win72a
+win73 compterm: 0.4545454545454538
+win73 gained 0.02307634127273539
+win74 compterm: -1.6739975782003342
+individuals not growing: win74a
+win75 compterm: 1.6841271197605207e-15
+win75 gained 1.1380856165802221e-16
+win76 compterm: -1.1347530701512562e-15
+individuals not growing: win76a
+win77 compterm: -1.1439731829116755
+individuals not growing: win77a
+win78 compterm: 2.7018950401653016e-15
+win78 gained 1.4146460549131595e-16
+win79 compterm: -1.1239005702873287e-15
+individuals not growing: win79a
+win80 compterm: -1.5561172499293232e-15
+individuals not growing: win80a
+win81 compterm: -1.4092534255430179e-16
+individuals not growing: win81a
+win82 compterm: -1.1317739082327543e-15
+individuals not growing: win82a
+win83 compterm: -1.0026220448316728e-15
+individuals not growing: win83a
+win84 compterm: -1.568593913524861e-15
+individuals not growing: win84a
+win85 compterm: 1.6845353482576609e-15
+win85 gained 9.344001922066382e-17
+win86 compterm: -1.2632612560042291e-15
+individuals not growing: win86a
+win87 compterm: 1.7061681653030027e-15
+win87 gained 8.639227427094464e-17
+win88 compterm: -1.4342673876845817
+individuals not growing: win88a
+win89 compterm: 2.7548091729264003e-15
+win89 gained 1.40335739232233e-16
+win90 compterm: -0.26660495674208007
+individuals not growing: win90a
+win91 compterm: 1.931099510671445e-15
+win91 gained 1.1454844435396935e-16
+win92 compterm: 2.2512226158596326e-15
+win92 gained 1.3992074333082362e-16
+win93 compterm: 1.4406097624987871e-15
+win93 gained 9.182223727400729e-17
+win94 compterm: 7.1213899515866345e-16
+win94 gained 4.389794631688394e-17
+win95 compterm: -1.9994622131344283e-15
+individuals not growing: win95a
+win96 compterm: 2.4139048999550246e-15
+win96 gained 1.2661214945294274e-16
+win97 compterm: -5.637692415474563e-16
+individuals not growing: win97a
+win98 compterm: -0.5947930945450277
+individuals not growing: win98a
+win99 compterm: 2.8743352687197317e-15
+win99 gained 1.6316376019924224e-16
+win100 compterm: 1.142088816893874e-15
+win100 gained 6.396134700768937e-17
+ant101 compterm: -1.1296596376405174e-15
+individuals not growing: ant101a
+ant102 compterm: 1.4055965837056545e-16
+ant102 gained 8.252043818464748e-18
+ant103 compterm: 1.127008439287887e-15
+ant103 gained 5.593755972429442e-17
+ant104 compterm: 1.4199596919411713e-15
+ant104 gained 7.204784290105003e-17
+ant105 compterm: -2.2523229919323697e-15
+individuals not growing: ant105a
+ant106 compterm: -1.1250785192370506e-15
+individuals not growing: ant106a
+ant107 compterm: -0.2505000579158919
+individuals not growing: ant107a
+ant108 compterm: -1.4218483011489068e-16
+individuals not growing: ant108a
+ant109 compterm: -4.3213415689635335e-16
+individuals not growing: ant109a
+ant110 compterm: 1.5363690754801419e-15
+ant110 gained 1.072968762334301e-16
+ant111 compterm: 4.3482658961722643e-16
+ant111 gained 2.4574719434445232e-17
+ant112 compterm: -0.32674278730463113
+individuals not growing: ant112a
+ant113 compterm: 2.5051577264595338e-15
+ant113 gained 1.2141278100684223e-16
+ant114 compterm: -0.5103392091732848
+individuals not growing: ant114a
+ant115 compterm: -2.1452469207041215e-15
+individuals not growing: ant115a
+ant116 compterm: 1.7023034080429328e-15
+ant116 gained 1.0297343810176624e-16
+ant117 compterm: -1.1310722325733685e-15
+individuals not growing: ant117a
+ant118 compterm: 1.2605882081956347e-15
+ant118 gained 6.118012917650293e-17
+ant119 compterm: -2.1476163644166443e-15
+individuals not growing: ant119a
+ant120 compterm: 0.45454545454545486
+ant120 gained 0.025290797514822307
+ant121 compterm: 0.45454545454545386
+ant121 gained 0.02718661655981325
+ant122 compterm: -1.2886893862749997e-15
+individuals not growing: ant122a
+ant123 compterm: 0.45454545454545475
+ant123 gained 0.027141848860658225
+ant124 compterm: 8.631765716234105e-16
+ant124 gained 4.4955400808024466e-17
+ant125 compterm: 2.145966919145066e-15
+ant125 gained 1.1040483293241076e-16
+ant126 compterm: 2.4264803904366533e-15
+ant126 gained 1.4989602709081455e-16
+ant127 compterm: -2.834439898515641e-15
+individuals not growing: ant127a
+ant128 compterm: 9.824557952491867e-16
+ant128 gained 6.277980642158694e-17
+ant129 compterm: -2.1491364222465854e-15
+individuals not growing: ant129a
+ant130 compterm: -0.8266960744360132
+individuals not growing: ant130a
+ant131 compterm: 2.902016184912141e-15
+ant131 gained 1.4832475053734996e-16
+ant132 compterm: -1.708792437056507e-15
+individuals not growing: ant132a
+ant133 compterm: -2.6913020890152754e-15
+individuals not growing: ant133a
+ant134 compterm: -3.0028519059329676e-15
+individuals not growing: ant134a
+ant135 compterm: 1.561568137675649e-15
+ant135 gained 8.796740594487304e-17
+ant136 compterm: -0.13207105977429495
+individuals not growing: ant136a
+ant137 compterm: -1.4158913061993123e-16
+individuals not growing: ant137a
+ant138 compterm: 0.0
+individuals not growing: ant138a
+ant139 compterm: -0.16199160782873584
+individuals not growing: ant139a
+ant140 compterm: 2.1263427327889286e-15
+ant140 gained 1.2920930852179527e-16
+ant141 compterm: -0.08296712699062539
+individuals not growing: ant141a
+ant142 compterm: 2.8104931703715014e-16
+ant142 gained 1.689799905787858e-17
+ant143 compterm: 1.281909977326929e-15
+ant143 gained 7.222429451309542e-17
+ant144 compterm: 3.1194871763652006e-15
+ant144 gained 1.7227605839256198e-16
+ant145 compterm: -4.3138010479056e-16
+individuals not growing: ant145a
+ant146 compterm: 1.843938814404288e-15
+ant146 gained 9.643558592630436e-17
+ant147 compterm: -9.84160166832018e-16
+individuals not growing: ant147a
+ant148 compterm: 0.4545454545454538
+ant148 gained 0.026509184970810434
+ant149 compterm: -0.5870324474818753
+individuals not growing: ant149a
+ant150 compterm: 0.0
+individuals not growing: ant150a
+ant151 compterm: -0.48180668761418993
+individuals not growing: ant151a
+ant152 compterm: -0.16635351133046197
+individuals not growing: ant152a
+ant153 compterm: 1.3212461086577777e-15
+ant153 gained 7.707520513391973e-17
+ant154 compterm: -1.2620892429694467e-15
+individuals not growing: ant154a
+ant155 compterm: 1.7196060024100977e-15
+ant155 gained 1.1086142811912083e-16
+ant156 compterm: 2.545213911454445e-15
+ant156 gained 1.604989422706397e-16
+ant157 compterm: 2.113922003420055e-15
+ant157 gained 1.1986590970219812e-16
+ant158 compterm: -1.2814231597051751e-15
+individuals not growing: ant158a
+ant159 compterm: -1.1404175747508428e-15
+individuals not growing: ant159a
+ant160 compterm: -1.1378795636051045e-15
+individuals not growing: ant160a
+ant161 compterm: 1.1312145765964421e-15
+ant161 gained 6.572045642810755e-17
+ant162 compterm: -1.5583989382151557e-15
+individuals not growing: ant162a
+ant163 compterm: -3.103921921684545e-15
+individuals not growing: ant163a
+ant164 compterm: -1.2943277620278479e-15
+individuals not growing: ant164a
+ant165 compterm: 1.7030663159589685e-15
+ant165 gained 8.582894839519821e-17
+ant166 compterm: -1.5621900699004718e-15
+individuals not growing: ant166a
+ant167 compterm: -9.972622554580138e-16
+individuals not growing: ant167a
+ant168 compterm: -0.24539399908440654
+individuals not growing: ant168a
+ant169 compterm: -2.2200150322433636
+individuals not growing: ant169a
+ant170 compterm: 1.2607267644515088e-15
+ant170 gained 7.399671766673651e-17
+ant171 compterm: -0.0823233827829492
+individuals not growing: ant171a
+ant172 compterm: -0.8261965630247253
+individuals not growing: ant172a
+ant173 compterm: 0.0
+individuals not growing: ant173a
+ant174 compterm: -0.1642318096930997
+individuals not growing: ant174a
+ant175 compterm: 0.18181818181818174
+ant175 gained 0.011006125678891091
+ant176 compterm: -0.2657498216377353
+individuals not growing: ant176a
+ant177 compterm: -1.9970554179203654
+individuals not growing: ant177a
+ant178 compterm: 8.591071470563188e-16
+ant178 gained 4.277338112282912e-17
+ant179 compterm: 1.144706324129206e-15
+ant179 gained 6.399128155331656e-17
+ant180 compterm: 0.09090909090909259
+ant180 gained 0.005383090585270606
+ant181 compterm: 1.272635643848015e-15
+ant181 gained 6.482226419645954e-17
+ant182 compterm: -1.6824732370127075e-15
+individuals not growing: ant182a
+ant183 compterm: 7.070853772771971e-16
+ant183 gained 4.088218855516028e-17
+ant184 compterm: -1.5956555602556099e-15
+individuals not growing: ant184a
+ant185 compterm: -1.858097053988222e-15
+individuals not growing: ant185a
+ant186 compterm: -0.2631820311237155
+individuals not growing: ant186a
+ant187 compterm: -1.8177053315722232e-15
+individuals not growing: ant187a
+ant188 compterm: -1.2859502802209734e-15
+individuals not growing: ant188a
+ant189 compterm: -0.13239194481536765
+individuals not growing: ant189a
+ant190 compterm: -0.3344592661398913
+individuals not growing: ant190a
+ant191 compterm: -0.16865403449471858
+individuals not growing: ant191a
+ant192 compterm: -0.603159462104834
+individuals not growing: ant192a
+ant193 compterm: -2.2790784202742643e-15
+individuals not growing: ant193a
+ant194 compterm: 9.882849426583233e-16
+ant194 gained 6.243714963468334e-17
+ant195 compterm: 7.07380067296714e-16
+ant195 gained 4.499569093602206e-17
+ant196 compterm: -1.4179725257020477e-15
+individuals not growing: ant196a
+ant197 compterm: -2.5744575819449224e-15
+individuals not growing: ant197a
+ant198 compterm: -5.651168230517502e-16
+individuals not growing: ant198a
+ant199 compterm: -1.899171892083502
+individuals not growing: ant199a
+ant200 compterm: -1.578247137026192e-15
+individuals not growing: ant200a
+Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+win1-a has 1.2308820629414186e-11 chance of dying
+win2-a has 1.332889354443978e-11 chance of dying
+win3-a has 1.0072054301701883e-11 chance of dying
+win4-a has 9.769962616701378e-12 chance of dying
+win5-a has 1.259325976832315e-11 chance of dying
+win6-a has 1.1655232334817356e-11 chance of dying
+win7-a has 1.0610956557854934e-11 chance of dying
+win8-a has 1.0444756171068548e-11 chance of dying
+win9-a has 1.1798007015784151e-11 chance of dying
+win10-a has 1.2006062810598905e-11 chance of dying
+win11-a has 1.153888096183664e-11 chance of dying
+win12-a has 1.275080041551746e-11 chance of dying
+win13-a has 1.0831557872847952e-11 chance of dying
+win14-a has 1.1585399306568434e-11 chance of dying
+win15-a has 1.1198930671696417e-11 chance of dying
+win16-a has 1.2864931342448926e-11 chance of dying
+win17-a has 1.122868464875637e-11 chance of dying
+win18-a has 1.0485057266862441e-11 chance of dying
+win19-a has 1.1427969681676586e-11 chance of dying
+win20-a has 1.0980549802752648e-11 chance of dying
+win21-a has 1.2087109091396542e-11 chance of dying
+win22-a has 1.1103451491578653e-11 chance of dying
+win23-a has 1.1905476604567866e-11 chance of dying
+win24-a has 1.208000366403894e-11 chance of dying
+win25-a has 1.2037482122195797e-11 chance of dying
+win26-a has 1.0542455797235561e-11 chance of dying
+win27-a has 1.0979550602030486e-11 chance of dying
+win28-a has 1.2180811914674905e-11 chance of dying
+win29-a has 1.2188583475847281e-11 chance of dying
+win30-a has 1.2566170326522297e-11 chance of dying
+win31-a has 1.1583178860519183e-11 chance of dying
+win32-a has 1.461097909327691e-11 chance of dying
+win33-a has 1.0257683591419209e-11 chance of dying
+win34-a has 1.237077107418827e-11 chance of dying
+win35-a has 1.1380230091617705e-11 chance of dying
+win36-a has 1.2135625837572661e-11 chance of dying
+win37-a has 1.0907164060824925e-11 chance of dying
+win38-a has 1.0485723400677216e-11 chance of dying
+win39-a has 1.1053602477772984e-11 chance of dying
+win40-a has 1.1827872015146568e-11 chance of dying
+win41-a has 1.1012746270466778e-11 chance of dying
+win42-a has 1.1561085422329143e-11 chance of dying
+win43-a has 1.1212364370294381e-11 chance of dying
+win44-a has 1.0888068224801373e-11 chance of dying
+win45-a has 1.2844614261098286e-11 chance of dying
+win46-a has 1.2449596908936655e-11 chance of dying
+win47-a has 1.0381584480967376e-11 chance of dying
+win48-a has 1.074584865534689e-11 chance of dying
+win49-a has 1.1040168779175019e-11 chance of dying
+win50-a has 1.063815702195825e-11 chance of dying
+win51-a has 8.88522588837759e-12 chance of dying
+win52-a has 1.1710521441443689e-11 chance of dying
+win53-a has 1.2036815988381022e-11 chance of dying
+win54-a has 1.1669887278742408e-11 chance of dying
+win55-a has 1.1357137452705501e-11 chance of dying
+win56-a has 1.1622924844800764e-11 chance of dying
+win57-a has 1.2487455514076373e-11 chance of dying
+win58-a has 1.3003154109014758e-11 chance of dying
+win59-a has 1.2251422099041065e-11 chance of dying
+win60-a has 1.175337605019422e-11 chance of dying
+win61-a has 1.2672973781491237e-11 chance of dying
+win62-a has 1.2169154572916341e-11 chance of dying
+win63-a has 1.2866152587776014e-11 chance of dying
+win64-a has 1.3561707312703675e-11 chance of dying
+win65-a has 1.1915024522579643e-11 chance of dying
+win66-a has 1.2088441359026092e-11 chance of dying
+win67-a has 1.1185719017703377e-11 chance of dying
+win68-a has 1.072819610925535e-11 chance of dying
+win69-a has 9.927836330803075e-12 chance of dying
+win70-a has 1.1715184378147114e-11 chance of dying
+win71-a has 1.1038725489243006e-11 chance of dying
+win72-a has 1.2324696818666325e-11 chance of dying
+win73-a has 1.0407674722046067e-11 chance of dying
+win74-a has 1.1185941062308302e-11 chance of dying
+win75-a has 1.3566703316314488e-11 chance of dying
+win76-a has 1.180988640214764e-11 chance of dying
+win77-a has 1.172117958248009e-11 chance of dying
+win78-a has 1.0650591519834052e-11 chance of dying
+win79-a has 1.1770029395563597e-11 chance of dying
+win80-a has 1.1851741810176009e-11 chance of dying
+win81-a has 1.0972778241580272e-11 chance of dying
+win82-a has 1.2959855411054377e-11 chance of dying
+win83-a has 1.1296075186351118e-11 chance of dying
+win84-a has 1.1206813255171255e-11 chance of dying
+win85-a has 1.113864556145927e-11 chance of dying
+win86-a has 1.1550538303595204e-11 chance of dying
+win87-a has 1.0298428776422952e-11 chance of dying
+win88-a has 1.2407075367093512e-11 chance of dying
+win89-a has 1.0565548436147765e-11 chance of dying
+win90-a has 1.2288947637273395e-11 chance of dying
+win91-a has 1.1704193170203325e-11 chance of dying
+win92-a has 1.2509548952266414e-11 chance of dying
+win93-a has 1.3134937582037765e-11 chance of dying
+win94-a has 1.2558953876862233e-11 chance of dying
+win95-a has 1.2638556867727857e-11 chance of dying
+win96-a has 1.0653811166605465e-11 chance of dying
+win97-a has 1.1637135699515966e-11 chance of dying
+win98-a has 1.2942202864962837e-11 chance of dying
+win99-a has 1.1670109323347333e-11 chance of dying
+win100-a has 1.1436851465873588e-11 chance of dying
+ant101-a has 1.1264100763241913e-11 chance of dying
+ant102-a has 1.1804335287024514e-11 chance of dying
+ant103-a has 1.0002110251150498e-11 chance of dying
+ant104-a has 1.0306200337595328e-11 chance of dying
+ant105-a has 1.3774870133431705e-11 chance of dying
+ant106-a has 9.985678950386045e-12 chance of dying
+ant107-a has 1.2949641359227826e-11 chance of dying
+ant108-a has 1.1521339438047562e-11 chance of dying
+ant109-a has 1.2869372234547427e-11 chance of dying
+ant110-a has 1.3953171951186505e-11 chance of dying
+ant111-a has 1.1717848913406215e-11 chance of dying
+ant112-a has 9.558576152812748e-12 chance of dying
+ant113-a has 9.64872626241231e-12 chance of dying
+ant114-a has 1.246747149963312e-11 chance of dying
+ant115-a has 1.1525003174028825e-11 chance of dying
+ant116-a has 1.227506984946558e-11 chance of dying
+ant117-a has 1.1796008614339826e-11 chance of dying
+ant118-a has 9.724110405784359e-12 chance of dying
+ant119-a has 1.3541390231353034e-11 chance of dying
+ant120-a has 1.1412537581634297e-11 chance of dying
+ant121-a has 1.2108536395771807e-11 chance of dying
+ant122-a has 1.2840173368999785e-11 chance of dying
+ant123-a has 1.2278844607749306e-11 chance of dying
+ant124-a has 1.0717871035126336e-11 chance of dying
+ant125-a has 1.052868903173021e-11 chance of dying
+ant126-a has 1.2613021738161478e-11 chance of dying
+ant127-a has 1.191935439237568e-11 chance of dying
+ant128-a has 1.2829293183358459e-11 chance of dying
+ant129-a has 1.1869727423174936e-11 chance of dying
+ant130-a has 1.0362266600338899e-11 chance of dying
+ant131-a has 1.0608736111805683e-11 chance of dying
+ant132-a has 1.1866063687193673e-11 chance of dying
+ant133-a has 1.2321921261104762e-11 chance of dying
+ant134-a has 1.1250222975434099e-11 chance of dying
+ant135-a has 1.1439516001132688e-11 chance of dying
+ant136-a has 1.1123546528324368e-11 chance of dying
+ant137-a has 1.265854088217111e-11 chance of dying
+ant138-a has 1.2024048423597833e-11 chance of dying
+ant139-a has 1.227107304657693e-11 chance of dying
+ant140-a has 1.2322032283407225e-11 chance of dying
+ant141-a has 1.1266099164686239e-11 chance of dying
+ant142-a has 1.2086109890674379e-11 chance of dying
+ant143-a has 1.1479484030019194e-11 chance of dying
+ant144-a has 1.1201595206955517e-11 chance of dying
+ant145-a has 1.0857537091624181e-11 chance of dying
+ant146-a has 1.0611400647064784e-11 chance of dying
+ant147-a has 1.066990940046253e-11 chance of dying
+ant148-a has 1.2030376694838196e-11 chance of dying
+ant149-a has 1.2714940211822068e-11 chance of dying
+ant150-a has 1.2792766845848291e-11 chance of dying
+ant151-a has 1.3531176179526483e-11 chance of dying
+ant152-a has 1.1994849558050191e-11 chance of dying
+ant153-a has 1.2250422898318902e-11 chance of dying
+ant154-a has 1.1230905094805621e-11 chance of dying
+ant155-a has 1.3215317729020626e-11 chance of dying
+ant156-a has 1.2754908240708573e-11 chance of dying
+ant157-a has 1.1430967283843074e-11 chance of dying
+ant158-a has 1.2119971692925446e-11 chance of dying
+ant159-a has 1.0919154469490877e-11 chance of dying
+ant160-a has 1.0916711978836702e-11 chance of dying
+ant161-a has 1.1751377648749894e-11 chance of dying
+ant162-a has 1.3716805469243809e-11 chance of dying
+ant163-a has 1.2084888645347291e-11 chance of dying
+ant164-a has 1.174282893146028e-11 chance of dying
+ant165-a has 1.0231371305735593e-11 chance of dying
+ant166-a has 1.3257950293166232e-11 chance of dying
+ant167-a has 1.209232713961228e-11 chance of dying
+ant168-a has 1.2252421299763228e-11 chance of dying
+ant169-a has 1.127897775177189e-11 chance of dying
+ant170-a has 1.1761147611366596e-11 chance of dying
+ant171-a has 9.326650562968553e-12 chance of dying
+ant172-a has 1.2773115898312426e-11 chance of dying
+ant173-a has 9.887868301916569e-12 chance of dying
+ant174-a has 1.2051692976911e-11 chance of dying
+ant175-a has 1.229139012792757e-11 chance of dying
+ant176-a has 1.3651191288488462e-11 chance of dying
+ant177-a has 1.1283418643870391e-11 chance of dying
+ant178-a has 1.019773154808945e-11 chance of dying
+ant179-a has 1.1442180536391788e-11 chance of dying
+ant180-a has 1.1978751324193126e-11 chance of dying
+ant181-a has 1.0302980690823915e-11 chance of dying
+ant182-a has 1.3059886505573104e-11 chance of dying
+ant183-a has 1.1696199564426024e-11 chance of dying
+ant184-a has 1.0100476011132287e-11 chance of dying
+ant185-a has 1.2005729743691518e-11 chance of dying
+ant186-a has 1.1939005339911546e-11 chance of dying
+ant187-a has 1.1220135931466757e-11 chance of dying
+ant188-a has 1.272648653127817e-11 chance of dying
+ant189-a has 8.850031818496973e-12 chance of dying
+ant190-a has 1.2489675960125624e-11 chance of dying
+ant191-a has 9.33975119465913e-12 chance of dying
+ant192-a has 1.131206239790572e-11 chance of dying
+ant193-a has 1.1568523916594131e-11 chance of dying
+ant194-a has 1.2759238110504612e-11 chance of dying
+ant195-a has 1.287303597052869e-11 chance of dying
+ant196-a has 1.145150640979864e-11 chance of dying
+ant197-a has 1.3321233005569866e-11 chance of dying
+ant198-a has 1.1852741010898171e-11 chance of dying
+ant199-a has 1.1062040172760135e-11 chance of dying
+ant200-a has 1.0203393685515039e-11 chance of dying
+win1 has biomassDict("veg"=>100.008) and projects 0.8265110255672694
+win2 has biomassDict("veg"=>99.6312) and projects 0.8233980451467123
+win3 has biomassDict("veg"=>101.006) and projects 0.8347604464394525
+win4 has biomassDict("veg"=>101.112) and projects 0.8356365504847444
+win5 has biomassDict("veg"=>99.8453) and projects 0.8251680333059612
+win6 has biomassDict("veg"=>100.59) and projects 0.8313217018246296
+win7 has biomassDict("veg"=>98.8533) and projects 0.8169696759406798
+win8 has biomassDict("veg"=>100.687) and projects 0.8321240279990519
+win9 has biomassDict("veg"=>101.04) and projects 0.8350401524971858
+win10 has biomassDict("veg"=>101.542) and projects 0.8391870154402705
+win11 has biomassDict("veg"=>99.4551) and projects 0.8219432738216764
+win12 has biomassDict("veg"=>99.1235) and projects 0.8192020940475139
+win13 has biomassDict("veg"=>98.6048) and projects 0.8149154488780921
+win14 has biomassDict("veg"=>98.3575) and projects 0.8128718178439905
+win15 has biomassDict("veg"=>99.9767) and projects 0.826253759367453
+win16 has biomassDict("veg"=>100.499) and projects 0.8305669196082452
+win17 has biomassDict("veg"=>100.239) and projects 0.8284202067478869
+win18 has biomassDict("veg"=>100.21) and projects 0.8281814199457509
+win19 has biomassDict("veg"=>100.507) and projects 0.8306364817757274
+win20 has biomassDict("veg"=>101.352) and projects 0.8376225847999029
+win21 has biomassDict("veg"=>100.396) and projects 0.8297155518794233
+win22 has biomassDict("veg"=>100.603) and projects 0.831426129044878
+win23 has biomassDict("veg"=>96.7413) and projects 0.7995151405146543
+win24 has biomassDict("veg"=>99.5804) and projects 0.8229786675781019
+win25 has biomassDict("veg"=>99.1696) and projects 0.8195833120547049
+win26 has biomassDict("veg"=>97.8732) and projects 0.8088696537524924
+win27 has biomassDict("veg"=>100.691) and projects 0.832156146298857
+win28 has biomassDict("veg"=>101.003) and projects 0.8347314669325203
+win29 has biomassDict("veg"=>101.387) and projects 0.8379092418125001
+win30 has biomassDict("veg"=>99.655) and projects 0.823595063338034
+win31 has biomassDict("veg"=>99.7187) and projects 0.8241218654846353
+win32 has biomassDict("veg"=>99.9497) and projects 0.8260305898071164
+win33 has biomassDict("veg"=>98.8034) and projects 0.816557431097789
+win34 has biomassDict("veg"=>99.6525) and projects 0.8235740623024226
+win35 has biomassDict("veg"=>99.5792) and projects 0.8229682018956415
+win36 has biomassDict("veg"=>100.377) and projects 0.8295581428436456
+win37 has biomassDict("veg"=>100.048) and projects 0.8268390369800761
+win38 has biomassDict("veg"=>100.185) and projects 0.8279752034335628
+win39 has biomassDict("veg"=>99.4355) and projects 0.8217809637967253
+win40 has biomassDict("veg"=>99.1671) and projects 0.819562694305325
+win41 has biomassDict("veg"=>99.8535) and projects 0.8252356728264229
+win42 has biomassDict("veg"=>98.7695) and projects 0.8162767879304144
+win43 has biomassDict("veg"=>98.5204) and projects 0.8142178687069104
+win44 has biomassDict("veg"=>99.2581) and projects 0.8203150508322667
+win45 has biomassDict("veg"=>97.4495) and projects 0.805368009872743
+win46 has biomassDict("veg"=>99.6356) and projects 0.8234346648987699
+win47 has biomassDict("veg"=>98.8892) and projects 0.817266408909639
+win48 has biomassDict("veg"=>99.3641) and projects 0.8211907373454475
+win49 has biomassDict("veg"=>100.772) and projects 0.8328267620743472
+win50 has biomassDict("veg"=>98.3818) and projects 0.813072792928174
+win51 has biomassDict("veg"=>101.244) and projects 0.8367255628159257
+win52 has biomassDict("veg"=>98.7516) and projects 0.8161285248354468
+win53 has biomassDict("veg"=>101.007) and projects 0.834767615377884
+win54 has biomassDict("veg"=>99.0495) and projects 0.8185912945856932
+win55 has biomassDict("veg"=>100.516) and projects 0.8307126953593116
+win56 has biomassDict("veg"=>99.6716) and projects 0.8237323869857432
+win57 has biomassDict("veg"=>100.048) and projects 0.8268448981281938
+win58 has biomassDict("veg"=>98.2128) and projects 0.8116759628947255
+win59 has biomassDict("veg"=>99.9599) and projects 0.8261147444008705
+win60 has biomassDict("veg"=>99.151) and projects 0.8194296218039661
+win61 has biomassDict("veg"=>99.0842) and projects 0.8188775183816069
+win62 has biomassDict("veg"=>99.5775) and projects 0.8229541599222994
+win63 has biomassDict("veg"=>99.8534) and projects 0.8252349164511876
+win64 has biomassDict("veg"=>98.5219) and projects 0.8142302392072488
+win65 has biomassDict("veg"=>99.4925) and projects 0.8222521870664009
+win66 has biomassDict("veg"=>98.7238) and projects 0.8158994214031209
+win67 has biomassDict("veg"=>99.0374) and projects 0.8184908207762733
+win68 has biomassDict("veg"=>100.628) and projects 0.8316341370740082
+win69 has biomassDict("veg"=>100.318) and projects 0.8290710369884384
+win70 has biomassDict("veg"=>99.0921) and projects 0.8189432940010642
+win71 has biomassDict("veg"=>99.3295) and projects 0.8209048576937789
+win72 has biomassDict("veg"=>100.085) and projects 0.8271492600032194
+win73 has biomassDict("veg"=>99.1596) and projects 0.8195010063994598
+win74 has biomassDict("veg"=>97.835) and projects 0.8085534751869635
+win75 has biomassDict("veg"=>101.257) and projects 0.8368376394838372
+win76 has biomassDict("veg"=>100.186) and projects 0.8279868696034169
+win77 has biomassDict("veg"=>100.628) and projects 0.8316332769551829
+win78 has biomassDict("veg"=>99.9322) and projects 0.8258857181184459
+win79 has biomassDict("veg"=>101.154) and projects 0.8359819962429627
+win80 has biomassDict("veg"=>100.455) and projects 0.8302047183519483
+win81 has biomassDict("veg"=>100.84) and projects 0.8333850971174426
+win82 has biomassDict("veg"=>100.45) and projects 0.8301663746556175
+win83 has biomassDict("veg"=>99.2158) and projects 0.8199655755369931
+win84 has biomassDict("veg"=>99.6557) and projects 0.8236012342398437
+win85 has biomassDict("veg"=>101.233) and projects 0.8366348411440635
+win86 has biomassDict("veg"=>101.244) and projects 0.836727729592296
+win87 has biomassDict("veg"=>99.9493) and projects 0.8260269955516485
+win88 has biomassDict("veg"=>99.9989) and projects 0.8264369476587247
+win89 has biomassDict("veg"=>98.0127) and projects 0.8100221777456688
+win90 has biomassDict("veg"=>99.878) and projects 0.8254379863509931
+win91 has biomassDict("veg"=>103.025) and projects 0.8514481594484264
+win92 has biomassDict("veg"=>101.0) and projects 0.8347114458679447
+win93 has biomassDict("veg"=>98.6447) and projects 0.8152456227091862
+win94 has biomassDict("veg"=>99.7759) and projects 0.8245938018375125
+win95 has biomassDict("veg"=>99.5027) and projects 0.8223366829700691
+win96 has biomassDict("veg"=>100.08) and projects 0.8271106144168876
+win97 has biomassDict("veg"=>100.827) and projects 0.8332847671402414
+win98 has biomassDict("veg"=>100.67) and projects 0.8319812068170537
+win99 has biomassDict("veg"=>98.881) and projects 0.8171981993126174
+win100 has biomassDict("veg"=>99.5429) and projects 0.822668629995623
+ant101 has biomassDict("veg"=>100.638) and projects 0.8317201137590738
+ant102 has biomassDict("veg"=>101.102) and projects 0.8355532565488917
+ant103 has biomassDict("veg"=>100.875) and projects 0.8336766696450625
+ant104 has biomassDict("veg"=>100.079) and projects 0.8271015082855703
+ant105 has biomassDict("veg"=>100.951) and projects 0.8343036462290994
+ant106 has biomassDict("veg"=>101.048) and projects 0.8351067292303734
+ant107 has biomassDict("veg"=>97.8223) and projects 0.8084488184792387
+ant108 has biomassDict("veg"=>99.9463) and projects 0.8260028879032004
+ant109 has biomassDict("veg"=>98.6559) and projects 0.8153376335795737
+ant110 has biomassDict("veg"=>101.746) and projects 0.8408760003168134
+ant111 has biomassDict("veg"=>98.045) and projects 0.8102890883074427
+ant112 has biomassDict("veg"=>99.6159) and projects 0.8232720366792065
+ant113 has biomassDict("veg"=>102.107) and projects 0.8438636110247366
+ant114 has biomassDict("veg"=>98.6635) and projects 0.8154012271593961
+ant115 has biomassDict("veg"=>99.3652) and projects 0.8211997357328267
+ant116 has biomassDict("veg"=>100.176) and projects 0.827902333292846
+ant117 has biomassDict("veg"=>100.512) and projects 0.8306813793755293
+ant118 has biomassDict("veg"=>101.459) and projects 0.8385019911706891
+ant119 has biomassDict("veg"=>99.2555) and projects 0.8202937142558084
+ant120 has biomassDict("veg"=>99.1071) and projects 0.8190667739484304
+ant121 has biomassDict("veg"=>100.412) and projects 0.8298540632989497
+ant122 has biomassDict("veg"=>99.2463) and projects 0.8202176054802791
+ant123 has biomassDict("veg"=>98.8561) and projects 0.8169924598264747
+ant124 has biomassDict("veg"=>98.7806) and projects 0.8163688692572506
+ant125 has biomassDict("veg"=>99.3318) and projects 0.8209242130655587
+ant126 has biomassDict("veg"=>99.5617) and projects 0.8228240264436867
+ant127 has biomassDict("veg"=>100.273) and projects 0.8287004452091583
+ant128 has biomassDict("veg"=>101.252) and projects 0.8367964910095125
+ant129 has biomassDict("veg"=>99.1853) and projects 0.8197135305735167
+ant130 has biomassDict("veg"=>99.9193) and projects 0.8257791064331512
+ant131 has biomassDict("veg"=>97.9378) and projects 0.8094033444853534
+ant132 has biomassDict("veg"=>99.7958) and projects 0.8247584276056245
+ant133 has biomassDict("veg"=>100.326) and projects 0.8291364000479257
+ant134 has biomassDict("veg"=>99.3815) and projects 0.8213347721998832
+ant135 has biomassDict("veg"=>100.104) and projects 0.8273067642908836
+ant136 has biomassDict("veg"=>99.6457) and projects 0.8235180007829449
+ant137 has biomassDict("veg"=>100.367) and projects 0.8294780805327802
+ant138 has biomassDict("veg"=>98.7889) and projects 0.8164372434053178
+ant139 has biomassDict("veg"=>99.6022) and projects 0.8231588260562005
+ant140 has biomassDict("veg"=>100.249) and projects 0.8285005879805913
+ant141 has biomassDict("veg"=>99.3665) and projects 0.8212103454124462
+ant142 has biomassDict("veg"=>101.127) and projects 0.8357613640840217
+ant143 has biomassDict("veg"=>99.7712) and projects 0.824555344223489
+ant144 has biomassDict("veg"=>100.221) and projects 0.8282745272929687
+ant145 has biomassDict("veg"=>98.8283) and projects 0.8167628431632
+ant146 has biomassDict("veg"=>100.188) and projects 0.8280025518500106
+ant147 has biomassDict("veg"=>101.077) and projects 0.8353473242905622
+ant148 has biomassDict("veg"=>98.5461) and projects 0.8144308809789362
+ant149 has biomassDict("veg"=>101.595) and projects 0.8396289458525065
+ant150 has biomassDict("veg"=>99.8017) and projects 0.8248077760965487
+ant151 has biomassDict("veg"=>101.543) and projects 0.8391979551453617
+ant152 has biomassDict("veg"=>100.164) and projects 0.8278041913072567
+ant153 has biomassDict("veg"=>96.8008) and projects 0.8000066873930988
+ant154 has biomassDict("veg"=>101.338) and projects 0.8375047394678725
+ant155 has biomassDict("veg"=>99.1682) and projects 0.8195720191229032
+ant156 has biomassDict("veg"=>100.501) and projects 0.8305830153303793
+ant157 has biomassDict("veg"=>100.838) and projects 0.8333685923670401
+ant158 has biomassDict("veg"=>99.8091) and projects 0.824868595992539
+ant159 has biomassDict("veg"=>99.6888) and projects 0.8238742221529507
+ant160 has biomassDict("veg"=>99.9111) and projects 0.8257118524482746
+ant161 has biomassDict("veg"=>100.5) and projects 0.8305768523194969
+ant162 has biomassDict("veg"=>100.308) and projects 0.8289891962322554
+ant163 has biomassDict("veg"=>100.724) and projects 0.8324280802134681
+ant164 has biomassDict("veg"=>98.814) and projects 0.8166445576059498
+ant165 has biomassDict("veg"=>100.131) and projects 0.8275314650313726
+ant166 has biomassDict("veg"=>100.064) and projects 0.8269774005684787
+ant167 has biomassDict("veg"=>99.7491) and projects 0.8243724833032067
+ant168 has biomassDict("veg"=>98.8348) and projects 0.8168164525993769
+ant169 has biomassDict("veg"=>100.185) and projects 0.8279738729153563
+ant170 has biomassDict("veg"=>101.448) and projects 0.8384098382159684
+ant171 has biomassDict("veg"=>99.7542) and projects 0.8244149024675538
+ant172 has biomassDict("veg"=>99.9495) and projects 0.8260286982238729
+ant173 has biomassDict("veg"=>99.3062) and projects 0.8207126892015425
+ant174 has biomassDict("veg"=>100.809) and projects 0.8331342102041184
+ant175 has biomassDict("veg"=>100.114) and projects 0.8273921706351073
+ant176 has biomassDict("veg"=>99.6517) and projects 0.8235674002001172
+ant177 has biomassDict("veg"=>100.54) and projects 0.8309107387120003
+ant178 has biomassDict("veg"=>99.2485) and projects 0.8202358508598919
+ant179 has biomassDict("veg"=>99.3153) and projects 0.8207875002718642
+ant180 has biomassDict("veg"=>100.488) and projects 0.8304754861435013
+ant181 has biomassDict("veg"=>100.498) and projects 0.830564292087802
+ant182 has biomassDict("veg"=>101.357) and projects 0.837660256631151
+ant183 has biomassDict("veg"=>100.489) and projects 0.8304872655065805
+ant184 has biomassDict("veg"=>97.9656) and projects 0.8096333039401259
+ant185 has biomassDict("veg"=>99.4249) and projects 0.8216933773749535
+ant186 has biomassDict("veg"=>100.137) and projects 0.827575301715309
+ant187 has biomassDict("veg"=>101.634) and projects 0.8399524484320243
+ant188 has biomassDict("veg"=>99.4577) and projects 0.8219646893631832
+ant189 has biomassDict("veg"=>99.5248) and projects 0.8225193942437695
+ant190 has biomassDict("veg"=>98.4601) and projects 0.8137195549229439
+ant191 has biomassDict("veg"=>97.6151) and projects 0.8067361714741156
+ant192 has biomassDict("veg"=>100.228) and projects 0.8283280783654384
+ant193 has biomassDict("veg"=>99.7656) and projects 0.8245092700358583
+ant194 has biomassDict("veg"=>100.655) and projects 0.8318608597082584
+ant195 has biomassDict("veg"=>100.447) and projects 0.830141289814311
+ant196 has biomassDict("veg"=>100.22) and projects 0.8282606197378739
+ant197 has biomassDict("veg"=>99.3589) and projects 0.8211482916100687
+ant198 has biomassDict("veg"=>100.587) and projects 0.8312977104924778
+ant199 has biomassDict("veg"=>98.6829) and projects 0.8155611219910298
+ant200 has biomassDict("veg"=>99.0462) and projects 0.8185637425799065
+win1 compterm: -1.0000000000000029
+individuals not growing: win1a
+win2 compterm: -1.0000000000000038
+individuals not growing: win2a
+win3 compterm: -0.9999999999999958
+individuals not growing: win3a
+win4 compterm: -1.000000000000004
+individuals not growing: win4a
+win5 compterm: -0.9999999999999977
+individuals not growing: win5a
+win6 compterm: -1.249813063425334
+individuals not growing: win6a
+win7 compterm: -1.0000000000000056
+individuals not growing: win7a
+win8 compterm: -1.3935068125742596
+individuals not growing: win8a
+win9 compterm: -1.0
+individuals not growing: win9a
+win10 compterm: -1.000000000000005
+individuals not growing: win10a
+win11 compterm: -0.999999999999996
+individuals not growing: win11a
+win12 compterm: -1.8224091175745145
+individuals not growing: win12a
+win13 compterm: -3.2126653274404493
+individuals not growing: win13a
+win14 compterm: -0.9999999999999951
+individuals not growing: win14a
+win15 compterm: -1.2960797594689157
+individuals not growing: win15a
+win16 compterm: -0.9999999999999991
+individuals not growing: win16a
+win17 compterm: -1.0000000000000042
+individuals not growing: win17a
+win18 compterm: -0.999999999999998
+individuals not growing: win18a
+win19 compterm: -1.0978514027171384
+individuals not growing: win19a
+win20 compterm: -1.2460688409965002
+individuals not growing: win20a
+win21 compterm: -2.3416031913027573
+individuals not growing: win21a
+win22 compterm: -2.336088437982532
+individuals not growing: win22a
+win23 compterm: -1.0000000000000044
+individuals not growing: win23a
+win24 compterm: -0.9999999999999949
+individuals not growing: win24a
+win25 compterm: -0.9999999999999977
+individuals not growing: win25a
+win26 compterm: -1.0000000000000044
+individuals not growing: win26a
+win27 compterm: -1.0
+individuals not growing: win27a
+win28 compterm: -1.0000000000000013
+individuals not growing: win28a
+win29 compterm: -0.9999999999999952
+individuals not growing: win29a
+win30 compterm: -0.9999999999999977
+individuals not growing: win30a
+win31 compterm: -1.0000000000000058
+individuals not growing: win31a
+win32 compterm: -0.09090909090909237
+individuals not growing: win32a
+win33 compterm: -1.000000000000004
+individuals not growing: win33a
+win34 compterm: -1.0000000000000022
+individuals not growing: win34a
+win35 compterm: -1.0000000000000053
+individuals not growing: win35a
+win36 compterm: -1.0000000000000049
+individuals not growing: win36a
+win37 compterm: -0.4545454545454538
+individuals not growing: win37a
+win38 compterm: -1.0000000000000022
+individuals not growing: win38a
+win39 compterm: -1.000000000000002
+individuals not growing: win39a
+win40 compterm: -1.1005135693934602
+individuals not growing: win40a
+win41 compterm: -1.0000000000000007
+individuals not growing: win41a
+win42 compterm: -1.0000000000000027
+individuals not growing: win42a
+win43 compterm: -0.9999999999999971
+individuals not growing: win43a
+win44 compterm: -0.9999999999999954
+individuals not growing: win44a
+win45 compterm: -0.9999999999999959
+individuals not growing: win45a
+win46 compterm: -1.8139762477069692
+individuals not growing: win46a
+win47 compterm: -1.0000000000000056
+individuals not growing: win47a
+win48 compterm: -0.999999999999998
+individuals not growing: win48a
+win49 compterm: -1.0000000000000002
+individuals not growing: win49a
+win50 compterm: -0.9999999999999953
+individuals not growing: win50a
+win51 compterm: -1.0000000000000042
+individuals not growing: win51a
+win52 compterm: -1.0000000000000027
+individuals not growing: win52a
+win53 compterm: -1.000000000000002
+individuals not growing: win53a
+win54 compterm: -0.9999999999999957
+individuals not growing: win54a
+win55 compterm: -0.9999999999999966
+individuals not growing: win55a
+win56 compterm: -0.9999999999999986
+individuals not growing: win56a
+win57 compterm: -1.0000000000000058
+individuals not growing: win57a
+win58 compterm: -0.9999999999999989
+individuals not growing: win58a
+win59 compterm: -0.9999999999999974
+individuals not growing: win59a
+win60 compterm: -0.9999999999999942
+individuals not growing: win60a
+win61 compterm: -3.4480804426229485
+individuals not growing: win61a
+win62 compterm: -1.0000000000000027
+individuals not growing: win62a
+win63 compterm: -1.0000000000000049
+individuals not growing: win63a
+win64 compterm: -0.9999999999999982
+individuals not growing: win64a
+win65 compterm: -3.0543065400203044
+individuals not growing: win65a
+win66 compterm: -0.9999999999999986
+individuals not growing: win66a
+win67 compterm: -1.000000000000004
+individuals not growing: win67a
+win68 compterm: -1.8929344805156831
+individuals not growing: win68a
+win69 compterm: -0.9999999999999991
+individuals not growing: win69a
+win70 compterm: -0.9999999999999966
+individuals not growing: win70a
+win71 compterm: -0.9999999999999957
+individuals not growing: win71a
+win72 compterm: -1.0000000000000038
+individuals not growing: win72a
+win73 compterm: -0.09090909090909241
+individuals not growing: win73a
+win74 compterm: -3.510996367300497
+individuals not growing: win74a
+win75 compterm: -0.9999999999999967
+individuals not growing: win75a
+win76 compterm: -1.0000000000000022
+individuals not growing: win76a
+win77 compterm: -2.715959774367516
+individuals not growing: win77a
+win78 compterm: -0.9999999999999946
+individuals not growing: win78a
+win79 compterm: -1.0000000000000022
+individuals not growing: win79a
+win80 compterm: -1.000000000000003
+individuals not growing: win80a
+win81 compterm: -1.0000000000000002
+individuals not growing: win81a
+win82 compterm: -1.0000000000000022
+individuals not growing: win82a
+win83 compterm: -1.000000000000002
+individuals not growing: win83a
+win84 compterm: -1.000000000000003
+individuals not growing: win84a
+win85 compterm: -0.9999999999999967
+individuals not growing: win85a
+win86 compterm: -1.0000000000000024
+individuals not growing: win86a
+win87 compterm: -0.9999999999999966
+individuals not growing: win87a
+win88 compterm: -3.1514010815268714
+individuals not growing: win88a
+win89 compterm: -0.9999999999999944
+individuals not growing: win89a
+win90 compterm: -1.399907435113119
+individuals not growing: win90a
+win91 compterm: -0.9999999999999961
+individuals not growing: win91a
+win92 compterm: -0.9999999999999954
+individuals not growing: win92a
+win93 compterm: -0.9999999999999971
+individuals not growing: win93a
+win94 compterm: -0.9999999999999986
+individuals not growing: win94a
+win95 compterm: -1.000000000000004
+individuals not growing: win95a
+win96 compterm: -0.9999999999999952
+individuals not growing: win96a
+win97 compterm: -1.000000000000001
+individuals not growing: win97a
+win98 compterm: -1.8921896418175403
+individuals not growing: win98a
+win99 compterm: -0.9999999999999942
+individuals not growing: win99a
+win100 compterm: -0.9999999999999977
+individuals not growing: win100a
+ant101 compterm: -1.0000000000000022
+individuals not growing: ant101a
+ant102 compterm: -0.9999999999999997
+individuals not growing: ant102a
+ant103 compterm: -0.9999999999999978
+individuals not growing: ant103a
+ant104 compterm: -0.9999999999999971
+individuals not growing: ant104a
+ant105 compterm: -1.0000000000000044
+individuals not growing: ant105a
+ant106 compterm: -1.0000000000000022
+individuals not growing: ant106a
+ant107 compterm: -1.3757500868738375
+individuals not growing: ant107a
+ant108 compterm: -1.0000000000000002
+individuals not growing: ant108a
+ant109 compterm: -1.0000000000000009
+individuals not growing: ant109a
+ant110 compterm: -0.9999999999999969
+individuals not growing: ant110a
+ant111 compterm: -0.9999999999999991
+individuals not growing: ant111a
+ant112 compterm: -1.4901141809569434
+individuals not growing: ant112a
+ant113 compterm: -0.999999999999995
+individuals not growing: ant113a
+ant114 compterm: -1.7655088137599286
+individuals not growing: ant114a
+ant115 compterm: -1.0000000000000042
+individuals not growing: ant115a
+ant116 compterm: -0.9999999999999966
+individuals not growing: ant116a
+ant117 compterm: -1.0000000000000022
+individuals not growing: ant117a
+ant118 compterm: -0.9999999999999974
+individuals not growing: ant118a
+ant119 compterm: -1.0000000000000042
+individuals not growing: ant119a
+ant120 compterm: -0.09090909090909033
+individuals not growing: ant120a
+ant121 compterm: -0.09090909090909223
+individuals not growing: ant121a
+ant122 compterm: -1.0000000000000027
+individuals not growing: ant122a
+ant123 compterm: -0.09090909090909048
+individuals not growing: ant123a
+ant124 compterm: -0.9999999999999982
+individuals not growing: ant124a
+ant125 compterm: -0.9999999999999957
+individuals not growing: ant125a
+ant126 compterm: -0.9999999999999951
+individuals not growing: ant126a
+ant127 compterm: -1.0000000000000058
+individuals not growing: ant127a
+ant128 compterm: -0.999999999999998
+individuals not growing: ant128a
+ant129 compterm: -1.0000000000000042
+individuals not growing: ant129a
+ant130 compterm: -2.2400441116540217
+individuals not growing: ant130a
+ant131 compterm: -0.9999999999999942
+individuals not growing: ant131a
+ant132 compterm: -1.0000000000000033
+individuals not growing: ant132a
+ant133 compterm: -1.0000000000000053
+individuals not growing: ant133a
+ant134 compterm: -1.000000000000006
+individuals not growing: ant134a
+ant135 compterm: -0.9999999999999969
+individuals not growing: ant135a
+ant136 compterm: -1.1981065896614416
+individuals not growing: ant136a
+ant137 compterm: -1.0000000000000002
+individuals not growing: ant137a
+ant138 compterm: -1.0
+individuals not growing: ant138a
+ant139 compterm: -1.242987411743104
+individuals not growing: ant139a
+ant140 compterm: -0.9999999999999958
+individuals not growing: ant140a
+ant141 compterm: -1.1244506904859388
+individuals not growing: ant141a
+ant142 compterm: -0.9999999999999994
+individuals not growing: ant142a
+ant143 compterm: -0.9999999999999974
+individuals not growing: ant143a
+ant144 compterm: -0.9999999999999938
+individuals not growing: ant144a
+ant145 compterm: -1.0000000000000009
+individuals not growing: ant145a
+ant146 compterm: -0.9999999999999963
+individuals not growing: ant146a
+ant147 compterm: -1.000000000000002
+individuals not growing: ant147a
+ant148 compterm: -0.09090909090909234
+individuals not growing: ant148a
+ant149 compterm: -1.880548671222815
+individuals not growing: ant149a
+ant150 compterm: -1.0
+individuals not growing: ant150a
+ant151 compterm: -1.7227100314212889
+individuals not growing: ant151a
+ant152 compterm: -1.2495302669956923
+individuals not growing: ant152a
+ant153 compterm: -0.9999999999999973
+individuals not growing: ant153a
+ant154 compterm: -1.0000000000000024
+individuals not growing: ant154a
+ant155 compterm: -0.9999999999999966
+individuals not growing: ant155a
+ant156 compterm: -0.9999999999999949
+individuals not growing: ant156a
+ant157 compterm: -0.9999999999999958
+individuals not growing: ant157a
+ant158 compterm: -1.0000000000000027
+individuals not growing: ant158a
+ant159 compterm: -1.0000000000000022
+individuals not growing: ant159a
+ant160 compterm: -1.0000000000000022
+individuals not growing: ant160a
+ant161 compterm: -0.9999999999999978
+individuals not growing: ant161a
+ant162 compterm: -1.000000000000003
+individuals not growing: ant162a
+ant163 compterm: -1.0000000000000062
+individuals not growing: ant163a
+ant164 compterm: -1.0000000000000027
+individuals not growing: ant164a
+ant165 compterm: -0.9999999999999966
+individuals not growing: ant165a
+ant166 compterm: -1.000000000000003
+individuals not growing: ant166a
+ant167 compterm: -1.000000000000002
+individuals not growing: ant167a
+ant168 compterm: -1.3680909986266108
+individuals not growing: ant168a
+ant169 compterm: -4.330022548365043
+individuals not growing: ant169a
+ant170 compterm: -0.9999999999999974
+individuals not growing: ant170a
+ant171 compterm: -1.123485074174423
+individuals not growing: ant171a
+ant172 compterm: -2.2392948445370924
+individuals not growing: ant172a
+ant173 compterm: -1.0
+individuals not growing: ant173a
+ant174 compterm: -1.2463477145396507
+individuals not growing: ant174a
+ant175 compterm: -0.6363636363636366
+individuals not growing: ant175a
+ant176 compterm: -1.3986247324566028
+individuals not growing: ant176a
+ant177 compterm: -3.9955831268805455
+individuals not growing: ant177a
+ant178 compterm: -0.9999999999999983
+individuals not growing: ant178a
+ant179 compterm: -0.9999999999999977
+individuals not growing: ant179a
+ant180 compterm: -0.8181818181818148
+individuals not growing: ant180a
+ant181 compterm: -0.9999999999999974
+individuals not growing: ant181a
+ant182 compterm: -1.0000000000000033
+individuals not growing: ant182a
+ant183 compterm: -0.9999999999999986
+individuals not growing: ant183a
+ant184 compterm: -1.000000000000003
+individuals not growing: ant184a
+ant185 compterm: -1.0000000000000038
+individuals not growing: ant185a
+ant186 compterm: -1.3947730466855737
+individuals not growing: ant186a
+ant187 compterm: -1.0000000000000036
+individuals not growing: ant187a
+ant188 compterm: -1.0000000000000027
+individuals not growing: ant188a
+ant189 compterm: -1.1985879172230516
+individuals not growing: ant189a
+ant190 compterm: -1.5016888992098356
+individuals not growing: ant190a
+ant191 compterm: -1.2529810517420776
+individuals not growing: ant191a
+ant192 compterm: -1.904739193157251
+individuals not growing: ant192a
+ant193 compterm: -1.0000000000000047
+individuals not growing: ant193a
+ant194 compterm: -0.999999999999998
+individuals not growing: ant194a
+ant195 compterm: -0.9999999999999986
+individuals not growing: ant195a
+ant196 compterm: -1.0000000000000029
+individuals not growing: ant196a
+ant197 compterm: -1.000000000000005
+individuals not growing: ant197a
+ant198 compterm: -1.000000000000001
+individuals not growing: ant198a
+ant199 compterm: -3.8487578381252496
+individuals not growing: ant199a
+ant200 compterm: -1.000000000000003
+individuals not growing: ant200a
+Reproducing: Organisms.Organism[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+win1-a has 1.2308820629414186e-11 chance of dying
+win2-a has 1.332889354443978e-11 chance of dying
+win3-a has 1.0072054301701883e-11 chance of dying
+win4-a has 9.769962616701378e-12 chance of dying
+win5-a has 1.259325976832315e-11 chance of dying
+win6-a has 1.1655232334817356e-11 chance of dying
+win7-a has 1.0610956557854934e-11 chance of dying
+win8-a has 1.0444756171068548e-11 chance of dying
+win9-a has 1.1798007015784151e-11 chance of dying
+win10-a has 1.2006062810598905e-11 chance of dying
+win11-a has 1.153888096183664e-11 chance of dying
+win12-a has 1.275080041551746e-11 chance of dying
+win13-a has 1.0831557872847952e-11 chance of dying
+win14-a has 1.1585399306568434e-11 chance of dying
+win15-a has 1.1198930671696417e-11 chance of dying
+win16-a has 1.2864931342448926e-11 chance of dying
+win17-a has 1.122868464875637e-11 chance of dying
+win18-a has 1.0485057266862441e-11 chance of dying
+win19-a has 1.1427969681676586e-11 chance of dying
+win20-a has 1.0980549802752648e-11 chance of dying
+win21-a has 1.2087109091396542e-11 chance of dying
+win22-a has 1.1103451491578653e-11 chance of dying
+win23-a has 1.1905476604567866e-11 chance of dying
+win24-a has 1.208000366403894e-11 chance of dying
+win25-a has 1.2037482122195797e-11 chance of dying
+win26-a has 1.0542455797235561e-11 chance of dying
+win27-a has 1.0979550602030486e-11 chance of dying
+win28-a has 1.2180811914674905e-11 chance of dying
+win29-a has 1.2188583475847281e-11 chance of dying
+win30-a has 1.2566170326522297e-11 chance of dying
+win31-a has 1.1583178860519183e-11 chance of dying
+win32-a has 1.461097909327691e-11 chance of dying
+win33-a has 1.0257683591419209e-11 chance of dying
+win34-a has 1.237077107418827e-11 chance of dying
+win35-a has 1.1380230091617705e-11 chance of dying
+win36-a has 1.2135625837572661e-11 chance of dying
+win37-a has 1.0907164060824925e-11 chance of dying
+win38-a has 1.0485723400677216e-11 chance of dying
+win39-a has 1.1053602477772984e-11 chance of dying
+win40-a has 1.1827872015146568e-11 chance of dying
+win41-a has 1.1012746270466778e-11 chance of dying
+win42-a has 1.1561085422329143e-11 chance of dying
+win43-a has 1.1212364370294381e-11 chance of dying
+win44-a has 1.0888068224801373e-11 chance of dying
+win45-a has 1.2844614261098286e-11 chance of dying
+win46-a has 1.2449596908936655e-11 chance of dying
+win47-a has 1.0381584480967376e-11 chance of dying
+win48-a has 1.074584865534689e-11 chance of dying
+win49-a has 1.1040168779175019e-11 chance of dying
+win50-a has 1.063815702195825e-11 chance of dying
+win51-a has 8.88522588837759e-12 chance of dying
+win52-a has 1.1710521441443689e-11 chance of dying
+win53-a has 1.2036815988381022e-11 chance of dying
+win54-a has 1.1669887278742408e-11 chance of dying
+win55-a has 1.1357137452705501e-11 chance of dying
+win56-a has 1.1622924844800764e-11 chance of dying
+win57-a has 1.2487455514076373e-11 chance of dying
+win58-a has 1.3003154109014758e-11 chance of dying
+win59-a has 1.2251422099041065e-11 chance of dying
+win60-a has 1.175337605019422e-11 chance of dying
+win61-a has 1.2672973781491237e-11 chance of dying
+win62-a has 1.2169154572916341e-11 chance of dying
+win63-a has 1.2866152587776014e-11 chance of dying
+win64-a has 1.3561707312703675e-11 chance of dying
+win65-a has 1.1915024522579643e-11 chance of dying
+win66-a has 1.2088441359026092e-11 chance of dying
+win67-a has 1.1185719017703377e-11 chance of dying
+win68-a has 1.072819610925535e-11 chance of dying
+win69-a has 9.927836330803075e-12 chance of dying
+win70-a has 1.1715184378147114e-11 chance of dying
+win71-a has 1.1038725489243006e-11 chance of dying
+win72-a has 1.2324696818666325e-11 chance of dying
+win73-a has 1.0407674722046067e-11 chance of dying
+win74-a has 1.1185941062308302e-11 chance of dying
+win75-a has 1.3566703316314488e-11 chance of dying
+win76-a has 1.180988640214764e-11 chance of dying
+win77-a has 1.172117958248009e-11 chance of dying
+win78-a has 1.0650591519834052e-11 chance of dying
+win79-a has 1.1770029395563597e-11 chance of dying
+win80-a has 1.1851741810176009e-11 chance of dying
+win81-a has 1.0972778241580272e-11 chance of dying
+win82-a has 1.2959855411054377e-11 chance of dying
+win83-a has 1.1296075186351118e-11 chance of dying
+win84-a has 1.1206813255171255e-11 chance of dying
+win85-a has 1.113864556145927e-11 chance of dying
+win86-a has 1.1550538303595204e-11 chance of dying
+win87-a has 1.0298428776422952e-11 chance of dying
+win88-a has 1.2407075367093512e-11 chance of dying
+win89-a has 1.0565548436147765e-11 chance of dying
+win90-a has 1.2288947637273395e-11 chance of dying
+win91-a has 1.1704193170203325e-11 chance of dying
+win92-a has 1.2509548952266414e-11 chance of dying
+win93-a has 1.3134937582037765e-11 chance of dying
+win94-a has 1.2558953876862233e-11 chance of dying
+win95-a has 1.2638556867727857e-11 chance of dying
+win96-a has 1.0653811166605465e-11 chance of dying
+win97-a has 1.1637135699515966e-11 chance of dying
+win98-a has 1.2942202864962837e-11 chance of dying
+win99-a has 1.1670109323347333e-11 chance of dying
+win100-a has 1.1436851465873588e-11 chance of dying
+ant101-a has 1.1264100763241913e-11 chance of dying
+ant102-a has 1.1804335287024514e-11 chance of dying
+ant103-a has 1.0002110251150498e-11 chance of dying
+ant104-a has 1.0306200337595328e-11 chance of dying
+ant105-a has 1.3774870133431705e-11 chance of dying
+ant106-a has 9.985678950386045e-12 chance of dying
+ant107-a has 1.2949641359227826e-11 chance of dying
+ant108-a has 1.1521339438047562e-11 chance of dying
+ant109-a has 1.2869372234547427e-11 chance of dying
+ant110-a has 1.3953171951186505e-11 chance of dying
+ant111-a has 1.1717848913406215e-11 chance of dying
+ant112-a has 9.558576152812748e-12 chance of dying
+ant113-a has 9.64872626241231e-12 chance of dying
+ant114-a has 1.246747149963312e-11 chance of dying
+ant115-a has 1.1525003174028825e-11 chance of dying
+ant116-a has 1.227506984946558e-11 chance of dying
+ant117-a has 1.1796008614339826e-11 chance of dying
+ant118-a has 9.724110405784359e-12 chance of dying
+ant119-a has 1.3541390231353034e-11 chance of dying
+ant120-a has 1.1412537581634297e-11 chance of dying
+ant121-a has 1.2108536395771807e-11 chance of dying
+ant122-a has 1.2840173368999785e-11 chance of dying
+ant123-a has 1.2278844607749306e-11 chance of dying
+ant124-a has 1.0717871035126336e-11 chance of dying
+ant125-a has 1.052868903173021e-11 chance of dying
+ant126-a has 1.2613021738161478e-11 chance of dying
+ant127-a has 1.191935439237568e-11 chance of dying
+ant128-a has 1.2829293183358459e-11 chance of dying
+ant129-a has 1.1869727423174936e-11 chance of dying
+ant130-a has 1.0362266600338899e-11 chance of dying
+ant131-a has 1.0608736111805683e-11 chance of dying
+ant132-a has 1.1866063687193673e-11 chance of dying
+ant133-a has 1.2321921261104762e-11 chance of dying
+ant134-a has 1.1250222975434099e-11 chance of dying
+ant135-a has 1.1439516001132688e-11 chance of dying
+ant136-a has 1.1123546528324368e-11 chance of dying
+ant137-a has 1.265854088217111e-11 chance of dying
+ant138-a has 1.2024048423597833e-11 chance of dying
+ant139-a has 1.227107304657693e-11 chance of dying
+ant140-a has 1.2322032283407225e-11 chance of dying
+ant141-a has 1.1266099164686239e-11 chance of dying
+ant142-a has 1.2086109890674379e-11 chance of dying
+ant143-a has 1.1479484030019194e-11 chance of dying
+ant144-a has 1.1201595206955517e-11 chance of dying
+ant145-a has 1.0857537091624181e-11 chance of dying
+ant146-a has 1.0611400647064784e-11 chance of dying
+ant147-a has 1.066990940046253e-11 chance of dying
+ant148-a has 1.2030376694838196e-11 chance of dying
+ant149-a has 1.2714940211822068e-11 chance of dying
+ant150-a has 1.2792766845848291e-11 chance of dying
+ant151-a has 1.3531176179526483e-11 chance of dying
+ant152-a has 1.1994849558050191e-11 chance of dying
+ant153-a has 1.2250422898318902e-11 chance of dying
+ant154-a has 1.1230905094805621e-11 chance of dying
+ant155-a has 1.3215317729020626e-11 chance of dying
+ant156-a has 1.2754908240708573e-11 chance of dying
+ant157-a has 1.1430967283843074e-11 chance of dying
+ant158-a has 1.2119971692925446e-11 chance of dying
+ant159-a has 1.0919154469490877e-11 chance of dying
+ant160-a has 1.0916711978836702e-11 chance of dying
+ant161-a has 1.1751377648749894e-11 chance of dying
+ant162-a has 1.3716805469243809e-11 chance of dying
+ant163-a has 1.2084888645347291e-11 chance of dying
+ant164-a has 1.174282893146028e-11 chance of dying
+ant165-a has 1.0231371305735593e-11 chance of dying
+ant166-a has 1.3257950293166232e-11 chance of dying
+ant167-a has 1.209232713961228e-11 chance of dying
+ant168-a has 1.2252421299763228e-11 chance of dying
+ant169-a has 1.127897775177189e-11 chance of dying
+ant170-a has 1.1761147611366596e-11 chance of dying
+ant171-a has 9.326650562968553e-12 chance of dying
+ant172-a has 1.2773115898312426e-11 chance of dying
+ant173-a has 9.887868301916569e-12 chance of dying
+ant174-a has 1.2051692976911e-11 chance of dying
+ant175-a has 1.229139012792757e-11 chance of dying
+ant176-a has 1.3651191288488462e-11 chance of dying
+ant177-a has 1.1283418643870391e-11 chance of dying
+ant178-a has 1.019773154808945e-11 chance of dying
+ant179-a has 1.1442180536391788e-11 chance of dying
+ant180-a has 1.1978751324193126e-11 chance of dying
+ant181-a has 1.0302980690823915e-11 chance of dying
+ant182-a has 1.3059886505573104e-11 chance of dying
+ant183-a has 1.1696199564426024e-11 chance of dying
+ant184-a has 1.0100476011132287e-11 chance of dying
+ant185-a has 1.2005729743691518e-11 chance of dying
+ant186-a has 1.1939005339911546e-11 chance of dying
+ant187-a has 1.1220135931466757e-11 chance of dying
+ant188-a has 1.272648653127817e-11 chance of dying
+ant189-a has 8.850031818496973e-12 chance of dying
+ant190-a has 1.2489675960125624e-11 chance of dying
+ant191-a has 9.33975119465913e-12 chance of dying
+ant192-a has 1.131206239790572e-11 chance of dying
+ant193-a has 1.1568523916594131e-11 chance of dying
+ant194-a has 1.2759238110504612e-11 chance of dying
+ant195-a has 1.287303597052869e-11 chance of dying
+ant196-a has 1.145150640979864e-11 chance of dying
+ant197-a has 1.3321233005569866e-11 chance of dying
+ant198-a has 1.1852741010898171e-11 chance of dying
+ant199-a has 1.1062040172760135e-11 chance of dying
+ant200-a has 1.0203393685515039e-11 chance of dying
+win1 has biomassDict("veg"=>100.008) and projects 0.8265110255672694
+win2 has biomassDict("veg"=>99.6312) and projects 0.8233980451467123
+win3 has biomassDict("veg"=>101.006) and projects 0.8347604464394525
+win4 has biomassDict("veg"=>101.112) and projects 0.8356365504847444
+win5 has biomassDict("veg"=>99.8453) and projects 0.8251680333059612
+win6 has biomassDict("veg"=>100.59) and projects 0.8313217018246296
+win7 has biomassDict("veg"=>98.8533) and projects 0.8169696759406798
+win8 has biomassDict("veg"=>100.687) and projects 0.8321240279990519
+win9 has biomassDict("veg"=>101.04) and projects 0.8350401524971858
+win10 has biomassDict("veg"=>101.542) and projects 0.8391870154402705
+win11 has biomassDict("veg"=>99.4551) and projects 0.8219432738216764
+win12 has biomassDict("veg"=>99.1235) and projects 0.8192020940475139
+win13 has biomassDict("veg"=>98.6048) and projects 0.8149154488780921
+win14 has biomassDict("veg"=>98.3575) and projects 0.8128718178439905
+win15 has biomassDict("veg"=>99.9767) and projects 0.826253759367453
+win16 has biomassDict("veg"=>100.499) and projects 0.8305669196082452
+win17 has biomassDict("veg"=>100.239) and projects 0.8284202067478869
+win18 has biomassDict("veg"=>100.21) and projects 0.8281814199457509
+win19 has biomassDict("veg"=>100.507) and projects 0.8306364817757274
+win20 has biomassDict("veg"=>101.352) and projects 0.8376225847999029
+win21 has biomassDict("veg"=>100.396) and projects 0.8297155518794233
+win22 has biomassDict("veg"=>100.603) and projects 0.831426129044878
+win23 has biomassDict("veg"=>96.7413) and projects 0.7995151405146543
+win24 has biomassDict("veg"=>99.5804) and projects 0.8229786675781019
+win25 has biomassDict("veg"=>99.1696) and projects 0.8195833120547049
+win26 has biomassDict("veg"=>97.8732) and projects 0.8088696537524924
+win27 has biomassDict("veg"=>100.691) and projects 0.832156146298857
+win28 has biomassDict("veg"=>101.003) and projects 0.8347314669325203
+win29 has biomassDict("veg"=>101.387) and projects 0.8379092418125001
+win30 has biomassDict("veg"=>99.655) and projects 0.823595063338034
+win31 has biomassDict("veg"=>99.7187) and projects 0.8241218654846353
+win32 has biomassDict("veg"=>99.9497) and projects 0.8260305898071164
+win33 has biomassDict("veg"=>98.8034) and projects 0.816557431097789
+win34 has biomassDict("veg"=>99.6525) and projects 0.8235740623024226
+win35 has biomassDict("veg"=>99.5792) and projects 0.8229682018956415
+win36 has biomassDict("veg"=>100.377) and projects 0.8295581428436456
+win37 has biomassDict("veg"=>100.048) and projects 0.8268390369800761
+win38 has biomassDict("veg"=>100.185) and projects 0.8279752034335628
+win39 has biomassDict("veg"=>99.4355) and projects 0.8217809637967253
+win40 has biomassDict("veg"=>99.1671) and projects 0.819562694305325
+win41 has biomassDict("veg"=>99.8535) and projects 0.8252356728264229
+win42 has biomassDict("veg"=>98.7695) and projects 0.8162767879304144
+win43 has biomassDict("veg"=>98.5204) and projects 0.8142178687069104
+win44 has biomassDict("veg"=>99.2581) and projects 0.8203150508322667
+win45 has biomassDict("veg"=>97.4495) and projects 0.805368009872743
+win46 has biomassDict("veg"=>99.6356) and projects 0.8234346648987699
+win47 has biomassDict("veg"=>98.8892) and projects 0.817266408909639
+win48 has biomassDict("veg"=>99.3641) and projects 0.8211907373454475
+win49 has biomassDict("veg"=>100.772) and projects 0.8328267620743472
+win50 has biomassDict("veg"=>98.3818) and projects 0.813072792928174
+win51 has biomassDict("veg"=>101.244) and projects 0.8367255628159257
+win52 has biomassDict("veg"=>98.7516) and projects 0.8161285248354468
+win53 has biomassDict("veg"=>101.007) and projects 0.834767615377884
+win54 has biomassDict("veg"=>99.0495) and projects 0.8185912945856932
+win55 has biomassDict("veg"=>100.516) and projects 0.8307126953593116
+win56 has biomassDict("veg"=>99.6716) and projects 0.8237323869857432
+win57 has biomassDict("veg"=>100.048) and projects 0.8268448981281938
+win58 has biomassDict("veg"=>98.2128) and projects 0.8116759628947255
+win59 has biomassDict("veg"=>99.9599) and projects 0.8261147444008705
+win60 has biomassDict("veg"=>99.151) and projects 0.8194296218039661
+win61 has biomassDict("veg"=>99.0842) and projects 0.8188775183816069
+win62 has biomassDict("veg"=>99.5775) and projects 0.8229541599222994
+win63 has biomassDict("veg"=>99.8534) and projects 0.8252349164511876
+win64 has biomassDict("veg"=>98.5219) and projects 0.8142302392072488
+win65 has biomassDict("veg"=>99.4925) and projects 0.8222521870664009
+win66 has biomassDict("veg"=>98.7238) and projects 0.8158994214031209
+win67 has biomassDict("veg"=>99.0374) and projects 0.8184908207762733
+win68 has biomassDict("veg"=>100.628) and projects 0.8316341370740082
+win69 has biomassDict("veg"=>100.318) and projects 0.8290710369884384
+win70 has biomassDict("veg"=>99.0921) and projects 0.8189432940010642
+win71 has biomassDict("veg"=>99.3295) and projects 0.8209048576937789
+win72 has biomassDict("veg"=>100.085) and projects 0.8271492600032194
+win73 has biomassDict("veg"=>99.1596) and projects 0.8195010063994598
+win74 has biomassDict("veg"=>97.835) and projects 0.8085534751869635
+win75 has biomassDict("veg"=>101.257) and projects 0.8368376394838372
+win76 has biomassDict("veg"=>100.186) and projects 0.8279868696034169
+win77 has biomassDict("veg"=>100.628) and projects 0.8316332769551829
+win78 has biomassDict("veg"=>99.9322) and projects 0.8258857181184459
+win79 has biomassDict("veg"=>101.154) and projects 0.8359819962429627
+win80 has biomassDict("veg"=>100.455) and projects 0.8302047183519483
+win81 has biomassDict("veg"=>100.84) and projects 0.8333850971174426
+win82 has biomassDict("veg"=>100.45) and projects 0.8301663746556175
+win83 has biomassDict("veg"=>99.2158) and projects 0.8199655755369931
+win84 has biomassDict("veg"=>99.6557) and projects 0.8236012342398437
+win85 has biomassDict("veg"=>101.233) and projects 0.8366348411440635
+win86 has biomassDict("veg"=>101.244) and projects 0.836727729592296
+win87 has biomassDict("veg"=>99.9493) and projects 0.8260269955516485
+win88 has biomassDict("veg"=>99.9989) and projects 0.8264369476587247
+win89 has biomassDict("veg"=>98.0127) and projects 0.8100221777456688
+win90 has biomassDict("veg"=>99.878) and projects 0.8254379863509931
+win91 has biomassDict("veg"=>103.025) and projects 0.8514481594484264
+win92 has biomassDict("veg"=>101.0) and projects 0.8347114458679447
+win93 has biomassDict("veg"=>98.6447) and projects 0.8152456227091862
+win94 has biomassDict("veg"=>99.7759) and projects 0.8245938018375125
+win95 has biomassDict("veg"=>99.5027) and projects 0.8223366829700691
+win96 has biomassDict("veg"=>100.08) and projects 0.8271106144168876
+win97 has biomassDict("veg"=>100.827) and projects 0.8332847671402414
+win98 has biomassDict("veg"=>100.67) and projects 0.8319812068170537
+win99 has biomassDict("veg"=>98.881) and projects 0.8171981993126174
+win100 has biomassDict("veg"=>99.5429) and projects 0.822668629995623
+ant101 has biomassDict("veg"=>100.638) and projects 0.8317201137590738
+ant102 has biomassDict("veg"=>101.102) and projects 0.8355532565488917
+ant103 has biomassDict("veg"=>100.875) and projects 0.8336766696450625
+ant104 has biomassDict("veg"=>100.079) and projects 0.8271015082855703
+ant105 has biomassDict("veg"=>100.951) and projects 0.8343036462290994
+ant106 has biomassDict("veg"=>101.048) and projects 0.8351067292303734
+ant107 has biomassDict("veg"=>97.8223) and projects 0.8084488184792387
+ant108 has biomassDict("veg"=>99.9463) and projects 0.8260028879032004
+ant109 has biomassDict("veg"=>98.6559) and projects 0.8153376335795737
+ant110 has biomassDict("veg"=>101.746) and projects 0.8408760003168134
+ant111 has biomassDict("veg"=>98.045) and projects 0.8102890883074427
+ant112 has biomassDict("veg"=>99.6159) and projects 0.8232720366792065
+ant113 has biomassDict("veg"=>102.107) and projects 0.8438636110247366
+ant114 has biomassDict("veg"=>98.6635) and projects 0.8154012271593961
+ant115 has biomassDict("veg"=>99.3652) and projects 0.8211997357328267
+ant116 has biomassDict("veg"=>100.176) and projects 0.827902333292846
+ant117 has biomassDict("veg"=>100.512) and projects 0.8306813793755293
+ant118 has biomassDict("veg"=>101.459) and projects 0.8385019911706891
+ant119 has biomassDict("veg"=>99.2555) and projects 0.8202937142558084
+ant120 has biomassDict("veg"=>99.1071) and projects 0.8190667739484304
+ant121 has biomassDict("veg"=>100.412) and projects 0.8298540632989497
+ant122 has biomassDict("veg"=>99.2463) and projects 0.8202176054802791
+ant123 has biomassDict("veg"=>98.8561) and projects 0.8169924598264747
+ant124 has biomassDict("veg"=>98.7806) and projects 0.8163688692572506
+ant125 has biomassDict("veg"=>99.3318) and projects 0.8209242130655587
+ant126 has biomassDict("veg"=>99.5617) and projects 0.8228240264436867
+ant127 has biomassDict("veg"=>100.273) and projects 0.8287004452091583
+ant128 has biomassDict("veg"=>101.252) and projects 0.8367964910095125
+ant129 has biomassDict("veg"=>99.1853) and projects 0.8197135305735167
+ant130 has biomassDict("veg"=>99.9193) and projects 0.8257791064331512
+ant131 has biomassDict("veg"=>97.9378) and projects 0.8094033444853534
+ant132 has biomassDict("veg"=>99.7958) and projects 0.8247584276056245
+ant133 has biomassDict("veg"=>100.326) and projects 0.8291364000479257
+ant134 has biomassDict("veg"=>99.3815) and projects 0.8213347721998832
+ant135 has biomassDict("veg"=>100.104) and projects 0.8273067642908836
+ant136 has biomassDict("veg"=>99.6457) and projects 0.8235180007829449
+ant137 has biomassDict("veg"=>100.367) and projects 0.8294780805327802
+ant138 has biomassDict("veg"=>98.7889) and projects 0.8164372434053178
+ant139 has biomassDict("veg"=>99.6022) and projects 0.8231588260562005
+ant140 has biomassDict("veg"=>100.249) and projects 0.8285005879805913
+ant141 has biomassDict("veg"=>99.3665) and projects 0.8212103454124462
+ant142 has biomassDict("veg"=>101.127) and projects 0.8357613640840217
+ant143 has biomassDict("veg"=>99.7712) and projects 0.824555344223489
+ant144 has biomassDict("veg"=>100.221) and projects 0.8282745272929687
+ant145 has biomassDict("veg"=>98.8283) and projects 0.8167628431632
+ant146 has biomassDict("veg"=>100.188) and projects 0.8280025518500106
+ant147 has biomassDict("veg"=>101.077) and projects 0.8353473242905622
+ant148 has biomassDict("veg"=>98.5461) and projects 0.8144308809789362
+ant149 has biomassDict("veg"=>101.595) and projects 0.8396289458525065
+ant150 has biomassDict("veg"=>99.8017) and projects 0.8248077760965487
+ant151 has biomassDict("veg"=>101.543) and projects 0.8391979551453617
+ant152 has biomassDict("veg"=>100.164) and projects 0.8278041913072567
+ant153 has biomassDict("veg"=>96.8008) and projects 0.8000066873930988
+ant154 has biomassDict("veg"=>101.338) and projects 0.8375047394678725
+ant155 has biomassDict("veg"=>99.1682) and projects 0.8195720191229032
+ant156 has biomassDict("veg"=>100.501) and projects 0.8305830153303793
+ant157 has biomassDict("veg"=>100.838) and projects 0.8333685923670401
+ant158 has biomassDict("veg"=>99.8091) and projects 0.824868595992539
+ant159 has biomassDict("veg"=>99.6888) and projects 0.8238742221529507
+ant160 has biomassDict("veg"=>99.9111) and projects 0.8257118524482746
+ant161 has biomassDict("veg"=>100.5) and projects 0.8305768523194969
+ant162 has biomassDict("veg"=>100.308) and projects 0.8289891962322554
+ant163 has biomassDict("veg"=>100.724) and projects 0.8324280802134681
+ant164 has biomassDict("veg"=>98.814) and projects 0.8166445576059498
+ant165 has biomassDict("veg"=>100.131) and projects 0.8275314650313726
+ant166 has biomassDict("veg"=>100.064) and projects 0.8269774005684787
+ant167 has biomassDict("veg"=>99.7491) and projects 0.8243724833032067
+ant168 has biomassDict("veg"=>98.8348) and projects 0.8168164525993769
+ant169 has biomassDict("veg"=>100.185) and projects 0.8279738729153563
+ant170 has biomassDict("veg"=>101.448) and projects 0.8384098382159684
+ant171 has biomassDict("veg"=>99.7542) and projects 0.8244149024675538
+ant172 has biomassDict("veg"=>99.9495) and projects 0.8260286982238729
+ant173 has biomassDict("veg"=>99.3062) and projects 0.8207126892015425
+ant174 has biomassDict("veg"=>100.809) and projects 0.8331342102041184
+ant175 has biomassDict("veg"=>100.114) and projects 0.8273921706351073
+ant176 has biomassDict("veg"=>99.6517) and projects 0.8235674002001172
+ant177 has biomassDict("veg"=>100.54) and projects 0.8309107387120003
+ant178 has biomassDict("veg"=>99.2485) and projects 0.8202358508598919
+ant179 has biomassDict("veg"=>99.3153) and projects 0.8207875002718642
+ant180 has biomassDict("veg"=>100.488) and projects 0.8304754861435013
+ant181 has biomassDict("veg"=>100.498) and projects 0.830564292087802
+ant182 has biomassDict("veg"=>101.357) and projects 0.837660256631151
+ant183 has biomassDict("veg"=>100.489) and projects 0.8304872655065805
+ant184 has biomassDict("veg"=>97.9656) and projects 0.8096333039401259
+ant185 has biomassDict("veg"=>99.4249) and projects 0.8216933773749535
+ant186 has biomassDict("veg"=>100.137) and projects 0.827575301715309
+ant187 has biomassDict("veg"=>101.634) and projects 0.8399524484320243
+ant188 has biomassDict("veg"=>99.4577) and projects 0.8219646893631832
+ant189 has biomassDict("veg"=>99.5248) and projects 0.8225193942437695
+ant190 has biomassDict("veg"=>98.4601) and projects 0.8137195549229439
+ant191 has biomassDict("veg"=>97.6151) and projects 0.8067361714741156
+ant192 has biomassDict("veg"=>100.228) and projects 0.8283280783654384
+ant193 has biomassDict("veg"=>99.7656) and projects 0.8245092700358583
+ant194 has biomassDict("veg"=>100.655) and projects 0.8318608597082584
+ant195 has biomassDict("veg"=>100.447) and projects 0.830141289814311
+ant196 has biomassDict("veg"=>100.22) and projects 0.8282606197378739
+ant197 has biomassDict("veg"=>99.3589) and projects 0.8211482916100687
+ant198 has biomassDict("veg"=>100.587) and projects 0.8312977104924778
+ant199 has biomassDict("veg"=>98.6829) and projects 0.8155611219910298
+ant200 has biomassDict("veg"=>99.0462) and projects 0.8185637425799065
+win1 compterm: -1.9999999999999991
+individuals not growing: win1a
+win2 compterm: -1.9999999999999918
+individuals not growing: win2a
+win3 compterm: -2.0000000000000058
+individuals not growing: win3a
+win4 compterm: -2.0000000000000036
+individuals not growing: win4a
+win5 compterm: -2.0000000000000004
+individuals not growing: win5a
+win6 compterm: -2.3330840845670995
+individuals not growing: win6a
+win7 compterm: -1.999999999999997
+individuals not growing: win7a
+win8 compterm: -2.5246757500990107
+individuals not growing: win8a
+win9 compterm: -2.0
+individuals not growing: win9a
+win10 compterm: -2.000000000000001
+individuals not growing: win10a
+win11 compterm: -2.000000000000006
+individuals not growing: win11a
+win12 compterm: -3.0965454900993494
+individuals not growing: win12a
+win13 compterm: -4.95022043658727
+individuals not growing: win13a
+win14 compterm: -2.0
+individuals not growing: win14a
+win15 compterm: -2.394773012625219
+individuals not growing: win15a
+win16 compterm: -2.000000000000003
+individuals not growing: win16a
+win17 compterm: -1.999999999999994
+individuals not growing: win17a
+win18 compterm: -2.000000000000007
+individuals not growing: win18a
+win19 compterm: -2.130468536956188
+individuals not growing: win19a
+win20 compterm: -2.328091787995342
+individuals not growing: win20a
+win21 compterm: -3.7888042550703447
+individuals not growing: win21a
+win22 compterm: -3.7814512506433813
+individuals not growing: win22a
+win23 compterm: -1.9999999999999993
+individuals not growing: win23a
+win24 compterm: -1.9999999999999991
+individuals not growing: win24a
+win25 compterm: -1.999999999999997
+individuals not growing: win25a
+win26 compterm: -1.9999999999999993
+individuals not growing: win26a
+win27 compterm: -2.0000000000000044
+individuals not growing: win27a
+win28 compterm: -2.000000000000003
+individuals not growing: win28a
+win29 compterm: -1.999999999999994
+individuals not growing: win29a
+win30 compterm: -2.000000000000006
+individuals not growing: win30a
+win31 compterm: -2.000000000000001
+individuals not growing: win31a
+win32 compterm: -0.6363636363636382
+individuals not growing: win32a
+win33 compterm: -1.999999999999995
+individuals not growing: win33a
+win34 compterm: -1.9999999999999998
+individuals not growing: win34a
+win35 compterm: -2.0000000000000053
+individuals not growing: win35a
+win36 compterm: -2.0000000000000044
+individuals not growing: win36a
+win37 compterm: -1.1818181818181857
+individuals not growing: win37a
+win38 compterm: -2.000000000000004
+individuals not growing: win38a
+win39 compterm: -1.9999999999999987
+individuals not growing: win39a
+win40 compterm: -2.134018092524619
+individuals not growing: win40a
+win41 compterm: -1.9999999999999962
+individuals not growing: win41a
+win42 compterm: -1.999999999999997
+individuals not growing: win42a
+win43 compterm: -2.0000000000000027
+individuals not growing: win43a
+win44 compterm: -1.9999999999999998
+individuals not growing: win44a
+win45 compterm: -1.999999999999997
+individuals not growing: win45a
+win46 compterm: -3.085301663609311
+individuals not growing: win46a
+win47 compterm: -2.000000000000001
+individuals not growing: win47a
+win48 compterm: -2.000000000000007
+individuals not growing: win48a
+win49 compterm: -1.9999999999999956
+individuals not growing: win49a
+win50 compterm: -1.9999999999999953
+individuals not growing: win50a
+win51 compterm: -1.9999999999999991
+individuals not growing: win51a
+win52 compterm: -2.000000000000005
+individuals not growing: win52a
+win53 compterm: -1.9999999999999987
+individuals not growing: win53a
+win54 compterm: -2.0000000000000004
+individuals not growing: win54a
+win55 compterm: -2.000000000000005
+individuals not growing: win55a
+win56 compterm: -1.9999999999999922
+individuals not growing: win56a
+win57 compterm: -1.999999999999996
+individuals not growing: win57a
+win58 compterm: -2.0000000000000027
+individuals not growing: win58a
+win59 compterm: -2.0000000000000044
+individuals not growing: win59a
+win60 compterm: -1.9999999999999991
+individuals not growing: win60a
+win61 compterm: -5.264107256830601
+individuals not growing: win61a
+win62 compterm: -2.000000000000005
+individuals not growing: win62a
+win63 compterm: -1.9999999999999947
+individuals not growing: win63a
+win64 compterm: -2.000000000000007
+individuals not growing: win64a
+win65 compterm: -4.739075386693735
+individuals not growing: win65a
+win66

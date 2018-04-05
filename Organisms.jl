@@ -12,13 +12,12 @@ using Fileprep
 export Organism, InitOrgs, newOrgs, projvegmass!, compete, develop!, allocate!, meanExP, checkboundaries, reproduce!, disperse!, germinate, establish!, survive!
 
 #TODO put them in OrgsRef
-const Boltz = 8.62e-5 # Brown & Sibly MTE book chap 2
-const aE = 0.65 # Brown & Sibly MTE book chap 2
-const plants_gb0 = (10^(10.15))/52 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base
-const plants_mb0 = 5.522 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
+const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
+const aE = 0.65 # eV Brown & Sibly MTE book chap 2
+const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter
+const plants_mb0 = 1.5029220413821088e11 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
 const plants_fb0 = exp(30.0) # fertility rate
 const seedmassµ = 0.8
-const tK = 273.15 # °C to K converter
 
 # Initial organisms parametrization
 mutable struct InitOrgs
@@ -307,6 +306,8 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
         T = landscape[reproducing[o].location[1], reproducing[o].location[2], reproducing[o].location[3]].temp
 
         offsprgB = round(Int64, plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway) #TODO stochasticity
+
+        println(simulog, orgs[o].id, "-", orgs[o].stage, "produced $offsprgB seeds")
 
         #unity test
         println(simulog, "Offspring of ", orgs[o], ": ",offsprgB)
