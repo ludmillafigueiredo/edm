@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+tuple#!/usr/bin/env julia
 
 # Get model directory and include it in Julia's loading path
 #cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
@@ -43,12 +43,12 @@ function read_initials()
     #     close(env)
     # end
     simparams = Setworld.Simpars()
-    simparams.fxlength = Tuple(500)
-    simparams.fylength = Tuple(500)
-    simparams.fmeantemp = Tuple(20.0)
-    simparams.ftempsd = Tuple(1.0)
-    simparams.fmeanprec = Tuple(100.0)
-    simparams.fprecsd = Tuple(1.0)
+    simparams.fxlength = tuple(500)
+    simparams.fylength = tuple(500)
+    simparams.fmeantemp = tuple(20.0)
+    simparams.ftempsd = tuple(1.0)
+    simparams.fmeanprec = tuple(100.0)
+    simparams.fprecsd = tuple(1.0)
     simparams.nfrags = 1
     simparams.timesteps = 52
     #verify that: TODO not a real test
@@ -72,16 +72,16 @@ function read_initials()
     #     close(orgf)
     # end
     initorgs = Organisms.InitOrgs()
-    initorgs.fgroups = ("wind", "ant")
-    initorgs.sps = ("sp1", "sp2")
-    initorgs.init_stage = ("a","a")
-    initorgs.init_abund = (100,100)
+    initorgs.fgroups = tuple("wind", "ant")
+    initorgs.sps = tuple("sp1", "sp2")
+    initorgs.init_stage = tuple("a","a")
+    initorgs.init_abund = tuple(100,100)
     #genotypes are not initialized with inputs
-    initorgs.biomassμ = (100,100)
-    initorgs.biomasssd = (1,1)
-    initorgs.dispμ = (0,0)
-    initorgs.dispshp = (0,0)
-    initorgs.radius = (0,0)
+    initorgs.biomassμ = tuple(100,100)
+    initorgs.biomasssd = tuple(1,1)
+    initorgs.dispμ = tuple(0,0)
+    initorgs.dispshp = tuple(0,0)
+    initorgs.radius = tuple(0,0)
 
     return simparams, initorgs
 end
@@ -150,7 +150,7 @@ function simulate()
     simulog = open("EDoutputs/simulog.txt","w")
 
 # MODEL RUN
-    for t in 1:simprams.timesteps
+    for t in 1:simparams.timesteps
         #develop!()
         projvegmass!(mylandscape,orgs,simulog)
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz, simulog)

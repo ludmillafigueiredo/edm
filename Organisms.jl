@@ -22,16 +22,16 @@ const tK = 273.15 # °C to K converter
 
 # Initial organisms parametrization
 mutable struct InitOrgs
-    fgroups::Tuple{String}
-    sps::Tuple{String}
-    init_stage::Tuple{String}
-    init_abund::Tuple{Int64}
+    fgroups::Any
+    sps::Any
+    init_stage::Any
+    init_abund::Any
     #genotypes #TODO initialie those in functions
-    biomassμ::Tuple{Float64}
-    biomasssd::Tuple{Float64}
-    dispμ::Tuple{Float64}
-    dispshp::Tuple{Float64}
-    radius::Tuple{Int64}
+    biomassμ::Any
+    biomasssd::Any
+    dispμ::Any
+    dispshp::Any
+    radius::Any
     InitOrgs() = new() #TODO check if new() is necessary
 end
 
