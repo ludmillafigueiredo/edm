@@ -134,7 +134,7 @@ Rewrites the projected mass of each organisms stored in `orgs` into the `neighs`
 function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N)
     # empt neighs to rewrite
     # TODO more efficient?
-    for f in 1:size(ladnscape,3)
+    for f in 1:size(landscape,3)
         for y in 1:size(landscape,2), x in 1:size(landscape,1)
             if length(keys(landscape[x,y,f].neighs)) == 0
                 continue
