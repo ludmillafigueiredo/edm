@@ -131,7 +131,7 @@ end
     projvegmass!(landscape,orgs)
 Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
 """
-function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N, simulog::IOStream)
+function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N)
     # empt neighs to rewrite
     # TODO more efficient?
     for f in 1:size(ladnscape,3)
