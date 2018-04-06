@@ -218,7 +218,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
         # unity test
         #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
         open("EDoutputs/simulog.txt","a") do sim
-            println(sim, org.id, " mass overlap: $nbsum and compterm $compterm")
+            println(sim, orgs[o].id, " mass overlap: $nbsum and compterm $compterm")
         end
 
         if compterm > 0
