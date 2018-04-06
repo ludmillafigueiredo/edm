@@ -1,7 +1,6 @@
 #!/bin/bash
-#SBATCH -n 1 #number of cores
+#SBATCH -n 12 #number of cores
 #SBATCH --mem-per-cpu=8G
-#SBATCH --workdir="/home/luf74xx/Dokumente/model/EDoutputs"
 #SBATCH --output=ED-%j.o
 #SBATCH --error=ED-%j.e
 
