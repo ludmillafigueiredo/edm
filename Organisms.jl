@@ -171,7 +171,7 @@ end
     compete(landscape, orgs)
 Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
 """
-function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, simulog::IOStream)
+function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
 
     x, y, frag = org.location
     fg = org.fgroup
@@ -202,7 +202,7 @@ end
     allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
-function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,N} where N, t::Int64, aE::Float64, Boltz::Float64, simulog::IOStream)
+function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,N} where N, t::Int64, aE::Float64, Boltz::Float64)
 
     nogrowth = Int64[]
 
@@ -307,7 +307,7 @@ end
     reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
-function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organisms.Organism,N} where N,simulog::IOStream, t::Int64)
+function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organisms.Organism,N} where N, t::Int64)
     #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
     #     pollination()
@@ -367,7 +367,7 @@ end
     disperse!(offspring)
 Butterflies, bees and seeds can/are disperse(d).
 """
-function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism, N} where N, simulog::IOStream)
+function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism, N} where N)
     # Seeds (Bullock et al. JEcol 2017)
     # Get seeds from org storage
     dispersing = find(x -> x.stage == "e" && x.age == 0, orgs)
@@ -436,7 +436,7 @@ end
     establish!
 Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
 """
-function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organisms.Organism, N} where N, t::Int64, simulog::IOStream)
+function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organisms.Organism, N} where N, t::Int64)
     #REFERENCE: May et al. 2009
     #check neighs
 
@@ -472,7 +472,7 @@ end
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 plants in nogrwth are subjected to two probability rates
 """
-function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N,simulog::IOStream)
+function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N)
 
     deaths = Int64[]
 
