@@ -42,8 +42,8 @@ function read_initials()
     #     close(env)
     # end
     simparams = Setworld.Simpars()
-    simparams.fxlength = tuple(74500)
-    simparams.fylength = tuple(74500)
+    simparams.fxlength = tuple(44700) # 5 cm² cells
+    simparams.fylength = tuple(44700)
     simparams.fmeantemp = tuple(20.0)
     simparams.ftempsd = tuple(1.0)
     simparams.fmeanprec = tuple(100.0)
@@ -114,13 +114,14 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
     sep = ","
 
     output = open(string("EDoutputs/orgsweek",t,".csv"), "w")
+    print(output, "week", sep)
     print(output, "id", sep)
-    print(output, "location", sep)
     print(output, "species", sep)
     print(output, "stage", sep)
-    print(output, "biomas", sep)
-    print(output, "radius", sep)
     print(output, "functional_group", sep)
+    print(output, "location", sep)
+    print(output, "biomass", sep)
+    print(output, "radius", sep)
     print(output, "genotype", sep)
     print(output, "dispersal_pars")
     println(output)
@@ -128,11 +129,12 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
     #TODO change writedlm
     for o in 1:length(orgs)
         println(output,
+        e, sep,
         orgs[o].id, sep,
-        orgs[o].location, sep,
         orgs[o].sp, sep,
         orgs[o].stage, sep,
         orgs[o].fgroup, sep,
+        orgs[o].location, sep,
         sum(values(orgs[o].biomass)), sep,
         orgs[o].radius, sep,
         orgs[o].genotype, sep,
