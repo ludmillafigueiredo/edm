@@ -42,8 +42,8 @@ function read_initials()
     #     close(env)
     # end
     simparams = Setworld.Simpars()
-    simparams.fxlength = tuple(44700) # 5 cm² cells
-    simparams.fylength = tuple(44700)
+    simparams.fxlength = tuple(50) # 5 cm² cells
+    simparams.fylength = tuple(50)
     simparams.fmeantemp = tuple(20.0)
     simparams.ftempsd = tuple(1.0)
     simparams.fmeanprec = tuple(100.0)
@@ -74,7 +74,7 @@ function read_initials()
     initorgs.fgroups = tuple("wind", "ant")
     initorgs.sps = tuple("sp1", "sp2")
     initorgs.init_stage = tuple("a","a")
-    initorgs.init_abund = tuple(100,100)
+    initorgs.init_abund = tuple(5,5)
     #genotypes are not initialized with inputs
     initorgs.biomassμ = tuple(100,100)
     initorgs.biomasssd = tuple(1,1)
