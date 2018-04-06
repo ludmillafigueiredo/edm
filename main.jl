@@ -118,9 +118,9 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
     header = reshape(append!(["week"],string.(fieldnames(Organisms))), 1, length(fieldstoheaders)+1)
     writedlm(output, header, sep)
 
-    #TODO change writedlm
+    #TODO better extract and arrange values
     for o in 1:length(orgs)
-        writedlm(output, [t orgs[o].id orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].location sum(values(orgs[o].biomass)) orgs[o].radius orgs[o].genotype orgs[o].disp)], sep)
+        writedlm(output, [t orgs[o].id orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].location sum(values(orgs[o].biomass)) orgs[o].radius orgs[o].genotype orgs[o].disp], sep)
     end
 end
 
