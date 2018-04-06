@@ -113,15 +113,20 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
 
     sep = ','
 
-    open(string("EDoutputs/orgsweek",t,".csv"), "a+") do output
-        header = reshape(append!(["week"],string.(fieldnames(Organisms))), 1, length(fieldstoheaders)+1)
-        writedlm(output, header, sep)
+    if t == 1
+        open(string("EDoutputs/orgsweek",t,".csv"), "a+") do output
+            header = string.(fieldnames(Organisms))
+            writedlm(output, reshape(append!(["week"], 1, length(fieldstoheaders)+1)), sep)
+        end
+    end
 
+    open(string("EDoutputs/orgsweek",t,".csv"), "a+") do output
         #TODO better extract and arrange values
         for o in 1:length(orgs)
             writedlm(output, [t orgs[o].id orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].location sum(values(orgs[o].biomass)) orgs[o].radius orgs[o].genotype orgs[o].disp], sep)
         end
     end
+
 end
 
 """
