@@ -214,7 +214,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
 
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
-        nbsum, compterm = compete(landscape, orgs[o], simulog)
+        nbsum, compterm = compete(landscape, orgs[o])
         # unity test
         #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
         open("EDoutputs/simulog.txt","a") do sim
