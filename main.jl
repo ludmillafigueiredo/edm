@@ -142,25 +142,27 @@ function simulate()
         println("Error in creating EDoutputs, assuming it already exists")
     end
 
-    simulog = open("EDoutputs/simulog.txt","w")
+    #simulog = open("EDoutputs/simulog.txt","w")
 
 # MODEL RUN
     for t in 1:simparams.timesteps
-        #develop!()
-        projvegmass!(mylandscape,orgs,simulog)
-        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz, simulog)
-        #TODO check if there is no better way to keep track of individuals that are not growing
+        open("EDoutputs/simulog.txt","a") do sim
+            println(sim,"WEEK ",t)
+        end
         if rem(t, 52) == 12 #juveniles become adults at the beggining of spring (reproductive season)
             develop!(orgs)
         end
+        projvegmass!(mylandscape,orgs)
+        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz)
+        #TODO check if there is no better way to keep track of individuals that are not growing
         if 12 <= rem(t, 52) < 25 #reproduction happens during spring
-            reproduce!(mylandscape,orgs,simulog)
+            reproduce!(mylandscape,orgs,1)
         end
         if 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
-            disperse!(mylandscape,orgs,simulog)
-            establish!(mylandscape,orgs,t,simulog)
+            disperse!(mylandscape,orgs)
+            establish!(mylandscape,orgs,t)
         end
-        survive!(mylandscape,orgs,nogrowth,simulog)
+        survive!(mylandscape,orgs,nogrowth)
         ## DISTURBANCES
         ## Dynamical landscape change
         # if t #something
@@ -178,7 +180,6 @@ function simulate()
         #network interactions
         #outputnetworks()
         #save(string("week",4*t)) more reasonable interval
-        println(simulog, "WEEK ",t)
     end
     close(simulog)
 end

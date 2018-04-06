@@ -164,9 +164,10 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, simulog
     x, y, frag = org.location
     fg = org.fgroup
     r = org.radius
-    # 2. Look for neighbors in the square area delimited by r
-    nbsum = 0
 
+    compterm = 0
+    nbsum = 0
+    # 2. Look for neighbors in the square area (2r+1) delimited by r
     for j in (y-r):(y+r), i in (x-r):(x+r)
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
@@ -181,14 +182,11 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, simulog
         else #!haskey(landscape[i,j,frag].neighs,fg) #there is no competition
             nbsum += 0
         end
-
-        # unity test
-        #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
-
     end
 
-    compterm = /(org.biomass["veg"] - nbsum, org.biomass["veg"]) # ratio of mass of neighs (- own biomass) in nb of cells. TODO It should ne normalized somehow
-    return compterm
+    compterm = /(org.biomass["veg"] - nbsum, org.biomass["veg"])
+
+    return nbsum, compterm
 end
 
 """
@@ -207,10 +205,12 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
 
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
-        compterm = compete(landscape, orgs[o], simulog)
-
-        #unity test
-        println(simulog,orgs[o].id," compterm: ",compterm)
+        nbsum, compterm = compete(landscape, orgs[o], simulog)
+        # unity test
+        #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
+        open("EDoutputs/simulog.txt","a") do sim
+            println(sim, org.id, " mass overlap: $nbsum and compterm $compterm")
+        end
 
         if compterm > 0
             grown_mass = plants_gb0 * (compterm *sum(values(orgs[o].biomass)))^(3/4) * exp(-aE/(Boltz*T))
@@ -226,9 +226,6 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
             elseif orgs[o].stage == "j"
                 # juveniles grow
                 orgs[o].biomass["veg"] += grown_mass
-
-                #unity test
-                #println(simulog,"individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in veg")
             elseif (orgs[o].stage == "a"  && (12 <= rem(t, 52) < 25))
                 # adults reproduc
                 if haskey(orgs[o].biomass,"reprd")
@@ -236,19 +233,20 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
                 else
                     orgs[o].biomass["reprd"] = grown_mass
                 end
-
                 # unity test
                 if rand() > 0.7
-                    println(simulog,"individual ", orgs[o].id, "-", orgs[o].stage, " grew $grown_mass in reprd")
+                    open("EDoutputs/simulog.txt","a") do sim
+                        println(sim, org.id, " gained $grown_mass")
+                    end
                 end
-                # adults only produce reproductive biomass
             end
         else
             push!(nogrowth,o)
-
-            # unity test
-            println(simulog, "individuals not growing: ", orgs[o].id, orgs[o].stage)
         end
+    end
+    # unity test
+    open("EDoutputs/simulog.txt","a") do sim
+        println(sim, "Not growing $nogrowth")
     end
     return nogrowth
 end
@@ -300,7 +298,7 @@ end
     reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
-function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organisms.Organism,N} where N,simulog::IOStream)
+function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organisms.Organism,N} where N,simulog::IOStream, t::Int64)
     #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
     #     pollination()
@@ -311,7 +309,9 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
     reproducing = filter(x -> x.stage == "a" && haskey(x.biomass, "reprd"), orgs)
 
     #unity test
-    println(simulog,"Reproducing: $reproducing")
+    open("EDoutputs/simulog.txt","a") do sim
+        println(sim, "Reproducing: $reproducing week $t")
+    end
 
     offspring = Organism[]
 
@@ -324,7 +324,9 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
         println(simulog, orgs[o].id, "-", orgs[o].stage, "produced $offsprgB seeds")
 
         #unity test
-        println(simulog, "Offspring of ", orgs[o], ": ",offsprgB)
+        open("EDoutputs/simulog.txt","a") do sim
+            println(sim, "Offspring of ", orgs[o], ": ",offsprgB)
+        end
 
         for n in 1:offsprgB
             #TODO check for a quicker way of creating several objects of composite-type
@@ -364,8 +366,10 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
     #TODO include insects
     # Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
 
-    # unity test
-    println(simulog,"Dispersing: $dispersing")
+    #unity test
+    open("EDoutputs/simulog.txt","a") do sim
+        println(sim, "Dispersing: $dispersing week $t")
+    end
 
     lost = Int64[]
 
@@ -391,12 +395,16 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
 
         if checkboundaries(landscape, xdest, ydest, fdest)
             orgs[d].location = (xdest,ydest,fdest)
-            # unity test
-            println(org[o].id," dispersed ", dist)
+            #unity test
+            open("EDoutputs/simulog.txt","a") do sim
+                println(sim, org[o].id," dispersed $dist")
+            end
         else
             push!(lost,d)
             #unity test
-            println(org[o].id," dispersed ", dist, " and died")
+            open("EDoutputs/simulog.txt","a") do sim
+                println(sim, org[o].id," dispersed $dist but died")
+            end
         end
     end
     deleteat!(orgs,lost)
@@ -426,8 +434,10 @@ function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism
     #TODO weekly timing of establishment
     establishing = find(x -> x.stage == "e", orgs)
 
-    # unity test
-    println(simulog,"Establishing seeds: $establishing")
+    #unity test
+    open("EDoutputs/simulog.txt","a") do sim
+        println(sim, "Establishing seeds: $establishing")
+    end
 
     lost = Int64[]
 
@@ -470,7 +480,9 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
 
             #unity test
             if rand() > 0.7
-                println(simulog,orgs[o].id,"-",orgs[o].stage, " has $mprob chance of dying")
+                open("EDoutputs/simulog.txt","a") do sim
+                    println(sim,orgs[o].id,"-",orgs[o].stage, " mprob: $mprob")
+                end
             end
 
             # individuals that didnt grow have
