@@ -129,9 +129,21 @@ end
 
 """
     projvegmass!(landscape,orgs)
-Projects the mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
+Re-projects the mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
 """
 function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N, simulog::IOStream)
+    # empt neighs to rewrite
+    # TODO more efficient?
+    for f in 1:size(ladnscape,3)
+        for y in 1:size(landscape,2), x in 1:size(landscape,1)
+            if length(keys(landscape[x,y,f].neighs)) == 0
+                continue
+            else
+                landscape[x,y,f].neighs = Dict()
+            end
+        end
+    end
+
     for o in 1:length(orgs)
         x, y, frag = orgs[o].location
         r = orgs[o].radius = round(Int64, (sqrt(orgs[o].biomass["veg"]^(2/3)) - 1)/2, RoundNearestTiesAway)
@@ -146,9 +158,9 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
                 continue
             else
                 if haskey(landscape[i,j,frag].neighs,fg)
-                    landscape[i,j,frag].neighs[fg] += projmass
+                     landscape[i,j,frag].neighs[fg] += projmass
                 else
-                    landscape[i,j,frag].neighs[fg] = projmass
+                     landscape[i,j,frag].neighs[fg] = projmass
                 end
             end
         end
@@ -174,9 +186,6 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, simulog
             #unity test
             #println(simulog, orgs.id, " is projecting outside the landscape, because it is at: ", org[o].location)
         elseif haskey(landscape[i,j,frag].neighs,fg)
-            # unity test
-            #println(simulog, org.id, " is overlapping with someone in cell ($i,$j).")
-
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs[fg] - org.biomass["veg"]/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
         else #!haskey(landscape[i,j,frag].neighs,fg) #there is no competition
