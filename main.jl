@@ -115,7 +115,7 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
 
     open(string("EDoutputs/orgsweek",t,".csv"), "a+") do output
 
-    header = reshape(append(["week"],string.(fieldnames(Organisms))), 1, length(fieldstoheaders)+1)
+    header = reshape(append!(["week"],string.(fieldnames(Organisms))), 1, length(fieldstoheaders)+1)
     writedlm(output, header), sep)
 
     #TODO change writedlm
