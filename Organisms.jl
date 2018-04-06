@@ -134,7 +134,7 @@ Projects the mass of each organisms stored in `orgs` into the `neighs` field of 
 function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N, simulog::IOStream)
     for o in 1:length(orgs)
         x, y, frag = orgs[o].location
-        r = orgs[o].radius = round(Int64, sqrt(orgs[o].biomass["veg"]^(2/3)), RoundNearestTiesAway)
+        r = orgs[o].radius = round(Int64, (sqrt(orgs[o].biomass["veg"]^(2/3)) - 1)/2, RoundNearestTiesAway)
         fg = orgs[o].fgroup
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
@@ -160,19 +160,19 @@ end
 Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
 """
 function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, simulog::IOStream)
+
     x, y, frag = org.location
     fg = org.fgroup
     r = org.radius
     # 2. Look for neighbors in the square area delimited by r
     nbsum = 0
 
-    for j in (y-r):(y+r), i in (x-r):(x+r) #TODO filter!() this area?
+    for j in (y-r):(y+r), i in (x-r):(x+r)
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
             #unity test
             #println(simulog, orgs.id, " is projecting outside the landscape, because it is at: ", org[o].location)
         elseif haskey(landscape[i,j,frag].neighs,fg)
-
             # unity test
             #println(simulog, org.id, " is overlapping with someone in cell ($i,$j).")
 
@@ -213,7 +213,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
         println(simulog,orgs[o].id," compterm: ",compterm)
 
         if compterm > 0
-            grown_mass = compterm * (plants_gb0 * sum(values(orgs[o].biomass))^(3/4) * exp(-aE/(Boltz*T)))
+            grown_mass = plants_gb0 * (compterm *sum(values(orgs[o].biomass)))^(3/4) * exp(-aE/(Boltz*T))
 
             # unity test
             #println(simulog, orgs[o].id, " gained ", grown_mass)

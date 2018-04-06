@@ -195,6 +195,7 @@ function simulate()
         #network interactions
         #outputnetworks()
         #save(string("week",4*t)) more reasonable interval
+        println(simulog, "WEEK ",t)
     end
     close(simulog)
 end
