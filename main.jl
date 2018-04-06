@@ -114,17 +114,14 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
     sep = ','
 
     open(string("EDoutputs/orgsweek",t,".csv"), "a+") do output
+        header = reshape(append!(["week"],string.(fieldnames(Organisms))), 1, length(fieldstoheaders)+1)
+        writedlm(output, header, sep)
 
-    header = reshape(append!(["week"],string.(fieldnames(Organisms))), 1, length(fieldstoheaders)+1)
-    writedlm(output, header, sep)
-
-    #TODO better extract and arrange values
-    for o in 1:length(orgs)
-        writedlm(output, [t orgs[o].id orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].location sum(values(orgs[o].biomass)) orgs[o].radius orgs[o].genotype orgs[o].disp], sep)
+        #TODO better extract and arrange values
+        for o in 1:length(orgs)
+            writedlm(output, [t orgs[o].id orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].location sum(values(orgs[o].biomass)) orgs[o].radius orgs[o].genotype orgs[o].disp], sep)
+        end
     end
-end
-
-    close(output)
 end
 
 """
@@ -136,6 +133,8 @@ function simulate()
     mylandscape = landscape_init(simparams)
     orgs = newOrgs(mylandscape, initorgs)
 
+    println("Starting simulation")
+
     try
         mkdir("EDoutputs")
     catch
@@ -143,9 +142,13 @@ function simulate()
     end
 
     #simulog = open("EDoutputs/simulog.txt","w")
+    println("Starting simulation")
 
 # MODEL RUN
     for t in 1:simparams.timesteps
+
+        println("running week $t")
+
         open("EDoutputs/simulog.txt","a") do sim
             println(sim,"WEEK ",t)
         end
@@ -181,7 +184,6 @@ function simulate()
         #outputnetworks()
         #save(string("week",4*t)) more reasonable interval
     end
-    close(simulog)
 end
 
 simulate()
