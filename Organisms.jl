@@ -102,7 +102,6 @@ function newOrgs(landscape::Array{Setworld.WorldCell,3},initorgs::Organisms.Init
     #TODO different fgroups have different metabolic rates. Get it form OrgsRef
     #TODO or make sure that it has varied in the global scope as well rather export it?
    return orgs
-
 end
 
 # function newOrgs(reprmode::String, parent_s::Array{Organism, N} where N, quant:Int64)
@@ -146,7 +145,10 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
 
     for o in 1:length(orgs)
         x, y, frag = orgs[o].location
-        r = orgs[o].radius = round(Int64, (sqrt(orgs[o].biomass["veg"]^(2/3)) - 1)/2, RoundNearestTiesAway)
+        orgs[o].radius = round(Int64, (sqrt(orgs[o].biomass["veg"]^(2/3)) - 1)/2, RoundNearestTiesAway)
+        r = orgs[o].radius # separated for debugging
+        # unity test
+        println("radius $r")
         fg = orgs[o].fgroup
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
@@ -158,9 +160,9 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
                 continue
             else
                 if haskey(landscape[i,j,frag].neighs,fg)
-                     landscape[i,j,frag].neighs[fg] += projmass
+                    landscape[i,j,frag].neighs[fg] += projmass
                 else
-                     landscape[i,j,frag].neighs[fg] = projmass
+                    landscape[i,j,frag].neighs[fg] = projmass
                 end
             end
         end
@@ -179,6 +181,7 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
 
     compterm = 0
     nbsum = 0
+
     # 2. Look for neighbors in the square area (2r+1) delimited by r
     for j in (y-r):(y+r), i in (x-r):(x+r)
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
@@ -187,15 +190,17 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
             #println(simulog, orgs.id, " is projecting outside the landscape, because it is at: ", org[o].location)
         elseif haskey(landscape[i,j,frag].neighs,fg)
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
-            nbsum += landscape[i,j,frag].neighs[fg] - org.biomass["veg"]/((2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
-        else #!haskey(landscape[i,j,frag].neighs,fg) #there is no competition
+            nbsum += /(landscape[i,j,frag].neighs[fg] - org.biomass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
+        else #!haskey(landscape[i,j,frag].neighs,fg) #no competition
             nbsum += 0
         end
     end
 
     compterm = /(org.biomass["veg"] - nbsum, org.biomass["veg"])
+    # unity test
+    println("compterm $compterm")
 
-    return nbsum, compterm
+    return compterm
 end
 
 """
@@ -203,54 +208,56 @@ end
 Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
 function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,N} where N, t::Int64, aE::Float64, Boltz::Float64)
-
+    #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
     nogrowth = Int64[]
 
-    #plants = filter orgs for fgroups that are plants. Insect allocation biomass allocation is not that important (stage transition is)
-
+    #2. Calculate growth for all plants (#TODO filter insects out)
     for o in 1:length(orgs)
-
+        # 2.a Get local temperature
         T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
-        nbsum, compterm = compete(landscape, orgs[o])
+        # 2.b Check for competition
+        compterm = compete(landscape, orgs[o])
         # unity test
         #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
         open("EDoutputs/simulog.txt","a") do sim
-            println(sim, orgs[o].id, " mass overlap: $nbsum and compterm $compterm")
+            println(sim, orgs[o].id, "  compterm $compterm")
         end
 
-        if compterm > 0
+        if compterm < 0
+            #2.c
+            push!(nogrowth,o)
+        else
+            #unity test
+            println("current biomass ", sum(values(orgs[o].biomass)))
+
             grown_mass = plants_gb0 * (compterm *sum(values(orgs[o].biomass)))^(3/4) * exp(-aE/(Boltz*T))
 
             # unity test
-            #println(simulog, orgs[o].id, " gained ", grown_mass)
+            println("gained ",compterm *sum(values(orgs[o].biomass)))
 
             #Resource allocation schedule
             #TODO make it more ellaborate and includde trade-offs
             if orgs[o].stage == "e"  #TODO accountant for resistant stages?
-                # embryos only consume reserves: TODO realistic
+                # embryos only consume reserves: TODO more realistic
                 orgs[o].biomass["veg"] -= 0.01*org[o].biomass["veg"]
+
             elseif orgs[o].stage == "j"
                 # juveniles grow
                 orgs[o].biomass["veg"] += grown_mass
-            elseif (orgs[o].stage == "a"  && (12 <= rem(t, 52) < 25))
+
+            elseif orgs[o].stage == "a" # && 12 <= rem(t, 52) < 25
                 # adults reproduc
                 if haskey(orgs[o].biomass,"reprd")
                     orgs[o].biomass["reprd"] += grown_mass
                 else
                     orgs[o].biomass["reprd"] = grown_mass
                 end
-                # unity test
-                if rand() > 0.7
-                    open("EDoutputs/simulog.txt","a") do sim
-                        println(sim, org.id, " gained $grown_mass")
-                    end
-                end
+            else
+                continue
             end
-        else
-            push!(nogrowth,o)
         end
     end
     # unity test
@@ -329,8 +336,6 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
         T = landscape[reproducing[o].location[1], reproducing[o].location[2], reproducing[o].location[3]].temp
 
         offsprgB = round(Int64, plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway) #TODO stochasticity
-
-        println(simulog, orgs[o].id, "-", orgs[o].stage, "produced $offsprgB seeds")
 
         #unity test
         open("EDoutputs/simulog.txt","a") do sim

@@ -2,6 +2,7 @@
 
 # Get model directory and include it in Julia's loading path
 #cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
+workspace()
 EDDir = pwd()
 push!(LOAD_PATH,EDDir)
 
@@ -74,7 +75,7 @@ function read_initials()
     initorgs.fgroups = tuple("wind", "ant")
     initorgs.sps = tuple("sp1", "sp2")
     initorgs.init_stage = tuple("a","a")
-    initorgs.init_abund = tuple(5,5)
+    initorgs.init_abund = tuple(1,1)
     #genotypes are not initialized with inputs
     initorgs.biomassμ = tuple(100,100)
     initorgs.biomasssd = tuple(1,1)
@@ -116,7 +117,7 @@ function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
     if t == 1
         open(string("EDoutputs/orgsweek",t,".csv"), "a+") do output
             header = append!(["week"], string.(fieldnames(Organisms)))
-            writedlm(output, reshape(header, 1, length(header)+1), sep)
+            writedlm(output, reshape(header, 1, length(header)), sep)
         end
     end
 
@@ -157,18 +158,25 @@ function simulate()
         open("EDoutputs/simulog.txt","a") do sim
             println(sim,"WEEK ",t)
         end
+
         if rem(t, 52) == 12 #juveniles become adults at the beggining of spring (reproductive season)
             develop!(orgs)
+        else
+            continue
         end
         projvegmass!(mylandscape,orgs)
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz)
         #TODO check if there is no better way to keep track of individuals that are not growing
         if 12 <= rem(t, 52) < 25 #reproduction happens during spring
             reproduce!(mylandscape,orgs,1)
+        else
+            continue
         end
         if 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
             disperse!(mylandscape,orgs)
             establish!(mylandscape,orgs,t)
+        else
+            continue
         end
         survive!(mylandscape,orgs,nogrowth)
         ## DISTURBANCES
