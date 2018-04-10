@@ -190,7 +190,7 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
             #println(simulog, orgs.id, " is projecting outside the landscape, because it is at: ", org[o].location)
         elseif haskey(landscape[i,j,frag].neighs,fg)
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
-            nbsum += /(landscape[i,j,frag].neighs[fg] - org.biomass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
+            nbsum += landscape[i,j,frag].neighs[fg] - /(org.biomass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
         else #!haskey(landscape[i,j,frag].neighs,fg) #no competition
             nbsum += 0
         end
@@ -248,15 +248,13 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
                 # juveniles grow
                 orgs[o].biomass["veg"] += grown_mass
 
-            elseif orgs[o].stage == "a" # && 12 <= rem(t, 52) < 25
+            elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25
                 # adults reproduc
                 if haskey(orgs[o].biomass,"reprd")
                     orgs[o].biomass["reprd"] += grown_mass
                 else
                     orgs[o].biomass["reprd"] = grown_mass
                 end
-            else
-                continue
             end
         end
     end

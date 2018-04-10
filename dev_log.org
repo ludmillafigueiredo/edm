@@ -1,4 +1,5 @@
-++* Code (general Julia)
+* Code (general Julia)
+** TODO check Symbols for sorting functional groups
 ** TODO Check arguments order in functions
    SCHEDULED: <2018-03-18 So> DEADLINE: <2018-03-28 Mi>
 ** TODO Read "Eval of julia code"

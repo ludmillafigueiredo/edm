@@ -108,20 +108,20 @@ end
     outputorgs()
 Saves a long format table (`.tsv` file) with the organisms field informations.
 """
-function outputorgs(orgs::Array{Organisms.Organism, N} where N, t::Int64)
+function orgstable(orgs::Array{Organisms.Organism, N} where N, t::Int64)
 
     #mk dir with simulation parameters identifier
 
     sep = ','
 
     if t == 1
-        open(string("EDoutputs/orgsweek",t,".csv"), "a+") do output
+        open(string("EDoutputs/orgsweek",t,".csv"), "a") do output
             header = append!(["week"], string.(fieldnames(Organisms)))
             writedlm(output, reshape(header, 1, length(header)), sep)
         end
     end
 
-    open(string("EDoutputs/orgsweek",t,".csv"), "a+") do output
+    open(string("EDoutputs/orgsweek",t,".csv"), "a") do output
         #TODO better extract and arrange values
         for o in 1:length(orgs)
             writedlm(output, [t orgs[o].id orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].location sum(values(orgs[o].biomass)) orgs[o].radius orgs[o].genotype orgs[o].disp], sep)
@@ -139,46 +139,42 @@ function simulate()
     mylandscape = landscape_init(simparams)
     orgs = newOrgs(mylandscape, initorgs)
 
+    # unity test
     println("Starting simulation")
 
     try
         mkdir("EDoutputs")
     catch
-        println("Error in creating EDoutputs, assuming it already exists")
+        println("Error in creating output folder, writing it to existing 'EDoutputs'")
     end
-
-    #simulog = open("EDoutputs/simulog.txt","w")
-    println("Starting simulation")
 
 # MODEL RUN
     for t in 1:simparams.timesteps
 
         println("running week $t")
 
-        open("EDoutputs/simulog.txt","a") do sim
+        open(string("EDoutputs/orgsweek",t,".csv"), "a") do sim
             println(sim,"WEEK ",t)
         end
 
-        if rem(t, 52) == 12 #juveniles become adults at the beggining of spring (reproductive season)
+        #juveniles become adults before the beggining of spring
+        if rem(t, 52) == 11 #juveniles become adults at the beggining of spring (reproductive season)
             develop!(orgs)
-        else
-            continue
         end
+
         projvegmass!(mylandscape,orgs)
-        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz)
-        #TODO check if there is no better way to keep track of individuals that are not growing
+
+        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz) #TODO check if there is no better way to keep track of individuals that are not growing
+
         if 12 <= rem(t, 52) < 25 #reproduction happens during spring
             reproduce!(mylandscape,orgs,1)
-        else
-            continue
-        end
-        if 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
+        elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
             disperse!(mylandscape,orgs)
             establish!(mylandscape,orgs,t)
-        else
-            continue
         end
-        survive!(mylandscape,orgs,nogrowth)
+
+        survive!(mylandscape,orgs,nogrowth) # density-dependent and independent mortality
+
         ## DISTURBANCES
         ## Dynamical landscape change
         # if t #something
@@ -190,7 +186,7 @@ function simulate()
         # Output:
         #orgs
         #if rem(t,4) == 0
-        outputorgs(orgs,t)
+        orgstable(orgs,t)
         #end
         #save(string("week",t))
         #network interactions
