@@ -131,15 +131,10 @@ end
 Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
 """
 function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N)
-    # empt neighs to rewrite
-    # TODO more efficient?
-    for f in 1:size(landscape,3)
-        for y in 1:size(landscape,2), x in 1:size(landscape,1)
-            if length(keys(landscape[x,y,f].neighs)) == 0
-                continue
-            else
-                landscape[x,y,f].neighs = Dict()
-            end
+    # empt neighs to rewrite TODO more efficient?
+    for cell in eachindex(landscape)
+        if length(keys(landscape[cell].neighs)) > 0
+            landscape[cell].neighs = Dict()
         end
     end
 
@@ -147,10 +142,14 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
         x, y, frag = orgs[o].location
         orgs[o].radius = round(Int64, (sqrt(orgs[o].biomass["veg"]^(2/3)) - 1)/2, RoundNearestTiesAway)
         r = orgs[o].radius # separated for debugging
+
         # unity test
         println("radius $r")
+        println("tracking week 13 issue: not stopping at the radius")
+
         fg = orgs[o].fgroup
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
+        println("tracking week 13 issue: projvegmass: $projmass")
 
         #unity test
         #println(simulog, orgs[o].id, " has biomass", orgs[o].biomass, " and projects ", projmass)
@@ -191,13 +190,12 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
         elseif haskey(landscape[i,j,frag].neighs,fg)
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs[fg] - /(org.biomass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
-        else #!haskey(landscape[i,j,frag].neighs,fg) #no competition
-            nbsum += 0
         end
     end
 
     compterm = /(org.biomass["veg"] - nbsum, org.biomass["veg"])
     # unity test
+    println("radius before compterm = $r")
     println("compterm $compterm")
 
     return compterm
@@ -207,7 +205,7 @@ end
     allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
-function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,N} where N, t::Int64, aE::Float64, Boltz::Float64)
+function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,N} where N, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any})
     #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
     nogrowth = Int64[]
 
@@ -222,21 +220,21 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
         compterm = compete(landscape, orgs[o])
         # unity test
         #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
-        open("EDoutputs/simulog.txt","a") do sim
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, orgs[o].id, "  compterm $compterm")
         end
 
         if compterm < 0
-            #2.c
+            #2.c Those not growing will have higher chance of dying
             push!(nogrowth,o)
         else
             #unity test
             println("current biomass ", sum(values(orgs[o].biomass)))
 
-            grown_mass = plants_gb0 * (compterm *sum(values(orgs[o].biomass)))^(3/4) * exp(-aE/(Boltz*T))
+            grown_mass = plants_gb0*(compterm *sum(values(orgs[o].biomass)))^(3/4)*exp(-aE/(Boltz*T))
 
             # unity test
-            println("gained ",compterm *sum(values(orgs[o].biomass)))
+            println("gained ",grown_mass)
 
             #Resource allocation schedule
             #TODO make it more ellaborate and includde trade-offs
@@ -248,8 +246,10 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
                 # juveniles grow
                 orgs[o].biomass["veg"] += grown_mass
 
-            elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25
-                # adults reproduc
+            elseif orgs[o].stage == "a" && 12 <= rem(t, 52) && rem(t,52) < 25
+                # adults invest in reproduction
+                #unity test
+                println("Flowering")
                 if haskey(orgs[o].biomass,"reprd")
                     orgs[o].biomass["reprd"] += grown_mass
                 else
@@ -258,10 +258,12 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
             end
         end
     end
+
     # unity test
-    open("EDoutputs/simulog.txt","a") do sim
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Not growing $nogrowth")
     end
+
     return nogrowth
 end
 
@@ -312,7 +314,7 @@ end
     reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
-function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organisms.Organism,N} where N, t::Int64)
+function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any})
     #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
     #     pollination()
@@ -323,7 +325,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
     reproducing = filter(x -> x.stage == "a" && haskey(x.biomass, "reprd"), orgs)
 
     #unity test
-    open("EDoutputs/simulog.txt","a") do sim
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Reproducing: $reproducing week $t")
     end
 
@@ -336,7 +338,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
         offsprgB = round(Int64, plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway) #TODO stochasticity
 
         #unity test
-        open("EDoutputs/simulog.txt","a") do sim
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, "Offspring of ", orgs[o], ": ",offsprgB)
         end
 
@@ -370,16 +372,13 @@ end
     disperse!(offspring)
 Butterflies, bees and seeds can/are disperse(d).
 """
-function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism, N} where N)
+function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism, N} where N, settings::Dict{String, Any})
     # Seeds (Bullock et al. JEcol 2017)
-    # Get seeds from org storage
     dispersing = find(x -> x.stage == "e" && x.age == 0, orgs)
-    # takes only seeds not in the seed bank (age>0)
     #TODO include insects
-    # Exponential kernel for Ant pollinated herbs: mean = a.(Gamma(3/b)/Gamma(2/b))
 
     #unity test
-    open("EDoutputs/simulog.txt","a") do sim
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Dispersing: $dispersing week $t")
     end
 
@@ -408,13 +407,13 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
         if checkboundaries(landscape, xdest, ydest, fdest)
             orgs[d].location = (xdest,ydest,fdest)
             #unity test
-            open("EDoutputs/simulog.txt","a") do sim
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                 println(sim, org[o].id," dispersed $dist")
             end
         else
             push!(lost,d)
             #unity test
-            open("EDoutputs/simulog.txt","a") do sim
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                 println(sim, org[o].id," dispersed $dist but died")
             end
         end
@@ -439,15 +438,12 @@ end
     establish!
 Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
 """
-function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organisms.Organism, N} where N, t::Int64)
+function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String, Any})
     #REFERENCE: May et al. 2009
-    #check neighs
-
-    #TODO weekly timing of establishment
     establishing = find(x -> x.stage == "e", orgs)
 
     #unity test
-    open("EDoutputs/simulog.txt","a") do sim
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Establishing seeds: $establishing")
     end
 
@@ -475,13 +471,15 @@ end
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 plants in nogrwth are subjected to two probability rates
 """
-function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N)
+function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N, settings::Dict{String, Any})
 
     deaths = Int64[]
 
     for o in 1:length(orgs)
 
         if orgs[o].age == 52 # annual plants die
+            push!(deaths, o)
+        elseif orgs[o].radius == 0
             push!(deaths, o)
         else
             T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
@@ -492,7 +490,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
 
             #unity test
             if rand() > 0.7
-                open("EDoutputs/simulog.txt","a") do sim
+                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                     println(sim,orgs[o].id,"-",orgs[o].stage, " mprob: $mprob")
                 end
             end

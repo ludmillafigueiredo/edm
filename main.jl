@@ -9,9 +9,10 @@ push!(LOAD_PATH,EDDir)
 srand(123)
 
 # Load Julia & model packages
+using ArgParse
 using Distributions
-#using JLD
-#using JuliaDB
+#using JLD #saving Julia objects
+using JuliaDB #for outputs
 using Setworld
 using Fileprep
 using Organisms
@@ -24,8 +25,21 @@ const plants_mb0 = 1.5029220413821088e11 #adjustted accordung to 1 death per ind
 const plants_fb0 = exp(30.0) # fertility rate
 const seedmassµ = 0.8
 
+function parse_commandline()
+    sets = ArgParseSettings() #object that will be populated with the arguments by the macro
+
+    @add_arg_table sets begin
+        "--simID"
+        help = "Name of the folder (string type) where outputs are stored. Default is current time."
+        arg_type = String
+        default = string(now())
+    end
+
+    return parse_args(sets) # returning a dictionnary of strings is useful because they can passed as keywords to Julia function
+end
+
 """
-    read_initials(simparams, initorgs)
+read_initials(simparams, initorgs)
 Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
 """
 function read_initials()
@@ -105,24 +119,26 @@ end
 # end
 
 """
-    outputorgs()
-Saves a long format table (`.tsv` file) with the organisms field informations.
+outputorgs()
+Saves a long format table
+
+ with the organisms field informations.
 """
-function orgstable(orgs::Array{Organisms.Organism, N} where N, t::Int64)
+function orgstable(orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
 
     #mk dir with simulation parameters identifier
 
     sep = ','
 
     if t == 1
-        open(string("EDoutputs/orgsweek",t,".csv"), "a") do output
+        open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do output
             header = append!(["week"], string.(fieldnames(Organisms)))
             writedlm(output, reshape(header, 1, length(header)), sep)
         end
     end
 
-    open(string("EDoutputs/orgsweek",t,".csv"), "a") do output
-        #TODO better extract and arrange values
+    open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do output
+        #TODO better extract and arrange the variables
         for o in 1:length(orgs)
             writedlm(output, [t orgs[o].id orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].location sum(values(orgs[o].biomass)) orgs[o].radius orgs[o].genotype orgs[o].disp], sep)
         end
@@ -131,10 +147,11 @@ function orgstable(orgs::Array{Organisms.Organism, N} where N, t::Int64)
 end
 
 """
-    simulate!()
+simulate!()
 """
 function simulate()
-#   INITIALIZATION
+    #   INITIALIZATION
+    settings = parse_commandline()
     simparams, initorgs = read_initials()
     mylandscape = landscape_init(simparams)
     orgs = newOrgs(mylandscape, initorgs)
@@ -143,37 +160,42 @@ function simulate()
     println("Starting simulation")
 
     try
-        mkdir("EDoutputs")
+        mkpath("EDoutputs/$(settings["simID"])")
+        println("Output will be written to 'EDoutputs'")
     catch
-        println("Error in creating output folder, writing it to existing 'EDoutputs'")
+        println("Writing results to existing 'EDoutputs/$(settings["simID"])' folder")
     end
 
-# MODEL RUN
+    cd(pwd())
+
+    # MODEL RUN
     for t in 1:simparams.timesteps
 
         println("running week $t")
 
-        open(string("EDoutputs/orgsweek",t,".csv"), "a") do sim
+        #unity testing
+        open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do sim
             println(sim,"WEEK ",t)
-        end
-
-        #juveniles become adults before the beggining of spring
-        if rem(t, 52) == 11 #juveniles become adults at the beggining of spring (reproductive season)
-            develop!(orgs)
         end
 
         projvegmass!(mylandscape,orgs)
 
-        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz) #TODO check if there is no better way to keep track of individuals that are not growing
+        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings) #TODO check if there is no better way to keep track of individuals that are not growing
 
-        if 12 <= rem(t, 52) < 25 #reproduction happens during spring
-            reproduce!(mylandscape,orgs,1)
-        elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
-            disperse!(mylandscape,orgs)
-            establish!(mylandscape,orgs,t)
+        #juveniles become adults before just before the beggining of spring
+        if rem(t, 52) == 11 #juveniles become adults at the beggining of spring (reproductive season)
+            develop!(orgs)
         end
 
-        survive!(mylandscape,orgs,nogrowth) # density-dependent and independent mortality
+        # Plants: adult reproduction and embryos dispersal
+        if 12 <= rem(t, 52) < 25 #reproduction happens during spring
+            reproduce!(mylandscape,orgs,t, settings)
+        elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
+            disperse!(mylandscape,orgs,settings)
+            establish!(mylandscape,orgs,t,settings)
+        end
+
+        survive!(mylandscape,orgs,nogrowth,settings) # density-dependent and independent mortality
 
         ## DISTURBANCES
         ## Dynamical landscape change
@@ -186,7 +208,7 @@ function simulate()
         # Output:
         #orgs
         #if rem(t,4) == 0
-        orgstable(orgs,t)
+        orgstable(orgs,t,settings)
         #end
         #save(string("week",t))
         #network interactions
@@ -199,12 +221,12 @@ simulate()
 
 #Dictionnary stores functio2nal groups parameters
 """
-    fgpars()
+fgpars()
 Stores functional groups parameters in a dictionnary that is consulted for every function involving organism's simulation.
     !!!! Better than struct in this case because it is possible to write general funcitons that match the strings identifying the fg og the organism and the key in the dictionnary
-"""
-# function fgparsdict()
-#     fgpars = Dict()
-#     # parse files in EDDir/functionalgroups and for each file, create an entry in the file with the first 3 letters of the group and the parametr it controls. takes the parameters of a list
-#     return fgpars
-# end
+    """
+    # function fgparsdict()
+    #     fgpars = Dict()
+    #     # parse files in EDDir/functionalgroups and for each file, create an entry in the file with the first 3 letters of the group and the parametr it controls. takes the parameters of a list
+    #     return fgpars
+    # end

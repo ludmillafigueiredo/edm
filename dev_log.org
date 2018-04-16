@@ -5,16 +5,20 @@
 ** TODO Read "Eval of julia code"
    SCHEDULED: <2018-03-18 So> DEADLINE: <2018-03-28 Mi>
 ** Fields in Arrays [1/1]
+   - [ ] use eachindex() for going throughh the landscape
    - [X] element-wise change is not possible for arrays nor dict of mutable structs: ONLY POSSIBLE IF STRUCTS ARE BUILT INDIVIDUALLY: NO FILL!!
 ** TODO check necessity new() in structs 
    DEADLINE: <2018-03-28 Mi>
 * main.jl
-** TODO test *simulate()* for reading and creating initial conditions
+** TODO test *simulate()* for reading and creating initial conditions :inputs:
    DEADLINE: <2018-03-30 Fr> SCHEDULED: <2018-03-18 So>
-- [ ] better format for initorgs: Dictionnary or different structure
-  - [ ] verify if it can take initilization info on [[Organisms.jl][multiple functional groups]]
+- [ ] better format for [[Inputs][initorgs]]: Dictionnary or different structure
+- [ ] verify if it can take initilization info on [[Organisms.jl][multiple functional groups]]
 ** Unity tests
-* Fileprep.jl
+*** REPL prints
+*** Simulog
+* Inputs
+** Fileprep.jl
 ** DONE *lengthstocell()* and *areatocell* convert/calculates real fragment sizes to grid cell side lengths CLOSED: <2018-03-02 Fr>
 ** Temperature & precipitation: German weather station (South station in Göttingen is quite representative) and Kathrin, from EU climate project, with more micro scale measurements, on a subset of the fragments
 - [ ] Species temperature and optimum temperature and precipitation values 
@@ -22,6 +26,13 @@
    DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-14 Mi>
 - [ ] individuals information
 - [ ] interaction matrix (*pollination!()*)
+* Outputs
+** ID outputs
+- [X] 'simID' variable holds the ID of the simulation, for now: commit number
+- [ ] parse rguments to script: ArgParse "Module for command-line argument parsing"
+- [ ] Identify folder with slurm jobs
+- [ ] Output a summary of inputs along with results
+- [ ] Check orgstable format
 * Parametrization
   DEADLINE: <2018-03-28 Mi> SCHEDULED: <2018-03-14 Mi>
 - [ ] Trait values:  LEDA database, Annetta Leinjärtner, Bernhard Hoiß
