@@ -229,9 +229,9 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
             push!(nogrowth,o)
         else
             #unity test
-            println("current biomass ", sum(values(orgs[o].biomass)))
+            println("current biomass ", sum(collect(values(orgs[o].biomass))))
 
-            grown_mass = plants_gb0*(compterm *sum(values(orgs[o].biomass)))^(3/4)*exp(-aE/(Boltz*T))
+            grown_mass = plants_gb0*(compterm *sum(collect(values(orgs[o].biomass))))^(3/4)*exp(-aE/(Boltz*T))
 
             # unity test
             println("gained ",grown_mass)
@@ -335,7 +335,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
 
         T = landscape[reproducing[o].location[1], reproducing[o].location[2], reproducing[o].location[3]].temp
 
-        offsprgB = round(Int64, plants_fb0 * sum(values(reproducing[o].biomass))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway) #TODO stochasticity
+        offsprgB = round(Int64, plants_fb0 * sum(collect(values(reproducing[o].biomass)))^(-1/4) * exp(-aE/(Boltz*T)),  RoundNearestTiesAway) #TODO stochasticity
 
         #unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -485,7 +485,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
             T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
             mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
-            mB = mortalconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/(Boltz*T))
+            mB = mortalconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/(Boltz*T))
             mprob = 1 - exp(-mB)
 
             #unity test
@@ -498,7 +498,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
             # individuals that didnt grow have
             if o in 1:length(nogrowth)
                 compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
-                cmB = compmortconst * (sum(values(orgs[o].biomass)))^(-1/4)*exp(-aE/Boltz*(T))
+                cmB = compmortconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/Boltz*(T))
                 cmprob =  1 - e^(-cmB)
                 mprob += cmprob
             end
