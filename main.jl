@@ -188,7 +188,7 @@ function simulate()
             println(sim,"WEEK ",t)
         end
 
-        projvegmass!(mylandscape,orgs)
+        projvegmass!(mylandscape,orgs,settings)
 
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings) #TODO check if there is no better way to keep track of individuals that are not growing
 
@@ -198,7 +198,7 @@ function simulate()
         end
 
         # Plants: adult reproduction and embryos dispersal
-        if 12 <= rem(t, 52) < 25 #reproduction happens during spring
+        if rem(t, 52) == 24 #reproduction = seed production happens at the end of spring (last week)
             reproduce!(mylandscape,orgs,t, settings)
         elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
             disperse!(mylandscape,orgs,settings)
