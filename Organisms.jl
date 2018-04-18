@@ -145,17 +145,14 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
         orgs[o].radius = round(Int64, (sqrt(orgs[o].biomass["veg"]^(2/3)) - 1)/2, RoundNearestTiesAway)
         r = orgs[o].radius # separated for debugging
 
-        # unity testf
-        println("radius $r")
-
         fg = orgs[o].fgroup
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
+
         # unity test
-        println("projvegmass: $projmass")
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim, "$(orgs[o].id) has $(orgs[o].biomass["veg"]) radius $r and projvegmass: $projmass")
 
-        #unity test
-        #println(simulog, orgs[o].id, " has biomass", orgs[o].biomass, " and projects ", projmass)
-
+        end
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
             if !checkbounds(Bool,landscape[:,:,frag],j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
                 continue
@@ -188,7 +185,9 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
             #unity test
-            #println(simulog, orgs.id, " is projecting outside the landscape, because it is at: ", org[o].location)
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, "$(orgs.id) out of bound projection at $(org[o].location)")
+            end
         elseif haskey(landscape[i,j,frag].neighs,fg)
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs[fg] - /(org.biomass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
@@ -197,7 +196,9 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
 
     compterm = /(org.biomass["veg"] - nbsum, org.biomass["veg"])
     # unity test
-    println("$(org.id) radius = $r and compterm = $compterm")
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println(sim, "$(org.id) radius = $r and compterm = $compterm")
+    end
 
     return compterm
 end
@@ -235,13 +236,15 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
                 push!(nogrowth,o)
             else
                 #unity test
-                println("current biomass ", sum(collect(values(orgs[o].biomass))))
-
+                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(sim, "current biomass ", sum(collect(values(orgs[o].biomass))))
+                end
                 grown_mass = plants_gb0*(compterm *sum(collect(values(orgs[o].biomass))))^(3/4)*exp(-aE/(Boltz*T))
 
                 # unity test
-                println("gained ",grown_mass)
-
+                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(sim, "gained ",grown_mass)
+                end
                 #Resource allocation schedule
                 #TODO make it more ellaborate and includde trade-offs
                 if orgs[o].stage == "j"
@@ -251,7 +254,9 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
                 elseif orgs[o].stage == "a" && 12 <= rem(t, 52) && rem(t,52) < 25
                     # adults invest in reproduction
                     #unity test
-                    println("Flowering")
+                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                        println(sim, "Flowering")
+                    end
                     if haskey(orgs[o].biomass,"reprd")
                         orgs[o].biomass["reprd"] += grown_mass
                     else
@@ -406,12 +411,11 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
             #for tests: (rand(collect(0.499:0.001:1,3056))) Bullock's 50th - 95th percentile
         end
 
-        dist = Fileprep.lengthtocell(s)
+        dist = Fileprep.lengthtocell(Distributions.InverseGaussian(a,b))
         #unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, org[o].id,"Calculated dispersal distance: $dist")
         end
-
 
         # Find patch
         θ = rand([0 0.5π π 1.5π]) #get radian angle of distribution
@@ -501,6 +505,10 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
 
             mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
             mB = mortalconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/(Boltz*T))
+            # unity test
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim,"$(orgs[o].id) mortality rate $mB")
+            end
             mprob = 1 - exp(-mB)
 
             #unity test
