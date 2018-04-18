@@ -138,18 +138,20 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organ
         end
     end
 
-    for o in 1:length(orgs)
+    competing = find(x->(x.stage == "a" || x.stage == "j"),orgs)
+
+    for o in competing
         x, y, frag = orgs[o].location
         orgs[o].radius = round(Int64, (sqrt(orgs[o].biomass["veg"]^(2/3)) - 1)/2, RoundNearestTiesAway)
         r = orgs[o].radius # separated for debugging
 
-        # unity test
+        # unity testf
         println("radius $r")
-        println("tracking week 13 issue: not stopping at the radius")
 
         fg = orgs[o].fgroup
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
-        println("tracking week 13 issue: projvegmass: $projmass")
+        # unity test
+        println("projvegmass: $projmass")
 
         #unity test
         #println(simulog, orgs[o].id, " has biomass", orgs[o].biomass, " and projects ", projmass)
@@ -195,8 +197,7 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism)
 
     compterm = /(org.biomass["veg"] - nbsum, org.biomass["veg"])
     # unity test
-    println("radius before compterm = $r")
-    println("compterm $compterm")
+    println("$(org.id) radius = $r and compterm = $compterm")
 
     return compterm
 end
@@ -217,54 +218,57 @@ function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
         # 2.b Check for competition
-        compterm = compete(landscape, orgs[o])
-        # unity test
-        #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, orgs[o].id, "  compterm $compterm")
-        end
+        if orgs[o].stage == "e"
+            # embryos only consume reserves: TODO more realistic
+            orgs[o].biomass["veg"] -= 0.01*org[o].biomass["veg"]
 
-        if compterm < 0
-            #2.c Those not growing will have higher chance of dying
-            push!(nogrowth,o)
         else
-            #unity test
-            println("current biomass ", sum(collect(values(orgs[o].biomass))))
-
-            grown_mass = plants_gb0*(compterm *sum(collect(values(orgs[o].biomass))))^(3/4)*exp(-aE/(Boltz*T))
-
+            compterm = compete(landscape, orgs[o])
             # unity test
-            println("gained ",grown_mass)
+            #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, orgs[o].id, "  compterm $compterm")
+            end
 
-            #Resource allocation schedule
-            #TODO make it more ellaborate and includde trade-offs
-            if orgs[o].stage == "e"  #TODO accountant for resistant stages?
-                # embryos only consume reserves: TODO more realistic
-                orgs[o].biomass["veg"] -= 0.01*org[o].biomass["veg"]
-
-            elseif orgs[o].stage == "j"
-                # juveniles grow
-                orgs[o].biomass["veg"] += grown_mass
-
-            elseif orgs[o].stage == "a" && 12 <= rem(t, 52) && rem(t,52) < 25
-                # adults invest in reproduction
+            if compterm < 0
+                #2.c Those not growing will have higher chance of dying
+                push!(nogrowth,o)
+            else
                 #unity test
-                println("Flowering")
-                if haskey(orgs[o].biomass,"reprd")
-                    orgs[o].biomass["reprd"] += grown_mass
-                else
-                    orgs[o].biomass["reprd"] = grown_mass
+                println("current biomass ", sum(collect(values(orgs[o].biomass))))
+
+                grown_mass = plants_gb0*(compterm *sum(collect(values(orgs[o].biomass))))^(3/4)*exp(-aE/(Boltz*T))
+
+                # unity test
+                println("gained ",grown_mass)
+
+                #Resource allocation schedule
+                #TODO make it more ellaborate and includde trade-offs
+                if orgs[o].stage == "j"
+                    # juveniles grow
+                    orgs[o].biomass["veg"] += grown_mass
+
+                elseif orgs[o].stage == "a" && 12 <= rem(t, 52) && rem(t,52) < 25
+                    # adults invest in reproduction
+                    #unity test
+                    println("Flowering")
+                    if haskey(orgs[o].biomass,"reprd")
+                        orgs[o].biomass["reprd"] += grown_mass
+                    else
+                        orgs[o].biomass["reprd"] = grown_mass
+                    end
                 end
             end
+
         end
-    end
 
-    # unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Not growing $nogrowth")
-    end
+        # unity test
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim, "Not growing $nogrowth")
+        end
 
-    return nogrowth
+        return nogrowth
+    end
 end
 
 """
@@ -290,6 +294,14 @@ function meanExP(a::Float64,b::Float64)
     return dist
 end
 
+"""
+    cauchydisp(a)
+Draws a dispersed distance from the Cauchy distribution, which approximates the LogSech distributions for b = 1.
+"""
+function cauchydisp(a,b)
+    dist = abs(rand(Cauchy(a,b)),1)
+    return dist
+end
 """
     checkboundaries(sourcefrag,xdest, ydest, fdest)
 `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
@@ -374,7 +386,7 @@ Butterflies, bees and seeds can/are disperse(d).
 """
 function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism, N} where N, settings::Dict{String, Any})
     # Seeds (Bullock et al. JEcol 2017)
-    dispersing = find(x -> x.stage == "e" && x.age == 0, orgs)
+    dispersing = find(x -> (x.stage == "e" && x.age == 0), orgs)
     #TODO include insects
 
     #unity test
@@ -385,23 +397,26 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
     lost = Int64[]
 
     for d in dispersing
-        # Dispersal distance from kernel:
-        if orgs[d].fgroup == "wind"
-            #Exp, herbs + appendage #TODO LogSech distribution
-            dist = Fileprep.lengthtocell(meanExP(4.7e-5,0.2336))
-            #(rand(collect(0.388:0.001:3.226))) Bullock's 50th - 95th percentile
-            #higher 9th percentile than ant (when comparing + appendage and 10-36 mg)
-            # Check for available habitat (inside or inter fragment)
-        elseif orgs[d].fgroup == "ant"
-            #ExPherbs, 10-36 mg
-            dist = Fileprep.lengthtocell(meanExP(0.3726,1.1615))
+        #sort dispersal kernels according to funcitonal group
+        # Dispersal distance from kernel: InverseGaussian distributions just for very contrasting distances
+        if orgs[d].fgroup == "ant"
+            a = 0.0197; b = 1.4989; # InverseGaussian
+        elseif orgs[d].fgroup == "wind"
+            a = 25.22; b = 0.8415; # InverseGaussian
             #for tests: (rand(collect(0.499:0.001:1,3056))) Bullock's 50th - 95th percentile
         end
 
+        dist = Fileprep.lengthtocell(s)
+        #unity test
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim, org[o].id,"Calculated dispersal distance: $dist")
+        end
+
+
         # Find patch
-        θ = rand([0,0.5π,π,1.5π]) #get radian angle of distribution
-        xdest = round(Int64, orgs[d].location[1] + dist*sin(θ), RoundNearestTiesAway)
-        ydest = round(Int64, orgs[d].location[2] + dist*cos(θ), RoundNearestTiesAway)
+        θ = rand([0 0.5π π 1.5π]) #get radian angle of distribution
+        xdest = orgs[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
+        ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
         fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
 
         if checkboundaries(landscape, xdest, ydest, fdest)
@@ -511,8 +526,11 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
             end
         end
     end
+    #unity test
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println("Dying orgs: $deaths")
+    end
     deleteat!(orgs, deaths)
-    return orgs
 end
 
 # """

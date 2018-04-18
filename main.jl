@@ -100,6 +100,18 @@ function read_initials()
     return simparams, initorgs
 end
 
+# """
+#     input(orgsfilepath,landfilepath)
+# Reads in files describing initial species pool, along with functional group, life stage, abundance and weight(mean and ⨦sd).
+# """
+#
+# function input()
+#
+#     species = loadtable("species.csv")
+#     #fg1pars = Dict("sps" => ["sp1", "sp2", "sp3"], "mean" => 100, "sd" => 1)
+#     #fg1pars = Dict("sps" => ["sp1", "sp2", "sp3"], "mean" => 100, "sd" => 1)
+# end
+
 # function read_landscape()
 #     #read and store initial conditions in dictionnary
 #     # for nas linhas do input
@@ -119,10 +131,8 @@ end
 # end
 
 """
-outputorgs()
-Saves a long format table
-
- with the organisms field informations.
+    outputorgs(orgs,t,settingsfrgou)
+Saves a long format table with the organisms field informations.
 """
 function orgstable(orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
 
@@ -147,7 +157,7 @@ function orgstable(orgs::Array{Organisms.Organism, N} where N, t::Int64, setting
 end
 
 """
-simulate!()
+    simulate!()
 """
 function simulate()
     #   INITIALIZATION
@@ -220,11 +230,11 @@ end
 simulate()
 
 #Dictionnary stores functio2nal groups parameters
-"""
-fgpars()
-Stores functional groups parameters in a dictionnary that is consulted for every function involving organism's simulation.
-    !!!! Better than struct in this case because it is possible to write general funcitons that match the strings identifying the fg og the organism and the key in the dictionnary
-    """
+# """
+# fgpars()
+# Stores functional groups parameters in a dictionnary that is consulted for every function involving organism's simulation.
+# !!!! Better than struct in this case because it is possible to write general funcitons that match the strings identifying the fg og the organism and the key in the dictionnary
+# """
     # function fgparsdict()
     #     fgpars = Dict()
     #     # parse files in EDDir/functionalgroups and for each file, create an entry in the file with the first 3 letters of the group and the parametr it controls. takes the parameters of a list
