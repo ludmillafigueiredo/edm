@@ -29,10 +29,12 @@
 * Outputs
 ** ID outputs
 - [X] 'simID' variable holds the ID of the simulation, for now: commit number
-- [ ] parse rguments to script: ArgParse "Module for command-line argument parsing"
+- [X] parse rguments to script: ArgParse "Module for command-line argument parsing"
 - [ ] Identify folder with slurm jobs
 - [ ] Output a summary of inputs along with results
 - [ ] Check orgstable format
+  - [ ] Make sure it is ready for R analysis
+- [ ] output landscape information
 * Parametrization
   DEADLINE: <2018-03-28 Mi> SCHEDULED: <2018-03-14 Mi>
 - [ ] Trait values:  LEDA database, Annetta Leinjärtner, Bernhard Hoiß
@@ -102,7 +104,11 @@ During initialization, one input file gives the functional types and their initi
 - [ ] input file format
 *** OrgsRef: [1/2] 
 - [ ] come up with structure (dict or composite type) to store the parameters of different species/fgroups, instead of tables?
-- [X] How to store multiple types of organisms: single array. Might be necessary to chage it, if calling specific fct types reveals itself to be important and can't be done otherwise
+  - [ ] read in input:
+    1. Species list per funcitonal group (*species_classif.csv*): classifcation of the species list according to functional. Useful to create orgs. That's all. All further parametrization will come from the fgroups pars file
+    2. Parameters of functional groups (*fgroups_pars*): biomass (mean & sd), seed mass(mean & sd), lifespan and everything else that comes from the clustering analysis and necessary in Organisms.jl
+    3. Initial list and  abundances of species (*initial_sps.csv*)
+- [X] How to store multiple types of organisms: single array. Might be necessary to change it, if calling specific fct types reveals itself to be important and can't be done otherwise
 - Eventhough they are more rigid, structs are easier to call and the fields have more flexibility to store different kinds of information on the functional group parameters 
 **** OrgsRef format: is that information stored?
 - [ ] Organize dummy data in the ideal input/reference format
@@ -210,6 +216,7 @@ Not totally independent because depends on biomass, which affects individuals bi
 - [ ]  Attraction of reproductive areas: Visitation frequency as a measure of attraction and/or patch flower density as a quadratic function with an optimum (if too high, there are dillution effects)
 - [ ] "Register" visit on interaction matrix and on both plant and insect
 - [ ]  ENERGY TRANFERS
+- [ ] Julia DB NSparse for interaction matrices
 ** Evolutionary dynamics
 Juliano's suggestion: Create a function of trait distribution change depending on abundance or temperature, so that the time 
 * Observation model

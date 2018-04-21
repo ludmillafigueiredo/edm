@@ -33,6 +33,10 @@ function parse_commandline()
         help = "Name of the folder (string type) where outputs are stored. Default is current time."
         arg_type = String
         default = string(now())
+        "--spfile"
+        help = "Name of file with species list."
+        arg_type = String
+        default = string(pwd(),"splist.txt")
     end
 
     return parse_args(sets) # returning a dictionnary of strings is useful because they can passed as keywords to Julia function

@@ -104,28 +104,6 @@ function newOrgs(landscape::Array{Setworld.WorldCell,3},initorgs::Organisms.Init
     return orgs
 end
 
-# function newOrgs(reprmode::String, parent_s::Array{Organism, N} where N, quant:Int64)
-# TODO integrate it with reproduce!()
-#     #     # TODO arguments are quite different. Should it be a different function?
-#     #     # # TODO For the reproduction method of this fct: The genotype and individual location depends on the group of reproduction
-#     for i in 1:quant
-#         neworg = Organism(string(parent_s[1].fgroup[1:3], length(orgs) + 1),
-#                           (XYs[i,1] XYs[i,2] frag),
-#                           initorgs.sps[f],
-#                           initorgs.init_stage[f],
-#                           0,
-#                           false,
-#                           initorgs.fgroups[f],
-#                           ["placeholder" "placeholder"], #initialize with function
-#                           Dict("veg" => rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f]))),
-#                           (initorgs.dispμ[f] initorgs.dispshp[f]),
-#                           [initorgs.radius[f]])
-#         push!(orgs, neworg)
-#
-#         #global IDcounter += 1
-#     end
-# end
-
 """
 projvegmass!(landscape,orgs)
 Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
@@ -552,44 +530,12 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
     deleteat!(orgs, deaths)
 end
 
-# """
-#     emerge!()
-# Germination for seeds, emergency for eggs.
-# """
-# function emerge!()
-#     embryos = filter.( x -> x.stage == "e", orgs)
-#     deaths = []
-#
-#     for o in 1:length(embryos)
-#         if embryos[o].fgroup in ["plants"] #TODO sould be more dynamics and read from inputed fgroups
-#             germb0 = plants_gb0 #TODO call it from OrgsRe
-#         elseif embryos[o].fgroup in ["insects"]
-#             germb0 = plants_gb0 #TODO call it from OrgsRe
-#         end
-#
-#         gB = germb0 * (sum(values(embryos[o].biomass)))^(-1/4)*exp(-aE/Boltz*T)
-#         gprob = 1 - e^(-gB*embryos[o].age) #TODO this age thing
-#
-#         if gprob > rand(PoissonBinomial(gprob)) # successes are germinations
-#             embryos[o].stage = "j"
-#             embryos[o].age = 1
-#         else
-#             if (embryos[o].fgroup in ["plants"] &&  embryos[o].age <= 52) #TODO seed bank of one year. Make it more complex (count age)
-#                 continue
-#             else
-#                 push!(deaths, o)
-#             end
-#         end
-#     end
-#     deleteat!(orgs, deaths)
-# end
 
 """
 pollination!()
 Simulates plant-insect encounters and effective pollen transfer.
 """
-#TODO find a not too cumbersome way of modelling pollen transfer: store interactions and check for last individual visit of a plant, within a time frame? (last one, for starters)
-
+#TODO find a not too cumbersome way of modelling pollen transfer: draw from Poisot's probability
 
 # """
 #     mate!()

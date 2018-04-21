@@ -1,5 +1,6 @@
-EDoutputs/*
+EDoutputs/
+inputs/
+img/
+parameters_pubs/
 models_docs/
-outputs_netlogo/
-outputs_model/
 #dev_log.org#
