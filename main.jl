@@ -36,7 +36,7 @@ function parse_commandline()
         "--spinfo"
         help = "Name of file with species list."
         arg_type = String
-        default = abspath(pwd(),"inputs/spinfo")
+        default = abspath(pwd(),"inputs/spinfo.csv")
         "--landpars"
         help = "Name of file with simulation parameters: areas of fragments, mean (and s.d.) temperature, total running time."
         arg_type = String
