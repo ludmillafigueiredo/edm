@@ -72,13 +72,13 @@ function read_initials(settings::Dict{String,Any})
     spinfo = loadtable(settings["spinfo"])
     # TODO unique() should be unnecessary once spinfo has a proper format
     initorgs = Organisms.InitOrgs()
-    initorgs.fgroups = unique(columns(spinfo, :kernels)) # there is no functional group classification anymore (or yet), so should
-    initorgs.sps = unique(columns(spinfo, :sp))
+    initorgs.fgroups = columns(spinfo, :kernels) # there is no functional group classification anymore (or yet), so should
+    initorgs.sps = columns(spinfo, :sp)
     initorgs.init_stage = "a" #always initializing adults
-    initorgs.init_abund = unique(columns(spinfo, :abund))
+    initorgs.init_abund = columns(spinfo, :abund)
     #genotypes are not initialized with inputs
-    initorgs.biomassμ = unique(columns(spinfo, :biomass_mean))
-    initorgs.biomasssd = unique(columns(spinfo, :biomass_sd))
+    initorgs.biomassμ = columns(spinfo, :biomass_mean)
+    initorgs.biomasssd = columns(spinfo, :biomass_sd)
     initorgs.radius = 0
 
     return landparams, initorgs, spinfo

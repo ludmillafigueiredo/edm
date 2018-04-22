@@ -72,22 +72,22 @@ function newOrgs(landscape::Array{Setworld.WorldCell,3},initorgs::Organisms.Init
 
     for frag in 1:size(landscape,3)
 
-        for f in 1:length(initorgs.fgroups) #TODO check the organisms file format: so far, all fragments get the same sps
+        for s in 1:length(initorgs.sp) #TODO check the organisms file format: so far, all fragments get the same sps
 
-            XYs = hcat(rand(1:size(landscape,1),initorgs.init_abund[f]),
-            rand(1:size(landscape,2),initorgs.init_abund[f]))
+            XYs = hcat(rand(1:size(landscape,1),initorgs.init_abund[s]),
+            rand(1:size(landscape,2),initorgs.init_abund[s]))
 
-            for i in 1:initorgs.init_abund[f]
+            for i in 1:initorgs.init_abund[s]
                 neworg = Organism(string(initorgs.fgroups[f][1:3], length(orgs) + 1),
                 (XYs[i,1],XYs[i,2],frag),
-                initorgs.sps[f], #TODO in order to have redundant species, this should take a rdm? sps inside the sps pool of that fragment OR o input the sps teria que ser casado com o de funcitonal group e abundance (cada linha eh uma sp, com abundancia etc...)
-                initorgs.init_stage[f],
+                initorgs.sps[s],
+                initorgs.init_stage,
                 0,
                 false,
-                initorgs.fgroups[f],
+                initorgs.fgroups[s],
                 ["" ""], #initialize with function
                 Dict("veg" => rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f]))),
-                initorgs.radius[f])
+                initorgs.radius)
 
                 push!(orgs, neworg)
 
@@ -472,7 +472,7 @@ function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism
 end
 
 """
-survive!(ors, nogrowth,landscape)
+survive!(orgs, nogrowth,landscape)
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 plants in nogrwth are subjected to two probability rates
 """
