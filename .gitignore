@@ -1,5 +1,4 @@
-EDoutputs/
-inputs/
+EDoutputs/*
 img/
 parameters_pubs/
 models_docs/

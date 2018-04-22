@@ -28,8 +28,6 @@ mutable struct InitOrgs
     #genotypes #TODO initialie those in functions
     biomassμ::Any
     biomasssd::Any
-    dispμ::Any
-    dispshp::Any
     radius::Any
     InitOrgs() = new() #TODO check if new() is necessary
 end
@@ -44,7 +42,6 @@ mutable struct Organism
     fgroup::String # Plant, insect or more precise functional group
     genotype::Array{String,2}
     biomass::Dict
-    disp::Tuple #dispersal kernel parameters (a and b) TODO tuple
     radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
     #Organism() = new()
 end
@@ -90,7 +87,6 @@ function newOrgs(landscape::Array{Setworld.WorldCell,3},initorgs::Organisms.Init
                 initorgs.fgroups[f],
                 ["" ""], #initialize with function
                 Dict("veg" => rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f]))),
-                (initorgs.dispμ[f], initorgs.dispshp[f]),
                 initorgs.radius[f])
 
                 push!(orgs, neworg)
@@ -363,7 +359,6 @@ function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organis
             #[OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
             #OrgsRef.radius[f])
             Dict("veg" => reproducing[o].biomass["veg"]*0.001), #TODO use seed size for the fgroup
-            reproducing[o].disp,
             reproducing[o].radius) # could be 0, should depend on biomass
 
             push!(offspring, embryo)

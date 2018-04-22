@@ -12,7 +12,7 @@ srand(123)
 using ArgParse
 using Distributions
 #using JLD #saving Julia objects
-using JuliaDB #for outputs
+using JuliaDB #for in/outputs
 using Setworld
 using Fileprep
 using Organisms
@@ -30,117 +30,65 @@ function parse_commandline()
 
     @add_arg_table sets begin
         "--simID"
-        help = "Name of the folder (string type) where outputs are stored. Default is current time."
+        help = "Name of the folder (string type) where outputs will be stored. Default is current time."
         arg_type = String
         default = string(now())
-        "--spfile"
+        "--spinfo"
         help = "Name of file with species list."
         arg_type = String
-        default = string(pwd(),"splist.txt")
+        default = abspath(pwd(),"inputs/spinfo")
+        "--landpars"
+        help = "Name of file with simulation parameters: areas of fragments, mean (and s.d.) temperature, total running time."
+        arg_type = String
+        default = abspath(pwd(),"inputs/landpars.csv")
+        "--timesteps"
+        help = "Duration of simulation (weeks)."
+        arg_type = Int64
+        default = 52
     end
 
     return parse_args(sets) # returning a dictionnary of strings is useful because they can passed as keywords to Julia function
 end
 
 """
-read_initials(simparams, initorgs)
+read_initials(settings)
 Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
 """
-function read_initials()
-    #TODO change simulation input: dictionnary?
-    # simparams = Setworld.Simpars()
-    # begin
-    #     env = open("landscape_init.in")
-    #     readline(env); simparams.fxlength = tuple(parse(Int64,readline(env)))
-    #     readline(env); simparams.fylength = tuple(parse(Int64,readline(env)))
-    #     readline(env); simparams.fmeantemp = tuple(parse(Float64,readline(env)))
-    #     readline(env); simparams.ftempsd = tuple(parse(Float64,readline(env)))
-    #     readline(env); simparams.fmeanprec = tuple(parse(Float64,readline(env)))
-    #     readline(env); simparams.fprecsd = tuple(parse(Float64,readline(env)))
-    #     readline(env); simparams.nfrags = parse(Int64,readline(env))
-    #     close(env)
-    # end
-    simparams = Setworld.Simpars()
-    simparams.fxlength = tuple(50) # 5 cm² cells
-    simparams.fylength = tuple(50)
-    simparams.fmeantemp = tuple(20.0)
-    simparams.ftempsd = tuple(1.0)
-    simparams.fmeanprec = tuple(100.0)
-    simparams.fprecsd = tuple(1.0)
-    simparams.nfrags = 1
-    simparams.timesteps = 52
-    #verify that: TODO not a real test
-    simparams.nfrags == length(simparams.fxlength)
+function read_initials(settings::Dict{String,Any})
 
-    # initorgs = Organisms.InitOrgs()
-    # begin
-    #     #TODO check the organisms file format: so far, all fragments get the same sps
-    #     orgf = open("organisms.in")
-    #     readline(orgf); initorgs.fgroups = tuple(readline(orgf)) #doest need parse for string
-    #     readline(orgf); initorgs.sps = tuple(readline(orgf))
-    #     readline(orgf); initorgs.init_stage = tuple(readline(orgf))
-    #     readline(orgf); initorgs.init_abund = tuple(parse(Int64,readline(orgf)))
-    #     #readline(orgf); genotypes = (readline(orgf))
-    #     readline(orgf); initorgs.biomassμ = tuple(parse(Float64,readline(orgf)))
-    #     readline(orgf); initorgs.biomasssd = tuple(parse(Float64,readline(orgf)))
-    #     readline(orgf); initorgs.dispμ = tuple(parse.(Float64,readline(orgf)))
-    #     readline(orgf); initorgs.dispshp = tuple(parse.(Float64,readline(orgf)))
-    #     readline(orgf); initorgs.radius = tuple(parse(Int64,readline(orgf)))
-    #     #check why if parsed into tuple, becomes a float
-    #     close(orgf)
-    # end
+    landin = loadtable(settings["landpars"])
+    #TODO if csv cells are not set ot Text, round number are entered as Int64
+
+    landparams = Setworld.Landpars()
+    landparams.fxlength = Fileprep.areatocell(select(landin, :areas_m2)) # 5 cm² cells
+    landparams.fylength = Fileprep.areatocell(select(landin, :areas_m2))
+    landparams.fmeantemp = select(landin, :temp_mean)
+    landparams.ftempsd = select(landin, :temp_sd)
+    landparams.fmeanprec = select(landin, :precipt_mean)
+    landparams.fprecsd = select(landin, :precipt_mean)
+    landparams.nfrags == length(landparams.fxlength)
+    landparams.timesteps = settings["timesteps"]
+
+    spinfo = loadtable(settings["spinfo"])
+    # TODO unique() should be unnecessary once spinfo has a proper format
     initorgs = Organisms.InitOrgs()
-    initorgs.fgroups = tuple("wind", "ant")
-    initorgs.sps = tuple("sp1", "sp2")
-    initorgs.init_stage = tuple("a","a")
-    initorgs.init_abund = tuple(1,1)
+    initorgs.fgroups = unique(columns(spinfo, :kernels)) # there is no functional group classification anymore (or yet), so should
+    initorgs.sps = unique(columns(spinfo, :sp))
+    initorgs.init_stage = "a" #always initializing adults
+    initorgs.init_abund = unique(columns(spinfo, :abund))
     #genotypes are not initialized with inputs
-    initorgs.biomassμ = tuple(100,100)
-    initorgs.biomasssd = tuple(1,1)
-    initorgs.dispμ = tuple(0,0)
-    initorgs.dispshp = tuple(0,0)
-    initorgs.radius = tuple(0,0)
+    initorgs.biomassμ = unique(columns(spinfo, :biomass_mean))
+    initorgs.biomasssd = unique(columns(spinfo, :biomass_sd))
+    initorgs.radius = 0
 
-    return simparams, initorgs
+    return landparams, initorgs, spinfo
 end
-
-# """
-#     input(orgsfilepath,landfilepath)
-# Reads in files describing initial species pool, along with functional group, life stage, abundance and weight(mean and ⨦sd).
-# """
-#
-# function input()
-#
-#     species = loadtable("species.csv")
-#     #fg1pars = Dict("sps" => ["sp1", "sp2", "sp3"], "mean" => 100, "sd" => 1)
-#     #fg1pars = Dict("sps" => ["sp1", "sp2", "sp3"], "mean" => 100, "sd" => 1)
-# end
-
-# function read_landscape()
-#     #read and store initial conditions in dictionnary
-#     # for nas linhas do input
-#     file = open(readcsv, "landscpinit.csv")
-#     map(x,y -> Dict(x => y), file(1,1:end),file(2:end,1:end))
-#     landpars = Dict{Any,Float64}(file(1,1:end),file(2:end,1:end))
-#
-#     #Alternative
-#     file = readlines("landscpinit.csv")
-#     landpars = Dict()
-#     simpars = Simpars()
-#     for l in 1:length(file)
-#         simpars.???
-#         \
-#         parse(str, start; greedy=true, raise=true)
-#     end
-# end
 
 """
     outputorgs(orgs,t,settingsfrgou)
 Saves a long format table with the organisms field informations.
 """
-function orgstable(orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
-
-    #mk dir with simulation parameters identifier
+function orgstable(initorgs::Organisms.InitOrgs, landparams::Setworld.Landpars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
 
     sep = ','
 
@@ -158,6 +106,12 @@ function orgstable(orgs::Array{Organisms.Organism, N} where N, t::Int64, setting
         end
     end
 
+    if t == seetings["timesteps"]
+        open(string("EDoutputs/",settings["simID"],"/simulationID",t,), "w") do output
+            println(dump(initorgs))
+            println(dump(landparams))
+        end
+    end
 end
 
 """
@@ -166,8 +120,8 @@ end
 function simulate()
     #   INITIALIZATION
     settings = parse_commandline()
-    simparams, initorgs = read_initials()
-    mylandscape = landscape_init(simparams)
+    landparams, initorgs, spinfo = read_initials(settings)
+    mylandscape = landscape_init(landparams)
     orgs = newOrgs(mylandscape, initorgs)
 
     # unity test
@@ -183,7 +137,7 @@ function simulate()
     cd(pwd())
 
     # MODEL RUN
-    for t in 1:simparams.timesteps
+    for t in 1:landparams.timesteps
 
         println("running week $t")
 

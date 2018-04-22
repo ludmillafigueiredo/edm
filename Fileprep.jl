@@ -13,7 +13,7 @@ Convert fragments real length values give in `realxlen` and `realylen` from m to
 1 m = 100 cm, 3 cm of cell side size
 """
 
-function gridsizes(realxlen::Array{Float64,2}, realylen::Array{Float64,2})
+function gridsizes(realxlen::Array{Float64,1}, realylen::Array{Float64,1})
   xlength = round(Int64,((realxlen.*100)./3), RoundNearestTiesAway)
   ylength = round(Int64,((realylen.*100)./3), RoundNearestTiesAway)
   return xlength, ylength
@@ -37,12 +37,12 @@ Calculate the side length of a square grid of a fragment of `area` m².
 - multiple fragments
 """
 function areatocell(area::Float64)
-  side = round(Int64,((sqrt.(area*10000))/3), RoundNearestTiesAway)
+  side = round(Int64,((sqrt(area*10000))/3), RoundNearestTiesAway)
   return side
 end
 
-function areatocell(area::Array{Float64,2})
-  side = round(Int64,((sqrt.(area.*10000))./3), RoundNearestTiesAway)
+function areatocell(area::Array{Float64,1})
+  side = round.(Int64,((sqrt.(area.*10000))./3), RoundNearestTiesAway)
   return side
 end
 

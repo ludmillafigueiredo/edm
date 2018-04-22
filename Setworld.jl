@@ -25,16 +25,16 @@ This module contains the type of the cell and functions for setting up initial e
 		const tK = 273.15 # °C to K converter
 
 		#Simulation parameters storage:
-		mutable struct Simpars #TODO put all landscape.in values in here
-			fxlength::Tuple{Int64}
-			fylength::Tuple{Int64}
-			fmeantemp::Tuple{Float64}
-			ftempsd::Tuple{Float64}
-			fmeanprec::Tuple{Float64}
-			fprecsd::Tuple{Float64}
+		mutable struct Landpars #TODO put all landscape.in values in here
+			fxlength::Array{Int64}
+			fylength::Array{Int64}
+			fmeantemp::Array{Float64}
+			ftempsd::Array{Float64}
+			fmeanprec::Array{Float64}
+			fprecsd::Array{Float64}
 			nfrags::Int64
 			timesteps::Int64
-			Simpars() = new() #necessary
+			Landpars() = new() #necessary
 		end
 
 		#Types
