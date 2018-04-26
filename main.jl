@@ -13,6 +13,7 @@ using ArgParse
 using Distributions
 #using JLD #saving Julia objects
 using JuliaDB #for in/outputs
+using DataValues
 using Setworld
 using Fileprep
 using Organisms
@@ -87,13 +88,13 @@ end
 
 mutable struct OrgsRef
     kernel::Dict{String,String}
-    biomass_mean::Dict{String,Float64}
-    biomass_sd::Dict{String,Float64}
-    abund::Dict{String,Int64}
-    mean_seed_number::Dict{String,Float64}
-    mean_seed_mass::Dict{String,Float64}
-    life_span::Dict{String,String}
-    max_span::Dict{String,Int64}
+    biomass_mean::Dict{String,DataValue{Float64}}
+    biomass_sd::Dict{String,DataValue{Float64}}
+    abund::Dict{String,DataValue{Int64}}
+    mean_seed_number::Dict{String,DataValue{Float64}}
+    mean_seed_mass::Dict{String,DataValue{Float64}}
+    life_span::Dict{String,DataValue{String}}
+    max_span::Dict{String,DataValue{Int64}}
 end
 
 function read_spinput(settings)
