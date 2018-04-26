@@ -101,18 +101,24 @@ Organisms are stored in an array of n_frags (read from simulation file). All org
    - [ ] ant reproduction: Bullock et al. 2017
 ** TODO Create organisms of different functional groups
 During initialization, one input file gives the functional types and their initial abundances, vegmass, reprodmass
-- [ ] input file format
-*** OrgsRef: [1/2] 
+- [X] input file format: csv file, created wiht R (*traits project*)
+*** DONE OrgsRef: [3/4]
+    CLOSED: [2018-04-26 Do 12:09]
+    - CLOSING NOTE [2018-04-26 Do 12:09] \\
+      *OrgsRef structure:* each parameter is a field, species are the keys to access the parameter values.
 - [ ] come up with structure (dict or composite type) to store the parameters of different species/fgroups, instead of tables?
-  - [ ] read in input:
+<2018-03-18 So>: Eventhough they are more rigid, structs are easier to call and the fields have more flexibility to store different kinds of information on the functional group parameters 
+DEADLINE: <2018-03-23 Fr>
+- [X] read in input: from file into whatever structure I choose to store the parameter values
+Read .csv file with JuliaDB because it is easier to call the parameters by name (DataFrames and readcsv might have something similar, but synthax is easier right now).
+_Originally_
     1. Species list per funcitonal group (*species_classif.csv*): classifcation of the species list according to functional. Useful to create orgs. That's all. All further parametrization will come from the fgroups pars file
     2. Parameters of functional groups (*fgroups_pars*): biomass (mean & sd), seed mass(mean & sd), lifespan and everything else that comes from the clustering analysis and necessary in Organisms.jl
     3. Initial list and  abundances of species (*initial_sps.csv*)
+_Actual implementation_
+*spinput.csv* has the list of 
+*** orgs: Store individuals
 - [X] How to store multiple types of organisms: single array. Might be necessary to change it, if calling specific fct types reveals itself to be important and can't be done otherwise
-- Eventhough they are more rigid, structs are easier to call and the fields have more flexibility to store different kinds of information on the functional group parameters 
-**** OrgsRef format: is that information stored?
-- [ ] Organize dummy data in the ideal input/reference format
-   DEADLINE: <2018-03-23 Fr>
 ** Life-cycle
 *** TODO Check MTE units & probabilities!!!
 **** Boltz: Chap.2 MTE book <2018-04-02 Mo>
