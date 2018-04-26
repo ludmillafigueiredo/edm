@@ -1,4 +1,4 @@
-biomass_mean#!/usr/bin/env julia
+:sp_id:sp_id:sp_id:sp_id:sp_idsp_idbiomass_mean#!/usr/bin/env julia
 
 # Get model directory and include it in Julia's loading path
 #cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
@@ -79,7 +79,7 @@ function read_initials(settings::Dict{String,Any})
     initorgs.init_stage = "a" #always initializing adults
     initorgs.init_abund = columns(spinfo, :abund)
     #genotypes are not initialized with inputs
-    initorgs.biomassμ = columns(spinfo, :biomass_mean)
+    initorgs.biomassμ = orgs.biomass_mean
     initorgs.biomasssd = columns(spinfo, :biomass_sd)
     initorgs.radius = 0
 
@@ -87,6 +87,7 @@ function read_initials(settings::Dict{String,Any})
 end
 
 mutable struct OrgsRef
+    species::Dict{String,String}
     kernel::Dict{String,String}
     biomass_mean::Dict{String,DataValue{Float64}}
     biomass_sd::Dict{String,DataValue{Float64}}
@@ -97,17 +98,23 @@ mutable struct OrgsRef
     max_span::Dict{String,DataValue{Int64}}
 end
 
+"""
+    read_input(seetings)
+Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
+"""
+
 function read_spinput(settings)
     spinputtbl = loadtable(settings["spinfo"])
     orgsref = OrgsRef(
-        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:kernels)[i] for i in 1: length(rows(spinputtbl, :id))),
-        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:biomass_mean)[i] for i in 1: length(rows(spinputtbl, :id))),
-        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:biomass_sd)[i] for i in 1: length(rows(spinputtbl, :id))),
-        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:init_abund)[i] for i in 1: length(rows(spinputtbl, :id))),
-        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:mean_seed_number)[i] for i in 1: length(rows(spinputtbl, :id))),
-        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:mean_seed_mass)[i] for i in 1: length(rows(spinputtbl, :id))),
-        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:span)[i] for i in 1: length(rows(spinputtbl, :id))),
-        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:max_span)[i] for i in 1: length(rows(spinputtbl, :id)))
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sp)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernels)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_mean)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_sd)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:init_abund)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_number)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_mass)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:span)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_span)[i] for i in 1: length(rows(spinputtbl, :sp_id)))
     )
     return orgsref
 end
