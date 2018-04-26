@@ -6,10 +6,12 @@ Organisms have the same attributes, whose specific values differ according to fu
 module Organisms
 
 using Distributions
+using JuliaDB
+using DataValues
 using Setworld
 using Fileprep
 
-export Organism, InitOrgs, newOrgs, projvegmass!, compete, develop!, allocate!, meanExP, checkboundaries, reproduce!, disperse!, germinate, establish!, survive!
+export Organism, InitOrgs, OrgsRef, newOrgs, projvegmass!, compete, develop!, allocate!, meanExP, checkboundaries, reproduce!, disperse!, germinate, establish!, survive!
 
 #TODO put them in OrgsRef
 const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
@@ -32,10 +34,23 @@ mutable struct InitOrgs
     InitOrgs() = new() #TODO check if new() is necessary
 end
 
+mutable struct OrgsRef
+    species::Dict{String,String}
+    sp_id::Array{String, 1}
+    kernel::Dict{String,String}
+    biomass_mean::Dict{String,Float64}
+    biomass_sd::Dict{String,Float64}
+    abund::Dict{String,Int64}
+    mean_seed_number::Dict{String,Float64}
+    mean_seed_mass::Dict{String,Float64}
+    life_span::Dict{String,String}
+    max_span::Dict{String,Int64}
+end
+
 mutable struct Organism
     id::String
     location::Tuple # (x,y,frag)
-    sp::String
+    sp::String #sp id, easier to read
     stage::String #e,j,a
     age::Int64 # controls passing stages, phenology and
     reped::Bool # reproduced?
@@ -66,28 +81,28 @@ newOrg() generates offspringn, after reproduc- newOrg() generates offspringn, af
 `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
 `quant::Int64` is nb of new individuals or offspring to be created
 """
-function newOrgs(landscape::Array{Setworld.WorldCell,3},initorgs::Organisms.InitOrgs)
+function newOrgs(landscape::Array{Setworld.WorldCell,3},orgsref::OrgsRef)
 
     orgs = Organism[]
 
     for frag in 1:size(landscape,3)
 
-        for s in 1:length(initorgs.sp) #TODO check the organisms file format: so far, all fragments get the same sps
+        for s in orgsref.sp_id
 
-            XYs = hcat(rand(1:size(landscape,1),initorgs.init_abund[s]),
-            rand(1:size(landscape,2),initorgs.init_abund[s]))
+            XYs = hcat(rand(1:size(landscape,1),orgsref.abund[s]),
+            rand(1:size(landscape,2),orgsref.abund[s]))
 
-            for i in 1:initorgs.init_abund[s]
-                neworg = Organism(string(initorgs.fgroups[f][1:3], length(orgs) + 1),
+            for i in 1:orgsref.init_abund[s]
+                neworg = Organism(string(s, "-", length(orgs) + 1),
                 (XYs[i,1],XYs[i,2],frag),
-                initorgs.sps[s],
-                initorgs.init_stage,
+                s,
+                "a",
                 0,
                 false,
-                initorgs.fgroups[s],
+                "", #no functional groups anymore
                 ["" ""], #initialize with function
-                Dict("veg" => rand(Distributions.Normal(initorgs.biomassμ[f],initorgs.biomasssd[f]))),
-                initorgs.radius)
+                Dict("veg" => rand(Distributions.Normal(orgsref.biomass_mean[s],orgsref.biomasss_sd[s]))),
+                0)
 
                 push!(orgs, neworg)
 

@@ -1,4 +1,4 @@
-:sp_id:sp_id:sp_id:sp_id:sp_idsp_idbiomass_mean#!/usr/bin/env julia
+#!/usr/bin/env julia
 
 # Get model directory and include it in Julia's loading path
 #cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
@@ -17,6 +17,8 @@ using DataValues
 using Setworld
 using Fileprep
 using Organisms
+
+export OrgsRef
 
 #TODO put them in OrgsRef
 const Boltz = 8.62e-5 # Brown & Sibly MTE book chap 2
@@ -71,31 +73,7 @@ function read_initials(settings::Dict{String,Any})
     landparams.nfrags == length(landparams.fxlength)
     landparams.timesteps = settings["timesteps"]
 
-    spinfo = loadtable(settings["spinfo"])
-    # TODO unique() should be unnecessary once spinfo has a proper format
-    initorgs = Organisms.InitOrgs()
-    initorgs.fgroups = columns(spinfo, :kernels) # there is no functional group classification anymore (or yet), so should
-    initorgs.sps = columns(spinfo, :sp)
-    initorgs.init_stage = "a" #always initializing adults
-    initorgs.init_abund = columns(spinfo, :abund)
-    #genotypes are not initialized with inputs
-    initorgs.biomassμ = orgs.biomass_mean
-    initorgs.biomasssd = columns(spinfo, :biomass_sd)
-    initorgs.radius = 0
-
-    return landparams, initorgs, spinfo
-end
-
-mutable struct OrgsRef
-    species::Dict{String,String}
-    kernel::Dict{String,String}
-    biomass_mean::Dict{String,DataValue{Float64}}
-    biomass_sd::Dict{String,DataValue{Float64}}
-    abund::Dict{String,DataValue{Int64}}
-    mean_seed_number::Dict{String,DataValue{Float64}}
-    mean_seed_mass::Dict{String,DataValue{Float64}}
-    life_span::Dict{String,DataValue{String}}
-    max_span::Dict{String,DataValue{Int64}}
+    return landparams
 end
 
 """
@@ -106,15 +84,16 @@ Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a 
 function read_spinput(settings)
     spinputtbl = loadtable(settings["spinfo"])
     orgsref = OrgsRef(
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sp)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernels)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_mean)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_sd)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:init_abund)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_number)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_mass)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:span)[i] for i in 1: length(rows(spinputtbl, :sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_span)[i] for i in 1: length(rows(spinputtbl, :sp_id)))
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sp)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
+        Array(rows(spinputtbl,:sp_id)),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernels)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_mean)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_sd)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:abund)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_number)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_mass)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:span)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_span)[i] for i in 1: length(rows(spinputtbl,:sp_id)))
     )
     return orgsref
 end
@@ -143,6 +122,7 @@ function orgstable(initorgs::Organisms.InitOrgs, landparams::Setworld.Landpars, 
 
     if t == seetings["timesteps"]
         open(string("EDoutputs/",settings["simID"],"/simulationID",t,), "w") do output
+            println("Initial conditions:")
             println(dump(initorgs))
             println(dump(landparams))
         end
