@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+biomass_mean#!/usr/bin/env julia
 
 # Get model directory and include it in Julia's loading path
 #cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
@@ -33,16 +33,16 @@ function parse_commandline()
         help = "Name of the folder (string type) where outputs will be stored. Default is current time."
         arg_type = String
         default = string(now())
-        "--spinfo"
+        "--spinput"
         help = "Name of file with species list."
         arg_type = String
-        default = abspath(pwd(),"inputs/spinfo.csv")
+        default = abspath(pwd(),"inputs/spinput.csv")
         "--landpars"
         help = "Name of file with simulation parameters: areas of fragments, mean (and s.d.) temperature, total running time."
         arg_type = String
         default = abspath(pwd(),"inputs/landpars.csv")
         "--timesteps"
-        help = "Duration of simulation (weeks)."
+        help = "Duration of simulation in weeks."
         arg_type = Int64
         default = 52
     end
@@ -57,6 +57,7 @@ Reads in and stores landscape conditions and organisms from `"landscape_init.in"
 function read_initials(settings::Dict{String,Any})
 
     landin = loadtable(settings["landpars"])
+
     #TODO if csv cells are not set ot Text, round number are entered as Int64
 
     landparams = Setworld.Landpars()
@@ -82,6 +83,32 @@ function read_initials(settings::Dict{String,Any})
     initorgs.radius = 0
 
     return landparams, initorgs, spinfo
+end
+
+mutable struct OrgsRef
+    kernel::Dict{String,String}
+    biomass_mean::Dict{String,Float64}
+    biomass_sd::Dict{String,Float64}
+    abund::Dict{String,Int64}
+    mean_seed_number::Dict{String,Float64}
+    mean_seed_mass::Dict{String,Float64}
+    life_span::Dict{String,String}
+    max_span::Dict{String,Int64}
+end
+
+function read_spinput(settings)
+    spinputtbl = loadtable(settings["spinfo"])
+    orgsref = OrgsRef(
+        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:kernels)[i] for i in 1: length(rows(spinputtbl, :id))),
+        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:biomass_mean)[i] for i in 1: length(rows(spinputtbl, :id))),
+        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:biomass_sd)[i] for i in 1: length(rows(spinputtbl, :id))),
+        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:init_abund)[i] for i in 1: length(rows(spinputtbl, :id))),
+        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:mean_seed_number)[i] for i in 1: length(rows(spinputtbl, :id))),
+        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:mean_seed_mass)[i] for i in 1: length(rows(spinputtbl, :id))),
+        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:span)[i] for i in 1: length(rows(spinputtbl, :id))),
+        Dict(rows(spinputtbl,:id)[i] => rows(spinputtbl,:max_span)[i] for i in 1: length(rows(spinputtbl, :id)))
+    )
+    return orgsref
 end
 
 """
