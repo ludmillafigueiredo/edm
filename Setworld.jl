@@ -58,8 +58,8 @@ This module contains the type of the cell and functions for setting up initial e
 
 			landscape = WorldCell[]
 
-			for frag in 1:simpars.nfrags
-				for y in 1:simpars.fylength[frag], x in 1:simpars.fxlength[frag]
+			for frag in 1:landinit.nfrags
+				for y in 1:landinit.fylength[frag], x in 1:simpars.fxlength[frag]
 					newcell = WorldCell(true,
 					rand(Normal(landinit.fmeantemp[frag],landinit.ftempsd[frag]),1)[1] + tK,
 					rand(Normal(landinit.fmeanprec[frag],landinit.fprecsd[frag]),1)[1],
@@ -67,22 +67,10 @@ This module contains the type of the cell and functions for setting up initial e
 					push!(landscape,newcell)
 				end
 			end
-			landscape = reshape(landscape, (simpars.fxlength[1], simpars.fylength[1], simpars.nfrags)) # reshaping is easier then going through every index of a 3D landscap, creating a WordCell cell there and parameterizing it. x in inner loops matches reshape order
+			landscape = reshape(landscape, (landinit.fxlength[1], landinit.fylength[1], landinit.nfrags)) # reshaping is easier then going through every index of a 3D landscap, creating a WordCell cell there and parameterizing it. x in inner loops matches reshape order
 			#TODO check reshaping for landscape with frags of different sizes
 			return landscape
 		end
-		# function read_envcond()
-		# 	# creat incomplete calls (outer constructors section of Julia manual for when read_envcond(false), conditions don't change)
-		# end
-		# """
-		# """
-		# function neighborhood(landscape::Array{WorldCell, N} where N)
-		# 	neighborhood = []
-		# 	fill!(neighborhood, Dict())
-		# 	reshape(neighboorhood)
-		# 	return neighborhood
-		# end
-		#TODO create/read in matrix with Connectivity between fragments
 
 		"""
 		climate!(landscape,t)
