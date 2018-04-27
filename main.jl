@@ -131,10 +131,20 @@ end
 function simulate()
     #   INITIALIZATION
     settings = parse_commandline()
+    #unity test
+    println(dump(settings))
     landinit = read_landinit(settings)
+    #unity test
+    println(dump(landinit))
     spinput = read_spinput(settings)
+    #unity test
+    println(dump(spinput))
     mylandscape = landscape_init(landinit)
+    #unity test
+    println(dump(mylandscape))
     orgs = newOrgs(mylandscape, orgsref)
+    #unity test
+    println(dump(orgs))
 
     # unity test
     println("Starting simulation")
