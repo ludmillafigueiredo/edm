@@ -138,7 +138,7 @@ function simulate()
     #unity test
     println("Land init stored in object of type $(typeof(landinit))")
 
-    spinput = read_spinput(settings)
+    orgsref = read_spinput(settings)
     #unity test
     println("Sp info stored in object of type $(typeof(spinput))")
 
