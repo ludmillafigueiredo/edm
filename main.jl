@@ -140,7 +140,7 @@ function simulate()
 
     orgsref = read_spinput(settings)
     #unity test
-    println("Sp info stored in object of type $(typeof(spinput))")
+    println("Sp info stored in object of type $(typeof(orgsref))")
 
     mylandscape = landscape_init(landinit)
     #unity test
@@ -162,35 +162,35 @@ function simulate()
 
     cd(pwd())
 
-    # # MODEL RUN
-    # for t in 1:landparams.timesteps
-    #
-    #     println("running week $t")
-    #
-    #     #unity testing
-    #     open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do sim
-    #         println(sim,"WEEK ",t)
-    #     end
-    #
-    #     projvegmass!(mylandscape,orgs,settings)
-    #
-    #     nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings) #TODO check if there is no better way to keep track of individuals that are not growing
-    #
-    #     #juveniles become adults before just before the beggining of spring
-    #     if rem(t, 52) == 11 #juveniles become adults at the beggining of spring (reproductive season)
-    #         develop!(orgs)
-    #     end
-    #
-    #     # Plants: adult reproduction and embryos dispersal
-    #     if rem(t, 52) == 24 #reproduction = seed production happens at the end of spring (last week)
-    #         reproduce!(mylandscape,orgs,t, settings)
-    #     elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
-    #         disperse!(mylandscape,orgs,settings)
-    #         establish!(mylandscape,orgs,t,settings)
-    #     end
-    #
-    #     survive!(mylandscape,orgs,nogrowth,settings) # density-dependent and independent mortality
-    #end
+    # MODEL RUN
+    for t in 1:landparams.timesteps
+
+        println("running week $t")
+
+        #unity testing
+        open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do sim
+            println(sim,"WEEK ",t)
+        end
+
+        projvegmass!(mylandscape,orgs,settings)
+
+        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings) #TODO check if there is no better way to keep track of individuals that are not growing
+
+        #juveniles become adults before just before the beggining of spring
+        if rem(t, 52) == 11 #juveniles become adults at the beggining of spring (reproductive season)
+            develop!(orgs)
+        end
+
+        # Plants: adult reproduction and embryos dispersal
+        if rem(t, 52) == 24 #reproduction = seed production happens at the end of spring (last week)
+            reproduce!(mylandscape,orgs,t, settings)
+        elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
+            disperse!(mylandscape,orgs,settings)
+            establish!(mylandscape,orgs,t,settings)
+        end
+
+        survive!(mylandscape,orgs,nogrowth,settings) # density-dependent and independent mortality
+    end
         ## DISTURBANCES
         ## Dynamical landscape change
         # if t #something
