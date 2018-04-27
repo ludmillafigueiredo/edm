@@ -25,7 +25,7 @@ This module contains the type of the cell and functions for setting up initial e
 		const tK = 273.15 # °C to K converter
 
 		#Simulation parameters storage:
-		mutable struct Landpars #TODO put all landscape.in values in here
+		mutable struct Landpars
 			fxlength::Array{Int64,N} where N
 			fylength::Array{Int64,N} where N
 			fmeantemp::Array{Float64,N} where N
@@ -38,13 +38,9 @@ This module contains the type of the cell and functions for setting up initial e
 		#Types
 		mutable struct WorldCell
 			avail::Bool
-			#resourcesFONs::Dict #separate Dict matrix
-			#pollinationFONs::Dict  separate Dict matrix
 			temp::Float64
 			precpt::Float64
-			neighs::Dict{String,Float64} #
-			#stem::Bool #steming point of plant
-			#WorldCell() = new() #if this is included, and WorldCell object must be initialized as WordCell() and then completed
+			neighs::Dict{String,Float64}
 		end
 
 		mutable struct PollCell
@@ -59,13 +55,18 @@ This module contains the type of the cell and functions for setting up initial e
 			landscape = WorldCell[]
 
 			for frag in 1:landinit.nfrags
+				fragt = rand(Normal(landinit.fmeantemp[frag],landinit.ftempsd[frag]),1)[1] + tK
+				fragp = rand(Normal(landinit.fmeanprec[frag],landinit.fprecsd[frag]),1)[1]
 				for y in 1:landinit.fylength[frag], x in 1:landinit.fxlength[frag]
-					newcell = WorldCell(true,
-					rand(Normal(landinit.fmeantemp[frag],landinit.ftempsd[frag]),1)[1] + tK,
-					rand(Normal(landinit.fmeanprec[frag],landinit.fprecsd[frag]),1)[1],
-					Dict())
+					newcell = WorldCell(
+										true,
+										fragt,
+										fragp,
+										Dict()
+					)
 					push!(landscape,newcell)
 				end
+
 			end
 			landscape = reshape(landscape, (landinit.fxlength[1], landinit.fylength[1], landinit.nfrags)) # reshaping is easier then going through every index of a 3D landscap, creating a WordCell cell there and parameterizing it. x in inner loops matches reshape order
 			#TODO check reshaping for landscape with frags of different sizes
