@@ -54,15 +54,15 @@ This module contains the type of the cell and functions for setting up initial e
 		#WorldCell() = WorldCell(false, 0.0, 0.0, Dict())
 
 		# Functions
-		function landscape_init(simpars)
+		function landscape_init(landinit::Landpars)
 
 			landscape = WorldCell[]
 
 			for frag in 1:simpars.nfrags
 				for y in 1:simpars.fylength[frag], x in 1:simpars.fxlength[frag]
 					newcell = WorldCell(true,
-					rand(Normal(simpars.fmeantemp[frag],simpars.ftempsd[frag]),1)[1] + tK,
-					rand(Normal(simpars.fmeanprec[frag],simpars.fprecsd[frag]),1)[1],
+					rand(Normal(landinit.fmeantemp[frag],landinit.ftempsd[frag]),1)[1] + tK,
+					rand(Normal(landinit.fmeanprec[frag],landinit.fprecsd[frag]),1)[1],
 					Dict())
 					push!(landscape,newcell)
 				end

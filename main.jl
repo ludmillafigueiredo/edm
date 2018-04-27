@@ -54,9 +54,11 @@ end
 read_landin(settings)
 Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
 """
-function read_landinit(settings::Dict{String,Any})
+function read_landinit()
+        #settings::Dict{String,Any}
 
-    landinputtbl = loadtable(settings["landconfig"])
+    landinputtbl = loadtable(abspath(pwd(),"inputs/landpars.csv"))
+    #landinputtbl = loadtable(settings["landconfig"])
 
     landinit = Setworld.Landpars(Fileprep.areatocell(select(landinputtbl,:areas_m2)),
                                  Fileprep.areatocell(select(landinputtbl,:areas_m2)),
@@ -73,9 +75,13 @@ end
 Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
 """
 
-function read_spinput(settings::Dict{String,Any})
-    spinputtbl = loadtable(settings["spinput"])
-    orgsref = OrgsRef(
+function read_spinput()
+        #settings::Dict{String,Any}
+
+   spinputtbl = loadtable(abspath(pwd(),"inputs/spinput.csv"))
+   #spinputtbl = loadtable(settings["spinput"])
+
+   orgsref = OrgsRef(
         Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sp)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
         Array(rows(spinputtbl,:sp_id)),
         Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernels)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
@@ -129,7 +135,9 @@ function simulate()
     settings = parse_commandline()
     landinit = read_landinit(settings)
     spinput = read_spinput(settings)
+    spinput = read_spinput()
     mylandscape = landscape_init(landinit)
+    mylandscape = landscape_init()
     orgs = newOrgs(mylandscape, orgsref)
 
     # unity test
