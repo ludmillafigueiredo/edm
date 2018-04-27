@@ -22,18 +22,6 @@ const plants_fb0 = exp(30.0) # fertility rate
 const seedmassµ = 0.8
 
 # Initial organisms parametrization
-mutable struct InitOrgs
-    fgroups::Any
-    sps::Any
-    init_stage::Any
-    init_abund::Any
-    #genotypes #TODO initialie those in functions
-    biomassμ::Any
-    biomasssd::Any
-    radius::Any
-    InitOrgs() = new() #TODO check if new() is necessary
-end
-
 mutable struct OrgsRef
     species::Dict{String,String}
     sp_id::Array{String, 1}
@@ -51,15 +39,16 @@ mutable struct Organism
     id::String
     location::Tuple # (x,y,frag)
     sp::String #sp id, easier to read
+    biomass::Dict
     stage::String #e,j,a
     age::Int64 # controls passing stages, phenology and
     reped::Bool # reproduced?
     fgroup::String # Plant, insect or more precise functional group
     genotype::Array{String,2}
-    biomass::Dict
     radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
     #Organism() = new()
 end
+Organism(id,location,sp,biomass) = Organism(id,location,sp,biomass, "a", 0,false,"",["" ""],0)
 
 """
 newOrg(fgroups, init_abund, biomassμ, biomasssd)
@@ -92,21 +81,14 @@ function newOrgs(landscape::Array{Setworld.WorldCell,3},orgsref::OrgsRef)
             XYs = hcat(rand(1:size(landscape,1),orgsref.abund[s]),
             rand(1:size(landscape,2),orgsref.abund[s]))
 
-            for i in 1:orgsref.init_abund[s]
+            for i in 1:orgsref.abund[s]
                 neworg = Organism(string(s, "-", length(orgs) + 1),
                 (XYs[i,1],XYs[i,2],frag),
                 s,
-                "a",
-                0,
-                false,
-                "", #no functional groups anymore
-                ["" ""], #initialize with function
-                Dict("veg" => rand(Distributions.Normal(orgsref.biomass_mean[s],orgsref.biomasss_sd[s]))),
-                0)
+                Dict("veg" => rand(Distributions.Normal(orgsref.biomass_mean[s],orgsref.biomass_sd[s]))))
 
                 push!(orgs, neworg)
 
-                #global IDcounter += 1
             end
         end
     end

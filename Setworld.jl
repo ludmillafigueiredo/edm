@@ -9,7 +9,7 @@ This module contains the type of the cell and functions for setting up initial e
 
 		landscape_init() creates a multidimensional array composed of habitat grid cells (Array{WorldCell}(xlength, ylength, n_frags)). If -fragmentation` is `false`, then one single grid of `xlength` x `ylength` cells is created. If `fragmentation` is `true`, `n_frags`
 		# Arguments
-		- `fragmentation::Bool` statement about fragmentation of the landscape
+		`fragmentation::Bool` statement about fragmentation of the landscape
 		`xlength::Int64` Maximal x length of a fragment or total x length of an unfragmented landscape
 		`ylength::Int64` Maximal y length of a fragment or total y length of an unfragmented landscape
 		`n_frags::Int64` Number of fragments
@@ -20,21 +20,19 @@ This module contains the type of the cell and functions for setting up initial e
 
 		using Distributions
 
-		export Simpars, WorldCell, landscape_init, climate!
+		export Simpars, Landpars, WorldCell, landscape_init, climate!
 
 		const tK = 273.15 # °C to K converter
 
 		#Simulation parameters storage:
 		mutable struct Landpars #TODO put all landscape.in values in here
-			fxlength::Array{Int64}
-			fylength::Array{Int64}
-			fmeantemp::Array{Float64}
-			ftempsd::Array{Float64}
-			fmeanprec::Array{Float64}
-			fprecsd::Array{Float64}
+			fxlength::Array{Int64,N} where N
+			fylength::Array{Int64,N} where N
+			fmeantemp::Array{Float64,N} where N
+			ftempsd::Array{Float64,N} where N
+			fmeanprec::Array{Float64,N} where N
+			fprecsd::Array{Float64,N} where N
 			nfrags::Int64
-			timesteps::Int64
-			Landpars() = new() #necessary
 		end
 
 		#Types

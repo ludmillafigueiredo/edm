@@ -1,8 +1,8 @@
 #!/usr/bin/env julia
 
 # Get model directory and include it in Julia's loading path
-#cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
-workspace()
+#
+cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
 EDDir = pwd()
 push!(LOAD_PATH,EDDir)
 
@@ -14,13 +14,10 @@ using Distributions
 #using JLD #saving Julia objects
 using JuliaDB #for in/outputs
 using DataValues
-using Setworld
 using Fileprep
+using Setworld
 using Organisms
 
-export OrgsRef
-
-#TODO put them in OrgsRef
 const Boltz = 8.62e-5 # Brown & Sibly MTE book chap 2
 const aE = 0.65 # Brown & Sibly MTE book chap 2
 const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter (MTEpar notebook)
@@ -40,7 +37,7 @@ function parse_commandline()
         help = "Name of file with species list."
         arg_type = String
         default = abspath(pwd(),"inputs/spinput.csv")
-        "--landpars"
+        "--landconfig"
         help = "Name of file with simulation parameters: areas of fragments, mean (and s.d.) temperature, total running time."
         arg_type = String
         default = abspath(pwd(),"inputs/landpars.csv")
@@ -54,46 +51,41 @@ function parse_commandline()
 end
 
 """
-read_initials(settings)
+read_landin(settings)
 Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
 """
-function read_initials(settings::Dict{String,Any})
+function read_landinit(settings::Dict{String,Any})
 
-    landin = loadtable(settings["landpars"])
+    landinputtbl = loadtable(settings["landconfig"])
 
-    #TODO if csv cells are not set ot Text, round number are entered as Int64
-
-    landparams = Setworld.Landpars()
-    landparams.fxlength = Fileprep.areatocell(select(landin, :areas_m2)) # 5 cm² cells
-    landparams.fylength = Fileprep.areatocell(select(landin, :areas_m2))
-    landparams.fmeantemp = select(landin, :temp_mean)
-    landparams.ftempsd = select(landin, :temp_sd)
-    landparams.fmeanprec = select(landin, :precipt_mean)
-    landparams.fprecsd = select(landin, :precipt_mean)
-    landparams.nfrags == length(landparams.fxlength)
-    landparams.timesteps = settings["timesteps"]
-
-    return landparams
+    landinit = Setworld.Landpars(Fileprep.areatocell(select(landinputtbl,:areas_m2)),
+                                 Fileprep.areatocell(select(landinputtbl,:areas_m2)),
+                                 select(landinputtbl,:temp_mean),
+                                 select(landinputtbl,:temp_sd),
+                                 select(landinputtbl,:precipt_mean),
+                                 select(landinputtbl,:precipt_mean),
+                                 length(select(landinputtbl, :id)))
+    return landinit
 end
 
 """
-    read_input(seetings)
+    read_spinput(seetings)
 Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
 """
 
-function read_spinput(settings)
-    spinputtbl = loadtable(settings["spinfo"])
+function read_spinput(settings::Dict{String,Any})
+    spinputtbl = loadtable(settings["spinput"])
     orgsref = OrgsRef(
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sp)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sp)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
         Array(rows(spinputtbl,:sp_id)),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernels)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_mean)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_sd)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:abund)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_number)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_mass)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:span)[i] for i in 1: length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_span)[i] for i in 1: length(rows(spinputtbl,:sp_id)))
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernels)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_mean)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_sd)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:abund)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_number)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_mass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:span)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_span)[i] for i in 1:length(rows(spinputtbl,:sp_id)))
     )
     return orgsref
 end
@@ -102,7 +94,7 @@ end
     outputorgs(orgs,t,settingsfrgou)
 Saves a long format table with the organisms field informations.
 """
-function orgstable(initorgs::Organisms.InitOrgs, landparams::Setworld.Landpars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
+function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.Landpars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
 
     sep = ','
 
@@ -123,8 +115,8 @@ function orgstable(initorgs::Organisms.InitOrgs, landparams::Setworld.Landpars, 
     if t == seetings["timesteps"]
         open(string("EDoutputs/",settings["simID"],"/simulationID",t,), "w") do output
             println("Initial conditions:")
-            println(dump(initorgs))
-            println(dump(landparams))
+            println(dump(orgsref))
+            println(dump(landinit))
         end
     end
 end
@@ -135,9 +127,10 @@ end
 function simulate()
     #   INITIALIZATION
     settings = parse_commandline()
-    landparams, initorgs, spinfo = read_initials(settings)
-    mylandscape = landscape_init(landparams)
-    orgs = newOrgs(mylandscape, initorgs)
+    landinit = read_landinit(settings)
+    spinput = read_spinput(settings)
+    mylandscape = landscape_init(landinit)
+    orgs = newOrgs(mylandscape, orgsref)
 
     # unity test
     println("Starting simulation")
@@ -151,35 +144,35 @@ function simulate()
 
     cd(pwd())
 
-    # MODEL RUN
-    for t in 1:landparams.timesteps
-
-        println("running week $t")
-
-        #unity testing
-        open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do sim
-            println(sim,"WEEK ",t)
-        end
-
-        projvegmass!(mylandscape,orgs,settings)
-
-        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings) #TODO check if there is no better way to keep track of individuals that are not growing
-
-        #juveniles become adults before just before the beggining of spring
-        if rem(t, 52) == 11 #juveniles become adults at the beggining of spring (reproductive season)
-            develop!(orgs)
-        end
-
-        # Plants: adult reproduction and embryos dispersal
-        if rem(t, 52) == 24 #reproduction = seed production happens at the end of spring (last week)
-            reproduce!(mylandscape,orgs,t, settings)
-        elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
-            disperse!(mylandscape,orgs,settings)
-            establish!(mylandscape,orgs,t,settings)
-        end
-
-        survive!(mylandscape,orgs,nogrowth,settings) # density-dependent and independent mortality
-
+    # # MODEL RUN
+    # for t in 1:landparams.timesteps
+    #
+    #     println("running week $t")
+    #
+    #     #unity testing
+    #     open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do sim
+    #         println(sim,"WEEK ",t)
+    #     end
+    #
+    #     projvegmass!(mylandscape,orgs,settings)
+    #
+    #     nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings) #TODO check if there is no better way to keep track of individuals that are not growing
+    #
+    #     #juveniles become adults before just before the beggining of spring
+    #     if rem(t, 52) == 11 #juveniles become adults at the beggining of spring (reproductive season)
+    #         develop!(orgs)
+    #     end
+    #
+    #     # Plants: adult reproduction and embryos dispersal
+    #     if rem(t, 52) == 24 #reproduction = seed production happens at the end of spring (last week)
+    #         reproduce!(mylandscape,orgs,t, settings)
+    #     elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
+    #         disperse!(mylandscape,orgs,settings)
+    #         establish!(mylandscape,orgs,t,settings)
+    #     end
+    #
+    #     survive!(mylandscape,orgs,nogrowth,settings) # density-dependent and independent mortality
+    #end
         ## DISTURBANCES
         ## Dynamical landscape change
         # if t #something
@@ -197,19 +190,6 @@ function simulate()
         #network interactions
         #outputnetworks()
         #save(string("week",4*t)) more reasonable interval
-    end
 end
 
 simulate()
-
-#Dictionnary stores functio2nal groups parameters
-# """
-# fgpars()
-# Stores functional groups parameters in a dictionnary that is consulted for every function involving organism's simulation.
-# !!!! Better than struct in this case because it is possible to write general funcitons that match the strings identifying the fg og the organism and the key in the dictionnary
-# """
-    # function fgparsdict()
-    #     fgpars = Dict()
-    #     # parse files in EDDir/functionalgroups and for each file, create an entry in the file with the first 3 letters of the group and the parametr it controls. takes the parameters of a list
-    #     return fgpars
-    # end

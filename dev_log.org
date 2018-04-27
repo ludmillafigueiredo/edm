@@ -22,19 +22,33 @@
 ** DONE *lengthstocell()* and *areatocell* convert/calculates real fragment sizes to grid cell side lengths CLOSED: <2018-03-02 Fr>
 ** Temperature & precipitation: German weather station (South station in Göttingen is quite representative) and Kathrin, from EU climate project, with more micro scale measurements, on a subset of the fragments
 - [ ] Species temperature and optimum temperature and precipitation values 
-** TODO *out_landscape()* prepare output that characterize output for both unity tests and visualization [0/2]
-   DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-14 Mi>
-- [ ] individuals information
-- [ ] interaction matrix (*pollination!()*)
+*** DONE OrgsRef: [3/4]
+    CLOSED: [2018-04-26 Do 12:09]
+      *OrgsRef structure:* each parameter is a field, species are the keys to access the parameter values.
+- [ ] come up with structure (dict or composite type) to store the parameters of different species/fgroups, instead of tables?
+<2018-03-18 So>: Eventhough they are more rigid, structs are easier to call and the fields have more flexibility to store different kinds of information on the functional group parameters 
+DEADLINE: <2018-03-23 Fr>
+- [X] read in input: from file into whatever structure I choose to store the parameter values
+Read .csv file with JuliaDB because it is easier to call the parameters by name (DataFrames and readcsv might have something similar, but synthax is easier right now).
+_Originally_
+    1. Species list per funcitonal group (*species_classif.csv*): classifcation of the species list according to functional. Useful to create orgs. That's all. All further parametrization will come from the fgroups pars file
+    2. Parameters of functional groups (*fgroups_pars*): biomass (mean & sd), seed mass(mean & sd), lifespan and everything else that comes from the clustering analysis and necessary in Organisms.jl
+    3. Initial list and  abundances of species (*initial_sps.csv*)
+_Actual implementation_
+*spinput.csv* has the list of species parameters and initial conditions 
 * Outputs
 ** ID outputs
 - [X] 'simID' variable holds the ID of the simulation, for now: commit number
 - [X] parse rguments to script: ArgParse "Module for command-line argument parsing"
 - [ ] Identify folder with slurm jobs
 - [ ] Output a summary of inputs along with results
-- [ ] Check orgstable format
+- [ ] Check orgstable format: Julia DB?
   - [ ] Make sure it is ready for R analysis
 - [ ] output landscape information
+** TODO *out_landscape()* prepare output that characterize output for both unity tests and visualization [0/2]
+   DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-14 Mi>
+- [ ] individuals information
+- [ ] interaction matrix (*pollination!()*)
 * Parametrization
   DEADLINE: <2018-03-28 Mi> SCHEDULED: <2018-03-14 Mi>
 - [ ] Trait values:  LEDA database, Annetta Leinjärtner, Bernhard Hoiß
@@ -97,26 +111,11 @@ Organisms are stored in an array of n_frags (read from simulation file). All org
  - [X] check ERROR with method on function newOrgs(): why push! nao funciona? Because all arry's contents had been initialized at the same time <2018-02-26 Mo>.
  - [ ] Simulate single functional group
    - [ ] reproduction: pollinator independent = use reproduction probability
-   - [ ] wind reproduction (see *reproduction()*): Bullock et al. 2017
-   - [ ] ant reproduction: Bullock et al. 2017
-** TODO Create organisms of different functional groups
+   - [ ] wind and ant pollination (see *reproduction()*): Bullock et al. 2017: 
+** DONE Create organisms of different functional groups
+   CLOSED: [2018-04-27 Fr 09:35]
 During initialization, one input file gives the functional types and their initial abundances, vegmass, reprodmass
 - [X] input file format: csv file, created wiht R (*traits project*)
-*** DONE OrgsRef: [3/4]
-    CLOSED: [2018-04-26 Do 12:09]
-    - CLOSING NOTE [2018-04-26 Do 12:09] \\
-      *OrgsRef structure:* each parameter is a field, species are the keys to access the parameter values.
-- [ ] come up with structure (dict or composite type) to store the parameters of different species/fgroups, instead of tables?
-<2018-03-18 So>: Eventhough they are more rigid, structs are easier to call and the fields have more flexibility to store different kinds of information on the functional group parameters 
-DEADLINE: <2018-03-23 Fr>
-- [X] read in input: from file into whatever structure I choose to store the parameter values
-Read .csv file with JuliaDB because it is easier to call the parameters by name (DataFrames and readcsv might have something similar, but synthax is easier right now).
-_Originally_
-    1. Species list per funcitonal group (*species_classif.csv*): classifcation of the species list according to functional. Useful to create orgs. That's all. All further parametrization will come from the fgroups pars file
-    2. Parameters of functional groups (*fgroups_pars*): biomass (mean & sd), seed mass(mean & sd), lifespan and everything else that comes from the clustering analysis and necessary in Organisms.jl
-    3. Initial list and  abundances of species (*initial_sps.csv*)
-_Actual implementation_
-*spinput.csv* has the list of 
 *** orgs: Store individuals
 - [X] How to store multiple types of organisms: single array. Might be necessary to change it, if calling specific fct types reveals itself to be important and can't be done otherwise
 ** Life-cycle
@@ -174,6 +173,10 @@ Parameters values might be specific to each functional group, but general mechan
 - [ ] reproduction depends on finding partners inside [[Pollination][pollen dispersal kernel]]
 - [X] fertility is calculated according to MTE, which depends on TOTAL biomass: The allocation of biomass to reproduction and growth allows controlling competition, and the rates are affected indirectly, if competition decreases due to total biomass reduction due to competition or herbivory.
 - [ ] use newOrgs 2nd method for creating the orgs and handling genetics of fertilization
+- [ ] Wind and ant dispersal kernels: ExP and Log-Sech distributions not in Julia. Having the pdf, it is necessary to find the inverse of it. For some pdfs, it might not exist (if they are bijective funcitons).
+Possibilities:
+1. *Currently implemented:* Use the InverseGaussian, because it seems to have similar values and the ExP is also known as "generalized Gaussian":
+2. Try monte Carlo variable generation in R and randomly draw from them.
 ****  Decide on newOrgs!() is called between reproduction and establishment: Are new individuals created right after reproduction?
 *** Dispersal [0/4]
     SCHEDULED: <2018-03-18 So>
