@@ -122,6 +122,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.Landpars, orgs
             println(dump(orgsref))
             println(dump(landinit))
         end
+        println("End of simulation")
     end
 end
 

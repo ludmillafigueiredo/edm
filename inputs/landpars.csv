@@ -1,2 +1,2 @@
-id,areas_m2,temp_mean,temp_sd,precipt_mean,precipt_mean
-1,50000.0,20.0,0.2,100,1.0
+id,areas_m2,temp_mean,temp_sd,precipt_mean,precipt_sd
+1,50000,20,0.2,100,1
