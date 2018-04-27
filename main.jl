@@ -43,7 +43,7 @@ function parse_commandline()
         default = abspath(pwd(),"inputs/landpars.csv")
         "--timesteps"
         help = "Duration of simulation in weeks."
-        arg_type = Int64
+        arg_type = Int
         default = 52
     end
 
@@ -117,7 +117,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.Landpars, orgs
     end
 
     if t == seetings["timesteps"]
-        open(string("EDoutputs/",settings["simID"],"/simulationID",t,), "w") do output
+        open(string("EDoutputs/",settings["simID"],"/simulationID",t), "w") do output
             println("Initial conditions:")
             println(dump(orgsref))
             println(dump(landinit))
@@ -133,15 +133,19 @@ function simulate()
     settings = parse_commandline()
     #unity test
     println(dump(settings))
+
     landinit = read_landinit(settings)
     #unity test
     println(dump(landinit))
+
     spinput = read_spinput(settings)
     #unity test
     println(dump(spinput))
+
     mylandscape = landscape_init(landinit)
     #unity test
     println(dump(mylandscape))
+
     orgs = newOrgs(mylandscape, orgsref)
     #unity test
     println(dump(orgs))
@@ -198,7 +202,7 @@ function simulate()
         # Output:
         #orgs
         #if rem(t,4) == 0
-        orgstable(orgs,t,settings)
+        orgstable(orgsref, landinit, orgs,t,settings)
         #end
         #save(string("week",t))
         #network interactions
