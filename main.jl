@@ -163,7 +163,7 @@ function simulate()
     cd(pwd())
 
     # MODEL RUN
-    for t in 1:landparams.timesteps
+    for t in 1:settings["timesteps"]
 
         println("running week $t")
 
