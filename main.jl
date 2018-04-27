@@ -136,19 +136,19 @@ function simulate()
 
     landinit = read_landinit(settings)
     #unity test
-    println("Land init stored in object of type $(typeof(landinit)) and size $(size(landinit))")
+    println("Land init stored in object of type $(typeof(landinit))")
 
     spinput = read_spinput(settings)
     #unity test
-    println("Sp info stored in object of type $(typeof(spinput)) and size $(size(spinput))")
+    println("Sp info stored in object of type $(typeof(spinput))")
 
     mylandscape = landscape_init(landinit)
     #unity test
-    println("Landscape initialized: type $(typeof(mylandscape)) and size $(size(mylandscape))")
+    println("Landscape initialized: type $(typeof(mylandscape))")
 
     orgs = newOrgs(mylandscape, orgsref)
     #unity test
-    println("Plants initialized: type $(typeof(orgs)) and size $(size(orgs))")
+    println("Plants initialized: type $(typeof(orgs))")
 
     # unity test
     println("Starting simulation")
