@@ -59,7 +59,7 @@ This module contains the type of the cell and functions for setting up initial e
 			landscape = WorldCell[]
 
 			for frag in 1:landinit.nfrags
-				for y in 1:landinit.fylength[frag], x in 1:simpars.fxlength[frag]
+				for y in 1:landinit.fylength[frag], x in 1:landinit.fxlength[frag]
 					newcell = WorldCell(true,
 					rand(Normal(landinit.fmeantemp[frag],landinit.ftempsd[frag]),1)[1] + tK,
 					rand(Normal(landinit.fmeanprec[frag],landinit.fprecsd[frag]),1)[1],
