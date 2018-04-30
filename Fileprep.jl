@@ -42,7 +42,7 @@ function areatocell(area::Float64)
 end
 
 function areatocell(area::Array{Float64,1})
-  side = round.(Int64,((sqrt.(area.*10000))./3), RoundNearestTiesAway)
+  side = round.(Int64,(sqrt.(area*10000))/3, RoundNearestTiesAway)
   return side
 end
 

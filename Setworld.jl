@@ -20,7 +20,7 @@ This module contains the type of the cell and functions for setting up initial e
 
 		using Distributions
 
-		export Simpars, Landpars, WorldCell, landscape_init, climate!
+		export Landpars, WorldCell, landscape_init, climate!
 
 		const tK = 273.15 # °C to K converter
 
@@ -52,9 +52,11 @@ This module contains the type of the cell and functions for setting up initial e
 		# Functions
 		function landscape_init(landinit::Landpars)
 
-			landscape = WorldCell[]
+			landscape = Wordcell[]
 
-			for frag in 1:landinit.nfrags
+			for frag in collect(1:landinit.nfrags)
+				fragment = WorldCell[]
+
 				fragt = rand(Normal(landinit.fmeantemp[frag],landinit.ftempsd[frag]),1)[1] + tK
 				fragp = rand(Normal(landinit.fmeanprec[frag],landinit.fprecsd[frag]),1)[1]
 				for y in 1:landinit.fylength[frag], x in 1:landinit.fxlength[frag]
@@ -64,11 +66,17 @@ This module contains the type of the cell and functions for setting up initial e
 										fragp,
 										Dict()
 					)
-					push!(landscape,newcell)
+					push!(fragment,newcell)
 				end
-
+				reshape(fragment,landinit.fxlength[frag],landinit.fylength[frag])
+				# add the fragment to the landscape structure
+				if frag == 1
+					landscape = frag #when empty, landscape cant cat with frag
+				else
+					landscape = cat(3,landscape, frag)
+				end
 			end
-			landscape = reshape(landscape, (landinit.fxlength[1], landinit.fylength[1], landinit.nfrags)) # reshaping is easier then going through every index of a 3D landscap, creating a WordCell cell there and parameterizing it. x in inner loops matches reshape order
+			 # reshaping is easier then going through every index of a 3D landscap, creating a WordCell cell there and parameterizing it. x in inner loops matches reshape order
 			#TODO check reshaping for landscape with frags of different sizes
 			return landscape
 		end
