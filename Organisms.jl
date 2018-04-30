@@ -11,7 +11,7 @@ using DataValues
 using Setworld
 using Fileprep
 
-export Organism, InitOrgs, OrgsRef, newOrgs, projvegmass!, compete, develop!, allocate!, meanExP, checkboundaries, reproduce!, disperse!, germinate, establish!, survive!
+export Organism, OrgsRef, newOrgs, projvegmass!, compete, develop!, allocate!, meanExP, checkboundaries, reproduce!, disperse!, germinate, establish!, survive!
 
 #TODO put them in OrgsRef
 const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
@@ -157,7 +157,7 @@ function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, setting
             continue
             #unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, "$(orgs.id) out of bound projection at $(org[o].location)")
+                println(sim, "$(org.id) out of bound projection at $(org.location)")
             end
         elseif haskey(landscape[i,j,frag].neighs,fg)
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
@@ -276,14 +276,14 @@ function meanExP(a::Float64,b::Float64)
     return dist
 end
 
-"""
-cauchydisp(a,b)
-Draws a dispersed distance from the Cauchy distribution, which approximates the LogSech distributions for b = 1.
-"""
-function cauchydisp(a,b)
-    dist = abs(rand(Cauchy(a,b)),1)
-    return dist
-end
+# """
+# cauchydisp(a,b)
+# Draws a dispersed distance from the Cauchy distribution, which approximates the LogSech distributions for b = 1.
+# """
+# function cauchydisp(a,b)
+#     dist = abs(rand(Cauchy(a,b)),1)
+#     return dist
+# end
 """
 checkboundaries(sourcefrag,xdest, ydest, fdest)
 `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
@@ -397,7 +397,7 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
         dist = Fileprep.lengthtocell(Distributions.InverseGaussian(a,b))
         #unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, org[o].id,"Calculated dispersal distance: $dist")
+            println(sim, orgs[d].id,"Calculated dispersal distance: $dist")
         end
 
         # Find patch
@@ -410,13 +410,13 @@ function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.
             orgs[d].location = (xdest,ydest,fdest)
             #unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, org[o].id," dispersed $dist")
+                println(sim, orgs[d].id," dispersed $dist")
             end
         else
             push!(lost,d)
             #unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, org[o].id," dispersed $dist but died")
+                println(sim, orgs[d].id," dispersed $dist but died")
             end
         end
     end
@@ -427,7 +427,7 @@ end
 germinate(org)
 Seeds have a probability of germinating (`gprob`).
 """
-function germinate(org::Organisms.Organism)
+function germinate()
     gprob = 0.5
     germ = false
     if 1 == rand(Distributions.Binomial(1,gprob))
@@ -457,7 +457,7 @@ function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism
         if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]].neighs,orgfg)
             push!(lost,o)
         else
-            if germinate(orgs[o])
+            if germinate()
                 orgs[o].stage = "j"
                 # the ones that dont germinate but are older than 1 year die
             elseif orgs[o].age > 52
@@ -517,7 +517,7 @@ function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.O
     end
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println("Dying orgs: $deaths")
+        println(sim, "Dying orgs: $deaths")
     end
     deleteat!(orgs, deaths)
 end

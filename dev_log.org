@@ -37,18 +37,22 @@ _Originally_
 _Actual implementation_
 *spinput.csv* has the list of species parameters and initial conditions 
 * Outputs
-** ID outputs
-- [X] 'simID' variable holds the ID of the simulation, for now: commit number
+** REPL messages
+** Detailed (print based unity testing)
+** Simulation results/outputs
+*** id simulation
+- [X] 'simID' variable holds the ID of the simulation, for now
 - [X] parse rguments to script: ArgParse "Module for command-line argument parsing"
 - [ ] Identify folder with slurm jobs
-- [ ] Output a summary of inputs along with results
-- [ ] Check orgstable format: Julia DB?
-  - [ ] Make sure it is ready for R analysis
+- [X] Output a summary of inputs along with results
+- [ ] more summarized version
+*** individuals results
+- [ ] Check orgstable format: weekly simple csv. Leave more complicated formats to analysis
+- [ ] Output analysis R script
 - [ ] output landscape information
-** TODO *out_landscape()* prepare output that characterize output for both unity tests and visualization [0/2]
-   DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-14 Mi>
-- [ ] individuals information
 - [ ] interaction matrix (*pollination!()*)
+** Errors (proper unity tests)
+
 * Parametrization
   DEADLINE: <2018-03-28 Mi> SCHEDULED: <2018-03-14 Mi>
 - [ ] Trait values:  LEDA database, Annetta Leinjärtner, Bernhard Hoiß
@@ -56,9 +60,8 @@ Type of data: Annual/perennial, dispersal mode, dispersal parameters, seed mass,
   - [ ] herbs: LEDA/TRY, LEDA probably more uniform, Lina Wieß
   - [ ] butterflies: Jochen
   - [ ] bees:
-- [ ] Clustering analysis for functional groups
+- [X] Clustering analysis for functional groups: not yet. Force sp-specific values. Consider it for NAs.
 - [ ] Interactions data: Ingo Grass paper
-- [ ] 
 * Setworld.jl
 *** DONE Create multi fragment landscape structure (not simulated yet) 
 *** DONE Whole fragment is getting the same temperature and preciptation
@@ -232,6 +235,13 @@ Juliano's suggestion: Create a function of trait distribution change depending o
 *Different from Virtual Ecologist approach* : OM always exists, VE verifies parametrization algorithm and data sampling method
 ** Hierarchical model for estimating true abundances from count data?
  - How VE verification of sampling method and this hierarchical model?
+* Output analysis
+** Rank-bundance
+** SAR
+** Time series:
+*** Richness
+*** mean biomass
+Use JuliaDB/dplyr to groupby and plot from  
 * DOCUMENTATION
 *** TODO Update TRACE
 Describe wind pollen dispersal, seed dispersal, reproduction and germination submodels
