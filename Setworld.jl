@@ -20,12 +20,12 @@ This module contains the type of the cell and functions for setting up initial e
 
 		using Distributions
 
-		export Landpars, WorldCell, landscape_init, climate!
+		export LandPars, WorldCell, landscape_init, climate!
 
 		const tK = 273.15 # °C to K converter
 
 		#Simulation parameters storage:
-		mutable struct Landpars
+		mutable struct LandPars
 			fxlength::Array{Int64,N} where N
 			fylength::Array{Int64,N} where N
 			fmeantemp::Array{Float64,N} where N
@@ -50,9 +50,9 @@ This module contains the type of the cell and functions for setting up initial e
 		#WorldCell() = WorldCell(false, 0.0, 0.0, Dict())
 
 		# Functions
-		function landscape_init(landinit::Landpars)
+		function landscape_init(landinit::LandPars)
 
-			landscape = Wordcell[]
+			landscape = WorldCell[]
 
 			for frag in collect(1:landinit.nfrags)
 				fragment = WorldCell[]
@@ -76,7 +76,7 @@ This module contains the type of the cell and functions for setting up initial e
 					landscape = cat(3,landscape, frag)
 				end
 			end
-			 # reshaping is easier then going through every index of a 3D landscap, creating a WordCell cell there and parameterizing it. x in inner loops matches reshape order
+			 # reshaping is easier then going through every index of a 3D landscap, creating a WorldCell cell there and parameterizing it. x in inner loops matches reshape order
 			#TODO check reshaping for landscape with frags of different sizes
 			return landscape
 		end

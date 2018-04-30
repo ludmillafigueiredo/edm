@@ -59,7 +59,7 @@ function read_landinit(settings::Dict{String,Any})
     #landinputtbl = loadtable(abspath(pwd(),"inputs/landpars.csv"))
     landinputtbl = loadtable(settings["landconfig"])
 
-    landinit = Setworld.Landpars(Fileprep.areatocell(select(landinputtbl,:areas_m2)),
+    landinit = Setworld.LandPars(Fileprep.areatocell(select(landinputtbl,:areas_m2)),
                                  Fileprep.areatocell(select(landinputtbl,:areas_m2)),
                                  select(landinputtbl,:temp_mean),
                                  select(landinputtbl,:temp_sd),
@@ -98,7 +98,7 @@ end
     outputorgs(orgs,t,settingsfrgou)
 Saves a long format table with the organisms field informations.
 """
-function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.Landpars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
+function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.LandPars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
 
     sep = ','
 
