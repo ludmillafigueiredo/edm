@@ -178,7 +178,7 @@ end
 allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
-function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any})
+function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any})
     #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
     nogrowth = Int64[]
 
@@ -288,7 +288,7 @@ end
 checkboundaries(sourcefrag,xdest, ydest, fdest)
 `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
 """
-function checkboundaries(landscape::Array{Setworld.WorldCell,3}, xdest::Int64, ydest::Int64, fdest::Int64)
+function checkboundaries(landscape::Array{Setworld.WorldCell,N} where N, xdest::Int64, ydest::Int64, fdest::Int64)
     #check inside frag
     if checkbounds(Bool, landscape[:,:,fdest], xdest, ydest)
         #if (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2])
@@ -372,7 +372,7 @@ end
 disperse!(offspring)
 Butterflies, bees and seeds can/are disperse(d).
 """
-function disperse!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism, N} where N, settings::Dict{String, Any})
+function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, settings::Dict{String, Any})
     # Seeds (Bullock et al. JEcol 2017)
     dispersing = find(x -> (x.stage == "e" && x.age == 0), orgs)
     #TODO include insects
@@ -440,7 +440,7 @@ end
 establish!
 Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
 """
-function establish!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String, Any})
+function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String, Any})
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
@@ -473,7 +473,7 @@ survive!(orgs, nogrowth,landscape)
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 plants in nogrwth are subjected to two probability rates
 """
-function survive!(landscape::Array{Setworld.WorldCell,3},orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N, settings::Dict{String, Any})
+function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N, settings::Dict{String, Any})
 
     deaths = Int64[]
 
