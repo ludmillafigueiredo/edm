@@ -70,7 +70,7 @@ newOrg() generates offspringn, after reproduc- newOrg() generates offspringn, af
 `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
 `quant::Int64` is nb of new individuals or offspring to be created
 """
-function newOrgs(landscape::Array{Setworld.WorldCell,3},orgsref::OrgsRef)
+function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::OrgsRef)
 
     orgs = Organism[]
 
@@ -101,7 +101,7 @@ end
 projvegmass!(landscape,orgs)
 Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
 """
-function projvegmass!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organism,N} where N, settings::Dict{String,Any})
+function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organism,1}, settings::Dict{String,Any})
     # empt neighs to rewrite TODO more efficient?
     for cell in eachindex(landscape)
         if length(keys(landscape[cell].neighs)) > 0
@@ -142,7 +142,7 @@ end
 compete(landscape, orgs)
 Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
 """
-function compete(landscape::Array{Setworld.WorldCell, 3}, org::Organism, settings::Dict{String,Any})
+function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism, settings::Dict{String,Any})
 
     x, y, frag = org.location
     fg = org.fgroup
@@ -178,7 +178,7 @@ end
 allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
-function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,N} where N, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any})
+function allocate!(landscape::Array{Setworld.WorldCell,3}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any})
     #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
     nogrowth = Int64[]
 
@@ -308,7 +308,7 @@ end
 reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
-function reproduce!(landscape::Array{Setworld.WorldCell, 3}, orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any})
+function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any})
     #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
     #     pollination()
