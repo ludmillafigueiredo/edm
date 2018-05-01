@@ -60,7 +60,7 @@ This module contains the type of the cell and functions for setting up initial e
 
 				fragt = rand(Normal(landinit.fmeantemp[frag],landinit.ftempsd[frag]),1)[1] + tK
 				fragp = rand(Normal(landinit.fmeanprec[frag],landinit.fprecsd[frag]),1)[1]
-				for y in collect(1:landinit.fylength[frag], x in) 1:landinit.fxlength[frag]
+				for y in collect(1:landinit.fylength[frag]), x in 1:(landinit.fxlength[frag])
 					newcell = WorldCell(true,
 										fragt,
 										fragp,
