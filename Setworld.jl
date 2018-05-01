@@ -55,20 +55,19 @@ This module contains the type of the cell and functions for setting up initial e
 			landscape = WorldCell[]
 
 			for frag in collect(1:landinit.nfrags)
+
 				fragment = WorldCell[]
 
 				fragt = rand(Normal(landinit.fmeantemp[frag],landinit.ftempsd[frag]),1)[1] + tK
 				fragp = rand(Normal(landinit.fmeanprec[frag],landinit.fprecsd[frag]),1)[1]
 				for y in 1:landinit.fylength[frag], x in 1:landinit.fxlength[frag]
-					newcell = WorldCell(
-										true,
+					newcell = WorldCell(true,
 										fragt,
 										fragp,
-										Dict()
-					)
+										Dict())
 					push!(fragment,newcell)
 				end
-				reshape(fragment,landinit.fxlength[frag],landinit.fylength[frag])
+				fragment = reshape(fragment,landinit.fxlength[frag],landinit.fylength[frag])
 				# add the fragment to the landscape structure
 				if frag == 1
 					landscape = frag #when empty, landscape cant cat with frag
@@ -76,7 +75,7 @@ This module contains the type of the cell and functions for setting up initial e
 					landscape = cat(3,landscape, frag)
 				end
 			end
-			 # reshaping is easier then going through every index of a 3D landscap, creating a WorldCell cell there and parameterizing it. x in inner loops matches reshape order
+			 # reshaping is easier then going through every index of a 3D landscap, creating a WorldCell cell there and parameterizing it. x in inner loop matches reshape order
 			#TODO check reshaping for landscape with frags of different sizes
 			return landscape
 		end
