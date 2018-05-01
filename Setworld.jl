@@ -26,12 +26,12 @@ This module contains the type of the cell and functions for setting up initial e
 
 		#Simulation parameters storage:
 		mutable struct LandPars
-			fxlength::Array{Int64,N} where N
-			fylength::Array{Int64,N} where N
-			fmeantemp::Array{Float64,N} where N
-			ftempsd::Array{Float64,N} where N
-			fmeanprec::Array{Float64,N} where N
-			fprecsd::Array{Float64,N} where N
+			fxlength::Array{Int64,1}
+			fylength::Array{Int64,1}
+			fmeantemp::Array{Float64,1}
+			ftempsd::Array{Float64,1}
+			fmeanprec::Array{Float64,1}
+			fprecsd::Array{Float64,1}
 			nfrags::Int64
 		end
 
@@ -60,7 +60,7 @@ This module contains the type of the cell and functions for setting up initial e
 
 				fragt = rand(Normal(landinit.fmeantemp[frag],landinit.ftempsd[frag]),1)[1] + tK
 				fragp = rand(Normal(landinit.fmeanprec[frag],landinit.fprecsd[frag]),1)[1]
-				for y in 1:landinit.fylength[frag], x in 1:landinit.fxlength[frag]
+				for y in collect(1:landinit.fylength[frag], x in) 1:landinit.fxlength[frag]
 					newcell = WorldCell(true,
 										fragt,
 										fragp,
@@ -70,7 +70,7 @@ This module contains the type of the cell and functions for setting up initial e
 				fragment = reshape(fragment,landinit.fxlength[frag],landinit.fylength[frag])
 				# add the fragment to the landscape structure
 				if frag == 1
-					landscape = frag #when empty, landscape cant cat with frag
+					landscape = fragment #when empty, landscape cant cat with frag
 				else
 					landscape = cat(3,landscape, frag)
 				end
@@ -86,7 +86,7 @@ This module contains the type of the cell and functions for setting up initial e
 		"""
 		function climate!(landscape::Array{Setworld.WorldCell,3}, t)
 			#TODO Unity test
-			for frag in 1:size(landscape[:,:,3]) #every fragment
+			for frag in collect(1:size(landscape[:,:,3])) #every fragment
 				for cell in eachindex(landscape[:,:,frag])
 					# weekly update temperature
 					landscape[cell,frag].temp = rand(Normal(LandRef[t,1],LandRef[t,2]),1)[1] + tK

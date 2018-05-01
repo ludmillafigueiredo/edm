@@ -64,8 +64,11 @@ Type of data: Annual/perennial, dispersal mode, dispersal parameters, seed mass,
 - [ ] Interactions data: Ingo Grass paper
 * Setworld.jl
 *** DONE Create multi fragment landscape structure (not simulated yet) 
+**** TODO create multifragment structure with fragments of different sizes, because so far, they are all the same size
+     SCHEDULED: <2018-05-01 Di>
 *** DONE Whole fragment is getting the same temperature and preciptation
-    - [X] because assignment of one field changes all the fields of the array!
+    Because assignment of one field changes all the fields of the array!
+    However, it is not necessary to have microhabitats and there is no data to such level of detail, therefore, no need for cell specific environmental conditions
 *** DONE Change names so that temperature and preciptation can be called niche dimensions: no need
 *** TODO Initialize
     DEADLINE: <2018-03-30 Fr>
