@@ -122,8 +122,8 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
         # unity test
         # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         #     println(sim, orgs[o].id," has ",orgs[o].biomass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
+        # end
 
-        end
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
             if !checkbounds(Bool,landscape[:,:,frag],j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
                 continue
@@ -158,7 +158,7 @@ function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,
             # #unity test
             # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             #     println(sim, "$(org.id) out of bound projection at $(org.location)")
-            end
+            #end
         elseif haskey(landscape[i,j,frag].neighs,fg)
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs[fg] - /(org.biomass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
