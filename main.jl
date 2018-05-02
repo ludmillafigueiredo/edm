@@ -110,9 +110,9 @@ function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.LandPars, orgs
     end
 
     open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do output
-        #TODO better extract and arrange the variables
+        #TODO better extract and arrange the field values
         for o in 1:length(orgs)
-            writedlm(output, [t orgs[o].id orgs[o].sp orgs[o].stage orgs[o].fgroup orgs[o].location sum(values(orgs[o].biomass)) orgs[o].radius orgs[o].genotype orgs[o].disp], sep)
+            writedlm(output, [t orgs[o].id orgs[o].location orgs[o].sp sum(values(orgs[o].biomass)) orgs[o].stage orgs[o].age orgs[o].reped  orgs[o].fgroup orgs[o].genotype orgs[o].redius], sep)
         end
     end
 
@@ -168,9 +168,8 @@ function simulate()
 
         println("running week $t")
 
-        #unity testing
-        open(joinpath("EDoutputs",settings["simID"],"orgsweek",t,".csv"), "a") do sim
-            println(sim,"WEEK ",t)
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, "WEEK $t")
         end
 
         projvegmass!(mylandscape,orgs,settings)

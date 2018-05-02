@@ -120,8 +120,8 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
         # unity test
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, "$(orgs[o].id) has $(orgs[o].biomass["veg"]) radius $r and projvegmass: $projmass")
+        # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        #     println(sim, orgs[o].id," has ",orgs[o].biomass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
 
         end
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
@@ -155,9 +155,9 @@ function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,
     for j in (y-r):(y+r), i in (x-r):(x+r)
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
-            #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, "$(org.id) out of bound projection at $(org.location)")
+            # #unity test
+            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #     println(sim, "$(org.id) out of bound projection at $(org.location)")
             end
         elseif haskey(landscape[i,j,frag].neighs,fg)
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
@@ -166,10 +166,10 @@ function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,
     end
 
     compterm = /(org.biomass["veg"] - nbsum, org.biomass["veg"])
-    # unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "$(org.id) radius = $r and compterm = $compterm")
-    end
+    # # unity test
+    # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    #     println(sim, "$(org.id) radius = $r and compterm = $compterm")
+    # end
 
     return compterm
 end
@@ -198,9 +198,9 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
             compterm = compete(landscape, orgs[o], settings)
             # unity test
             #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[o].id, "  compterm $compterm")
-            end
+            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #     println(sim, orgs[o].id, "  compterm $compterm")
+            # end
 
             if compterm < 0
                 #2.c Those not growing will have higher chance of dying
@@ -214,21 +214,21 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                     # juveniles grow
                     orgs[o].biomass["veg"] += grown_mass
                     # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) gained $grown_mass")
-                    end
+                    # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    #     println(sim, "$(orgs[o].id)-$(orgs[o].stage) gained $grown_mass")
+                    # end
                 elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 51 && orgs[o].biomass["veg"] < 50 #individuals that are too small dont reproduce #TODO better allocation rules
                     orgs[o].biomass["veg"] += grown_mass
                     # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) gained VEG $grown_mass")
-                    end
+                    # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    #     println(sim, "$(orgs[o].id)-$(orgs[o].stage) gained VEG $grown_mass")
+                    # end
                 elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25
                     # adults invest in reproduction
                     #unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING")
-                    end
+                    # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    #     println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING")
+                    # end
                     if haskey(orgs[o].biomass,"reprd")
                         orgs[o].biomass["reprd"] += grown_mass
                     else
@@ -238,9 +238,9 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
             end
 
             #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, "current biomass: $(orgs[o].biomass)")
-            end
+            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #     println(sim, "current biomass: $(orgs[o].biomass)")
+            # end
 
         end
 
@@ -338,9 +338,9 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
         end
 
         #unity test
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, "Offspring of ", orgs[o], ": ",offsprgB)
-        end
+        # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        #     println(sim, "Offspring of ", orgs[o], ": ",offsprgB)
+        # end
 
         for n in 1:offsprgB
             #TODO check for a quicker way of creating several objects of composite-type
@@ -409,15 +409,15 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
         if checkboundaries(landscape, xdest, ydest, fdest)
             orgs[d].location = (xdest,ydest,fdest)
             #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[d].id," dispersed $dist")
-            end
+            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #     println(sim, orgs[d].id," dispersed $dist")
+            # end
         else
             push!(lost,d)
             #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[d].id," dispersed $dist but died")
-            end
+            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #     println(sim, orgs[d].id," dispersed $dist but died")
+            # end
         end
     end
     deleteat!(orgs,lost)
@@ -489,15 +489,15 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
             mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
             mB = mortalconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim,"$(orgs[o].id) mortality rate $mB")
-            end
+            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #     println(sim,"$(orgs[o].id) mortality rate $mB")
+            # end
             mprob = 1 - exp(-mB)
 
             #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim,orgs[o].id,"-",orgs[o].stage, " mprob: $mprob")
-            end
+            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #     println(sim,orgs[o].id,"-",orgs[o].stage, " mprob: $mprob")
+            # end
 
             # individuals that didnt grow have
             if o in 1:length(nogrowth)
