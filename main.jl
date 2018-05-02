@@ -32,7 +32,7 @@ function parse_commandline()
         "--simID"
         help = "Name of the folder (string type) where outputs will be stored. Default is current time."
         arg_type = String
-        default = string(now())
+        required = true
         "--spinput"
         help = "Name of file with species list."
         arg_type = String
@@ -158,7 +158,7 @@ function simulate()
         mkpath("EDoutputs/$(settings["simID"])")
         println("Output will be written to 'EDoutputs'")
     catch
-        println("Writing results to existing 'EDoutputs/$(settings["simID"])' folder")
+        println("Overwriting results to existing 'EDoutputs/$(settings["simID"])' folder")
     end
 
     cd(pwd())
@@ -169,7 +169,7 @@ function simulate()
         println("running week $t")
 
         #unity testing
-        open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do sim
+        open(joinpath("EDoutputs",settings["simID"],"orgsweek",t,".csv"), "a") do sim
             println(sim,"WEEK ",t)
         end
 
