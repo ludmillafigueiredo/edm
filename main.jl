@@ -190,6 +190,9 @@ function simulate()
         end
 
         survive!(mylandscape,orgs,nogrowth,settings) # density-dependent and independent mortality
+
+        # output weekly
+        orgstable(orgsref, landinit, orgs,t,settings)
     end
         ## DISTURBANCES
         ## Dynamical landscape change
