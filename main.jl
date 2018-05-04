@@ -70,7 +70,7 @@ function read_landinit(settings::Dict{String,Any})
 end
 
 """
-    read_spinput(seetings)
+    read_spinput(settings)
 Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
 """
 
@@ -116,7 +116,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.LandPars, orgs
         end
     end
 
-    if t == seetings["timesteps"]
+    if t == settings["timesteps"]
         open(string("EDoutputs/",settings["simID"],"/simulationID",t), "w") do output
             println("Initial conditions:")
             println(dump(orgsref))
