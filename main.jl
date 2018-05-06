@@ -32,7 +32,7 @@ function parse_commandline()
         "--simID"
         help = "Name of the folder (string type) where outputs will be stored. Default is current time."
         arg_type = String
-        required = true
+        default = "testing" #TODO required = true
         "--spinput"
         help = "Name of file with species list."
         arg_type = String

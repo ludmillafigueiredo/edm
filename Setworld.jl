@@ -81,6 +81,14 @@ This module contains the type of the cell and functions for setting up initial e
 		end
 
 		"""
+		arealoss!()
+
+		"""
+		function arealoss!(landscape,settings::Dict{String,Any})
+
+		end
+
+		"""
 		climate!(landscape,t)
 		Update temperature and precipitation values according to the weekly input data (weekly means and ).
 		"""
@@ -89,11 +97,18 @@ This module contains the type of the cell and functions for setting up initial e
 			for frag in collect(1:size(landscape[:,:,3])) #every fragment
 				for cell in eachindex(landscape[:,:,frag])
 					# weekly update temperature
-					landscape[cell,frag].temp = rand(Normal(LandRef[t,1],LandRef[t,2]),1)[1] + tK
+					landscape[cell,frag].temp = rand(Normal(disturbance[t,1],LandRef[t,2]),1)[1] + tK
 					# weekly update precipitation
-					landscape[cell,frag].precpt = rand(Normal(LandRef[t,3],LandRef[t,4]),1)[1]
+					landscape[cell,frag].precpt = rand(Normal(disturbance[t,3],LandRef[t,4]),1)[1]
 				end
 			end
 
 		end
+
+		"""
+		fragmentation!()
+		"""
+		function fragmentation!()
+		end
+
 	end
