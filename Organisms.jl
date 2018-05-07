@@ -48,7 +48,7 @@ mutable struct Organism
     radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
     #Organism() = new()
 end
-Organism(id,location,sp,biomass) = Organism(id,location,sp,biomass, "a", 0,false,"",["" ""],0)
+Organism(id,location,sp,biomass) = Organism(id,location,sp,biomass, "a", 0,false,"",["" ""],0) #this is individuals are initialized in the beginning of the simulationy
 
 """
 newOrg(fgroups, init_abund, biomassμ, biomasssd)
@@ -316,7 +316,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
     #     parents_genes = mate!()
     # end
 
-    reproducing = filter(x -> (x.stage == "a" && haskey(x.biomass, "reprd")), orgs)
+    reproducing = find(x -> (x.stage == "a" && haskey(x.biomass, "reprd")), orgs)
 
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -325,12 +325,12 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
 
     offspring = Organism[]
 
-    for o in 1:length(reproducing)
+    for o in reproducing
 
-        T = landscape[reproducing[o].location[1], reproducing[o].location[2], reproducing[o].location[3]].temp
+        T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
-        offsprgB = round(Int64, plants_fb0 * sum(collect(values(reproducing[o].biomass)))^(-1/4) * exp(-aE/(Boltz*T)), RoundNearestTiesAway) #TODO stochasticity
-        avalseeds =  round(Int64, /(reproducing[o].biomass["reprd"],seedmassµ), RoundNearestTiesAway)
+        offsprgB = round(Int64, plants_fb0 * sum(collect(values(orgs[o].biomass)))^(-1/4) * exp(-aE/(Boltz*T)), RoundNearestTiesAway) #TODO stochasticity
+        avalseeds =  round(Int64, /(orgs[o].biomass["reprd"],seedmassµ), RoundNearestTiesAway)
 
         # TODO necessary? easier to keep just one of them?
         if offsprgB > avalseeds
@@ -344,24 +344,24 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
 
         for n in 1:offsprgB
             #TODO check for a quicker way of creating several objects of composite-type
-            embryo = Organism(string(reproducing[o].fgroup[1:3], length(orgs) + length(offspring) + 1),
-            reproducing[o].location, #location is given according to functional group and dispersal strategy, in disperse!()
-            reproducing[o].sp,
+            embryo = Organism(string(orgs[o].sp_id[1:3], "-", (length(orgs) + length(offspring) + 1)),
+            orgs[o].location, #location is given according to functional group and dispersal strategy, in disperse!()
+            orgs[o].sp,
+            Dict("veg" => orgs[o].biomass["veg"]*0.001), #TODO use seed size for the fgroup
             "e",
             0,
             false,
-            reproducing[o].fgroup,
+            orgs[o].fgroup,
             ["placeholder" "placeholder"], #come from function
-            #rand(Distributions.Normal(OrgsRef.seedbiomassμ[reproducing[o].fgroup],OrgsRef.biomasssd[reproducing[o].fgroup])),
+            #rand(Distributions.Normal(OrgsRef.seedbiomassμ[orgs[o].fgroup],OrgsRef.biomasssd[orgs[o].fgroup])),
             #[OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
             #OrgsRef.radius[f])
-            Dict("veg" => reproducing[o].biomass["veg"]*0.001), #TODO use seed size for the fgroup
-            reproducing[o].radius) # could be 0, should depend on biomass
+            orgs[o].radius) # could be 0, should depend on biomass
 
             push!(offspring, embryo)
         end
 
-        reproducing[o].biomass["reprd"] -= (offsprgB * seedmassµ)
+        orgs[o].biomass["reprd"] -= (offsprgB * seedmassµ)
 
     end
     append!(orgs, offspring)
