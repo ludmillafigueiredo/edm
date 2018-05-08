@@ -108,7 +108,7 @@ This module contains the type of the cell and functions for setting up initial e
 		"""
 		fragmentation!()
 		"""
-		function fragmentation!()
+		function fragmentation!(landscape::Array{Setworld.WorldCell,3}, t, settings::Dict{String,Any})
 		end
 
 	end

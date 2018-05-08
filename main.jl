@@ -154,6 +154,11 @@ function simulate()
     # unity test
     println("Starting simulation")
 
+    # OUTPUT SIMULATION ID
+    open(string("EDoutputs/",settings["simID"],"/simID.txt"),"a") do ID
+            println(ID, settings)
+    end
+
     try
         mkpath("EDoutputs/$(settings["simID"])")
         println("Output will be written to 'EDoutputs'")
@@ -167,6 +172,18 @@ function simulate()
     for t in 1:settings["timesteps"]
 
         println("running week $t")
+
+        # DISTURBANCE
+        if haskey(settings, "disturb")
+                # select function according to keyword: loss, frag, temp
+                if settings["disturb"] == "loss"
+                elseif settings["disturb"] == "frag"
+                elseif settings["disturb"] == "temp"
+                else
+                        error("Please specify one of the disturbance scenarios with `--disturb`:\nhabitat area loss ("loss"),\nhabitat fragmentation ("frag") or\ntemperature change ("temp")")
+                        break
+                end
+        end
 
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                 println(sim, "WEEK $t")
@@ -193,8 +210,9 @@ function simulate()
 
         # output weekly
         orgstable(orgsref, landinit, orgs,t,settings)
-    end
+
         ## DISTURBANCES
+        ##
         ## Dynamical landscape change
         # if t #something
         #     function update_landscape!()
@@ -202,15 +220,8 @@ function simulate()
         ## Invasion
         # read_orgs(invasivefile)
 
-        # Output:
-        #orgs
-        #if rem(t,4) == 0
-        orgstable(orgsref, landinit, orgs,t,settings)
-        #end
-        #save(string("week",t))
-        #network interactions
-        #outputnetworks()
-        #save(string("week",4*t)) more reasonable interval
+    end
+
 end
 
 simulate()
