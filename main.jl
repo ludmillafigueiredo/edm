@@ -154,7 +154,7 @@ function simulate()
     println("Starting simulation")
 
     # OUTPUT SIMULATION ID
-    open(string("EDoutputs/",settings["simID"],"/simID.txt"),"a") do ID
+    open(string("EDoutputs/",settings["simID"],"/simID.txt"),"w") do ID
             println(ID, settings)
     end
 
