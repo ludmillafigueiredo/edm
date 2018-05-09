@@ -153,19 +153,20 @@ function simulate()
     # unity test
     println("Starting simulation")
 
-    # OUTPUT SIMULATION ID
-    open(string("EDoutputs/",settings["simID"],"/simID.txt"),"w") do ID
-            println(ID, settings)
-    end
-
+    
     try
         mkpath("EDoutputs/$(settings["simID"])")
         println("Output will be written to 'EDoutputs'")
     catch
         println("Overwriting results to existing 'EDoutputs/$(settings["simID"])' folder")
     end
-
+    
     cd(pwd())
+
+    # OUTPUT SIMULATION SETTINGS
+    open(string("EDoutputs/",settings["simID"],"/simID"),"w") do ID
+            println(ID, settings)
+    end
 
     # MODEL RUN
     for t in 1:settings["timesteps"]

@@ -2,7 +2,7 @@ tests.jl
 EDoutputs/*
 img/
 parameters_pubs/
-models_docs/
+models_docs/*
 #dev_log.org#
 ED-48585.o
 ED-48585_longestjob.e
