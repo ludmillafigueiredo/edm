@@ -1,0 +1,8 @@
+String["spinput", "landconfig", "timesteps", "simID"]
+Land init stored in object of type Setworld.LandPars
+Sp info stored in object of type Organisms.OrgsRef
+Landscape initialized: type Array{Setworld.WorldCell,2}
+Plants initialized: type Array{Organisms.Organism,1}
+Starting simulation
+Output will be written to 'EDoutputs'
+running week 1

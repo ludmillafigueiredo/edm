@@ -1,0 +1,31 @@
+String["spinput", "landconfig", "timesteps", "simID"]
+Land init stored in object of type Setworld.LandPars
+Sp info stored in object of type Organisms.OrgsRef
+Landscape initialized: type Array{Setworld.WorldCell,2}
+Plants initialized: type Array{Organisms.Organism,1}
+Starting simulation
+Output will be written to 'EDoutputs'
+running week 1
+running week 2
+running week 3
+running week 4
+running week 5
+running week 6
+running week 7
+running week 8
+running week 9
+running week 10
+running week 11
+running week 12
+running week 13
+running week 14
+running week 15
+running week 16
+running week 17
+running week 18
+running week 19
+running week 20
+running week 21
+running week 22
+running week 23
+running week 24

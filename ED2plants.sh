@@ -4,4 +4,4 @@
 #SBATCH --output=ED-%j.o
 #SBATCH --error=ED-%j.e
 
-/home/luf74xx/builds/julia-d386e40c17/bin/julia main.jl
+/home/luf74xx/builds/julia-d386e40c17/bin/julia main.jl --simID "singlesp" --spinput "/home/luf74xx/Dokumente/model/inputs/singlespinput.csv"
