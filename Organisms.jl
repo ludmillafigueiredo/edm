@@ -48,7 +48,7 @@ mutable struct Organism
     radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
     #Organism() = new()
 end
-Organism(id,location,sp,biomass,fgroup) = Organism(id,location,sp,biomass,fgroup,"a", 0,false,["" ""],0) #this is individuals are initialized in the beginning of the simulationy
+Organism(id,location,sp,biomass,fgroup) = Organism(id,location,sp,biomass,fgroup,"a", 0,false,["A" "A"],0) #this is individuals are initialized in the beginning of the simulationy
 # TODO fgroups are sps for now
 
 """
@@ -348,15 +348,16 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
 
         for n in 1:offsprgB
             #TODO check for a quicker way of creating several objects of composite-type
-            embryo = Organism(string(orgs[o].sp, "-", (length(orgs) + length(offspring) + 1)),
+            
+            embryo = Organism(string(orgs[o].sp, (length(orgs) + length(offspring) + 1)) ,
             orgs[o].location, #location is given according to functional group and dispersal strategy, in disperse!()
             orgs[o].sp,
             Dict("veg" => orgsref.mean_seed_mass[orgs[o].sp]), #use seed size for the fgroup
+            orgs[o].fgroup,
             "e",
             0,
             false,
-            orgs[o].fgroup,
-            ["" ""], #come from function
+            ["A" "A"], #come from function
             #rand(Distributions.Normal(OrgsRef.seedbiomassμ[orgs[o].fgroup],OrgsRef.biomasssd[orgs[o].fgroup])),
             #[OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
             #OrgsRef.radius[f])

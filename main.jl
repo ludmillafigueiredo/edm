@@ -103,7 +103,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.LandPars, orgs
 
     if t == 1
         open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "w") do output
-            header = append!(["week"], string.(fieldnames(Organism)))
+            header = append!(["week"], string.(append!(fieldnames(Organism)[1:end-2], ["chrm1" "chrm2" "radius"]))) #for non-diploid Orgs? string.(fieldnames(Organism))
             writedlm(output, reshape(header, 1, length(header)))
         end
     end
