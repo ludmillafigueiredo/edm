@@ -39,7 +39,7 @@ mutable struct Organism
     id::String
     location::Tuple # (x,y,frag)
     sp::String #sp id, easier to read
-    biomass::Dict\
+    biomass::Dict
     fgroup::String # Plant, insect or more precise functional group
     stage::String #e,j,a
     age::Int64 # controls passing stages, phenology and
@@ -270,6 +270,7 @@ function develop!(orgs::Array{Organism,N} where N)
     #TODO insect holometabolic growth
     #TODO insect hemimetabolic development
 end
+
 """
 meanExP(a,b)
 Draws a mean dispersed distance from the Exponential Power dispersal kernel.
@@ -311,7 +312,7 @@ end
 reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
 """
-function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any})
+function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any},orgsref::OrgsRef)
     #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
     #     pollination()
@@ -350,7 +351,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
             embryo = Organism(string(orgs[o].sp, "-", (length(orgs) + length(offspring) + 1)),
             orgs[o].location, #location is given according to functional group and dispersal strategy, in disperse!()
             orgs[o].sp,
-            Dict("veg" => orgs[o].biomass["veg"]*0.001), #TODO use seed size for the fgroup
+            Dict("veg" => orgsref.mean_seed_mass[orgs[o].sp]), #use seed size for the fgroup
             "e",
             0,
             false,
