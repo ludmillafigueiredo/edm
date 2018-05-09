@@ -111,7 +111,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.LandPars, orgs
     open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
         #TODO better extract and arrange the field values
         for o in 1:length(orgs)
-            writedlm(output, [t orgs[o].id orgs[o].location orgs[o].sp orgs[o].biomass orgs[o].stage orgs[o].age orgs[o].reped  orgs[o].fgroup orgs[o].genotype orgs[o].radius])
+            writedlm(output, [t orgs[o].id orgs[o].location orgs[o].sp orgs[o].biomass orgs[o].fgroup orgs[o].stage orgs[o].age orgs[o].reped orgs[o].genotype orgs[o].radius])
         end
     end
 
@@ -199,7 +199,7 @@ function simulate()
 
         # Plants: adult reproduction and embryos dispersal
         if rem(t, 52) == 24 #reproduction = seed production happens at the end of spring (last week)
-            reproduce!(mylandscape,orgs,t, settings)
+            reproduce!(mylandscape,orgs,t, settings, orgsref)
         elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
             disperse!(mylandscape,orgs,settings)
             establish!(mylandscape,orgs,t,settings)
