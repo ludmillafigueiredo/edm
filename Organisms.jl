@@ -39,16 +39,17 @@ mutable struct Organism
     id::String
     location::Tuple # (x,y,frag)
     sp::String #sp id, easier to read
-    biomass::Dict
+    biomass::Dict\
+    fgroup::String # Plant, insect or more precise functional group
     stage::String #e,j,a
     age::Int64 # controls passing stages, phenology and
     reped::Bool # reproduced?
-    fgroup::String # Plant, insect or more precise functional group
     genotype::Array{String,2}
     radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
     #Organism() = new()
 end
-Organism(id,location,sp,biomass) = Organism(id,location,sp,biomass, "a", 0,false,"",["" ""],0) #this is individuals are initialized in the beginning of the simulationy
+Organism(id,location,sp,biomass,fgroup) = Organism(id,location,sp,biomass,fgroup,"a", 0,false,["" ""],0) #this is individuals are initialized in the beginning of the simulationy
+# TODO fgroups are sps for now
 
 """
 newOrg(fgroups, init_abund, biomassμ, biomasssd)
@@ -82,10 +83,11 @@ function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::OrgsRef
             rand(1:size(landscape,2),orgsref.abund[s]))
 
             for i in 1:orgsref.abund[s]
-                neworg = Organism(string(s, "-", length(orgs) + 1),
+                neworg = Organism(string(s, "-", length(orgs) + 1), #sp_id isnt ind id!
                 (XYs[i,1],XYs[i,2],frag),
                 s,
-                Dict("veg" => rand(Distributions.Normal(orgsref.biomass_mean[s],orgsref.biomass_sd[s]))))
+                Dict("veg" => rand(Distributions.Normal(orgsref.biomass_mean[s],orgsref.biomass_sd[s]))),
+                s) #fgroup is sp_id for now
 
                 push!(orgs, neworg)
 
@@ -117,6 +119,7 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
         r = orgs[o].radius # separated for debugging
 
         fg = orgs[o].fgroup
+
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
         # unity test
@@ -352,7 +355,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
             0,
             false,
             orgs[o].fgroup,
-            ["placeholder" "placeholder"], #come from function
+            ["" ""], #come from function
             #rand(Distributions.Normal(OrgsRef.seedbiomassμ[orgs[o].fgroup],OrgsRef.biomasssd[orgs[o].fgroup])),
             #[OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
             #OrgsRef.radius[f])
