@@ -344,7 +344,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
 
         for n in 1:offsprgB
             #TODO check for a quicker way of creating several objects of composite-type
-            embryo = Organism(string(orgs[o].sp[1:3], "-", (length(orgs) + length(offspring) + 1)),
+            embryo = Organism(string(orgs[o].sp, "-", (length(orgs) + length(offspring) + 1)),
             orgs[o].location, #location is given according to functional group and dispersal strategy, in disperse!()
             orgs[o].sp,
             Dict("veg" => orgs[o].biomass["veg"]*0.001), #TODO use seed size for the fgroup

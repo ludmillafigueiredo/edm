@@ -100,27 +100,26 @@ Saves a long format table with the organisms field informations.
 """
 function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.LandPars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
 
-    sep = ','
 
     if t == 1
-        open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do output
-            header = append!(["week"], string.(fieldnames(Organisms)))
-            writedlm(output, reshape(header, 1, length(header)), sep)
+        open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "w") do output
+            header = append!(["week"], string.(fieldnames(Organism)))
+            writedlm(output, reshape(header, 1, length(header)))
         end
     end
 
-    open(string("EDoutputs/",settings["simID"],"/orgsweek",t,".csv"), "a") do output
+    open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
         #TODO better extract and arrange the field values
         for o in 1:length(orgs)
-            writedlm(output, [t orgs[o].id orgs[o].location orgs[o].sp sum(values(orgs[o].biomass)) orgs[o].stage orgs[o].age orgs[o].reped  orgs[o].fgroup orgs[o].genotype orgs[o].radius], sep)
+            writedlm(output, [t orgs[o].id orgs[o].location orgs[o].sp orgs[o].biomass orgs[o].stage orgs[o].age orgs[o].reped  orgs[o].fgroup orgs[o].genotype orgs[o].radius])
         end
     end
 
     if t == settings["timesteps"]
         open(string("EDoutputs/",settings["simID"],"/simulationID",t), "w") do output
-            println("Initial conditions:")
-            println(dump(orgsref))
-            println(dump(landinit))
+            println(output, "Initial conditions:")
+            println(output, dump(orgsref))
+            println(output, dump(landinit))
         end
         println("End of simulation")
     end
@@ -174,16 +173,16 @@ function simulate()
         println("running week $t")
 
         # DISTURBANCE
-        if haskey(settings, "disturb")
-                # select function according to keyword: loss, frag, temp
-                if settings["disturb"] == "loss"
-                elseif settings["disturb"] == "frag"
-                elseif settings["disturb"] == "temp"
-                else
-                        error("Please specify one of the disturbance scenarios with `--disturb`:\nhabitat area loss ("loss"),\nhabitat fragmentation ("frag") or\ntemperature change ("temp")")
-                        break
-                end
-        end
+        #if haskey(settings, "disturb")
+        #        # select function according to keyword: loss, frag, temp
+        #        if settings["disturb"] == "loss"
+        #        elseif settings["disturb"] == "frag"
+        #        elseif settings["disturb"] == "temp"
+        #        else
+        #                error("Please specify one of the disturbance scenarios with `--disturb`:\nhabitat area loss (`loss??),\nhabitat fragmentation (`frag`) or\ntemperature change (`temp`)")
+        #                break
+        #        end
+        #end
 
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                 println(sim, "WEEK $t")
