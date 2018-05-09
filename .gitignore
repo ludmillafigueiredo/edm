@@ -4,3 +4,15 @@ img/
 parameters_pubs/
 models_docs/
 #dev_log.org#
+ED-48585.o
+ED-48585_longestjob.e
+ED-48614.e
+ED-48614.o
+ED-48615.e
+ED-48615.o
+ED-48837.e
+ED-48837.o
+profilingED.sh
+singlesimulations
+slurm-43915.out
+
