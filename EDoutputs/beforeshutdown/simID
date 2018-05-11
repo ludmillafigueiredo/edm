@@ -1,0 +1,1 @@
+Dict{String,Any}(Pair{String,Any}("spinput", "inputs/spinput.csv"),Pair{String,Any}("landconfig", "inputs/landpars.csv"),Pair{String,Any}("timesteps", 52),Pair{String,Any}("simID", "beforeshutdown"))
