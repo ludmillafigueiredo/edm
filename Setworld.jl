@@ -28,10 +28,10 @@ This module contains the type of the cell and functions for setting up initial e
 		mutable struct LandPars
 			fxlength::Array{Int64,1}
 			fylength::Array{Int64,1}
-			fmeantemp::Array{Float64,1}
-			ftempsd::Array{Float64,1}
-			fmeanprec::Array{Float64,1}
-			fprecsd::Array{Float64,1}
+			meantempts::Array{Float64,1} #all fragments get the same temperature
+			sdtempts::Array{Float64,1}
+			meanprects::Array{Float64,1}
+			sdprects::Array{Float64,1} # this is probably gonna go
 			nfrags::Int64
 		end
 
@@ -50,24 +50,24 @@ This module contains the type of the cell and functions for setting up initial e
 		#WorldCell() = WorldCell(false, 0.0, 0.0, Dict())
 
 		# Functions
-		function landscape_init(landinit::LandPars)
+		function landscape_init(landpars::LandPars)
 
 			landscape = WorldCell[]
 
-			for frag in collect(1:landinit.nfrags)
+			for frag in collect(1:landpars.nfrags)
 
 				fragment = WorldCell[]
 
-				fragt = rand(Normal(landinit.fmeantemp[frag],landinit.ftempsd[frag]),1)[1] + tK
-				fragp = rand(Normal(landinit.fmeanprec[frag],landinit.fprecsd[frag]),1)[1]
-				for y in collect(1:landinit.fylength[frag]), x in 1:(landinit.fxlength[frag])
+				fragt = rand(Normal(landpars.meantempts[1],landpars.sdtempts[1]),1)[1] + tK
+				fragp = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]]),1)[1]
+				for y in collect(1:landpars.fylength[frag]), x in 1:(landpars.fxlength[frag])
 					newcell = WorldCell(true,
 										fragt,
 										fragp,
 										Dict())
 					push!(fragment,newcell)
 				end
-				fragment = reshape(fragment,landinit.fxlength[frag],landinit.fylength[frag])
+				fragment = reshape(fragment,landpars.fxlength[frag],landpars.fylength[frag])
 				# add the fragment to the landscape structure
 				if frag == 1
 					landscape = fragment #when empty, landscape cant cat with frag
@@ -75,7 +75,7 @@ This module contains the type of the cell and functions for setting up initial e
 					landscape = cat(3,landscape, frag)
 				end
 			end
-			 # reshaping is easier then going through every index of a 3D landscap, creating a WorldCell cell there and parameterizing it. x in inner loop matches reshape order
+			 # reshaping is easier then going through every index of a 3D landscape, creating a WorldCell cell there and parameterizing it. x in inner loop matches reshape order
 			#TODO check reshaping for landscape with frags of different sizes
 			return landscape
 		end
@@ -89,17 +89,17 @@ This module contains the type of the cell and functions for setting up initial e
 		end
 
 		"""
-		climate!(landscape,t)
+		updatetemp!(landscape,t)
 		Update temperature and precipitation values according to the weekly input data (weekly means and ).
 		"""
-		function climate!(landscape::Array{Setworld.WorldCell,3}, t)
+		function updatetemp!(landscape::Array{Setworld.WorldCell,3}, t, landpars::LandPars)
 			#TODO Unity test
-			for frag in collect(1:size(landscape[:,:,3])) #every fragment
+			for frag landscape[:,:,3] #every fragment
 				for cell in eachindex(landscape[:,:,frag])
 					# weekly update temperature
-					landscape[cell,frag].temp = rand(Normal(disturbance[t,1],LandRef[t,2]),1)[1] + tK
+					landscape[cell,frag].temp = rand(Normal(landpars.meantempts[1],landpars.sdtempts[1]),1)[1] + tK
 					# weekly update precipitation
-					landscape[cell,frag].precpt = rand(Normal(disturbance[t,3],LandRef[t,4]),1)[1]
+					landscape[cell,frag].precpt = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]])[1]
 				end
 			end
 

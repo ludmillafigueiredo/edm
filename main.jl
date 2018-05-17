@@ -45,6 +45,10 @@ function parse_commandline()
         help = "Duration of simulation in weeks."
         arg_type = Int
         default = 52
+        "tempts"
+        help = "Name of file with weekly temperature  and precipitation time series"
+        arg_type = Float
+        default = abspath(pwd(),"inputs/envtimeseries.csv")
     end
 
     return parse_args(sets) # returning a dictionnary of strings is useful because they can passed as keywords to Julia function
@@ -54,19 +58,20 @@ end
 read_landin(settings)
 Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
 """
-function read_landinit(settings::Dict{String,Any})
+function read_landpars(settings::Dict{String,Any})
 
     #landinputtbl = loadtable(abspath(pwd(),"inputs/landpars.csv"))
     landinputtbl = loadtable(settings["landconfig"])
+    temp_tsinput = loadtable(settings["temp_ts"])
 
-    landinit = Setworld.LandPars(Fileprep.areatocell(select(landinputtbl,:areas_m2)),
+    landpars = Setworld.LandPars(Fileprep.areatocell(select(landinputtbl,:areas_m2)),
                                  Fileprep.areatocell(select(landinputtbl,:areas_m2)),
-                                 select(landinputtbl,:temp_mean),
-                                 select(landinputtbl,:temp_sd),
-                                 select(landinputtbl,:precipt_mean),
-                                 select(landinputtbl,:precipt_mean),
-                                 length(select(landinputtbl, :id)))
-    return landinit
+                                 select(temp_tsinput,:meantemp_ts)),
+                                 select(temp_tsinput,:sdtemp_ts)),
+                                 select(temp_tsinput,:meanprec_ts)),
+                                 select(temp_tsinput,:sdprec_ts)),
+                                 length(select(landinputtbl, :id))
+    return landpars
 end
 
 """
@@ -98,7 +103,7 @@ end
     outputorgs(orgs,t,settingsfrgou)
 Saves a long format table with the organisms field informations.
 """
-function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.LandPars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
+function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
 
 
     if t == 1
@@ -119,7 +124,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landinit::Setworld.LandPars, orgs
         open(string("EDoutputs/",settings["simID"],"/simulationID",t), "w") do output
             println(output, "Initial conditions:")
             println(output, dump(orgsref))
-            println(output, dump(landinit))
+            println(output, dump(landpars))
         end
         println("End of simulation")
     end
@@ -134,15 +139,15 @@ function simulate()
     #unity test
     println(keys(settings))
 
-    landinit = read_landinit(settings)
+    landpars = read_landpars(settings)
     #unity test
-    println("Land init stored in object of type $(typeof(landinit))")
+    println("Land init stored in object of type $(typeof(landpars))")
 
     orgsref = read_spinput(settings)
     #unity test
     println("Sp info stored in object of type $(typeof(orgsref))")
 
-    mylandscape = landscape_init(landinit)
+    mylandscape = landscape_init(landpars)
     #unity test
     println("Landscape initialized: type $(typeof(mylandscape))")
 
@@ -153,14 +158,14 @@ function simulate()
     # unity test
     println("Starting simulation")
 
-    
+
     try
         mkpath("EDoutputs/$(settings["simID"])")
         println("Output will be written to 'EDoutputs'")
     catch
         println("Overwriting results to existing 'EDoutputs/$(settings["simID"])' folder")
     end
-    
+
     cd(pwd())
 
     # OUTPUT SIMULATION SETTINGS
@@ -172,6 +177,11 @@ function simulate()
     for t in 1:settings["timesteps"]
 
         println("running week $t")
+
+        # UPDATE TEMPERATURE
+        if t != 1
+                updatetemp!(mylandscape,t)
+        end
 
         # DISTURBANCE
         #if haskey(settings, "disturb")
@@ -209,7 +219,7 @@ function simulate()
         survive!(mylandscape,orgs,nogrowth,settings) # density-dependent and independent mortality
 
         # output weekly
-        orgstable(orgsref, landinit, orgs,t,settings)
+        orgstable(orgsref, landpars, orgs,t,settings)
 
         ## DISTURBANCES
         ##
