@@ -58,7 +58,7 @@ function landscape_init(landpars::LandPars)
 		fragment = WorldCell[]
 
 		fragt = rand(Normal(landpars.meantempts[1],landpars.sdtempts[1]),1)[1] + tK
-		fragp = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]]),1)[1]
+		fragp = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]),1)[1]
 		for y in collect(1:landpars.fylength[frag]), x in 1:(landpars.fxlength[frag])
 			newcell = WorldCell(true,
 			fragt,
