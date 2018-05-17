@@ -180,7 +180,7 @@ function simulate()
 
         # UPDATE TEMPERATURE
         if t != 1
-                updatetemp!(mylandscape,t)
+                updateenv!(mylandscape,t)
         end
 
         # DISTURBANCE
