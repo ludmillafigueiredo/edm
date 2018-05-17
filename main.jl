@@ -45,9 +45,9 @@ function parse_commandline()
         help = "Duration of simulation in weeks."
         arg_type = Int
         default = 52
-        "tempts"
+        "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
-        arg_type = Float
+        arg_type = String
         default = abspath(pwd(),"inputs/envtimeseries.csv")
     end
 
@@ -66,11 +66,11 @@ function read_landpars(settings::Dict{String,Any})
 
     landpars = Setworld.LandPars(Fileprep.areatocell(select(landinputtbl,:areas_m2)),
                                  Fileprep.areatocell(select(landinputtbl,:areas_m2)),
-                                 select(temp_tsinput,:meantemp_ts)),
-                                 select(temp_tsinput,:sdtemp_ts)),
-                                 select(temp_tsinput,:meanprec_ts)),
-                                 select(temp_tsinput,:sdprec_ts)),
-                                 length(select(landinputtbl, :id))
+                                 select(temp_tsinput,:meantemp_ts),
+                                 select(temp_tsinput,:sdtemp_ts),
+                                 select(temp_tsinput,:meanprec_ts),
+                                 select(temp_tsinput,:sdprec_ts),
+                                 length(select(landinputtbl, :id)))
     return landpars
 end
 
