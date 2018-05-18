@@ -20,7 +20,7 @@ module Setworld
 
 using Distributions
 
-export LandPars, WorldCell, landscape_init, updatetemp!
+export LandPars, WorldCell, landscape_init, updateenv!
 
 const tK = 273.15 # °C to K converter
 
@@ -91,7 +91,7 @@ end
 updateenv!(landscape,t)
 Update temperature and precipitation values according to the weekly input data (weekly means and ).
 """
-function updateenv!(landscape::Array{Setworld.WorldCell,3}, t, landpars::LandPars)
+function updateenv!(landscape::Array{Setworld.WorldCell,N} where N, t::Int64, landpars::LandPars)
 	#TODO Unity test
 	for frag in landscape[:,:,3] #every fragment
 		for cell in eachindex(landscape[:,:,frag])
