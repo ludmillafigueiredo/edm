@@ -93,14 +93,14 @@ Update temperature and precipitation values according to the weekly input data (
 """
 function updateenv!(landscape::Array{Setworld.WorldCell,N} where N, t::Int64, landpars::LandPars)
 	#TODO Unity test
-	for frag in 1:size(landscape,3) #every fragment
-		for cell in eachindex(landscape[:,:,frag])
+	#for frag in 1:size(landscape,3) #every fragment # all fragments get the same temperature
+		for cell in eachindex(landscape)
 			# weekly update temperature
-			landscape[cell,frag].temp = rand(Normal(landpars.meantempts[1],landpars.sdtempts[1]),1)[1] + tK
+			landscape[cell].temp = rand(Normal(landpars.meantempts[1],landpars.sdtempts[1]),1)[1] + tK
 			# weekly update precipitation
-			landscape[cell,frag].precpt = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]),1)[1]
+			landscape[cell].precpt = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]),1)[1]
 		end
-	end
+	#end
 
 end
 
