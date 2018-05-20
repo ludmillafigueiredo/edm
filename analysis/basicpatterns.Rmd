@@ -1,0 +1,125 @@
+---
+title: "ED model output analyses"
+output: html_notebook
+          code_folding = true
+        pdf_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse);
+library(stringr);
+```
+
+Set outputs folder, specific id and get file
+```{r}
+outdir <- file.path("/home/luf74xx/Dokumente/model/EDoutputs")
+outid <- file.path("beforeshutdown")
+outraw <- as_tibble(read.table(file.path(outdir, outid, "orgsweekly.csv"), header = TRUE, sep = "\t"))
+# very long file, since each organism gets a line
+```
+
+## Standard procedures
+### Clean-up
+```{r}
+## parentheses from location ("()") and biomass ("()", "Dict", "=")+
+loc <- gsub("[\\(|\\)]", "", outraw$location)
+ ## split location in 3 columns
+loc <- as.data.frame(matrix(unlist(str_split(loc, ",")),ncol =3,byrow = T))
+names(loc) = c("xloc", "yloc", "floc")
+## get vegetative and reproductive biomasses. When no reproductive biomass, adds 0 before reshaping 2 columns
+masses = c()
+for(plant in outraw$biomass){
+  m <- unlist(str_extract_all(plant,"[0-9]{1,4}.[0-9]{1,3}")) # extracts both veg and repr
+  if(length(m) < 2){
+    m <- append(m, 0)
+  }
+  masses <- rbind(masses,m)
+}
+masses <- as.data.frame(masses, stringsAsFactors = FALSE); #there is probably a better way to convert into numeric
+masses <- as.data.frame(sapply(masses, as.numeric));
+names(masses) <-c("veg", "repr");
+```
+
+```{r}
+# complete and clean table
+outdata <- as_tibble(cbind(select(outraw,-one_of("location","biomass")),
+                 loc,
+                 masses))
+rm(masses, loc, plant, m)
+str(outdata)
+head(outdata)
+```
+
+### Check output
+The following should be used for every output analysis, to verify some general patterns
+
+1. Check if reproduction is happening
+```{r}
+levels(outdata$reped)
+```
+
+2. Plot populations, weekly
+  a. Extract biomass from raw and create separate data frame
+  b. ggplot it seasonally
+```{r}
+weekabund <- outdata %>% group_by(week, sp) %>% summarize(abundance = n())
+
+weekabund.plot <- ggplot(weekabund, aes(x = week, y = abundance, color = factor(sp))) 
+
+weekabund.plot +
+  geom_line() + #TODO differentiate species with colorgeom_line(color = "forestgreen") 
+  labs(x = "Week", y = "Abundance (n individuals)",
+       title = "Abundance variation",
+       subtitle = "Species abundance per week")+
+  theme(legend.position = "none")
+```
+
+3. Plot species-specific biomass, weekly
+  a. Get species-specific biomass mean and variation weekly
+  b. ggplot it seasonally
+  c. `#TODO` so far,it is plotting the first year. For longer simulations, get mean from all years (since there is growth, get the mean of biomass uptake, instead of actual biomass) 
+```{r}
+weekmass <- outdata %>%
+  group_by(week, sp) %>%
+  summarise(veg.mean = mean(veg), veg.sd = sd(veg), repr.mean = mean(repr), repr.sd = sd(repr))
+
+head(weekmass)
+
+weekmass.plot <- ggplot(weekmass, aes(x=week, y= veg.mean, color = factor(sp)))
+
+weekmass.plot +
+  geom_line() +
+  labs(x = "Week", y = "Mean vegetative biomass (g)",
+       title = "Annual biomass variation",
+       subtitle = "Mean vegetative biomass (+-sd) per species")+
+  theme(legend.position = "none")
+```
+Same for reproductive biomass
+```{r}
+weekrepmass.plot <- ggplot(weekmass, aes(x=week, y= repr.mean, color = factor(sp)))
+
+weekrepmass.plot + 
+  geom_line() +
+  labs(x = "Week", y = "Mean reproductive biomass (g)",
+       title = "Annual reproductive biomass variation",
+       subtitle = "Mean reproductive biomass (+-sd) per species")+
+  theme(legend.position = "none")
+```
+
+4. Size (diameter) variation
+```{r}
+weeksize <- outdata %>%
+  group_by(week, sp) %>%
+  summarise(rad.mean = 3*mean(radius), rad.sd = 3*sd(radius)) #each cell is 3x3cm²
+
+weeksize.plot <- ggplot(weeksize, aes(x=week, y=rad.mean, color = factor(sp)))
+
+weeksize.plot +
+  geom_line() +
+  labs(x = "Week", y = "Mean radius (cm)",
+       title = "Plant size variation (cm) ",
+       subtitle = "Mean radius (+-sd) per species")+
+  theme(legend.position = "none")
+```
+
+4. Biomass density over time
