@@ -30,7 +30,7 @@ function parse_commandline()
 
     @add_arg_table sets begin
         "--simID"
-        help = "Name of the folder (string type) where outputs will be stored. Default is current time."
+        help = "Name of the folder (string type) where outputs will be stored."
         arg_type = String
         required = true
         "--spinput"
@@ -209,7 +209,7 @@ function simulate()
         end
 
         # Plants: adult reproduction and embryos dispersal
-        if rem(t, 52) == 24 #reproduction = seed production happens at the end of spring (last week)
+        if 12 <= rem(t, 52) <= 24 #reproduction = seed production happens during spring
             reproduce!(mylandscape,orgs,t, settings, orgsref)
         elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
             disperse!(mylandscape,orgs,settings)
