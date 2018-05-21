@@ -1,1 +1,1 @@
-Dict{String,Any}(Pair{String,Any}("spinput", "/home/luf74xx/Dokumente/model/inputs/singlespinput1.csv"),Pair{String,Any}("landconfig", "/home/luf74xx/Dokumente/model/inputs/singlelandpars.csv"),Pair{String,Any}("timesteps", 52),Pair{String,Any}("simID", "singlesp1"))
+Dict{String,Any}(Pair{String,Any}("spinput", "inputs/singlespinput1.csv"),Pair{String,Any}("temp_ts", "/home/ludmilla/model/inputs/envtimeseries.csv"),Pair{String,Any}("landconfig", "inputs/landpars1m.csv"),Pair{String,Any}("timesteps", 52),Pair{String,Any}("simID", "singlesp1"))
