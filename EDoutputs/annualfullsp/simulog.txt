@@ -97,3 +97,85 @@ Dispersing: Int64[]
 Establishing seeds: Int64[]
 Dying orgs: Int64[]
 WEEK 30
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 31
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 32
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 33
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 34
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 35
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 36
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 37
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 38
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 39
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 40
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 41
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 42
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 43
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 44
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 45
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 46
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 47
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 48
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 49
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 50
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 51
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 52
+Not growing Int64[]
+Dying orgs: Int64[]
