@@ -103,7 +103,7 @@ During simulation, after reproduction (and dispersion?) new organisms will only 
    CLOSED: [2018-03-25 So 20:00] DEADLINE: <2018-03-23 Fr> SCHEDULED: <2018-03-08 Do>
    - CLOSING NOTE [2018-03-25 So 20:00] \\
      Uglier, but more straight forward
-** TODO Simulate single plant species/functional group [3/4] :initialization:
+** DONE Simulate single plant species/functional group [4/4] :initialization:
 Organisms are stored in an array of n_frags (read from simulation file). All organisms are stored in this array and are updated together (each fragment - it could be possible to have simulations where there is some desynchronization between fragments!).
 *newOrg()* will have multiple methods: One for initialization, where individuals always establish and another where it depends on the individuals fitness in the grid and establishment!() is called.  
  - [X] Initialize a certain number of organisms
@@ -115,9 +115,9 @@ Organisms are stored in an array of n_frags (read from simulation file). All org
      - [X] create different arrays for different fct groups: For now, not necessary, as functional group should be available as field of orgs array. CLOSED <2018-02-23 Fr> 
  - [X] correct IDcounter: global in Organisms module, exported and called in newOrgs!()
  - [X] check ERROR with method on function newOrgs(): why push! nao funciona? Because all arry's contents had been initialized at the same time <2018-02-26 Mo>.
- - [ ] Simulate single functional group
-   - [ ] reproduction: pollinator independent = use reproduction probability
-   - [ ] wind and ant pollination (see *reproduction()*): Bullock et al. 2017: 
+ - [X] Simulate single functional group
+   - [X] reproduction: pollinator independent = use reproduction probability
+   - [X] wind and ant pollination (see *reproduction()*): Bullock et al. 2017: 
 ** DONE Create organisms of different functional groups
    CLOSED: [2018-04-27 Fr 09:35]
 During initialization, one input file gives the functional types and their initial abundances, vegmass, reprodmass
@@ -143,13 +143,13 @@ Projection outside boundaries are not being taken into account: *edge effects* c
     DEADLINE: <2018-03-28 Mi>
 - [-] Divide biomass GAIN according to allocation to survival, growth and reproduction. The allocation will depend on the stage:
   - [X] sorts things into the individual's /biomass/ Dictionnary
-  For _embryos_:
+  For _eggs/seed (e)_:
   - [ ] Only consume reserve = decrease biomass
       SCHEDULED: <2018-03-18 So>
-  For _juveniles_:
-  - Biomass goes into /growth/ dictionnary entry: this is used in *projvegmass!()* for plants
-  For _adults_:
-  - Biomass goes into /reprod/ dictionnary entry: this is used in *projrepmass!()* for plants
+  For _juveniles (j)_:
+  - [X] Biomass goes into /veg/ dictionnary entry: this is used in *projvegmass!()* for plants
+  For _adults (a)_:
+  - [ ] Biomass goes into /reprd/ dictionnary entry: this is used in *projrepmass!()* for plants
   - [ ] TODO Only exists during reproductive season, controlled by *age* and *fgroup* (gives the duration of reproductive season): for annuals, it should arise from stage transitions, but how about perennials?
       SCHEDULED: <2018-03-18 So>
 - [X] Biomass gain depends on competition: normalize *compterm* 
@@ -184,7 +184,7 @@ Possibilities:
 1. *Currently implemented:* Use the InverseGaussian, because it seems to have similar values and the ExP is also known as "generalized Gaussian":
 2. Try monte Carlo variable generation in R and randomly draw from them.
 ****  Decide on newOrgs!() is called between reproduction and establishment: Are new individuals created right after reproduction?
-*** Dispersal [0/4]
+*** TODO Dispersal [0/4]
     SCHEDULED: <2018-03-18 So>
 - [ ] Random distances from 50-95th percentiles 
 - [ ] Find distribution from PDF for LogSech
@@ -213,12 +213,12 @@ Not totally independent because depends on biomass, which affects individuals bi
 - [ ] Interaction matrix of frequency
 **** TODO Interactions modelled "by" the *outcomes* (Tikhonov et al. 2017, Spiesman & Inouye 2014) 8[0/1]
   - [ ] Is it possible to integrate interaction outcomes and MTE? The patterns would lead to enregy flux across community levels
-*** DONE Germination [2/2]
+*** DONE Germination [1/2]
     CLOSED: [2018-03-25 So 19:36] SCHEDULED: <2018-03-25 So>
     - CLOSING NOTE [2018-03-25 So 19:36] \\
       v0.1 has a prototype of seed bank. Make a more realistic one next
 - [X] germination rate turned into probability
-- [X] one-year seed bank for seeds
+- [ ] one-year seed bank for seeds: actually, should arise from seed mortality
 *** Pollination
 **** DONE Wind pollination [2/2]
      CLOSED: [2018-03-21 Mi 10:22] DEADLINE: <2018-03-20 Di> SCHEDULED: <2018-03-20 Di>
