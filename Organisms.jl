@@ -382,11 +382,11 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
 
     for d in dispersing
         #sort dispersal kernels according to funcitonal group
-        # Dispersal distance from kernel: InverseGaussian distributions just for very contrasting distances
+        # Dispersal distance from kernel: InverseGaussian distributions just for very contrasting distances (available in Julia and described in Nathan's table as outperforming for seed dispersal)
         if orgs[d].fgroup == "ant"
-            a = 0.0197; b = 1.4989; # InverseGaussian
+            a = 1; b = 0.2; # InverseGaussian
         else #if orgs[d].fgroup == "wind" == "windant"
-            a = 25.22; b = 0.8415; # InverseGaussian #TODO fayer windant sortear uma das duas
+            a = 0.1; b = 3; # InverseGaussian #TODO fayer windant sortear uma das duas
             #for tests: (rand(collect(0.499:0.001:1,3056))) Bullock's 50th - 95th percentile
         end
 
