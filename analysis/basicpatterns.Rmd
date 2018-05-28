@@ -123,3 +123,4 @@ weeksize.plot +
 ```
 
 4. Biomass density over time
+ Re-scale density cover abundance to check results 
