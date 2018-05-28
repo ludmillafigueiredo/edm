@@ -16,8 +16,8 @@ export Organism, OrgsRef, newOrgs, projvegmass!, compete, develop!, allocate!, m
 #TODO put them in OrgsRef
 const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
 const aE = 0.65 # eV Brown & Sibly MTE book chap 2
-const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter
-const plants_mb0 = 1.5029220413821088e11 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
+const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter, and converted from kg to g
+const plants_mb0 = 1.5029220413821088e11 #adjustted accordung to 1 death per individual for 1g  (MTEpar notebook)
 const plants_fb0 = exp(30.0) # fertility rate
 const seedmassµ = 0.8 #TODO refer to OrgsRef
 
@@ -192,11 +192,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
         # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
         # Any cost related to insufficient minimal biomass goes into the survival probability function
         # 2.b Check for competition
-        if orgs[o].stage == "e"
-            # embryos only consume reserves: TODO more realistic: sementes nao mudam massa. O esquema delas eh na mortalidade e na germinacao. De repente, introduzo um viability funciton
-            orgs[o].biomass["veg"] -= 0.01*org[o].biomass["veg"]
 
-        else
             compterm = compete(landscape, orgs[o], settings)
             # unity test
             #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
@@ -204,7 +200,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
             #     println(sim, orgs[o].id, "  compterm $compterm")
             # end
 
-            if compterm < 0
+            if compterm <= 0
                 #2.c Those not growing will have higher chance of dying
                 push!(nogrowth,o)
             else
@@ -212,20 +208,20 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
 
                 #Resource allocation schedule
                 #TODO make it more ellaborate and includde trade-offs
-                if orgs[o].stage == "j" && 12 <= rem(t, 52) < 51 # no growth during winter: the MTE should take care of it with T, but also water is a problem
+                if orgs[o].stage == "j" # no growth during winter: the MTE should take care of it with T, but also water is a problem
                     # juveniles grow
                     orgs[o].biomass["veg"] += grown_mass
                     # unity test
                     # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                     #     println(sim, "$(orgs[o].id)-$(orgs[o].stage) gained $grown_mass")
                     # end
-                elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 51 && orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
+                elseif orgs[o].stage == "a" && orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
                     orgs[o].biomass["veg"] += grown_mass
                     # unity test
                     # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                     #     println(sim, "$(orgs[o].id)-$(orgs[o].stage) gained VEG $grown_mass")
                     # end
-                elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25 #TODO extend it to summer
+                elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25 #TODO extend it to summer?
                     # adults invest in reproduction
                     #unity test
                     # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -244,7 +240,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
             #     println(sim, "current biomass: $(orgs[o].biomass)")
             # end
 
-        end
+
 
         # unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
