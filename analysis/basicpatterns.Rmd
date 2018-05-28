@@ -13,7 +13,7 @@ library(stringr);
 Set outputs folder, specific id and get file
 ```{r}
 outdir <- file.path("/home/luf74xx/Dokumente/model/EDoutputs")
-outid <- file.path("beforeshutdown")
+outid <- file.path("singlesp1")
 outraw <- as_tibble(read.table(file.path(outdir, outid, "orgsweekly.csv"), header = TRUE, sep = "\t"))
 # very long file, since each organism gets a line
 ```
