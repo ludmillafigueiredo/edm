@@ -174,27 +174,25 @@ Parameters values might be specific to each functional group, but general mechan
   - [X] plants germinate: hard coded, 0.5 probability
   - [ ] according to the list of fgroups from the input
 - [ ] Seed bank
-*** TODO Reproduction [1/2]
+*** TODO Reproduction [3/5]
     DEADLINE: <2018-03-23 Fr>
-- [ ] reproduction depends on finding partners inside [[Pollination][pollen dispersal kernel]]
+- [X] pollination independent [[ch][check Dispersal description]]
+- [ ] pollination-independent: reproduction depends on finding partners inside [[Pollination][pollen dispersal kernel]]
 - [X] fertility is calculated according to MTE, which depends on TOTAL biomass: The allocation of biomass to reproduction and growth allows controlling competition, and the rates are affected indirectly, if competition decreases due to total biomass reduction due to competition or herbivory.
 - [ ] use newOrgs 2nd method for creating the orgs and handling genetics of fertilization
-- [ ] Wind and ant dispersal kernels: ExP and Log-Sech distributions not in Julia. Having the pdf, it is necessary to find the inverse of it. For some pdfs, it might not exist (if they are bijective funcitons).
-Possibilities:
-1. *Currently implemented:* Use the InverseGaussian, because it seems to have similar values and the ExP is also known as "generalized Gaussian":
-2. Try monte Carlo variable generation in R and randomly draw from them.
 ****  Decide on newOrgs!() is called between reproduction and establishment: Are new individuals created right after reproduction?
-*** Dispersal [0/4]
+*** Dispersal [4/5]
     SCHEDULED: <2018-03-18 So>
-- [ ] Random distances from 50-95th percentiles 
-- [ ] Find distribution from PDF for LogSech
-- [ ] Mean distances from Exponential Power dispersal kernels: wind pollination, wind and ant seed dispersal.
-- [ ] Connectivity matrix: 
-  - [ ] Eucledian distances
-  - [ ] Use Saura & Pascual-Hortal's probability?
-  - [ ] somehow should inform between fragments dispersal
+*Perfect wind and ant dispersal kernels: ExP and Log-Sech* BUT their distributions are not in Julia. Having the pdf, it is necessary to find the inverse of it. For some pdfs, it might not exist (if they are bijective functions), and the Monte Carlo method would be necessary.
+Possibilities:
+1. *Currently implemented:* Use the InverseGaussian, because it seems to have similar values and the ExP is also known as "generalized Gaussian"
+- [X] Random distances from 50-95th percentiles: close enough for the InverseGaussian (see notebook)
+- [X] Connectivity matrix: 
+  - [X] Eucledian distances:  Eucledian distances should fall inside the distance taken from dispersal kernel
 - [ ] Sort out Saura & Pascual-Hortal's probability of connectivity(landscape property) and dispersal kernel (organism property): there might not be a way of combining, since they are properties of different entities.
-[[https://www.researchgate.net/post/Which_connectivity_index_should_I_use_to_compare_different_networks_of_protected_areas][connectivity_discussion]] Probability of connectivity
+  - [ ] Could it inform dispersal success?
+  - [ ] Check [[https://www.researchgate.net/post/Which_connectivity_index_should_I_use_to_compare_different_networks_of_protected_areas][connectivity_discussion]] Probability of connectivity
+2. Try monte Carlo variable generation in R and randomly draw from them.
 *** TODO Update organisms: [0/2]
   - [ ] Simultaneous or independent update?
   - [ ] Consider making a mutable struct where each field stores the individuals of a functional group, therefore, when updating the organisms, I wouldn't have to go through all of them, just through the group affected by the function in question 
@@ -222,10 +220,9 @@ Not totally independent because depends on biomass, which affects individuals bi
 *** Pollination
 **** DONE Wind pollination [2/2]
      CLOSED: [2018-03-21 Mi 10:22] DEADLINE: <2018-03-20 Di> SCHEDULED: <2018-03-20 Di>
-     - CLOSING NOTE [2018-03-21 Mi 10:22] \\
-       Wind and pollen dispersal are using mean distances of the dispersal kernel PDFs to find future landning place. IT might be to narrowing, but is simpler, for now...
-- [X] Dispersal kernel parameters (Nathan et al. 2012)
-- [X] Finding partners inside it: draws a distance from exponential power mean and checks for partner there
+     - CLOSING NOTE [2018-05-21 Mo 10:22] \\
+- [ ] Check Nathan et al. (dispersal book table) for poolen kernels
+- [ ] Finding partners inside it: draws a distance from exponential power mean and checks for partner there
 **** Animal pollination [0/4]
 - [ ] PollCell is a "pollination landscape cell" that stores 
 - [ ]  Attraction of reproductive areas: Visitation frequency as a measure of attraction and/or patch flower density as a quadratic function with an optimum (if too high, there are dillution effects)
