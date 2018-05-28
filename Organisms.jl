@@ -212,7 +212,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
 
                 #Resource allocation schedule
                 #TODO make it more ellaborate and includde trade-offs
-                if orgs[o].stage == "j" && 12 <= rem(t, 52) < 51 # no growth during winter
+                if orgs[o].stage == "j" && 12 <= rem(t, 52) < 51 # no growth during winter: the MTE should take care of it with T, but also water is a problem
                     # juveniles grow
                     orgs[o].biomass["veg"] += grown_mass
                     # unity test
