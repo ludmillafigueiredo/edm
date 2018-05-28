@@ -48,7 +48,7 @@ function parse_commandline()
         "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
-        default = abspath(pwd(),"inputs/envtimeseries.csv")
+        default = abspath(pwd(),"inputs/envtimeseries_1999.csv")
     end
 
     return parse_args(sets) # returning a dictionnary of strings is useful because they can passed as keywords to Julia function
