@@ -197,15 +197,19 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                 compterm = compete(landscape, orgs[o], settings)
                 # unity test
                 #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
-                # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #     println(sim, orgs[o].id, "  compterm $compterm")
-                # end
+                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(sim, orgs[o].id, "  compterm $compterm")
+                end
 
                 if compterm <= 0
                     #2.c Those not growing will have higher chance of dying
                     push!(nogrowth,o)
                 else
                     grown_mass = plants_gb0*(compterm *sum(collect(values(orgs[o].biomass))))^(3/4)*exp(-aE/(Boltz*T))
+                    # unity test
+                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                        println(sim, "$(orgs[o].id) should grow $grown_mass")
+                    end
 
                     #Resource allocation schedule
                     #TODO make it more ellaborate and includde trade-offs
@@ -216,7 +220,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                             println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
                         end
-                    elseif orgs[o].stage == "a" && orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
+                    elseif orgs[o].stage == "a" #&& orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
                         orgs[o].biomass["veg"] += grown_mass
                         # unity test
                         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -249,7 +253,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
     end
 
     return nogrowth
-    
+
 end
 
 """
