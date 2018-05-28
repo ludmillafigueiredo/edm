@@ -184,68 +184,72 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
     #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
     nogrowth = Int64[]
 
-    #2. Calculate growth for all plants (#TODO filter insects out)
-    for o in 1:length(orgs)
-        # 2.a Get local temperature
-        T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
+    if (12 <= rem(t, 52) < 51) # no growth during winter: the MTE should take care of it with T, but also water is a problem
+        #2. Calculate growth for all plants (#TODO filter insects out)
+        for o in 1:length(orgs)
+            # 2.a Get local temperature
+            T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
-        # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
-        # Any cost related to insufficient minimal biomass goes into the survival probability function
-        # 2.b Check for competition
+            # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
+            # Any cost related to insufficient minimal biomass goes into the survival probability function
+            # 2.b Check for competition
 
-            compterm = compete(landscape, orgs[o], settings)
-            # unity test
-            #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
-            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #     println(sim, orgs[o].id, "  compterm $compterm")
-            # end
+                compterm = compete(landscape, orgs[o], settings)
+                # unity test
+                #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
+                # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                #     println(sim, orgs[o].id, "  compterm $compterm")
+                # end
 
-            if compterm <= 0
-                #2.c Those not growing will have higher chance of dying
-                push!(nogrowth,o)
-            else
-                grown_mass = plants_gb0*(compterm *sum(collect(values(orgs[o].biomass))))^(3/4)*exp(-aE/(Boltz*T))
+                if compterm <= 0
+                    #2.c Those not growing will have higher chance of dying
+                    push!(nogrowth,o)
+                else
+                    grown_mass = plants_gb0*(compterm *sum(collect(values(orgs[o].biomass))))^(3/4)*exp(-aE/(Boltz*T))
 
-                #Resource allocation schedule
-                #TODO make it more ellaborate and includde trade-offs
-                if orgs[o].stage == "j"
-                    # juveniles grow
-                    orgs[o].biomass["veg"] += grown_mass
-                    # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
-                    end
-                elseif orgs[o].stage == "a" && orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
-                    orgs[o].biomass["veg"] += grown_mass
-                    # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
-                    end
-                elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25 #TODO extend it to summer?
-                    # adults invest in reproduction
-                    #unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING")
-                    end
-                    if haskey(orgs[o].biomass,"reprd")
-                        orgs[o].biomass["reprd"] += grown_mass
-                    else
-                        orgs[o].biomass["reprd"] = grown_mass
+                    #Resource allocation schedule
+                    #TODO make it more ellaborate and includde trade-offs
+                    if orgs[o].stage == "j"
+                        # juveniles grow
+                        orgs[o].biomass["veg"] += grown_mass
+                        # unity test
+                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
+                        end
+                    elseif orgs[o].stage == "a" && orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
+                        orgs[o].biomass["veg"] += grown_mass
+                        # unity test
+                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
+                        end
+                    elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25 #TODO extend it to summer?
+                        # adults invest in reproduction
+                        #unity test
+                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING")
+                        end
+                        if haskey(orgs[o].biomass,"reprd")
+                            orgs[o].biomass["reprd"] += grown_mass
+                        else
+                            orgs[o].biomass["reprd"] = grown_mass
+                        end
                     end
                 end
+
+                #unity test
+                # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                #     println(sim, "current biomass: $(orgs[o].biomass)")
+                # end
+
+            # unity test
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, "Not growing $nogrowth")
             end
 
-            #unity test
-            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #     println(sim, "current biomass: $(orgs[o].biomass)")
-            # end
-
-        # unity test
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, "Not growing $nogrowth")
+            return nogrowth
         end
-
-        return nogrowth
+    else
+        continue
     end
 end
 

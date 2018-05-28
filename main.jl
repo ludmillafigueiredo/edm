@@ -201,9 +201,8 @@ function simulate()
 
         projvegmass!(mylandscape,orgs,settings)
 
-        if (12 <= rem(t, 52) < 51) # no growth during winter: the MTE should take care of it with T, but also water is a problem
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings) #TODO check if there is no better way to keep track of individuals that are not growing
-        end
+
 
         #juveniles become adults before just before the beggining of spring
         if rem(t, 52) == 11 #juveniles become adults at the beggining of spring (reproductive season)
