@@ -19,7 +19,7 @@ const aE = 0.65 # eV Brown & Sibly MTE book chap 2
 const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter
 const plants_mb0 = 1.5029220413821088e11 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
 const plants_fb0 = exp(30.0) # fertility rate
-const seedmassµ = 0.8
+const seedmassµ = 0.8 #TODO refer to OrgsRef
 
 # Initial organisms parametrization
 mutable struct OrgsRef
@@ -193,7 +193,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
         # Any cost related to insufficient minimal biomass goes into the survival probability function
         # 2.b Check for competition
         if orgs[o].stage == "e"
-            # embryos only consume reserves: TODO more realistic
+            # embryos only consume reserves: TODO more realistic: sementes nao mudam massa. O esquema delas eh na mortalidade e na germinacao. De repente, introduzo um viability funciton
             orgs[o].biomass["veg"] -= 0.01*org[o].biomass["veg"]
 
         else
@@ -212,20 +212,20 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
 
                 #Resource allocation schedule
                 #TODO make it more ellaborate and includde trade-offs
-                if orgs[o].stage == "j" && 12 <= rem(t, 52) < 51 # no growth during winter
+                if orgs[o].stage == "j" && 12 <= rem(t, 52) < 51 # no growth during winter: the MTE should take care of it with T, but also water is a problem
                     # juveniles grow
                     orgs[o].biomass["veg"] += grown_mass
                     # unity test
                     # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                     #     println(sim, "$(orgs[o].id)-$(orgs[o].stage) gained $grown_mass")
                     # end
-                elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 51 && orgs[o].biomass["veg"] < 50 #individuals that are too small dont reproduce #TODO better allocation rules
+                elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 51 && orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
                     orgs[o].biomass["veg"] += grown_mass
                     # unity test
                     # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                     #     println(sim, "$(orgs[o].id)-$(orgs[o].stage) gained VEG $grown_mass")
                     # end
-                elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25
+                elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25 #TODO extend it to summer
                     # adults invest in reproduction
                     #unity test
                     # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -330,15 +330,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
 
     for o in reproducing
 
-        T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
-
-        offsprgB = round(Int64, plants_fb0 * sum(collect(values(orgs[o].biomass)))^(-1/4) * exp(-aE/(Boltz*T)), RoundNearestTiesAway) #TODO stochasticity
-        avalseeds =  round(Int64, /(orgs[o].biomass["reprd"],seedmassµ), RoundNearestTiesAway)
-
-        # TODO necessary? easier to keep just one of them?
-        if offsprgB > avalseeds
-            offsprgB = avalseeds
-        end
+        offsprgB =  round(Int64, /(orgs[o].biomass["reprd"],seedmassµ), RoundNearestTiesAway) #TODO set species specific seedmassµ!!
 
         #unity test
         # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -390,11 +382,11 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
 
     for d in dispersing
         #sort dispersal kernels according to funcitonal group
-        # Dispersal distance from kernel: InverseGaussian distributions just for very contrasting distances
+        # Dispersal distance from kernel: InverseGaussian distributions just for very contrasting distances (available in Julia and described in Nathan's table as outperforming for seed dispersal)
         if orgs[d].fgroup == "ant"
-            a = 0.0197; b = 1.4989; # InverseGaussian
+            µ = 1; λ = 0.2; # InverseGaussian
         else #if orgs[d].fgroup == "wind" == "windant"
-            a = 25.22; b = 0.8415; # InverseGaussian
+            µ = 0.1; λ = 3; # InverseGaussian #TODO fayer windant sortear uma das duas
             #for tests: (rand(collect(0.499:0.001:1,3056))) Bullock's 50th - 95th percentile
         end
 
@@ -503,7 +495,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
             #     println(sim,orgs[o].id,"-",orgs[o].stage, " mprob: $mprob")
             # end
 
-            # individuals that didnt grow have
+            # individuals that didnt grow have double? the chance of dying
             if o in 1:length(nogrowth)
                 compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
                 cmB = compmortconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/Boltz*(T))
