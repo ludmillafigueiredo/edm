@@ -220,12 +220,6 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                             println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
                         end
-                    elseif orgs[o].stage == "a" #&& orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
-                        orgs[o].biomass["veg"] += grown_mass
-                        # unity test
-                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
-                        end
                     elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25 #TODO extend it to summer?
                         # adults invest in reproduction
                         #unity test
@@ -236,6 +230,12 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                             orgs[o].biomass["reprd"] += grown_mass
                         else
                             orgs[o].biomass["reprd"] = grown_mass
+                        end
+                    else orgs[o].stage == "a" #&& orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
+                        orgs[o].biomass["veg"] += grown_mass
+                        # unity test
+                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
                         end
                     end
                 end
