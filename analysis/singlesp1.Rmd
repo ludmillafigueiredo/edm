@@ -11,8 +11,12 @@ library(stringr);
 
 Set outputs folder, specific ID and get file
 ```{r}
-outdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/EDoutputs") #CCTBserver: /home/luf74xx/Dokumente/model/EDoutputs
-outid <- file.path("singlesp1") #simID
+#indir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/inputs") 
+indir <- file.path("/home/luf74xx/Dokumente/model/inputs") #CCTBserver
+inid <- file.path("singlespinput1.csv") # check in simID file in output
+#outdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/EDoutputs") #CCTBserver: 
+outdir <- file.path("/home/luf74xx/Dokumente/model/EDoutputs")
+outid <- file.path("singlesp1.2") #simID
 outraw <- as_tibble(read.table(file.path(outdir, outid, "orgsweekly.csv"), header = TRUE, sep = "\t"))
 # very long file, since each organism gets a line
 head(outraw)
@@ -29,15 +33,15 @@ names(loc) = c("xloc", "yloc", "floc")
 ## get vegetative and reproductive biomasses. When no reproductive biomass, adds 0 before reshaping 2 columns
 masses = c()
 for(plant in outraw$biomass){
-  m <- unlist(str_extract_all(plant,"[0-9]{1,4}.[0-9]{1,3}")) # extracts both veg and repr
+  m <- unlist(str_extract_all(plant,"([0-9]{1,4}.[0-9]{1,7})")) # extracts both veg and repr
   if(length(m) < 2){
-    m <- append(m, 0)
+    m <- c(0,m)
   }
   masses <- rbind(masses,m)
 }
 masses <- as.data.frame(masses, stringsAsFactors = FALSE); #there is probably a better way to convert into numeric
 masses <- as.data.frame(sapply(masses, as.numeric));
-names(masses) <-c("veg", "repr");
+names(masses) <-c("repr", "veg");
 
 ## Complete and clean table
 outdata <- as_tibble(cbind(select(outraw,-one_of("location","biomass")),
@@ -99,8 +103,6 @@ Check individual variation
 ```{r}
 biomass <- outdata %>%
   select(week,id,sp,veg,repr)
-
-head(weekmass)
 
 #Individual biomass variation
 indweekmass.plot <- ggplot(biomass, aes(x=week, y= veg, color = factor(id)))

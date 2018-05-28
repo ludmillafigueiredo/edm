@@ -33,7 +33,7 @@ names(loc) = c("xloc", "yloc", "floc")
 ## get vegetative and reproductive biomasses. When no reproductive biomass, adds 0 before reshaping 2 columns
 masses = c()
 for(plant in outraw$biomass){
-  m <- unlist(str_extract_all(plant,"[0-9]{1,4}.[0-9]{1,3}")) # extracts both veg and repr
+  m <- unlist(str_extract_all(plant,"([0-9]{1,4}.[0-9]{1,7})")) # extracts both veg and repr
   if(length(m) < 2){
     m <- append(m, 0)
   }
