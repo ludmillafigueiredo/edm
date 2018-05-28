@@ -1,20 +1,16 @@
 ---
-title: "Template for ED model output analyses"
+title: "Single species simulation analysis"
 output: html_notebook
           code_folding = true
         pdf_document
 ---
-
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse);
 library(stringr);
 ```
-# TODO get input, output info from simID
-Set input and output folders, specific id and get file
+
+Set outputs folder, specific ID and get file
 ```{r}
-indir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/inputs") #CCTBserver: /home/luf74xx/Dokumente/model/EDoutputs
-inid <- file.path("singlespinput1.csv") # check in simID file in output
-input <- as_tibble(read.table(file.path(indir, inid), header = TRUE, sep = ","))
 outdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/EDoutputs") #CCTBserver: /home/luf74xx/Dokumente/model/EDoutputs
 outid <- file.path("singlesp1") #simID
 outraw <- as_tibble(read.table(file.path(outdir, outid, "orgsweekly.csv"), header = TRUE, sep = "\t"))
@@ -94,11 +90,11 @@ weekabund.plot +
   theme(legend.position = "none")
 ```
 
-3. Plot individual biomass, weekly
+3. Plot individual vegetative biomass, weekly
   a. Get species-specific biomass mean and variation weekly
   b. ggplot it seasonally
   c. `#TODO` so far,it is plotting the first year. For longer simulations, get mean from all years (since there is growth, get the mean of biomass uptake, instead of actual biomass) 
-  
+
 Check individual variation
 ```{r}
 biomass <- outdata %>%
@@ -131,6 +127,7 @@ spproduction.plot +
        subtitle = "Mean vegetative biomass (+-sd) per species")+
   theme(legend.position = "none")
 ```
+
 Same for reproductive biomass
 Individual variation
 ```{r}
@@ -168,21 +165,3 @@ indsize.plot +
        subtitle = "Individual radius")+
   theme(legend.position = "bottom")
 ```
-
-```{r}
-weeksize <- outdata %>%
-  group_by(week, sp) %>%
-  summarise(rad.mean = 3*mean(radius), rad.sd = 3*sd(radius)) #each cell is 3x3cm²
-
-weeksize.plot <- ggplot(weeksize, aes(x=week, y=rad.mean, color = factor(sp)))
-
-weeksize.plot +
-  geom_line() +
-  labs(x = "Week", y = "Mean radius (cm)",
-       title = "Plant size variation (cm) ",
-       subtitle = "Mean radius (+-sd) per species")+
-  theme(legend.position = "none")
-```
-
-4. Biomass density over time
- Re-scale density cover abundance to check results 

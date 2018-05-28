@@ -1,5 +1,6 @@
 ---
-title: "Template for ED model output analyses"
+title: "All species simulation analysis"
+subtitle: "Before ODD updated code"
 output: html_notebook
           code_folding = true
         pdf_document
@@ -9,14 +10,14 @@ output: html_notebook
 library(tidyverse);
 library(stringr);
 ```
-# TODO get input, output info from simID
+
 Set input and output folders, specific id and get file
 ```{r}
 indir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/inputs") #CCTBserver: /home/luf74xx/Dokumente/model/EDoutputs
-inid <- file.path("singlespinput1.csv") # check in simID file in output
+inid <- file.path("spinput.csv") # check in simID file in output
 input <- as_tibble(read.table(file.path(indir, inid), header = TRUE, sep = ","))
 outdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/EDoutputs") #CCTBserver: /home/luf74xx/Dokumente/model/EDoutputs
-outid <- file.path("singlesp1") #simID
+outid <- file.path("annualfullsp") #simID
 outraw <- as_tibble(read.table(file.path(outdir, outid, "orgsweekly.csv"), header = TRUE, sep = "\t"))
 # very long file, since each organism gets a line
 head(outraw)
@@ -70,7 +71,7 @@ annualtemp
 *Species simulated*
 
 ```{r}
-head(input)
+str(input)
 ```
 
 1. Check if reproduction is happening
@@ -113,7 +114,7 @@ indweekmass.plot +
   labs(x = "Week", y = "Mean vegetative biomass (g)",
        title = "Annual biomass variation",
        subtitle = "Individual biomass")+
-  theme(legend.position = "bottom")
+  theme(legend.position = "none")
 ```
 
 Check variation at species-level
@@ -139,7 +140,7 @@ indrepmass.plot +
   geom_line() +
   labs(x = "Week", y = "Total reproductive biomass (g)",
        title = "Individual reproductive biomass variation")+
-  theme(legend.position = "bottom")
+  theme(legend.position = "none")
 ```
 
 Species-level variation
@@ -166,7 +167,7 @@ indsize.plot +
   labs(x = "Week", y = "Radius (cm)",
        title = "Plant size variation (cm) ",
        subtitle = "Individual radius")+
-  theme(legend.position = "bottom")
+  theme(legend.position = "none")
 ```
 
 ```{r}
