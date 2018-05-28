@@ -245,12 +245,11 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                 println(sim, "Not growing $nogrowth")
             end
-
-            return nogrowth
         end
-    else
-        continue
     end
+
+    return nogrowth
+    
 end
 
 """

@@ -203,7 +203,6 @@ function simulate()
 
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings) #TODO check if there is no better way to keep track of individuals that are not growing
 
-
         #juveniles become adults before just before the beggining of spring
         if rem(t, 52) == 11 #juveniles become adults at the beggining of spring (reproductive season)
             develop!(orgs)
