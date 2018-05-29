@@ -404,7 +404,7 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
             #for tests: (rand(collect(0.499:0.001:1,3056))) Bullock's 50th - 95th percentile
         end
 
-        dist = Fileprep.lengthtocell(Distributions.InverseGaussian(a,b))
+        dist = Fileprep.lengthtocell(Distributions.InverseGaussian(µ,λ))
         #unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, orgs[d].id,"Calculated dispersal distance: $dist")
@@ -438,7 +438,7 @@ germinate(org)
 Seeds have a probability of germinating (`gprob`).
 """
 function germinate()
-    gprob = 0.1
+    gprob = 1
     germ = false
     if 1 == rand(Distributions.Binomial(1,gprob))
         germ = true
@@ -465,28 +465,28 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
         orgcell = orgs[o].location
         orgfg= orgs[o].fgroup
         if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]].neighs,orgfg)
-            push!(lost,o)
+            #push!(lost,o)
 	#unity test
    	open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        	println(sim, "Didnt estbllish: $o")
+        	println(sim, "$o falling into occupied cell")
     	end
+	end
 
-        else
-            if germinate()
-                orgs[o].stage = "j"
+        if germinate()
+            orgs[o].stage = "j"
 		#unity test
    		open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         		println(sim, "Became juvenile: $o")
     		end
                 # the ones that dont germinate but are older than 1 year die
-            elseif orgs[o].age > 52
-                push!(lost,o)
+        elseif orgs[o].age > 52
+            push!(lost,o)
 		#unity test
    		open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         		println(sim, "Didnt germinate: $o")
     		end
-            end
         end
+        
     end
     deleteat!(orgs,lost)
 end
@@ -532,19 +532,19 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
             mprob = 1 - exp(-mB*orgs[o].age/1000)
         end
 	# individuals that didnt grow have double? the chance of dying
-            if o in 1:length(nogrowth)
-                compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
-                cmB = compmortconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/Boltz*(T))
-                cmprob =  1 - e^(-cmB)
-                mprob += cmprob
-            end
+            #if o in 1:length(nogrowth)
+            #    compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
+            #    cmB = compmortconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/Boltz*(T))
+            #    cmprob =  1 - e^(-cmB)
+            #    mprob = 2*cmprob
+            #end
 
-            if rand(Distributions.Binomial(1,mprob),1) == 1
+            #if rand(Distributions.Binomial(1,mprob),1) == 1
                 #mprob > rand(PoissonBinomial([mprob]),1)[1] # TODO should use a more ellaboratedistribution model? successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
-                push!(deaths, o)
-	    else
-                orgs[o].age += 1
-            end
+            #    push!(deaths, o)
+	    #else
+            #    orgs[o].age += 1
+            #end
     end
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
