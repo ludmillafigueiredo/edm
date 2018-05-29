@@ -17,7 +17,7 @@ export Organism, OrgsRef, newOrgs, projvegmass!, compete, develop!, allocate!, m
 const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
 const aE = 0.65 # eV Brown & Sibly MTE book chap 2
 const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter, and converted from kg to g
-const plants_mb0 = 1.5029220413821088e11 #adjustted accordung to 1 death per individual for 1g  (MTEpar notebook)
+const plants_mb0 = 9.902 #adjustted accordung to 1 death per individual for 1g for annuals (MTEpar notebook)
 const plants_fb0 = exp(30.0) # fertility rate
 
 # Initial organisms parametrization
@@ -473,28 +473,37 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
     deaths = Int64[]
 
     for o in 1:length(orgs)
+	T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
-        if orgs[o].age == 52 # annual plants die
+	
+        if orgs[o].radius == 0
             push!(deaths, o)
-        elseif orgs[o].radius == 0
-            push!(deaths, o)
-        else
-            T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
-
+	#annuals
+	elseif orgsref.span[orgs[o].sp] == "annuals"# annual plants die according to the constant set for mortality in the MTE notebook
+            
             mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
             mB = mortalconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
             # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             #     println(sim,"$(orgs[o].id) mortality rate $mB")
             # end
-            mprob = 1 - exp(-mB)
+            mprob = 1 - exp(-mB*orgs[o].age/40)
 
             #unity test
             # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             #     println(sim,orgs[o].id,"-",orgs[o].stage, " mprob: $mprob")
             # end
 
-            # individuals that didnt grow have double? the chance of dying
+	elseif orgsref.span[orgs[o].sp] == "perennials"
+	    mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
+            mB = mortalconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/(Boltz*T))
+            # unity test
+            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #     println(sim,"$(orgs[o].id) mortality rate $mB")
+            # end
+            mprob = 1 - exp(-mB*orgs[o].age/1000)
+        end
+	# individuals that didnt grow have double? the chance of dying
             if o in 1:length(nogrowth)
                 compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
                 cmB = compmortconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/Boltz*(T))
@@ -505,10 +514,9 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
             if rand(Distributions.Binomial(1,mprob),1) == 1
                 #mprob > rand(PoissonBinomial([mprob]),1)[1] # TODO should use a more ellaboratedistribution model? successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
                 push!(deaths, o)
-            else
+	    else
                 orgs[o].age += 1
             end
-        end
     end
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim

@@ -21,9 +21,9 @@ using Organisms
 const Boltz = 8.62e-5 # Brown & Sibly MTE book chap 2
 const aE = 0.65 # Brown & Sibly MTE book chap 2
 const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter (MTEpar notebook)
-const plants_mb0 = 1.5029220413821088e11 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
+const plants_mb0 = 9.902 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
 const plants_fb0 = exp(30.0) # fertility rate
-const seedmassµ = 0.8
+#const seedmassµ = 0.8
 
 function parse_commandline()
     sets = ArgParseSettings() #object that will be populated with the arguments by the macro
