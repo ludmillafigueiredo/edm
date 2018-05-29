@@ -19,7 +19,6 @@ const aE = 0.65 # eV Brown & Sibly MTE book chap 2
 const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter, and converted from kg to g
 const plants_mb0 = 1.5029220413821088e11 #adjustted accordung to 1 death per individual for 1g  (MTEpar notebook)
 const plants_fb0 = exp(30.0) # fertility rate
-const seedmassµ = 0.8 #TODO refer to OrgsRef
 
 # Initial organisms parametrization
 mutable struct OrgsRef
@@ -331,12 +330,14 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
 
     for o in reproducing
 
-        offsprgB =  round(Int64, /(orgs[o].biomass["reprd"],seedmassµ), RoundNearestTiesAway) #TODO set species specific seedmassµ!!
+        seedmassµ = orgsref.mean_seed_mass[orgs[o].sp]
+        offsprgB =  round(Int64, /(orgs[o].biomass["reprd"],seedmassµ), RoundNearestTiesAway)
+        orgs[o].biomass["reprd"] -= (offsprgB * seedmassµ)
 
         #unity test
-        # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        #     println(sim, "Offspring of ", orgs[o], ": ",offsprgB)
-        # end
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim, "Offspring of ", orgs[o], ": ",offsprgB)
+        end
 
         for n in 1:offsprgB
             #TODO check for a quicker way of creating several objects of composite-type
@@ -357,9 +358,6 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
 
             push!(offspring, embryo)
         end
-
-        orgs[o].biomass["reprd"] -= (offsprgB * seedmassµ)
-
     end
     append!(orgs, offspring)
     # return offspring

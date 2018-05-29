@@ -41,11 +41,11 @@ _Actual implementation_
 ** Detailed (print based unity testing)
 ** Simulation results/outputs
 *** id simulation
-- [X] 'simID' variable holds the ID of the simulation, for now
-- [X] parse rguments to script: ArgParse "Module for command-line argument parsing"
-- [ ] Identify folder with slurm jobs
-- [X] Output a summary of inputs along with results
-- [ ] more summarized version
+- [X] 'simID' variable holds the ID of the simulation
+- [X] simID.txt has input file names, simulation duration (all parsed arguments)
+- [X] parse arguments to script: ArgParse "Module for command-line argument parsing"
+- [ ] Identify folder with slurm jobs (not necessary if HPC keep working)
+- [ ] output landscape configuration every time step
 *** individuals results
 - [ ] Check orgstable format: weekly simple csv. Leave more complicated formats to analysis
 - [ ] Output analysis R script
