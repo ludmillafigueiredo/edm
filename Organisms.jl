@@ -404,7 +404,7 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
             #for tests: (rand(collect(0.499:0.001:1,3056))) Bullock's 50th - 95th percentile
         end
 
-        dist = Fileprep.lengthtocell(Distributions.InverseGaussian(µ,λ))
+        dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
         #unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, orgs[d].id,"Calculated dispersal distance: $dist")
