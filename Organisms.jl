@@ -183,7 +183,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
     #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
     nogrowth = Int64[]
 
-    if (12 <= rem(t, 52) < 51) # no growth during winter: the MTE should take care of it with T, but also water is a problem
+    #if (12 <= rem(t, 52) < 51) # no growth during winter: the MTE should take care of it with T, but also water is a problem
         #2. Calculate growth for all plants (#TODO filter insects out)
         for o in 1:length(orgs)
             # 2.a Get local temperature
@@ -249,7 +249,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                 println(sim, "Not growing $nogrowth")
             end
         end
-    end
+    #end
 
     return nogrowth
 
@@ -342,7 +342,7 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
         for n in 1:offsprgB
             #TODO check for a quicker way of creating several objects of composite-type
 
-            embryo = Organism(string(orgs[o].sp, (length(orgs) + length(offspring) + 1)) ,
+            embryo = Organism(string(orgs[o].sp,"-", (length(orgs) + length(offspring) + 1)) ,
             orgs[o].location, #location is given according to functional group and dispersal strategy, in disperse!()
             orgs[o].sp,
             Dict("veg" => orgsref.mean_seed_mass[orgs[o].sp]), #use seed size for the fgroup
