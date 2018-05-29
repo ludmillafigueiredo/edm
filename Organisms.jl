@@ -183,9 +183,14 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
     #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
     nogrowth = Int64[]
 
-    #if (12 <= rem(t, 52) < 51) # no growth during winter: the MTE should take care of it with T, but also water is a problem
+    #if (12 <= rem(t, 52) < 51) # no growth during winter: the MTE should take care of it with T, but also water is a probleM
         #2. Calculate growth for all plants (#TODO filter insects out)
-        for o in 1:length(orgs)
+    for o in 1:length(orgs)
+
+	if orgs[o].stage == "e" #embryos dont allocate because they dont grow
+		continue
+	else
+
             # 2.a Get local temperature
             T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
@@ -249,6 +254,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                 println(sim, "Not growing $nogrowth")
             end
         end
+    end
     #end
 
     return nogrowth
@@ -331,12 +337,12 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
     for o in reproducing
 
         seedmassµ = orgsref.mean_seed_mass[orgs[o].sp]
-        offsprgB =  round(Int64, /(orgs[o].biomass["reprd"],seedmassµ), RoundNearestTiesAway)
+        offsprgB =  round(Int64, /(orgs[o].biomass["reprd"],seedmassµ), RoundDown)
         orgs[o].biomass["reprd"] -= (offsprgB * seedmassµ)
 
         #unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, "Offspring of ", orgs[o], ": ",offsprgB)
+            println(sim, "Number of offspring of ", orgs[o].id, ": ",offsprgB)
         end
 
         for n in 1:offsprgB
@@ -357,10 +363,19 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
             orgs[o].radius) # could be 0, should depend on biomass
 
             push!(offspring, embryo)
+	    #unitest
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, "Pushed new org ", embryo, " into offpring")
+
+            end
         end
     end
     append!(orgs, offspring)
-    # return offspring
+    #unitest
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+	println(sim, "Total offspring this summer: " ,offspring)
+    end
+    
 end
 
 """
@@ -404,15 +419,15 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
         if checkboundaries(landscape, xdest, ydest, fdest)
             orgs[d].location = (xdest,ydest,fdest)
             #unity test
-            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #     println(sim, orgs[d].id," dispersed $dist")
-            # end
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, orgs[d].id," dispersed $dist")
+            end
         else
             push!(lost,d)
             #unity test
-            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #     println(sim, orgs[d].id," dispersed $dist but died")
-            # end
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, orgs[d].id," dispersed $dist but died")
+            end
         end
     end
     deleteat!(orgs,lost)
@@ -423,7 +438,7 @@ germinate(org)
 Seeds have a probability of germinating (`gprob`).
 """
 function germinate()
-    gprob = 0.5
+    gprob = 0.1
     germ = false
     if 1 == rand(Distributions.Binomial(1,gprob))
         germ = true
@@ -451,12 +466,25 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
         orgfg= orgs[o].fgroup
         if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]].neighs,orgfg)
             push!(lost,o)
+	#unity test
+   	open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        	println(sim, "Didnt estbllish: $o")
+    	end
+
         else
             if germinate()
                 orgs[o].stage = "j"
+		#unity test
+   		open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        		println(sim, "Became juvenile: $o")
+    		end
                 # the ones that dont germinate but are older than 1 year die
             elseif orgs[o].age > 52
                 push!(lost,o)
+		#unity test
+   		open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        		println(sim, "Didnt germinate: $o")
+    		end
             end
         end
     end
