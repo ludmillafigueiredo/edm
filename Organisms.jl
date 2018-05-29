@@ -500,7 +500,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
 
     deaths = Int64[]
 
-    for o in 1:length(orgs)
+    for o in nogrowth #1:length(orgs)
 	T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
 	
