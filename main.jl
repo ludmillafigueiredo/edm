@@ -216,7 +216,7 @@ function simulate()
             establish!(mylandscape,orgs,t,settings)
         end
 
-        survive!(mylandscape,orgs,nogrowth,settings) # density-dependent and independent mortality
+        survive!(mylandscape,orgs,nogrowth,settings, orgsref) # density-dependent and independent mortality
 
         # output weekly
         orgstable(orgsref, landpars, orgs,t,settings)

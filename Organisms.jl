@@ -468,7 +468,7 @@ survive!(orgs, nogrowth,landscape)
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 plants in nogrwth are subjected to two probability rates
 """
-function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N, settings::Dict{String, Any})
+function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N, settings::Dict{String, Any}, orgsref::OrgsRef)
 
     deaths = Int64[]
 
@@ -479,7 +479,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
         if orgs[o].radius == 0
             push!(deaths, o)
 	#annuals
-	elseif orgsref.span[orgs[o].sp] == "annuals"# annual plants die according to the constant set for mortality in the MTE notebook
+	elseif orgsref.life_span[orgs[o].sp] == "annuals"# annual plants die according to the constant set for mortality in the MTE notebook
             
             mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
             mB = mortalconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/(Boltz*T))
@@ -494,7 +494,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
             #     println(sim,orgs[o].id,"-",orgs[o].stage, " mprob: $mprob")
             # end
 
-	elseif orgsref.span[orgs[o].sp] == "perennials"
+	elseif orgsref.life_span[orgs[o].sp] == "perennials"
 	    mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
             mB = mortalconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
