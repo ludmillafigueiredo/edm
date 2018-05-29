@@ -47,7 +47,7 @@ mutable struct Organism
     radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
     #Organism() = new()
 end
-Organism(id,location,sp,biomass,fgroup) = Organism(id,location,sp,biomass,fgroup,"a", 0,false,["A" "A"],0) #this is individuals are initialized in the beginning of the simulationy
+Organism(id,location,sp,biomass,fgroup) = Organism(id,location,sp,biomass,fgroup,"j", 0,false,["A" "A"],0) #this is individuals are initialized in the beginning of the simulationy
 # TODO fgroups are sps for now
 
 """
