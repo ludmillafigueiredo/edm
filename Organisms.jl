@@ -22,16 +22,28 @@ const plants_fb0 = exp(30.0) # fertility rate
 
 # Initial organisms parametrization
 mutable struct OrgsRef
-    species::Dict{String,String}
-    sp_id::Array{String, 1}
-    kernel::Dict{String,String}
-    biomass_mean::Dict{String,Float64}
-    biomass_sd::Dict{String,Float64}
-    abund::Dict{String,Int64}
-    mean_seed_number::Dict{String,Float64}
-    mean_seed_mass::Dict{String,Float64}
-    life_span::Dict{String,String}
-    max_span::Dict{String,Int64}
+    #species::Dict{String,String}
+    #sp_id::Array{String, 1}
+    kernel::Dict{String,Int}
+mu_seed::Dict{String,Float64}
+sd_seed::Dict{String,Float64}
+pb0g::Dict{String,Float64}
+pb0ms::Dict{String,Float64}
+pb0am::Dict{String,Float64}
+pb0sg::Dict{String,Float64}
+pb0ag::Dict{String,Float64}
+sestra::Dict{String,Int}
+dyad::Dict{String,Float64}
+floron::Dict{String,Int}
+floroff::Dict{String,Int}
+sripe::Dict{String,Int}
+seedon::Dict{String,Int}
+seedoff::Dict{String,Int}
+maxmass::Dict{String,Float64}
+span::Dict{String,Int}
+max_span::Dict{String,Int64}
+mass::Dict{String,Float64}
+abund::Dict{String,Int}
 end
 
 mutable struct Organism

@@ -11,7 +11,6 @@ srand(123)
 # Load Julia & model packages
 using ArgParse
 using Distributions
-#using JLD #saving Julia objects
 using JuliaDB #for in/outputs
 using DataValues
 using Fileprep
@@ -20,9 +19,9 @@ using Organisms
 
 const Boltz = 8.62e-5 # Brown & Sibly MTE book chap 2
 const aE = 0.65 # Brown & Sibly MTE book chap 2
-const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter (MTEpar notebook)
-const plants_mb0 = 9.902 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
-const plants_fb0 = exp(30.0) # fertility rate
+#const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter (MTEpar notebook)
+#const plants_mb0 = 9.902 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
+#const plants_fb0 = exp(30.0) # fertility rate
 #const seedmassµ = 0.8
 
 function parse_commandline()
@@ -36,7 +35,7 @@ function parse_commandline()
         "--spinput"
         help = "Name of file with species list."
         arg_type = String
-        default = abspath(pwd(),"inputs/spinput.csv")
+        default = abspath(pwd(),"inputs/species.csv")
         "--landconfig"
         help = "Name of file with simulation parameters: areas of fragments, mean (and s.d.) temperature, total running time."
         arg_type = String
@@ -85,16 +84,27 @@ function read_spinput(settings::Dict{String,Any})
    spinputtbl = loadtable(settings["spinput"])
 
    orgsref = OrgsRef(
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sp)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Array(rows(spinputtbl,:sp_id)),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernels)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_mean)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:biomass_sd)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:abund)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_number)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mean_seed_mass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        #Array(rows(spinputtbl,:sp_id)),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernel)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mu_seed)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sd_seed)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0g)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0ms)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0am)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0sg)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0ag)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sestra)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:dyad)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:floron)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:floroff)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sripe)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:seedon)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:seedoff)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:maxmass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
         Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:span)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_span)[i] for i in 1:length(rows(spinputtbl,:sp_id)))
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_span)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:abund)[i] for i in 1:length(rows(spinputtbl,:sp_id)))
     )
     return orgsref
 end
