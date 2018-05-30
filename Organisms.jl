@@ -16,17 +16,17 @@ export Organism, OrgsRef, newOrgs, projvegmass!, compete, develop!, allocate!, m
 #TODO put them in OrgsRef
 const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
 const aE = 0.65 # eV Brown & Sibly MTE book chap 2
-const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter, and converted from kg to g
-const plants_mb0 = 9.902 #adjustted accordung to 1 death per individual for 1g for annuals (MTEpar notebook)
-const plants_fb0 = exp(30.0) # fertility rate
+#const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter, and converted from kg to g
+#const plants_mb0 = 9.902 #adjustted accordung to 1 death per individual for 1g for annuals (MTEpar notebook)
+#const plants_fb0 = exp(30.0) # fertility rate
 
 # Initial organisms parametrization
 mutable struct OrgsRef
-    #species::Dict{String,String}
-    #sp_id::Array{String, 1}
-    kernel::Dict{String,Int}
-mu_seed::Dict{String,Float64}
-sd_seed::Dict{String,Float64}
+#species::Dict{String,String}
+sp_id::Array{String, 1}
+kernel::Dict{String,Int}
+seed_mu::Dict{String,Float64}
+seed_sd::Dict{String,Float64}
 pb0g::Dict{String,Float64}
 pb0ms::Dict{String,Float64}
 pb0am::Dict{String,Float64}
@@ -42,46 +42,47 @@ seedoff::Dict{String,Int}
 maxmass::Dict{String,Float64}
 span::Dict{String,Int}
 max_span::Dict{String,Int64}
-mass::Dict{String,Float64}
+mass_mu::Dict{String,Float64}
+mass_sd::Dict{String,Float64}
 abund::Dict{String,Int}
 end
 
 mutable struct Organism
-    id::String
-    location::Tuple # (x,y,frag)
-    sp::String #sp id, easier to read
-    biomass::Dict
-    fgroup::String # Plant, insect or more precise functional group
-    stage::String #e,j,a
-    age::Int64 # controls passing stages, phenology and
-    reped::Bool # reproduced?
-    genotype::Array{String,2}
-    radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
-    #Organism() = new()
+id::String
+location::Tuple # (x,y,frag)
+sp::String #sp id, easier to read
+mass::Dict
+#fgroup::String # Plant, insect or more precise functional group
+stage::String #e,j,a
+age::Int64 # controls passing stages, phenology and
+reped::Bool # TODO is it necessary?
+genotype::Array{String,2} #initialize separately
+radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
+#Organism() = new()
 end
-Organism(id,location,sp,biomass,fgroup) = Organism(id,location,sp,biomass,fgroup,"j", 0,false,["A" "A"],0) #this is individuals are initialized in the beginning of the simulationy
+Organism(id,location,sp,biomass) = Organism(id,location,sp,biomass,fgroup,"a", 0,false,["A" "A"],0) #this is individuals are initialized in the beginning of the simulationy
 # TODO fgroups are sps for now
 
 """
 newOrg(fgroups, init_abund, biomassμ, biomasssd)
 newOrg() creates new `init_abund` individuals of each  functional group (`fgroups`), with biomass (N(`biomassμ`,`biomasssd`)). It is called during the initialization and all  the Organisms parameters are read from a parameter file, for the specific functional group. All organisms, from all funcitonal groups, are stored in the same array `orgs` thathte function returns.
 
-newOrg(parents, reprmode)
-newOrg() generates offspringn, after reproduc- newOrg() generates offspringn, after reproduction. For offspring creation, the `genotype` field is filled according to parental genotype and mode of reproduction and the other fields are copied from the parents.
-# Methods
-1. Upon initialization: `newOrg(fgroups, init_abund, biomassμ, landscape)`
-`fgroups` list of funcitonal groups to be simulated
-`init_abund` initial abundances
-`biomassμ` mean biomass
+    newOrg(parents, reprmode)
+    newOrg() generates offspringn, after reproduc- newOrg() generates offspringn, after reproduction. For offspring creation, the `genotype` field is filled according to parental genotype and mode of reproduction and the other fields are copied from the parents.
+    # Methods
+    1. Upon initialization: `newOrg(fgroups, init_abund, biomassμ, landscape)`
+    `fgroups` list of funcitonal groups to be simulated
+    `init_abund` initial abundances
+    `biomassμ` mean biomass
 
-# Arguments:
-`reprmode::String` specificies how the new organisms are generated:
-`init` initialization of the model
-`sex` sexual reproduction
-`clone` assexual reproduction
-`parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
-`quant::Int64` is nb of new individuals or offspring to be created
-"""
+    # Arguments:
+    `reprmode::String` specificies how the new organisms are generated:
+    `init` initialization of the model
+    `sex` sexual reproduction
+    `clone` assexual reproduction
+    `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
+        `quant::Int64` is nb of new individuals or offspring to be created
+        """
 function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::OrgsRef)
 
     orgs = Organism[]
@@ -91,15 +92,13 @@ function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::OrgsRef
         for s in orgsref.sp_id
 
             XYs = hcat(rand(1:size(landscape,1),orgsref.abund[s]),
-            rand(1:size(landscape,2),orgsref.abund[s]))
+                       rand(1:size(landscape,2),orgsref.abund[s]))
 
             for i in 1:orgsref.abund[s]
                 neworg = Organism(string(s, "-", length(orgs) + 1), #sp_id isnt ind id!
-                (XYs[i,1],XYs[i,2],frag),
-                s,
-                Dict("veg" => rand(Distributions.Normal(orgsref.biomass_mean[s],orgsref.biomass_sd[s]))),
-                s) #fgroup is sp_id for now
-
+                                  (XYs[i,1],XYs[i,2],frag),
+                                  s,
+                                  Dict("veg" => rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])), "repr" => 0))
                 push!(orgs, neworg)
             end
         end
@@ -110,9 +109,9 @@ function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::OrgsRef
 end
 
 """
-projvegmass!(landscape,orgs)
-Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
-"""
+        projvegmass!(landscape,orgs)
+        Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
+        """
 function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organism,1}, settings::Dict{String,Any})
     # empt neighs to rewrite TODO more efficient?
     for cell in eachindex(landscape)
@@ -152,9 +151,9 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
 end
 
 """
-compete(landscape, orgs)
-Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
-"""
+        compete(landscape, orgs)
+        Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
+        """
 function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism, settings::Dict{String,Any})
 
     x, y, frag = org.location
@@ -188,19 +187,19 @@ function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,
 end
 
 """
-allocate!(orgs, landscape, aE, Boltz, OrgsRef)
-Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
+        allocate!(orgs, landscape, aE, Boltz, OrgsRef)
+        Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
 function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any})
     #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
     nogrowth = Int64[]
 
     #if (12 <= rem(t, 52) < 51) # no growth during winter: the MTE should take care of it with T, but also water is a probleM
-        #2. Calculate growth for all plants (#TODO filter insects out)
+    #2. Calculate growth for all plants (#TODO filter insects out)
     for o in 1:length(orgs)
 
 	if orgs[o].stage == "e" #embryos dont allocate because they dont grow
-		continue
+	    continue
 	else
 
             # 2.a Get local temperature
@@ -210,56 +209,56 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
             # Any cost related to insufficient minimal biomass goes into the survival probability function
             # 2.b Check for competition
 
-                compterm = compete(landscape, orgs[o], settings)
+            compterm = compete(landscape, orgs[o], settings)
+            # unity test
+            #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, orgs[o].id, "  compterm $compterm")
+            end
+
+            if compterm <= 0
+                #2.c Those not growing will have higher chance of dying
+                push!(nogrowth,o)
+            else
+                grown_mass = plants_gb0*(compterm *sum(collect(values(orgs[o].biomass))))^(3/4)*exp(-aE/(Boltz*T))
                 # unity test
-                #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
                 open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(sim, orgs[o].id, "  compterm $compterm")
+                    println(sim, "$(orgs[o].id) should grow $grown_mass")
                 end
 
-                if compterm <= 0
-                    #2.c Those not growing will have higher chance of dying
-                    push!(nogrowth,o)
-                else
-                    grown_mass = plants_gb0*(compterm *sum(collect(values(orgs[o].biomass))))^(3/4)*exp(-aE/(Boltz*T))
+                #Resource allocation schedule
+                #TODO make it more ellaborate and includde trade-offs
+                if orgs[o].stage == "j"
+                    # juveniles grow
+                    orgs[o].biomass["veg"] += grown_mass
                     # unity test
                     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, "$(orgs[o].id) should grow $grown_mass")
+                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
                     end
-
-                    #Resource allocation schedule
-                    #TODO make it more ellaborate and includde trade-offs
-                    if orgs[o].stage == "j"
-                        # juveniles grow
-                        orgs[o].biomass["veg"] += grown_mass
-                        # unity test
-                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
-                        end
-                    elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25 #TODO extend it to summer?
-                        # adults invest in reproduction
-                        #unity test
-                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING")
-                        end
-                        if haskey(orgs[o].biomass,"reprd")
-                            orgs[o].biomass["reprd"] += grown_mass
-                        else
-                            orgs[o].biomass["reprd"] = grown_mass
-                        end
-                    else orgs[o].stage == "a" #&& orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
-                        orgs[o].biomass["veg"] += grown_mass
-                        # unity test
-                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
-                        end
+                elseif orgs[o].stage == "a" && 12 <= rem(t, 52) < 25 #TODO extend it to summer?
+                    # adults invest in reproduction
+                    #unity test
+                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING")
+                    end
+                    if haskey(orgs[o].biomass,"reprd")
+                        orgs[o].biomass["reprd"] += grown_mass
+                    else
+                        orgs[o].biomass["reprd"] = grown_mass
+                    end
+                else orgs[o].stage == "a" #&& orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce #TODO better allocation rules
+                    orgs[o].biomass["veg"] += grown_mass
+                    # unity test
+                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
                     end
                 end
+            end
 
-                #unity test
-                # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #     println(sim, "current biomass: $(orgs[o].biomass)")
-                # end
+            #unity test
+            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #     println(sim, "current biomass: $(orgs[o].biomass)")
+            # end
 
             # unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -328,7 +327,7 @@ end
 """
 reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
-"""
+    """
 function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any},orgsref::OrgsRef)
     #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
@@ -361,10 +360,10 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
             #TODO check for a quicker way of creating several objects of composite-type
 
             embryo = Organism(string(orgs[o].sp,"-", (length(orgs) + length(offspring) + 1)) ,
-            orgs[o].location, #location is given according to functional group and dispersal strategy, in disperse!()
-            orgs[o].sp,
-            Dict("veg" => orgsref.mean_seed_mass[orgs[o].sp]), #use seed size for the fgroup
-            orgs[o].fgroup,
+                              orgs[o].location, #location is given according to functional group and dispersal strategy, in disperse!()
+                              orgs[o].sp,
+                              Dict("veg" => orgsref.mean_seed_mass[orgs[o].sp]), #use seed size for the fgroup
+                              orgs[o].fgroup,
             "e",
             0,
             false,
@@ -391,9 +390,9 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
 end
 
 """
-disperse!(offspring)
-Butterflies, bees and seeds can/are disperse(d).
-"""
+    disperse!(offspring)
+    Butterflies, bees and seeds can/are disperse(d).
+    """
 function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, settings::Dict{String, Any})
     # Seeds (Bullock et al. JEcol 2017)
     dispersing = find(x -> (x.stage == "e" && x.age == 0), orgs)
@@ -446,8 +445,8 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
 end
 
 """
-germinate(org)
-Seeds have a probability of germinating (`gprob`).
+    germinate(org)
+    Seeds have a probability of germinating (`gprob`).
 """
 function germinate()
     gprob = 1
@@ -461,7 +460,7 @@ end
 """
 establish!
 Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
-"""
+    """
 function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String, Any})
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
@@ -478,25 +477,25 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
         orgfg= orgs[o].fgroup
         if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]].neighs,orgfg)
             #push!(lost,o)
-	#unity test
-   	open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+	    #unity test
+   	    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         	println(sim, "$o falling into occupied cell")
-    	end
+    	    end
 	end
 
         if germinate()
             orgs[o].stage = "j"
-		#unity test
-   		open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        		println(sim, "Became juvenile: $o")
-    		end
-                # the ones that dont germinate but are older than 1 year die
+	    #unity test
+   	    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        	println(sim, "Became juvenile: $o")
+    	    end
+            # the ones that dont germinate but are older than 1 year die
         elseif orgs[o].age > 52
             push!(lost,o)
-		#unity test
-   		open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        		println(sim, "Didnt germinate: $o")
-    		end
+	    #unity test
+   	    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        	println(sim, "Didnt germinate: $o")
+    	    end
         end
         
     end
@@ -504,10 +503,10 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
 end
 
 """
-survive!(orgs, nogrowth,landscape)
-Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
-plants in nogrwth are subjected to two probability rates
-"""
+    survive!(orgs, nogrowth,landscape)
+    Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
+    plants in nogrwth are subjected to two probability rates
+    """
 function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N, settings::Dict{String, Any}, orgsref::OrgsRef)
 
     deaths = Int64[]
@@ -518,7 +517,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
 	
         if orgs[o].radius == 0
             push!(deaths, o)
-	#annuals
+	    #annuals
 	elseif orgsref.life_span[orgs[o].sp] == "annuals"# annual plants die according to the constant set for mortality in the MTE notebook
             
             mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
@@ -544,19 +543,19 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
             mprob = 1 - exp(-mB*orgs[o].age/1000)
         end
 	# individuals that didnt grow have double? the chance of dying
-            #if o in 1:length(nogrowth)
-            #    compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
-            #    cmB = compmortconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/Boltz*(T))
-            #    cmprob =  1 - e^(-cmB)
-            #    mprob = 2*cmprob
-            #end
+        #if o in 1:length(nogrowth)
+        #    compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
+        #    cmB = compmortconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/Boltz*(T))
+        #    cmprob =  1 - e^(-cmB)
+        #    mprob = 2*cmprob
+        #end
 
-            #if rand(Distributions.Binomial(1,mprob),1) == 1
-                #mprob > rand(PoissonBinomial([mprob]),1)[1] # TODO should use a more ellaboratedistribution model? successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
-            #    push!(deaths, o)
-	    #else
-            #    orgs[o].age += 1
-            #end
+        #if rand(Distributions.Binomial(1,mprob),1) == 1
+        #mprob > rand(PoissonBinomial([mprob]),1)[1] # TODO should use a more ellaboratedistribution model? successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
+        #    push!(deaths, o)
+	#else
+        #    orgs[o].age += 1
+        #end
     end
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -567,9 +566,9 @@ end
 
 
 """
-pollination!()
-Simulates plant-insect encounters and effective pollen transfer.
-"""
+    pollination!()
+    Simulates plant-insect encounters and effective pollen transfer.
+    """
 #TODO find a not too cumbersome way of modelling pollen transfer: draw from Poisot's probability
 
 # """
