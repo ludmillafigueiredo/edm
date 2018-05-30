@@ -113,13 +113,7 @@ end
         Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
         """
 function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organism,1}, settings::Dict{String,Any})
-    # empt neighs to rewrite TODO more efficient?
-    for cell in eachindex(landscape)
-        if length(keys(landscape[cell].neighs)) > 0
-            landscape[cell].neighs = Dict()
-        end
-    end
-
+    
     competing = find(x->(x.stage == "a" || x.stage == "j"),orgs)
 
     for o in competing
@@ -127,7 +121,7 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
         orgs[o].radius = round(Int64, (sqrt(orgs[o].biomass["veg"]^(2/3)) - 1)/2, RoundNearestTiesAway)
         r = orgs[o].radius # separated for debugging
 
-        fg = orgs[o].fgroup
+        sp = orgs[o].fgroup
 
         projmass = /(orgs[o].biomass["veg"], ((2*r+1)^2))
 
