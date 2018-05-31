@@ -69,30 +69,29 @@ function read_landpars(settings::Dict{String,Any})
                                  select(temp_tsinput,:sdtemp_ts),
                                  select(temp_tsinput,:meanprec_ts),
                                  select(temp_tsinput,:sdprec_ts),
-                                 length(select(landinputtbl, :id)))
+    length(select(landinputtbl, :id)))
     return landpars
 end
 
 """
-    read_spinput(settings)
+read_spinput(settings)
 Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
 """
 
 function read_spinput(settings::Dict{String,Any})
 
-   #spinputtbl = loadtable(abspath(pwd(),"inputs/spinput.csv"))
-   spinputtbl = loadtable(settings["spinput"])
+    #spinputtbl = loadtable(abspath(pwd(),"inputs/spinput.csv"))
+    spinputtbl = loadtable(settings["spinput"])
 
-   orgsref = OrgsRef(
-        #Array(rows(spinputtbl,:sp_id)),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernel)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mu_seed)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sd_seed)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0g)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0ms)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0am)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0sg)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0ag)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    orgsref = OrgsRef(Array(rows(spinputtbl,:sp_id)),
+                      Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernel)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:e_mu)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:e_sd)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0g)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0me)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0am)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0eg)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0ag)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sestra)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:dyad)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:floron)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
@@ -100,17 +99,18 @@ function read_spinput(settings::Dict{String,Any})
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sripe)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:seedon)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:seedoff)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:maxmass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:span)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_mass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:span)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_span)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mass_mu)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mass_sd)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:abund)[i] for i in 1:length(rows(spinputtbl,:sp_id)))
     )
     return orgsref
 end
 
 """
-    outputorgs(orgs,t,settingsfrgou)
+outputorgs(orgs,t,settingsfrgou)
 Saves a long format table with the organisms field informations.
 """
 function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
@@ -141,7 +141,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
 end
 
 """
-    simulate!()
+simulate!()
 """
 function simulate()
     #   INITIALIZATION
@@ -180,7 +180,7 @@ function simulate()
 
     # OUTPUT SIMULATION SETTINGS
     open(string("EDoutputs/",settings["simID"],"/simID"),"w") do ID
-            println(ID, settings)
+        println(ID, settings)
     end
 
     # MODEL RUN
@@ -190,7 +190,7 @@ function simulate()
 
         # UPDATE TEMPERATURE
         if t != 1
-                updateenv!(mylandscape,t, landpars)
+            updateenv!(mylandscape,t, landpars)
         end
 
         # DISTURBANCE
@@ -206,7 +206,7 @@ function simulate()
         #end
 
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, "WEEK $t")
+            println(sim, "WEEK $t")
         end
 
         projvegmass!(mylandscape,orgs,settings)
