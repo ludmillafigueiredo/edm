@@ -460,8 +460,8 @@ end
     germinate(org)
     Seeds have a probability of germinating (`gprob`).
 """
-function germinate()
-    gprob = 1 - 
+function germinate(org::Organisms.Organism)
+    gprob = 1 - exp(-orgsref.b0eg[org.sp])
     germ = false
     if 1 == rand(Distributions.Binomial(1,gprob))
         germ = true
@@ -495,7 +495,7 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
     	    end
 	end
 
-        if germinate()
+        if germinate(orgs[o])
             orgs[o].stage = "j"
 	    #unity test
    	    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
