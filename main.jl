@@ -220,9 +220,9 @@ function simulate()
 
         # Plants: adult reproduction and embryos dispersal
         if 12 <= rem(t, 52) <= 24 #reproduction = seed production happens during spring #TODO extend it to summer?
-            reproduce!(mylandscape,orgs,t, settings, orgsref)
+            mkoffspring!(mylandscape,orgs,t, settings, orgsref)
         elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
-            disperse!(mylandscape,orgs,settings)
+            disperse!(mylandscape,orgs,t,settings)
             establish!(mylandscape,orgs,t,settings)
         end
 
