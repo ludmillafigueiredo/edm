@@ -55,7 +55,7 @@ mass::Dict
 #fgroup::String # Plant, insect or more precise functional group
 stage::String #e,j,a
 age::Int64 # controls passing stages, phenology and
-reped::Bool # TODO is it necessary?
+mated::Bool # TODO is it necessary?
 genotype::Array{String,2} #initialize separately
 radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
 #Organism() = new()
@@ -301,20 +301,35 @@ function checkboundaries(landscape::Array{Setworld.WorldCell,N} where N, xdest::
     if checkbounds(Bool, landscape[:,:,fdest], xdest, ydest)
         inbound = true
     else
-        # if connectivity matrix
+        # if LandPars.nfrags > 1
         #  if dist in connectivity matrix
         #   xdest = rand(x from connectmatrix[curr,dest])
-        # ydest = rand(y from connect_matrix[current,dest])
+        #   ydest = rand(y from connect_matrix[current,dest])
+        #   fdest = connect column
+        #   inbound = true
+        #  end
+        # else
         inbound = false
+        # end
     end
-    return inbound, fdest
+    return inbound #,xdest, ydest, fdest
 end
 
 """
 reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
     """
-function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any},orgsref::OrgsRef)
+"""
+mate!()
+Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
+    GEnetic comes here
+"""
+
+"""
+mkoffspring!()
+After mating happened (marked in `reped`), calculate the amount of offspring
+"""
+function mkoffspring!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any},orgsref::OrgsRef)
     #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
     #     pollination()
@@ -322,8 +337,8 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
     #     parents_genes = mate!()
     # end
 
-    reproducing = find(x -> (x.stage == "a" && haskey(x.biomass, "reprd")), orgs)
-
+    ferts = find(x -> x.mated == true, orgs)
+    
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Reproducing: $reproducing week $t")
@@ -331,33 +346,29 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
 
     offspring = Organism[]
 
-    for o in reproducing
+    for o in ferts
 
-        seedmassµ = orgsref.mean_seed_mass[orgs[o].sp]
-        offsprgB =  round(Int64, /(orgs[o].biomass["reprd"],seedmassµ), RoundDown)
-        orgs[o].biomass["reprd"] -= (offsprgB * seedmassµ)
+        emu = orgsref.e_mu[orgs[o].sp]
+        offs =  round(Int64, /(orgs[o].biomass["reprd"],emu), RoundDown)
+        orgs[o].biomass["reprd"] -= (offs * emu)
 
         #unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, "Number of offspring of ", orgs[o].id, ": ",offsprgB)
+            println(sim, "Number of offspring of ", orgs[o].id, ": ",offs)
         end
 
-        for n in 1:offsprgB
+        for n in 1:offs
             #TODO check for a quicker way of creating several objects of composite-type
 
             embryo = Organism(string(orgs[o].sp,"-", (length(orgs) + length(offspring) + 1)) ,
-                              orgs[o].location, #location is given according to functional group and dispersal strategy, in disperse!()
+                              orgs[o].location, #stays with mom until release
                               orgs[o].sp,
-                              Dict("veg" => orgsref.mean_seed_mass[orgs[o].sp]), #use seed size for the fgroup
-                              orgs[o].fgroup,
-            "e",
-            0,
+                              Dict("veg" => rand(Distributions.Normal(orgsref.e_mu[orgs[o].sp],orgsref.e_sd[orgs[o].sp]),1)[1]), #use seed size for the fgroup
+                              "e",
+                              0,
             false,
             ["A" "A"], #come from function
-            #rand(Distributions.Normal(OrgsRef.seedbiomassμ[orgs[o].fgroup],OrgsRef.biomasssd[orgs[o].fgroup])),
-            #[OrgsRef.dispμ[f] OrgsRef.dispshp[f]],
-            #OrgsRef.radius[f])
-            orgs[o].radius) # could be 0, should depend on biomass
+            0)
 
             push!(offspring, embryo)
 	    #unitest
@@ -376,14 +387,24 @@ function reproduce!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array
 end
 
 """
-    disperse!(offspring)
-    Butterflies, bees and seeds can/are disperse(d).
-    """
-function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, settings::Dict{String, Any})
-    # Seeds (Bullock et al. JEcol 2017)
-    dispersing = find(x -> (x.stage == "e" && x.age == 0), orgs)
-    #TODO include insects
+    release!()
+Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
+"""
 
+"""
+    disperse!(offspring)
+Seeds are dispersed.
+    """
+function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any})
+
+    #TODO include insects
+    # if achar plant (fgroup?)
+    #  dipersar xovens
+    # else
+    #  dispersa adultos
+    # end
+    dispersing = find(x -> (x.stage == "e" && x.age == 0), orgs) |> filter(x -> orgsref.seedon[x.sp] <= t < orgsref.seedoff[x.sp]) # achar embrioes das species que estao liberando sementes no tempo t 
+    
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Dispersing: $dispersing")
@@ -435,7 +456,7 @@ end
     Seeds have a probability of germinating (`gprob`).
 """
 function germinate()
-    gprob = 1
+    gprob = 1 - 
     germ = false
     if 1 == rand(Distributions.Binomial(1,gprob))
         germ = true
