@@ -189,8 +189,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
     #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
     nogrowth = Int64[]
 
-    #if (12 <= rem(t, 52) < 51) # no growth during winter: the MTE should take care of it with T, but also water is a probleM
-    #2. Calculate growth for all plants (#TODO filter insects out)
+    #TODO filter insects out?
     for o in 1:length(orgs)
 
 	if orgs[o].stage == "e" #embryos dont allocate because they dont grow
@@ -273,7 +272,6 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
             end
         end
     end
-    #end
 
     return nogrowth
 
@@ -295,40 +293,21 @@ function develop!(orgs::Array{Organism,N} where N)
 end
 
 """
-meanExP(a,b)
-Draws a mean dispersed distance from the Exponential Power dispersal kernel.
-"""
-function meanExP(a::Float64,b::Float64)
-    dist = a*rand(Distributions.Gamma(3/b))/rand(Distributions.Gamma(2/b))
-    return dist
-end
-
-# """
-# cauchydisp(a,b)
-# Draws a dispersed distance from the Cauchy distribution, which approximates the LogSech distributions for b = 1.
-# """
-# function cauchydisp(a,b)
-#     dist = abs(rand(Cauchy(a,b)),1)
-#     return dist
-# end
-"""
 checkboundaries(sourcefrag,xdest, ydest, fdest)
 `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
 """
-function checkboundaries(landscape::Array{Setworld.WorldCell,N} where N, xdest::Int64, ydest::Int64, fdest::Int64)
+function checkboundaries(landscape::Array{Setworld.WorldCell,N} where N, xdest::Int64, ydest::Int64, fdest::Int64) #TODO is this function necessary?
     #check inside frag
     if checkbounds(Bool, landscape[:,:,fdest], xdest, ydest)
-        #if (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2])
         inbound = true
-        #elseif (dx <= size(landscape[:,:,sf])[1] && dy <= size(landscape[:,:,sf])[2])
-        #TODO check ouside frag (more complex than checkbounds): how to detect the direction of neighboring fragments? use a matrix dependent probability?
-        # -> to find fdest: compare dist with matriyes sizes and call possible fragmetns in the third index of location)
-        # and checkbounds(landscape[:,:,:], xdest, ydest, fdest)
-        #inbound = true
     else
+        # if connectivity matrix
+        #  if dist in connectivity matrix
+        #   xdest = rand(x from connectmatrix[curr,dest])
+        # ydest = rand(y from connect_matrix[current,dest])
         inbound = false
     end
-    return inbound
+    return inbound, fdest
 end
 
 """
