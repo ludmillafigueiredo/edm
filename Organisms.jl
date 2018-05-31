@@ -16,6 +16,10 @@ export Organism, OrgsRef, newOrgs, projvegmass!, compete, develop!, allocate!, m
 #TODO put them in OrgsRef
 const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
 const aE = 0.65 # eV Brown & Sibly MTE book chap 2
+const µ_wind = 0.1
+const λ_wind = 3
+const µ_ant = 1
+const λ_ant = 0.2
 #const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter, and converted from kg to g
 #const plants_mb0 = 9.902 #adjustted accordung to 1 death per individual for 1g for annuals (MTEpar notebook)
 #const plants_fb0 = exp(30.0) # fertility rate
@@ -403,8 +407,8 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
     # else
     #  dispersa adultos
     # end
-    dispersing = find(x -> (x.stage == "e" && x.age == 0), orgs) |> filter(x -> orgsref.seedon[x.sp] <= t < orgsref.seedoff[x.sp]) # achar embrioes das species que estao liberando sementes no tempo t 
-    
+    # find indexes in orgs if embryos that are in the right to be dispersed and which releasing season is happening at t
+    dispersing = filter(x -> orgsref.seedon[x.sp] <= t < orgsref.seedoff[x.sp], filter(x -> (x.stage == "e" && x.age == 0), orgs)) #didnt mange to pipeline those, weird metho error
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Dispersing: $dispersing")
@@ -413,23 +417,24 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
     lost = Int64[]
 
     for d in dispersing
-        #sort dispersal kernels according to funcitonal group
-        # Dispersal distance from kernel: InverseGaussian distributions just for very contrasting distances (available in Julia and described in Nathan's table as outperforming for seed dispersal)
-        if orgs[d].fgroup == "ant"
-            µ = 1; λ = 0.2; # InverseGaussian
-        else #if orgs[d].fgroup == "wind" == "windant"
-            µ = 0.1; λ = 3; # InverseGaussian #TODO fayer windant sortear uma das duas
-            #for tests: (rand(collect(0.499:0.001:1,3056))) Bullock's 50th - 95th percentile
+        if orgsref.kernel[orgs[d].sp] == "ant"
+            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
+        elseif orgsref.kernel[orgs[d].sp] == "wind"
+            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])
+        elseif orgsref.kernel[orgs[d].sp] == "windant"
+            µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
+            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
+        else
+            error("Check dispersal kernel input.")
         end
 
-        dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
         #unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, orgs[d].id,"Calculated dispersal distance: $dist")
         end
 
         # Find patch
-        θ = rand([0 0.5π π 1.5π]) #get radian angle of distribution
+        θ = rand([0 0.5π π 1.5π]) # TODO tentar rand(0:2)*pi?
         xdest = orgs[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
         ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
         fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
