@@ -32,7 +32,7 @@ kernel::Dict{String,Int}
 e_mu::Dict{String,Float64}
 e_sd::Dict{String,Float64}
 b0g::Dict{String,Float64}
-b0me::Dict{String,Float64}
+b0em::Dict{String,Float64}
 b0am::Dict{String,Float64}
 b0eg::Dict{String,Float64}
 b0ag::Dict{String,Float64}
@@ -323,15 +323,15 @@ reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
     """
 """
-mate!()
-Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
+    mate!()
+    Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
     GEnetic comes here
-"""
+    """
 
 """
-mkoffspring!()
-After mating happened (marked in `reped`), calculate the amount of offspring
-"""
+    mkoffspring!()
+    After mating happened (marked in `reped`), calculate the amount of offspring
+    """
 function mkoffspring!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any},orgsref::OrgsRef)
     #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
@@ -391,12 +391,12 @@ end
 
 """
     release!()
-Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
-"""
+    Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
+    """
 
 """
     disperse!(offspring)
-Seeds are dispersed.
+    Seeds are dispersed.
     """
 function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any})
 
@@ -456,8 +456,8 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
 end
 
 """
-    germinate(org)
-    Seeds have a probability of germinating (`gprob`).
+germinate(org)
+Seeds have a probability of germinating (`gprob`).
 """
 function germinate(org::Organisms.Organism)
     gprob = 1 - exp(-orgsref.b0eg[org.sp])

@@ -88,7 +88,7 @@ function read_spinput(settings::Dict{String,Any})
                       Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:e_mu)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:e_sd)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0g)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0me)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0em)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0am)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0eg)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0ag)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
@@ -210,22 +210,17 @@ function simulate()
 
         projvegmass!(mylandscape,orgs,settings)
 
-        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings) #TODO check if there is no better way to keep track of individuals that are not growing
+        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings)
 
-        #juveniles become adults before just before the beggining of spring
-        if rem(t, 52) == 11 #juveniles become adults at the beggining of spring (reproductive season)
-            develop!(orgs)
-        end
+        develop!(orgs)
 
-        # Plants: adult reproduction and embryos dispersal
-        if 12 <= rem(t, 52) <= 24 #reproduction = seed production happens during spring #TODO extend it to summer?
-            mkoffspring!(mylandscape,orgs,t, settings, orgsref)
-        elseif 25 <= rem(t, 52) < 37  #seed dispersal and germination happen during summer
-            disperse!(mylandscape,orgs,t,settings)
-            establish!(mylandscape,orgs,t,settings)
-        end
+        mkoffspring!(mylandscape,orgs,t, settings, orgsref)
 
-        survive!(mylandscape,orgs,nogrowth,settings, orgsref) # density-dependent and independent mortality
+        disperse!(mylandscape,orgs,t,settings)
+
+        establish!(mylandscape,orgs,t,settings)
+        
+        survive!(mylandscape,orgs,nogrowth,settings, orgsref)
 
         # output weekly
         orgstable(orgsref, landpars, orgs,t,settings)
