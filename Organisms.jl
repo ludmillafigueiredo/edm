@@ -502,12 +502,6 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
         	println(sim, "Became juvenile: $o")
     	    end
             # the ones that dont germinate but are older than 1 year die
-        elseif orgs[o].age > 52
-            push!(lost,o)
-	    #unity test
-   	    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        	println(sim, "Didnt germinate: $o")
-    	    end
         end
         
     end
@@ -522,52 +516,38 @@ end
 function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N, settings::Dict{String, Any}, orgsref::OrgsRef)
 
     deaths = Int64[]
+    T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
-    for o in nogrowth #1:length(orgs)
-	T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
-
-	
-        if orgs[o].radius == 0
+    # Seed/Egg mortality
+    seeds = find( x -> orgs[o].stage == "e", orgs)
+    for s in seeds
+        Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+        mprob = 1 - exp(-Bm)
+        if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
             push!(deaths, o)
-	    #annuals
-	elseif orgsref.life_span[orgs[o].sp] == "annuals"# annual plants die according to the constant set for mortality in the MTE notebook
-            
-            mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
-            mB = mortalconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/(Boltz*T))
-            # unity test
-            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #     println(sim,"$(orgs[o].id) mortality rate $mB")
-            # end
-            mprob = 1 - exp(-mB*orgs[o].age/40)
-
-            #unity test
-            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #     println(sim,orgs[o].id,"-",orgs[o].stage, " mprob: $mprob")
-            # end
-
-	elseif orgsref.life_span[orgs[o].sp] == "perennials"
-	    mortalconst = plants_mb0 #TODO call it from OrgsRef, when with different functional groups
-            mB = mortalconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/(Boltz*T))
-            # unity test
-            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #     println(sim,"$(orgs[o].id) mortality rate $mB")
-            # end
-            mprob = 1 - exp(-mB*orgs[o].age/1000)
+        else
+            orgs[o].age += 1
         end
-	# individuals that didnt grow have double? the chance of dying
-        #if o in 1:length(nogrowth)
-        #    compmortconst = plants_mb0 #TODO use different b_0 for mortality consequence of competition
-        #    cmB = compmortconst * (sum(collect(values(orgs[o].biomass))))^(-1/4)*exp(-aE/Boltz*(T))
-        #    cmprob =  1 - e^(-cmB)
-        #    mprob = 2*cmprob
-        #end
-
-        #if rand(Distributions.Binomial(1,mprob),1) == 1
-        #mprob > rand(PoissonBinomial([mprob]),1)[1] # TODO should use a more ellaboratedistribution model? successes are death events, because they are the value that is going to be relavant in here: the amount of individuals to be taken out
-        #    push!(deaths, o)
-	#else
-        #    orgs[o].age += 1
-        #end
+    end
+    
+    # Juvenile and adult mortality
+    for o in nogrowth #1:length(orgs)
+	if orgsref.life_span[orgs[o].sp] == "annuals" && rem(orgs[o].age,52) >= 1
+                Bm = 1
+            else
+                Bm = orgsref.b0am[orgs[o].sp] * (sum(collect(values(orgs[o]mass))))^(-1/4)*exp(-aE/(Boltz*T))
+                # unity test
+                # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                #     println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
+                # end)
+        end
+        # TODO this block is being repeated: use funciton, centralize somewhere? (nogrowth and seed are different, though)
+        mprob = 1 - exp(-Bm)
+        if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
+            push!(deaths, o)
+        else
+            orgs[o].age += 1
+        end
     end
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
