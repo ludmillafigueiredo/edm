@@ -44,7 +44,6 @@ sripe::Dict{String,Int}
 seedon::Dict{String,Int}
 seedoff::Dict{String,Int}
 max_mass::Dict{String,Float64}
-span::Dict{String,Int}
 max_span::Dict{String,Int64}
 mass_mu::Dict{String,Float64}
 mass_sd::Dict{String,Float64}
@@ -515,33 +514,25 @@ end
     """
 function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N, settings::Dict{String, Any}, orgsref::OrgsRef)
 
-    deaths = Int64[]
     T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
-    # Seed/Egg mortality
-    seeds = find( x -> orgs[o].stage == "e", orgs)
-    for s in seeds
-        Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-        mprob = 1 - exp(-Bm)
-        if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
-            push!(deaths, o)
-        else
-            orgs[o].age += 1
+    deaths = Int64[]
+    seeds = find(x -> orgs[o].stage == "e", orgs)    
+
+    for o in 1:length(orgs)
+	if o in seeds
+            Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+        elseif rem(orgs[o].age,52) >= orgsref.max_span(orgs[o].sp]
+            Bm = 1
+        elseif o in nogrowth
+            Bm = orgsref.b0am[orgs[o].sp] * (sum(collect(values(orgs[o]mass))))^(-1/4)*exp(-aE/(Boltz*T))
+            # unity test
+            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #     println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
+            # end)
+            
         end
-    end
-    
-    # Juvenile and adult mortality
-    for o in nogrowth #1:length(orgs)
-	if orgsref.life_span[orgs[o].sp] == "annuals" && rem(orgs[o].age,52) >= 1
-                Bm = 1
-            else
-                Bm = orgsref.b0am[orgs[o].sp] * (sum(collect(values(orgs[o]mass))))^(-1/4)*exp(-aE/(Boltz*T))
-                # unity test
-                # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #     println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
-                # end)
-        end
-        # TODO this block is being repeated: use funciton, centralize somewhere? (nogrowth and seed are different, though)
+        
         mprob = 1 - exp(-Bm)
         if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
             push!(deaths, o)
