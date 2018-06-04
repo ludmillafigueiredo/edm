@@ -34,7 +34,7 @@ e_sd::Dict{String,Float64}
 b0g::Dict{String,Float64}
 b0em::Dict{String,Float64}
 b0am::Dict{String,Float64}
-b0eg::Dict{String,Float64}
+b0jg::Dict{String,Float64}
 b0ag::Dict{String,Float64}
 sestra::Dict{String,Int}
 dyad::Dict{String,Float64}
@@ -221,7 +221,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                 sp = orgs[o].sp 
                 # seedling and adults grow at different rates
                 if orgs[o].stage == "j"
-                    b0 = orgsref.b0eg[sp]
+                    b0 = orgsref.b0jg[sp]
                 elseif orgs[o].stage == "a"
                     b0 = orgsref.b0ag[sp]
                 else
@@ -243,7 +243,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                         println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
                     end
-                elseif orgs[o].stage == "a" && orgsref.floron[sp] <= t < orgsref.floroff[sp]                    #TODO extend it to summer?
+                elseif orgs[o].stage == "a" && sum(collect(keys(orgs[o].mass))) >= 0.2*orgsref.max_mass[sp]) && orgsref.floron[sp] <= t < orgsref.floroff[sp]
                     # adults invest in reproduction
                     #unity test
                     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -479,7 +479,7 @@ germinate(org)
 Seeds have a probability of germinating (`gprob`).
 """
 function germinate(org::Organisms.Organism, orgsref::Organisms.OrgsRef)
-    gprob = 1 - exp(-orgsref.b0eg[org.sp])
+    gprob = 1 - exp(-orgsref.b0jg[org.sp])
     germ = false
     if 1 == rand(Distributions.Binomial(1,gprob))
         germ = true
