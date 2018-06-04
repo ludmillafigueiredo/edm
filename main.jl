@@ -100,6 +100,7 @@ function read_spinput(settings::Dict{String,Any})
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:seedon)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:seedoff)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_mass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:min_mass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_span)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mass_mu)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mass_sd)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
@@ -208,17 +209,17 @@ function simulate()
             println(sim, "WEEK $t")
         end
 
-        projvegmass!(mylandscape,orgs,settings)
+        projvegmass!(mylandscape,orgs)
 
-        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings)
+        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref)
 
-        develop!(orgs)
+        develop!(orgs,orgsref)
 
-        mkoffspring!(mylandscape,orgs,t, settings, orgsref)
+        mkoffspring!(orgs,t,settings,orgsref)
 
-        disperse!(mylandscape,orgs,t,settings)
+        disperse!(mylandscape,orgs,t,settings,orgsref)
 
-        establish!(mylandscape,orgs,t,settings)
+        establish!(mylandscape,orgs,settings)
         
         survive!(mylandscape,orgs,nogrowth,settings, orgsref)
 
