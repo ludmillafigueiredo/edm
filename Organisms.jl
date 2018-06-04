@@ -322,11 +322,16 @@ end
 reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
     """
+function reproduce!()
+end
+
 """
     mate!()
     Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
     GEnetic comes here
     """
+function mate!()
+end
 
 """
     mkoffspring!()
@@ -393,6 +398,8 @@ end
     release!()
     Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
     """
+function release!()
+end
 
 """
     disperse!(offspring)
@@ -522,7 +529,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
     for o in 1:length(orgs)
 	if o in seeds
             Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-        elseif rem(orgs[o].age,52) >= orgsref.max_span(orgs[o].sp]
+        elseif rem(orgs[o].age,52) >= orgsref.max_span[orgs[o].sp]
             Bm = 1
         elseif o in nogrowth
             Bm = orgsref.b0am[orgs[o].sp] * (sum(collect(values(orgs[o]mass))))^(-1/4)*exp(-aE/(Boltz*T))
