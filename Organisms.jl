@@ -243,7 +243,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                         println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
                     end
-                elseif orgs[o].stage == "a" && sum(collect(keys(orgs[o].mass))) >= 0.2*orgsref.max_mass[sp]) && orgsref.floron[sp] <= t < orgsref.floroff[sp]
+                elseif orgs[o].stage == "a" && (sum(collect(keys(orgs[o].mass))) >= 0.2*orgsref.max_mass[sp]) && (orgsref.floron[sp] <= t < orgsref.floroff[sp])
                     # adults invest in reproduction
                     #unity test
                     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
