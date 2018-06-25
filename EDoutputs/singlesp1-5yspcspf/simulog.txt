@@ -1,0 +1,3304 @@
+WEEK 1
+WEEK 1
+WEEK 1
+p1-1  compterm -3.035535228840109
+Not growing [1]
+p1-2  compterm 0.3333250496107444
+p1-2 should grow 0.06255628779389981
+WEEK 1
+p1-1  compterm -3.035535228840109
+Not growing [1]
+p1-2  compterm 0.3333250496107444
+p1-2 should grow 0.06255628779389981
+p1-2-a grew VEG 0.06255628779389981
+Not growing [1]
+p1-3  compterm -0.915566793008981
+Not growing [1, 3]
+p1-4  compterm -0.9066663415730245
+Not growing [1, 3, 4]
+p1-5  compterm -1.8799996640109689
+Not growing [1, 3, 4, 5]
+p1-6  compterm -0.11999077258941945
+Not growing [1, 3, 4, 5, 6]
+p1-7  compterm -1.5333249864625298
+Not growing [1, 3, 4, 5, 6, 7]
+p1-8  compterm -1.7688854267539438
+Not growing [1, 3, 4, 5, 6, 7, 8]
+p1-9  compterm -2.520017788870755
+Not growing [1, 3, 4, 5, 6, 7, 8, 9]
+p1-10  compterm -2.4488847176110418
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-11  compterm -1.506668526085705
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-12  compterm -2.3733456710293592
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-13  compterm -1.6577822011972922
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-14  compterm -1.2399941987732475
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-15  compterm 0.23110930513018924
+p1-15 should grow 0.04753193473129442
+p1-15-a grew VEG 0.04753193473129442
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -2.0222265306251277
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16]
+p1-17  compterm -0.5244432304108169
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17]
+p1-18  compterm -2.4844346460364988
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18]
+p1-19  compterm -0.48444913677420254
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19]
+p1-20  compterm -0.5111073834696678
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20]
+Reproducing: Int64[] week 1
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+WEEK 1
+p1-1  compterm -3.035535228840109
+Not growing [1]
+p1-2  compterm 0.3333250496107444
+p1-2 should grow 0.06255628779389981
+p1-2-a grew VEG 0.06255628779389981
+Not growing [1]
+p1-3  compterm -0.915566793008981
+Not growing [1, 3]
+p1-4  compterm -0.9066663415730245
+Not growing [1, 3, 4]
+p1-5  compterm -1.8799996640109689
+Not growing [1, 3, 4, 5]
+p1-6  compterm -0.11999077258941945
+Not growing [1, 3, 4, 5, 6]
+p1-7  compterm -1.5333249864625298
+Not growing [1, 3, 4, 5, 6, 7]
+p1-8  compterm -1.7688854267539438
+Not growing [1, 3, 4, 5, 6, 7, 8]
+p1-9  compterm -2.520017788870755
+Not growing [1, 3, 4, 5, 6, 7, 8, 9]
+p1-10  compterm -2.4488847176110418
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-11  compterm -1.506668526085705
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-12  compterm -2.3733456710293592
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-13  compterm -1.6577822011972922
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-14  compterm -1.2399941987732475
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-15  compterm 0.23110930513018924
+p1-15 should grow 0.04753193473129442
+p1-15-a grew VEG 0.04753193473129442
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -2.0222265306251277
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16]
+p1-17  compterm -0.5244432304108169
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17]
+p1-18  compterm -2.4844346460364988
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18]
+p1-19  compterm -0.48444913677420254
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19]
+p1-20  compterm -0.5111073834696678
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20]
+Reproducing: Int64[] week 1
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 1
+p1-1  compterm -3.035535228840109
+Not growing [1]
+p1-2  compterm 0.3333250496107444
+p1-2 should grow 0.06255628779389981
+p1-2-a grew VEG 0.06255628779389981
+Not growing [1]
+p1-3  compterm -0.915566793008981
+Not growing [1, 3]
+p1-4  compterm -0.9066663415730245
+Not growing [1, 3, 4]
+p1-5  compterm -1.8799996640109689
+Not growing [1, 3, 4, 5]
+p1-6  compterm -0.11999077258941945
+Not growing [1, 3, 4, 5, 6]
+p1-7  compterm -1.5333249864625298
+Not growing [1, 3, 4, 5, 6, 7]
+p1-8  compterm -1.7688854267539438
+Not growing [1, 3, 4, 5, 6, 7, 8]
+p1-9  compterm -2.520017788870755
+Not growing [1, 3, 4, 5, 6, 7, 8, 9]
+p1-10  compterm -2.4488847176110418
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-11  compterm -1.506668526085705
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-12  compterm -2.3733456710293592
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-13  compterm -1.6577822011972922
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-14  compterm -1.2399941987732475
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-15  compterm 0.23110930513018924
+p1-15 should grow 0.04753193473129442
+p1-15-a grew VEG 0.04753193473129442
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -2.0222265306251277
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16]
+p1-17  compterm -0.5244432304108169
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17]
+p1-18  compterm -2.4844346460364988
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18]
+p1-19  compterm -0.48444913677420254
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19]
+p1-20  compterm -0.5111073834696678
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20]
+Reproducing: Int64[] week 1
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 1
+p1-1  compterm -3.035535228840109
+Not growing [1]
+p1-2  compterm 0.3333250496107444
+p1-2 should grow 0.06255628779389981
+p1-2-a grew VEG 0.06255628779389981
+Not growing [1]
+p1-3  compterm -0.915566793008981
+Not growing [1, 3]
+p1-4  compterm -0.9066663415730245
+Not growing [1, 3, 4]
+p1-5  compterm -1.8799996640109689
+Not growing [1, 3, 4, 5]
+p1-6  compterm -0.11999077258941945
+Not growing [1, 3, 4, 5, 6]
+p1-7  compterm -1.5333249864625298
+Not growing [1, 3, 4, 5, 6, 7]
+p1-8  compterm -1.7688854267539438
+Not growing [1, 3, 4, 5, 6, 7, 8]
+p1-9  compterm -2.520017788870755
+Not growing [1, 3, 4, 5, 6, 7, 8, 9]
+p1-10  compterm -2.4488847176110418
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-11  compterm -1.506668526085705
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-12  compterm -2.3733456710293592
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-13  compterm -1.6577822011972922
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-14  compterm -1.2399941987732475
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-15  compterm 0.23110930513018924
+p1-15 should grow 0.04753193473129442
+p1-15-a grew VEG 0.04753193473129442
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -2.0222265306251277
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16]
+p1-17  compterm -0.5244432304108169
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17]
+p1-18  compterm -2.4844346460364988
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18]
+p1-19  compterm -0.48444913677420254
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19]
+p1-20  compterm -0.5111073834696678
+Not growing [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20]
+Reproducing: Int64[] week 1
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 2
+p1-1  compterm -8.004403791013559
+Not growing [1]
+p1-2  compterm -0.795534681947005
+Not growing [1, 2]
+p1-3  compterm -3.275578030462411
+Not growing [1, 2, 3]
+p1-4  compterm -3.8133326831460437
+Not growing [1, 2, 3, 4]
+p1-5  compterm -5.760003130579347
+Not growing [1, 2, 3, 4, 5]
+p1-6  compterm -1.7733222925587826
+Not growing [1, 2, 3, 4, 5, 6]
+p1-7  compterm -4.59998330625839
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-8  compterm -5.537775782745042
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-9  compterm -6.773368911074855
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-10  compterm -6.764436101888744
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-11  compterm -5.013337685931205
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-12  compterm -6.680024675392061
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-13  compterm -5.315568516574285
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-14  compterm -4.013321730879831
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-15  compterm -1.0177494204636304
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-16  compterm -5.644453061250244
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-17  compterm -2.715558317345399
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-18  compterm -6.968869292072975
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+p1-19  compterm -2.835564940215078
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+p1-20  compterm -2.688881433606022
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+Reproducing: Int64[] week 2
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: [5]
+WEEK 3
+p1-1  compterm -12.973272353187033
+Not growing [1]
+p1-2  compterm -1.924417953132688
+Not growing [1, 2]
+p1-3  compterm -5.635589267915842
+Not growing [1, 2, 3]
+p1-4  compterm -6.506665994316838
+Not growing [1, 2, 3, 4]
+p1-6  compterm -3.359987479176922
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -7.666641626054236
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -8.435555718837664
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -11.026720033278957
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-10  compterm -11.079987486166452
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-11  compterm -7.853339941169646
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-12  compterm -10.986703679754722
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-13  compterm -8.337798368447086
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-14  compterm -6.786649262986405
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-15  compterm -2.02663116532492
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -9.266679591875368
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-17  compterm -4.720006790440733
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-18  compterm -11.45330393810947
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-19  compterm -5.18668074365594
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+p1-20  compterm -4.866655483742346
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+Reproducing: Int64[] week 3
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: [17]
+WEEK 4
+p1-1  compterm -17.551030703942423
+Not growing [1]
+p1-2  compterm -3.0533012243183655
+Not growing [1, 2]
+p1-3  compterm -7.684487027967228
+Not growing [1, 2, 3]
+p1-4  compterm -9.199999305487673
+Not growing [1, 2, 3, 4]
+p1-6  compterm -4.946652665795061
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -10.57774456034771
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -11.333335654930307
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -14.853401670143688
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-10  compterm -14.64442674023689
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-11  compterm -10.693342196408103
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-12  compterm -15.048937106610069
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-13  compterm -11.34225035498232
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-14  compterm -9.159976560487245
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-15  compterm -3.0355129101862057
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -12.62223857754875
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-17  compterm -6.724455263536044
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-19  compterm -7.0177942164564815
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-20  compterm -7.04442953387866
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+Reproducing: Int64[] week 4
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 5
+p1-1  compterm -22.128789054697844
+Not growing [1]
+p1-2  compterm -4.18218449550404
+Not growing [1, 2]
+p1-3  compterm -9.733384788018606
+Not growing [1, 2, 3]
+p1-4  compterm -11.893332616658446
+Not growing [1, 2, 3, 4]
+p1-6  compterm -6.533317852413209
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -13.488847494641172
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -14.231115591022933
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -18.68008330700845
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-10  compterm -18.20886599430728
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-11  compterm -13.53334445164655
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-12  compterm -19.111170533465383
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-13  compterm -14.346702341517597
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-14  compterm -11.533303857988072
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-15  compterm -4.044394655047493
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -15.977797563222126
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-17  compterm -8.728903736631375
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-19  compterm -8.848907689257034
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-20  compterm -9.222203584015029
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+Reproducing: Int64[] week 5
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 6
+p1-1  compterm -26.70654740545329
+Not growing [1]
+p1-2  compterm -5.31106776668972
+Not growing [1, 2]
+p1-3  compterm -11.782282548069995
+Not growing [1, 2, 3]
+p1-4  compterm -14.586665927829209
+Not growing [1, 2, 3, 4]
+p1-6  compterm -8.119983039031322
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -16.399950428934677
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -17.128895527115578
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -22.5067649438732
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-10  compterm -21.773305248377717
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-11  compterm -16.37334670688498
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-12  compterm -23.17340396032074
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-13  compterm -17.35115432805273
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-14  compterm -13.906631155488922
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-15  compterm -5.053276399908776
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -19.333356548895534
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-17  compterm -10.733352209726691
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-19  compterm -10.680021162057596
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-20  compterm -11.399977634151359
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+Reproducing: Int64[] week 6
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 7
+p1-1  compterm -31.28430575620864
+Not growing [1]
+p1-2  compterm -6.439951037875385
+Not growing [1, 2]
+p1-3  compterm -13.831180308121379
+Not growing [1, 2, 3]
+p1-4  compterm -17.279999239000073
+Not growing [1, 2, 3, 4]
+p1-6  compterm -9.706648225649468
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -19.311053363228133
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -20.026675463208228
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -26.333446580737974
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-10  compterm -25.337744502448146
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-11  compterm -19.213348962123426
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-12  compterm -27.23563738717597
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-13  compterm -20.35560631458805
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-14  compterm -16.27995845298976
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-15  compterm -6.062158144770058
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -22.688915534568906
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-17  compterm -12.737800682822016
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-19  compterm -12.511134634858127
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-20  compterm -13.57775168428768
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+Reproducing: Int64[] week 7
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 8
+p1-1  compterm -35.86206410696403
+Not growing [1]
+p1-2  compterm -7.568834309061094
+Not growing [1, 2]
+p1-3  compterm -15.880078068172766
+Not growing [1, 2, 3]
+p1-4  compterm -19.973332550170845
+Not growing [1, 2, 3, 4]
+p1-6  compterm -11.293313412267606
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -22.222156297521607
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -22.92445539930084
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -30.16012821760273
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-10  compterm -28.902183756518564
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-11  compterm -22.05335121736188
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-12  compterm -31.297870814031363
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-13  compterm -23.360058301123214
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-14  compterm -18.653285750490582
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-15  compterm -7.0710398896313675
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -26.04447452024229
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-17  compterm -14.742249155917364
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-19  compterm -14.342248107658685
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-20  compterm -15.755525734424001
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+Reproducing: Int64[] week 8
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 9
+p1-1  compterm -40.439822457719416
+Not growing [1]
+p1-2  compterm -8.697717580246772
+Not growing [1, 2]
+p1-3  compterm -17.928975828224146
+Not growing [1, 2, 3]
+p1-4  compterm -22.66666586134165
+Not growing [1, 2, 3, 4]
+p1-6  compterm -12.87997859888575
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -25.133259231815067
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -25.822235335393476
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -33.98680985446742
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-10  compterm -32.46662301058894
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-11  compterm -24.893353472600342
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-12  compterm -35.36010424088664
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-13  compterm -26.36451028765854
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-14  compterm -21.02661304799141
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-15  compterm -8.079921634492637
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -29.400033505915705
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-17  compterm -16.74669762901264
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-19  compterm -16.173361580459222
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-20  compterm -17.93329978456035
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+Reproducing: Int64[] week 9
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 10
+p1-1  compterm -45.01758080847494
+Not growing [1]
+p1-2  compterm -9.826600851432437
+Not growing [1, 2]
+p1-3  compterm -19.977873588275546
+Not growing [1, 2, 3]
+p1-4  compterm -25.3599991725124
+Not growing [1, 2, 3, 4]
+p1-6  compterm -14.466643785503882
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -28.044362166108577
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -28.72001527148613
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -37.813491491332094
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-10  compterm -36.03106226465943
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-11  compterm -27.733355727838816
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-12  compterm -39.422337667741985
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-13  compterm -29.368962274193688
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-14  compterm -23.39994034549226
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-15  compterm -9.088803379353937
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -32.75559249158908
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-17  compterm -18.751146102107995
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-19  compterm -18.00447505325979
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-20  compterm -20.111073834696676
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+Reproducing: Int64[] week 10
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 11
+p1-1  compterm -49.59533915923033
+Not growing [1]
+p1-2  compterm -10.955484122618117
+Not growing [1, 2]
+p1-3  compterm -22.026771348326932
+Not growing [1, 2, 3]
+p1-4  compterm -28.053332483683143
+Not growing [1, 2, 3, 4]
+p1-6  compterm -16.053308972122068
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -30.955465100401998
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -31.617795207578798
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -41.64017312819696
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-10  compterm -39.59550151872984
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-11  compterm -30.573357983077187
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-12  compterm -43.48457109459735
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-13  compterm -32.37341426072891
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-14  compterm -25.773267642993122
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-15  compterm -10.097685124215213
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -36.11115147726242
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-17  compterm -20.7555945752033
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-19  compterm -19.835588526060317
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-20  compterm -22.288847884833093
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+Reproducing: Int64[] week 11
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 12
+p1-1  compterm -54.17309750998578
+Not growing [1]
+p1-2  compterm -12.084367393803786
+Not growing [1, 2]
+p1-3  compterm -24.075669108378303
+Not growing [1, 2, 3]
+p1-4  compterm -30.746665794854003
+Not growing [1, 2, 3, 4]
+p1-6  compterm -17.639974158740188
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -33.86656803469545
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -34.51557514367128
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -45.466854765061775
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-10  compterm -43.15994077280025
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-11  compterm -33.4133602383157
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-12  compterm -47.546804521452735
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-13  compterm -35.377866247264265
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-14  compterm -28.14659494049391
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-15  compterm -11.106566869076484
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-16  compterm -39.466710462935765
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-17  compterm -22.76004304829863
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-19  compterm -21.666701998860862
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+p1-20  compterm -24.46662193496937
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+Reproducing: Int64[] week 12
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: [9]
+WEEK 13
+p1-1  compterm -58.40419046187994
+Not growing [1]
+p1-2  compterm -13.213250664989454
+Not growing [1, 2]
+p1-3  compterm -25.724564368772967
+Not growing [1, 2, 3]
+p1-4  compterm -33.43999910602477
+Not growing [1, 2, 3, 4]
+p1-6  compterm -19.226639345358336
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -36.62211579454144
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -37.41335507976408
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -48.84908962438319
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -36.25336249355416
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -51.43570404670662
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -38.382318233799495
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -30.031033725682036
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-15  compterm -12.115448613937808
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-16  compterm -42.537824453258025
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-17  compterm -24.764491521393953
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-19  compterm -23.093369763242535
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-20  compterm -26.644395985105703
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+Reproducing: Int64[] week 13
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 14
+p1-1  compterm -62.6352834137744
+Not growing [1]
+p1-2  compterm -14.342133936175118
+Not growing [1, 2]
+p1-3  compterm -27.373459629167655
+Not growing [1, 2, 3]
+p1-4  compterm -36.13333241719563
+Not growing [1, 2, 3, 4]
+p1-6  compterm -20.81330453197646
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -39.377663554387496
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -40.31113501585658
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -52.231324483704846
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -39.09336474879253
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -55.3246035719609
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -41.38677022033467
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -31.9154725108702
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-15  compterm -13.124330358799085
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-16  compterm -45.6089384435802
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-17  compterm -26.768939994489273
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+p1-19  compterm -24.52003752762416
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+p1-20  compterm -28.822170035242177
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+Reproducing: Int64[] week 14
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: [13, 15]
+WEEK 15
+p1-1  compterm -66.86637636566859
+Not growing [1]
+p1-2  compterm -15.222131002086902
+Not growing [1, 2]
+p1-3  compterm -29.02235488956229
+Not growing [1, 2, 3]
+p1-4  compterm -38.826665728366386
+Not growing [1, 2, 3, 4]
+p1-6  compterm -21.973305064398982
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -42.13321131423345
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -42.720022210831544
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -55.61355934302637
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -41.84003308359779
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -59.21350309721509
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -43.81344109628139
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -33.79991129605829
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -48.68005243390238
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -25.915594141434624
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -30.999944085378424
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 15
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 16
+p1-1  compterm -71.09746931756295
+Not growing [1]
+p1-2  compterm -16.10212806799865
+Not growing [1, 2]
+p1-3  compterm -30.671250149956983
+Not growing [1, 2, 3]
+p1-4  compterm -41.51999903953715
+Not growing [1, 2, 3, 4]
+p1-6  compterm -23.133305596821547
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -44.88875907407936
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -45.12890940580637
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -58.99579420234797
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -44.58670141840318
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -63.102402622469356
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -46.24011197222813
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -35.684350081246414
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -51.751166424224465
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -27.31115075524506
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -33.17771813551482
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 16
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 17
+p1-1  compterm -75.32856226945722
+Not growing [1]
+p1-2  compterm -16.982125133910394
+Not growing [1, 2]
+p1-3  compterm -32.32014541035167
+Not growing [1, 2, 3]
+p1-4  compterm -44.21333235070803
+Not growing [1, 2, 3, 4]
+p1-6  compterm -24.293306129244087
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -47.6443068339254
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -47.53779660078147
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -62.37802906166973
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -47.33336975320829
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -66.99130214772359
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -48.666782848174925
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -37.56878886643455
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -54.82228041454674
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -28.706707369055476
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -35.35549218565107
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 17
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 18
+p1-1  compterm -79.55965522135153
+Not growing [1]
+p1-2  compterm -17.86212219982214
+Not growing [1, 2]
+p1-3  compterm -33.969040670746274
+Not growing [1, 2, 3]
+p1-4  compterm -46.906665661878975
+Not growing [1, 2, 3, 4]
+p1-6  compterm -25.453306661666655
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -50.39985459377139
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -49.946683795756286
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -65.76026392099115
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -50.08003808801356
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -70.88020167297762
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -51.09345372412165
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -39.45322765162269
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -57.89339440486883
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -30.10226398286595
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -37.53326623578742
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 18
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 19
+p1-1  compterm -83.79074817324587
+Not growing [1]
+p1-2  compterm -18.74211926573388
+Not growing [1, 2]
+p1-3  compterm -35.61793593114098
+Not growing [1, 2, 3]
+p1-4  compterm -49.599998973049544
+Not growing [1, 2, 3, 4]
+p1-6  compterm -26.61330719408919
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -53.15540235361725
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -52.35557099073106
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -69.14249878031282
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -52.826706422818816
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -74.76910119823195
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -53.520124600068556
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -41.337666436810785
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -60.964508395191146
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -31.49782059667639
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -39.711040285923715
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 19
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 20
+p1-1  compterm -88.0218411251403
+Not growing [1]
+p1-2  compterm -19.62211633164564
+Not growing [1, 2]
+p1-3  compterm -37.2668311915356
+Not growing [1, 2, 3]
+p1-4  compterm -52.293332284220455
+Not growing [1, 2, 3, 4]
+p1-6  compterm -27.773307726511785
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -55.91095011346334
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -54.76445818570597
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -72.52473363963439
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -55.573374757624244
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -78.65800072348605
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -55.94679547601525
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -43.22210522199888
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -64.0356223855133
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -32.89337721048676
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -41.88881433606011
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 20
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 21
+p1-1  compterm -92.25293407703444
+Not growing [1]
+p1-2  compterm -20.50211339755738
+Not growing [1, 2]
+p1-3  compterm -38.91572645193026
+Not growing [1, 2, 3]
+p1-4  compterm -54.986665595391116
+Not growing [1, 2, 3, 4]
+p1-6  compterm -28.933308258934265
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -58.66649787330935
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -57.17334538068084
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -75.90696849895579
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -58.32004309242941
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -82.54690024874014
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -58.373466351961966
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -45.10654400718702
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -67.10673637583544
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -34.2889338242972
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -44.06658838619652
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 21
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 22
+p1-1  compterm -96.48402702892902
+Not growing [1]
+p1-2  compterm -21.382110463469154
+Not growing [1, 2]
+p1-3  compterm -40.564621712324985
+Not growing [1, 2, 3]
+p1-4  compterm -57.67999890656201
+Not growing [1, 2, 3, 4]
+p1-6  compterm -30.09330879135684
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -61.42204563315525
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -59.58223257565599
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -79.28920335827742
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -61.06671142723471
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -86.43579977399445
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -60.800137227908614
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -46.99098279237516
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -70.17785036615759
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -35.68449043810763
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -46.24436243633277
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 22
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 23
+p1-1  compterm -100.71511998082306
+Not growing [1]
+p1-2  compterm -22.2621075293809
+Not growing [1, 2]
+p1-3  compterm -42.21351697271961
+Not growing [1, 2, 3]
+p1-4  compterm -60.373332217732404
+Not growing [1, 2, 3, 4]
+p1-6  compterm -31.253309323779323
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -64.17759339300117
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -61.991119770630576
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -82.67143821759892
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -63.81337976203969
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -90.32469929924855
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -63.22680810385532
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -48.87542157756328
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -73.24896435647997
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -37.0800470519181
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -48.422136486469185
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 23
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 24
+p1-1  compterm -104.94621293271753
+Not growing [1]
+p1-2  compterm -23.142104595292654
+Not growing [1, 2]
+p1-3  compterm -43.86241223311432
+Not growing [1, 2, 3]
+p1-4  compterm -63.066665528903435
+Not growing [1, 2, 3, 4]
+p1-6  compterm -32.41330985620191
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -66.93314115284724
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -64.40000696560551
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -86.05367307692049
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -66.56004809684487
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -94.21359882450271
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -65.65347897980209
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -50.75986036275136
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -76.32007834680202
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -38.47560366572855
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -50.59991053660557
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 24
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 25
+p1-1  compterm -109.17730588461194
+Not growing [1]
+p1-2  compterm -24.022101661204363
+Not growing [1, 2]
+p1-3  compterm -45.51130749350896
+Not growing [1, 2, 3]
+p1-4  compterm -65.75999884007452
+Not growing [1, 2, 3, 4]
+p1-6  compterm -33.573310388624506
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -69.6886889126931
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -66.80889416058024
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -89.43590793624229
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -69.3067164316502
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -98.10249834975681
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -68.08014985574874
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -52.64429914793948
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -79.39119233712424
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -39.87116027953899
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -52.77768458674159
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 25
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 26
+p1-1  compterm -113.40839883650604
+Not growing [1]
+p1-2  compterm -24.90209872711612
+Not growing [1, 2]
+p1-3  compterm -47.16020275390358
+Not growing [1, 2, 3]
+p1-4  compterm -68.45333215124523
+Not growing [1, 2, 3, 4]
+p1-6  compterm -34.73331092104706
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -72.44423667253905
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -69.21778135555519
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -92.81814279556384
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -72.05338476645538
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -101.99139787501122
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -70.50682073169581
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -54.528737933127594
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -82.46230632744633
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -41.266716893349354
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -54.955458636877914
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 26
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 27
+p1-1  compterm -117.63949178840053
+Not growing [1]
+p1-2  compterm -25.78209579302787
+Not growing [1, 2]
+p1-3  compterm -48.80909801429828
+Not growing [1, 2, 3]
+p1-4  compterm -71.14666546241618
+Not growing [1, 2, 3, 4]
+p1-6  compterm -35.89331145346956
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -75.19978443238517
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -71.62666855053023
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -96.20037765488546
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -74.80005310126073
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -105.880297400265
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -72.93349160764238
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -56.413176718315775
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -85.53342031776856
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -42.66227350715979
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -57.133232687014484
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 27
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 28
+p1-1  compterm -121.87058474029482
+Not growing [1]
+p1-2  compterm -26.662092858939605
+Not growing [1, 2]
+p1-3  compterm -50.45799327469294
+Not growing [1, 2, 3]
+p1-4  compterm -73.83999877358661
+Not growing [1, 2, 3, 4]
+p1-6  compterm -37.05331198589209
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -77.95533219223117
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -74.03555574550514
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -99.582612514207
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -77.54672143606591
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -109.76919692551954
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -75.36016248358936
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -58.29761550350393
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -88.60453430809072
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -44.057830120970245
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -59.31100673715086
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 28
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 29
+p1-1  compterm -126.10167769218916
+Not growing [1]
+p1-2  compterm -27.542089924851417
+Not growing [1, 2]
+p1-3  compterm -52.10688853508764
+Not growing [1, 2, 3]
+p1-4  compterm -76.53333208475738
+Not growing [1, 2, 3, 4]
+p1-6  compterm -38.21331251831461
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -80.71087995207711
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -76.44444294047995
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -102.96484737352873
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -80.29338977087137
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -113.65809645077348
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -77.78683335953589
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -60.18205428869194
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -91.67564829841294
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -45.45338673478072
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -61.488780787287304
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 29
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 30
+p1-1  compterm -130.33277064408338
+Not growing [1]
+p1-2  compterm -28.422086990763166
+Not growing [1, 2]
+p1-3  compterm -53.75578379548225
+Not growing [1, 2, 3]
+p1-4  compterm -79.22666539592807
+Not growing [1, 2, 3, 4]
+p1-6  compterm -39.37331305073724
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -83.46642771192322
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -78.85333013545488
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -106.34708223285021
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -83.04005810567656
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -117.54699597602789
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -80.21350423548262
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -62.066493073880096
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -94.7467622887353
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -46.84894334859117
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -63.666554837423305
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 30
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 31
+p1-1  compterm -134.56386359597798
+Not growing [1]
+p1-2  compterm -29.30208405667481
+Not growing [1, 2]
+p1-3  compterm -55.404679055876926
+Not growing [1, 2, 3]
+p1-4  compterm -81.91999870709911
+Not growing [1, 2, 3, 4]
+p1-6  compterm -40.53331358315982
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -86.2219754717691
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -81.26221733042965
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -109.72931709217195
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -85.78672644048156
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -121.43589550128182
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -82.6401751114294
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -63.950931859068234
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -97.81787627905736
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -48.24449996240162
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -65.84432888755985
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 31
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 32
+p1-1  compterm -138.79495654787212
+Not growing [1]
+p1-2  compterm -30.182081122586577
+Not growing [1, 2]
+p1-3  compterm -57.053574316271586
+Not growing [1, 2, 3]
+p1-4  compterm -84.6133320182702
+Not growing [1, 2, 3, 4]
+p1-6  compterm -41.69331411558234
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -88.97752323161504
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -83.67110452540486
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -113.11155195149307
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -88.53339477528698
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -125.32479502653602
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -85.06684598737607
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -65.83537064425641
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -100.88899026937956
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -49.64005657621199
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -68.02210293769619
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 32
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 33
+p1-1  compterm -143.02604949976626
+Not growing [1]
+p1-2  compterm -31.06207818849838
+Not growing [1, 2]
+p1-3  compterm -58.70246957666634
+Not growing [1, 2, 3]
+p1-4  compterm -87.30666532944058
+Not growing [1, 2, 3, 4]
+p1-6  compterm -42.85331464800486
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -91.73307099146095
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -86.07999172037957
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -116.49378681081487
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -91.28006311009224
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -129.21369455179047
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -87.49351686332298
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -67.71980942944451
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -103.96010425970177
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -51.035613190022445
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -70.19987698783261
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 33
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 34
+p1-1  compterm -147.25714245166077
+Not growing [1]
+p1-2  compterm -31.942075254410085
+Not growing [1, 2]
+p1-3  compterm -60.35136483706098
+Not growing [1, 2, 3]
+p1-4  compterm -89.99999864061128
+Not growing [1, 2, 3, 4]
+p1-6  compterm -44.013315180427334
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -94.48861875130719
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -88.4888789153543
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -119.8760216701364
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -94.02673144489762
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -133.1025940770444
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -89.92018773926972
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -69.60424821463256
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -107.03121825002405
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -52.43116980383286
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -72.37765103796858
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 34
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 35
+p1-1  compterm -151.488235403555
+Not growing [1]
+p1-2  compterm -32.822072320321865
+Not growing [1, 2]
+p1-3  compterm -62.00026009745562
+Not growing [1, 2, 3]
+p1-4  compterm -92.69333195178264
+Not growing [1, 2, 3, 4]
+p1-6  compterm -45.173315712849984
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -97.24416651115305
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -90.8977661103292
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -123.25825652945815
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -96.7733997797027
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -136.9914936022992
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -92.34685861521639
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -71.48868699982071
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -110.10233224034609
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -53.82672641764339
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -74.55542508810497
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 35
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 36
+p1-1  compterm -155.71932835544933
+Not growing [1]
+p1-2  compterm -33.70206938623358
+Not growing [1, 2]
+p1-3  compterm -63.64915535785023
+Not growing [1, 2, 3]
+p1-4  compterm -95.38666526295289
+Not growing [1, 2, 3, 4]
+p1-6  compterm -46.33331624527255
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -99.99971427099901
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -93.30665330530387
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -126.64049138877974
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -99.52006811450806
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -140.8803931275529
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -94.77352949116326
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -73.37312578500881
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -113.17344623066819
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -55.22228303145376
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -76.73319913824162
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 36
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 37
+p1-1  compterm -159.9504213073437
+Not growing [1]
+p1-2  compterm -34.58206645214541
+Not growing [1, 2]
+p1-3  compterm -65.29805061824491
+Not growing [1, 2, 3]
+p1-4  compterm -98.07999857412354
+Not growing [1, 2, 3, 4]
+p1-6  compterm -47.49331677769504
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -102.75526203084502
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -95.71554050027923
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -130.0227262481013
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -102.26673644931337
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -144.76929265280705
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -97.20020036710973
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-14  compterm -75.25756457019705
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-16  compterm -116.24456022099037
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-19  compterm -56.61783964526425
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+p1-20  compterm -78.91097318837788
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+Reproducing: Int64[] week 37
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: [12]
+WEEK 38
+p1-1  compterm -164.02151472113658
+Not growing [1]
+p1-2  compterm -35.46206351805707
+Not growing [1, 2]
+p1-3  compterm -66.50249831445439
+Not growing [1, 2, 3]
+p1-4  compterm -100.77333188529428
+Not growing [1, 2, 3, 4]
+p1-6  compterm -48.65331731011752
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -105.43969879902593
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -98.12442769525381
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -133.06273682510968
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -105.01340478411836
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -148.6581921780614
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -99.62687124305664
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -119.11567366990195
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -57.880062406343434
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-20  compterm -81.08874723851427
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+Reproducing: Int64[] week 38
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 39
+p1-1  compterm -168.09260813492887
+Not growing [1]
+p1-2  compterm -36.34206058396887
+Not growing [1, 2]
+p1-3  compterm -67.70694601066398
+Not growing [1, 2, 3]
+p1-4  compterm -103.46666519646575
+Not growing [1, 2, 3, 4]
+p1-6  compterm -49.81331784254014
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -108.12413556720708
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -100.53331489022891
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -136.10274740211798
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -107.76007311892369
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -152.54709170331552
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -102.05354211900351
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -121.9867871188134
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -59.142285167422656
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-20  compterm -83.26652128865032
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+Reproducing: Int64[] week 39
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 40
+p1-1  compterm -172.16370154872152
+Not growing [1]
+p1-2  compterm -37.22205764988058
+Not growing [1, 2]
+p1-3  compterm -68.9113937068734
+Not growing [1, 2, 3]
+p1-4  compterm -106.15999850763623
+Not growing [1, 2, 3, 4]
+p1-6  compterm -50.97331837496273
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -110.80857233538836
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -102.94220208520373
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -139.1427579791266
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -110.5067414537293
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -156.43599122856946
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -104.48021299495015
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -124.85790056772512
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -60.404507928501886
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-20  compterm -85.44429533878687
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+Reproducing: Int64[] week 40
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 41
+p1-1  compterm -176.23479496251397
+Not growing [1]
+p1-2  compterm -38.10205471579233
+Not growing [1, 2]
+p1-3  compterm -70.11584140308287
+Not growing [1, 2, 3]
+p1-4  compterm -108.85333181880672
+Not growing [1, 2, 3, 4]
+p1-6  compterm -52.13331890738525
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -113.49300910356938
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -105.35108928017877
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -142.18276855613493
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -113.2534097885339
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -160.32489075382355
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -106.90688387089709
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -127.72901401663702
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -61.66673068958123
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-20  compterm -87.62206938892335
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+Reproducing: Int64[] week 41
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 42
+p1-1  compterm -180.30588837630683
+Not growing [1]
+p1-2  compterm -38.98205178170412
+Not growing [1, 2]
+p1-3  compterm -71.32028909929241
+Not growing [1, 2, 3]
+p1-4  compterm -111.54666512997792
+Not growing [1, 2, 3, 4]
+p1-6  compterm -53.293319439807796
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -116.17744587175062
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -107.75997647515321
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -145.22277913314355
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -116.0000781233393
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -164.21379027907787
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -109.33355474684348
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -130.6001274655482
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -62.92895345066033
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-20  compterm -89.79984343905957
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+Reproducing: Int64[] week 42
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 43
+p1-1  compterm -184.37698179009925
+Not growing [1]
+p1-2  compterm -39.86204884761582
+Not growing [1, 2]
+p1-3  compterm -72.52473679550188
+Not growing [1, 2, 3]
+p1-4  compterm -114.2399984411486
+Not growing [1, 2, 3, 4]
+p1-6  compterm -54.453319972230304
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -118.86188263993162
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -110.16886367012803
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -148.2627897101522
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -118.74674645814456
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -168.1026898043319
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -111.76022562279043
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -133.47124091446
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -64.19117621173957
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-20  compterm -91.97761748919595
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+Reproducing: Int64[] week 43
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 44
+p1-1  compterm -188.44807520389205
+Not growing [1]
+p1-2  compterm -40.74204591352757
+Not growing [1, 2]
+p1-3  compterm -73.72918449171138
+Not growing [1, 2, 3]
+p1-4  compterm -116.93333175231919
+Not growing [1, 2, 3, 4]
+p1-6  compterm -55.61332050465285
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -121.54631940811264
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -112.57775086510311
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -151.3028002871604
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -121.49341479295003
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -171.9915893295866
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -114.1868964987373
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -136.3423543633714
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -65.45339897281892
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-20  compterm -94.15539153933213
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+Reproducing: Int64[] week 44
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 45
+p1-1  compterm -192.51916861768453
+Not growing [1]
+p1-2  compterm -41.62204297943933
+Not growing [1, 2]
+p1-3  compterm -74.93363218792092
+Not growing [1, 2, 3]
+p1-4  compterm -119.62666506348997
+Not growing [1, 2, 3, 4]
+p1-6  compterm -56.7733210370754
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -124.23075617629371
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -114.98663806007806
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -154.34281086416897
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -124.2400831277552
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -175.88048885484056
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -116.61356737468384
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -139.21346781228317
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -66.7156217338981
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+p1-20  compterm -96.33316558946878
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+Reproducing: Int64[] week 45
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: [14]
+WEEK 46
+p1-1  compterm -196.3235958150076
+Not growing [1]
+p1-2  compterm -42.50204004535115
+Not growing [1, 2]
+p1-3  compterm -76.13807988413028
+Not growing [1, 2, 3]
+p1-4  compterm -121.97333077589032
+Not growing [1, 2, 3, 4]
+p1-6  compterm -57.93332156949796
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -126.66630417532282
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -117.39552525505313
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -157.29393191065466
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -126.9867514625601
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -179.36938628114535
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -119.04023825063051
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -141.92458063628533
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -67.97784449497729
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+Reproducing: Int64[] week 46
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 47
+p1-1  compterm -200.12802301233035
+Not growing [1]
+p1-2  compterm -43.38203711126283
+Not growing [1, 2]
+p1-3  compterm -77.34252758033986
+Not growing [1, 2, 3]
+p1-4  compterm -124.3199964882903
+Not growing [1, 2, 3, 4]
+p1-6  compterm -59.093322101920535
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -129.10185217435208
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -119.8044124500278
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -160.2450529571401
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -129.73341979736563
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -182.85828370744989
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -121.46690912657702
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -144.6356934602873
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -69.24006725605663
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+Reproducing: Int64[] week 47
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 48
+p1-1  compterm -203.93245020965384
+Not growing [1]
+p1-2  compterm -44.262034177174506
+Not growing [1, 2]
+p1-3  compterm -78.54697527654926
+Not growing [1, 2, 3]
+p1-4  compterm -126.66666220069081
+Not growing [1, 2, 3, 4]
+p1-6  compterm -60.253322634343014
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -131.5374001733811
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -122.21329964500283
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -163.19617400362586
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -132.48008813217095
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -186.34718113375448
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -123.89358000252443
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -147.34680628428936
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -70.50229001713586
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+Reproducing: Int64[] week 48
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 49
+p1-1  compterm -207.73687740697727
+Not growing [1]
+p1-2  compterm -45.14203124308636
+Not growing [1, 2]
+p1-3  compterm -79.75142297275877
+Not growing [1, 2, 3]
+p1-4  compterm -129.01332791309127
+Not growing [1, 2, 3, 4]
+p1-6  compterm -61.413323166765714
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -133.97294817241036
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -124.62218683997767
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -166.14729505011144
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -135.22675646697647
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -189.83607856005884
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -126.32025087847107
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -150.05791910829123
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -71.76451277821518
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+Reproducing: Int64[] week 49
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 50
+p1-1  compterm -211.54130460430045
+Not growing [1]
+p1-2  compterm -46.02202830899802
+Not growing [1, 2]
+p1-3  compterm -80.95587066896826
+Not growing [1, 2, 3]
+p1-4  compterm -131.3599936254912
+Not growing [1, 2, 3, 4]
+p1-6  compterm -62.57332369918815
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -136.40849617143923
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -127.03107403495233
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -169.09841609659676
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -137.97342480178122
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -193.32497598636388
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -128.74692175441797
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -152.76903193229322
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -73.02673553929431
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+Reproducing: Int64[] week 50
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 51
+p1-1  compterm -215.34573180162326
+Not growing [1]
+p1-2  compterm -46.90202537490988
+Not growing [1, 2]
+p1-3  compterm -82.16031836517777
+Not growing [1, 2, 3]
+p1-4  compterm -133.7066593378916
+Not growing [1, 2, 3, 4]
+p1-6  compterm -63.73332423161078
+Not growing [1, 2, 3, 4, 5]
+p1-7  compterm -138.8440441704686
+Not growing [1, 2, 3, 4, 5, 6]
+p1-8  compterm -129.43996122992758
+Not growing [1, 2, 3, 4, 5, 6, 7]
+p1-9  compterm -172.04953714308223
+Not growing [1, 2, 3, 4, 5, 6, 7, 8]
+p1-11  compterm -140.72009313658663
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9]
+p1-12  compterm -196.81387341266793
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+p1-13  compterm -131.1735926303644
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+p1-16  compterm -155.48014475629526
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+p1-19  compterm -74.28895830037351
+Not growing [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+Reproducing: Int64[] week 51
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: [1, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13]
+WEEK 52
+p1-2  compterm -47.36424759713208
+Not growing [1]
+p1-8  compterm -130.43996122992732
+Not growing [1, 2]
+Reproducing: Int64[] week 52
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: [1, 2]
+WEEK 53
+Reproducing: Int64[] week 53
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 54
+Reproducing: Int64[] week 54
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 55
+Reproducing: Int64[] week 55
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 56
+Reproducing: Int64[] week 56
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 57
+Reproducing: Int64[] week 57
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 58
+Reproducing: Int64[] week 58
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 59
+Reproducing: Int64[] week 59
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 60
+Reproducing: Int64[] week 60
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 61
+Reproducing: Int64[] week 61
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 62
+Reproducing: Int64[] week 62
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 63
+Reproducing: Int64[] week 63
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 64
+Reproducing: Int64[] week 64
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 65
+Reproducing: Int64[] week 65
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 66
+Reproducing: Int64[] week 66
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 67
+Reproducing: Int64[] week 67
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 68
+Reproducing: Int64[] week 68
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 69
+Reproducing: Int64[] week 69
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 70
+Reproducing: Int64[] week 70
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 71
+Reproducing: Int64[] week 71
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 72
+Reproducing: Int64[] week 72
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 73
+Reproducing: Int64[] week 73
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 74
+Reproducing: Int64[] week 74
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 75
+Reproducing: Int64[] week 75
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 76
+Reproducing: Int64[] week 76
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 77
+Reproducing: Int64[] week 77
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 78
+Reproducing: Int64[] week 78
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 79
+Reproducing: Int64[] week 79
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 80
+Reproducing: Int64[] week 80
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 81
+Reproducing: Int64[] week 81
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 82
+Reproducing: Int64[] week 82
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 83
+Reproducing: Int64[] week 83
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 84
+Reproducing: Int64[] week 84
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 85
+Reproducing: Int64[] week 85
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 86
+Reproducing: Int64[] week 86
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 87
+Reproducing: Int64[] week 87
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 88
+Reproducing: Int64[] week 88
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 89
+Reproducing: Int64[] week 89
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 90
+Reproducing: Int64[] week 90
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 91
+Reproducing: Int64[] week 91
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 92
+Reproducing: Int64[] week 92
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 93
+Reproducing: Int64[] week 93
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 94
+Reproducing: Int64[] week 94
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 95
+Reproducing: Int64[] week 95
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 96
+Reproducing: Int64[] week 96
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 97
+Reproducing: Int64[] week 97
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 98
+Reproducing: Int64[] week 98
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 99
+Reproducing: Int64[] week 99
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 100
+Reproducing: Int64[] week 100
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 101
+Reproducing: Int64[] week 101
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 102
+Reproducing: Int64[] week 102
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 103
+Reproducing: Int64[] week 103
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 104
+Reproducing: Int64[] week 104
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 105
+Reproducing: Int64[] week 105
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 106
+Reproducing: Int64[] week 106
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 107
+Reproducing: Int64[] week 107
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 108
+Reproducing: Int64[] week 108
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 109
+Reproducing: Int64[] week 109
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 110
+Reproducing: Int64[] week 110
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 111
+Reproducing: Int64[] week 111
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 112
+Reproducing: Int64[] week 112
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 113
+Reproducing: Int64[] week 113
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 114
+Reproducing: Int64[] week 114
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 115
+Reproducing: Int64[] week 115
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 116
+Reproducing: Int64[] week 116
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 117
+Reproducing: Int64[] week 117
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 118
+Reproducing: Int64[] week 118
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 119
+Reproducing: Int64[] week 119
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 120
+Reproducing: Int64[] week 120
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 121
+Reproducing: Int64[] week 121
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 122
+Reproducing: Int64[] week 122
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 123
+Reproducing: Int64[] week 123
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 124
+Reproducing: Int64[] week 124
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 125
+Reproducing: Int64[] week 125
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 126
+Reproducing: Int64[] week 126
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 127
+Reproducing: Int64[] week 127
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 128
+Reproducing: Int64[] week 128
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 129
+Reproducing: Int64[] week 129
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 130
+Reproducing: Int64[] week 130
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 131
+Reproducing: Int64[] week 131
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 132
+Reproducing: Int64[] week 132
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 133
+Reproducing: Int64[] week 133
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 134
+Reproducing: Int64[] week 134
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 135
+Reproducing: Int64[] week 135
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 136
+Reproducing: Int64[] week 136
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 137
+Reproducing: Int64[] week 137
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 138
+Reproducing: Int64[] week 138
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 139
+Reproducing: Int64[] week 139
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 140
+Reproducing: Int64[] week 140
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 141
+Reproducing: Int64[] week 141
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 142
+Reproducing: Int64[] week 142
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 143
+Reproducing: Int64[] week 143
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 144
+Reproducing: Int64[] week 144
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 145
+Reproducing: Int64[] week 145
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 146
+Reproducing: Int64[] week 146
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 147
+Reproducing: Int64[] week 147
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 148
+Reproducing: Int64[] week 148
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 149
+Reproducing: Int64[] week 149
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 150
+Reproducing: Int64[] week 150
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 151
+Reproducing: Int64[] week 151
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 152
+Reproducing: Int64[] week 152
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 153
+Reproducing: Int64[] week 153
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 154
+Reproducing: Int64[] week 154
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 155
+Reproducing: Int64[] week 155
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 156
+Reproducing: Int64[] week 156
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 157
+Reproducing: Int64[] week 157
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 158
+Reproducing: Int64[] week 158
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 159
+Reproducing: Int64[] week 159
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 160
+Reproducing: Int64[] week 160
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 161
+Reproducing: Int64[] week 161
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 162
+Reproducing: Int64[] week 162
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 163
+Reproducing: Int64[] week 163
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 164
+Reproducing: Int64[] week 164
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 165
+Reproducing: Int64[] week 165
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 166
+Reproducing: Int64[] week 166
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 167
+Reproducing: Int64[] week 167
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 168
+Reproducing: Int64[] week 168
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 169
+Reproducing: Int64[] week 169
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 170
+Reproducing: Int64[] week 170
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 171
+Reproducing: Int64[] week 171
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 172
+Reproducing: Int64[] week 172
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 173
+Reproducing: Int64[] week 173
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 174
+Reproducing: Int64[] week 174
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 175
+Reproducing: Int64[] week 175
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 176
+Reproducing: Int64[] week 176
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 177
+Reproducing: Int64[] week 177
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 178
+Reproducing: Int64[] week 178
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 179
+Reproducing: Int64[] week 179
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 180
+Reproducing: Int64[] week 180
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 181
+Reproducing: Int64[] week 181
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 182
+Reproducing: Int64[] week 182
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 183
+Reproducing: Int64[] week 183
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 184
+Reproducing: Int64[] week 184
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 185
+Reproducing: Int64[] week 185
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 186
+Reproducing: Int64[] week 186
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 187
+Reproducing: Int64[] week 187
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 188
+Reproducing: Int64[] week 188
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 189
+Reproducing: Int64[] week 189
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 190
+Reproducing: Int64[] week 190
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 191
+Reproducing: Int64[] week 191
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 192
+Reproducing: Int64[] week 192
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 193
+Reproducing: Int64[] week 193
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 194
+Reproducing: Int64[] week 194
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 195
+Reproducing: Int64[] week 195
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 196
+Reproducing: Int64[] week 196
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 197
+Reproducing: Int64[] week 197
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 198
+Reproducing: Int64[] week 198
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 199
+Reproducing: Int64[] week 199
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 200
+Reproducing: Int64[] week 200
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 201
+Reproducing: Int64[] week 201
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 202
+Reproducing: Int64[] week 202
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 203
+Reproducing: Int64[] week 203
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 204
+Reproducing: Int64[] week 204
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 205
+Reproducing: Int64[] week 205
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 206
+Reproducing: Int64[] week 206
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 207
+Reproducing: Int64[] week 207
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 208
+Reproducing: Int64[] week 208
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 209
+Reproducing: Int64[] week 209
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 210
+Reproducing: Int64[] week 210
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 211
+Reproducing: Int64[] week 211
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 212
+Reproducing: Int64[] week 212
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 213
+Reproducing: Int64[] week 213
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 214
+Reproducing: Int64[] week 214
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 215
+Reproducing: Int64[] week 215
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 216
+Reproducing: Int64[] week 216
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 217
+Reproducing: Int64[] week 217
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 218
+Reproducing: Int64[] week 218
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 219
+Reproducing: Int64[] week 219
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 220
+Reproducing: Int64[] week 220
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 221
+Reproducing: Int64[] week 221
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 222
+Reproducing: Int64[] week 222
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 223
+Reproducing: Int64[] week 223
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 224
+Reproducing: Int64[] week 224
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 225
+Reproducing: Int64[] week 225
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 226
+Reproducing: Int64[] week 226
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 227
+Reproducing: Int64[] week 227
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 228
+Reproducing: Int64[] week 228
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 229
+Reproducing: Int64[] week 229
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 230
+Reproducing: Int64[] week 230
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 231
+Reproducing: Int64[] week 231
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 232
+Reproducing: Int64[] week 232
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 233
+Reproducing: Int64[] week 233
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 234
+Reproducing: Int64[] week 234
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 235
+Reproducing: Int64[] week 235
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 236
+Reproducing: Int64[] week 236
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 237
+Reproducing: Int64[] week 237
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 238
+Reproducing: Int64[] week 238
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 239
+Reproducing: Int64[] week 239
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 240
+Reproducing: Int64[] week 240
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 241
+Reproducing: Int64[] week 241
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 242
+Reproducing: Int64[] week 242
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 243
+Reproducing: Int64[] week 243
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 244
+Reproducing: Int64[] week 244
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 245
+Reproducing: Int64[] week 245
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 246
+Reproducing: Int64[] week 246
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 247
+Reproducing: Int64[] week 247
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 248
+Reproducing: Int64[] week 248
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 249
+Reproducing: Int64[] week 249
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 250
+Reproducing: Int64[] week 250
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 251
+Reproducing: Int64[] week 251
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 252
+Reproducing: Int64[] week 252
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 253
+Reproducing: Int64[] week 253
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 254
+Reproducing: Int64[] week 254
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 255
+Reproducing: Int64[] week 255
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 256
+Reproducing: Int64[] week 256
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 257
+Reproducing: Int64[] week 257
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 258
+Reproducing: Int64[] week 258
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 259
+Reproducing: Int64[] week 259
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 260
+Reproducing: Int64[] week 260
+Total offspring this summer: Organisms.Organism[]
+Dispersing: Organisms.Organism[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]

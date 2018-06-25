@@ -1,0 +1,3245 @@
+WEEK 1
+p1-1  compterm 1.0
+p1-1 should grow 0.011685086393528478
+p1-1-a grew VEG 0.011685086393528478
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01168310357923386
+p1-2-a grew VEG 0.01168310357923386
+Not growing Int64[]
+WEEK 1
+p1-1  compterm 1.0
+p1-1 should grow 0.011685086393528478
+p1-1-a grew VEG 0.011685086393528478
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01168310357923386
+p1-2-a grew VEG 0.01168310357923386
+Not growing Int64[]
+WEEK 1
+p1-1  compterm 1.0
+p1-1 should grow 0.011685086393528478
+p1-1-a grew VEG 0.011685086393528478
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01168310357923386
+p1-2-a grew VEG 0.01168310357923386
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 2
+p1-1  compterm 1.0
+p1-1 should grow 0.011679318648842347
+p1-1-a grew VEG 0.011679318648842347
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011905854167149319
+p1-2-a grew VEG 0.011905854167149319
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 3
+p1-1  compterm 1.0
+p1-1 should grow 0.011835209863980472
+p1-1-a grew VEG 0.011835209863980472
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01163524709557735
+p1-2-a grew VEG 0.01163524709557735
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 4
+p1-1  compterm 1.0
+p1-1 should grow 0.01178371633008883
+p1-1-a grew VEG 0.01178371633008883
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011705662765374087
+p1-2-a grew VEG 0.011705662765374087
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 5
+p1-1  compterm 1.0
+p1-1 should grow 0.011757857099235635
+p1-1-a grew VEG 0.011757857099235635
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011574512707762833
+p1-2-a grew VEG 0.011574512707762833
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 6
+p1-1  compterm 1.0
+p1-1 should grow 0.011736679342062229
+p1-1-a grew VEG 0.011736679342062229
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011664245961676492
+p1-2-a grew VEG 0.011664245961676492
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 7
+p1-1  compterm 1.0
+p1-1 should grow 0.011703008145218022
+p1-1-a grew VEG 0.011703008145218022
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011932506476115866
+p1-2-a grew VEG 0.011932506476115866
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 8
+p1-1  compterm 1.0
+p1-1 should grow 0.01165480031787289
+p1-1-a grew VEG 0.01165480031787289
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011689839767047131
+p1-2-a grew VEG 0.011689839767047131
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 9
+p1-1  compterm 1.0
+p1-1 should grow 0.011889625849194941
+p1-1-a grew VEG 0.011889625849194941
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011693478869182292
+p1-2-a grew VEG 0.011693478869182292
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 10
+p1-1  compterm 1.0
+p1-1 should grow 0.011612768798752122
+p1-1-a grew VEG 0.011612768798752122
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011606810895390564
+p1-2-a grew VEG 0.011606810895390564
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 11
+p1-1  compterm 1.0
+p1-1 should grow 0.011937308112837795
+p1-1-a grew VEG 0.011937308112837795
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01152562237244783
+p1-2-a grew VEG 0.01152562237244783
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 12
+p1-1  compterm 1.0
+p1-1 should grow 0.01165467765027449
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011909001660229542
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 12
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0116547,"veg"=>99.7073), "p1", "a", 11, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.011909,"veg"=>99.6841), "p1", "a", 11, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 13
+p1-1  compterm 1.0
+p1-1 should grow 0.011680725002145535
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011741506870808327
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 13
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0233354,"veg"=>99.7073), "p1", "a", 12, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0236505,"veg"=>99.6841), "p1", "a", 12, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 14
+p1-1  compterm 1.0
+p1-1 should grow 0.011803658923516697
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011712177710512113
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 14
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0348609,"veg"=>99.7073), "p1", "a", 13, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0346373,"veg"=>99.6841), "p1", "a", 13, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 15
+p1-1  compterm 1.0
+p1-1 should grow 0.011747202741285856
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011788732095488893
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+Reproducing: [1, 2] week 15
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0231137,"veg"=>99.7073), "p1", "a", 14, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0228486,"veg"=>99.6841), "p1", "a", 14, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 16
+p1-1  compterm 1.0
+p1-1 should grow 0.011750840803064284
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011802391015029983
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+Reproducing: [1, 2] week 16
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0113629,"veg"=>99.7073), "p1", "a", 15, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0110462,"veg"=>99.6841), "p1", "a", 15, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 17
+p1-1  compterm 1.0
+p1-1 should grow 0.011687807319830736
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011893070693582477
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+Reproducing: [1, 2] week 17
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.000324912,"veg"=>99.7073), "p1", "a", 16, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.00084688,"veg"=>99.6841), "p1", "a", 16, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 18
+p1-1  compterm 1.0
+p1-1 should grow 0.011852520753202266
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01165853566402062
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+Reproducing: [1, 2] week 18
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0121774,"veg"=>99.7073), "p1", "a", 17, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0125054,"veg"=>99.6841), "p1", "a", 17, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 19
+p1-1  compterm 1.0
+p1-1 should grow 0.011778004733775908
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011931577334124291
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+Reproducing: [1, 2] week 19
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0239554,"veg"=>99.7073), "p1", "a", 18, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.024437,"veg"=>99.6841), "p1", "a", 18, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 20
+p1-1  compterm 1.0
+p1-1 should grow 0.011773825532223428
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01184912675070685
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+Reproducing: [1, 2] week 20
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0342707,"veg"=>99.7073), "p1", "a", 19, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0337139,"veg"=>99.6841), "p1", "a", 19, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 21
+p1-1  compterm 1.0
+p1-1 should grow 0.011758303431886651
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011752478120523411
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+p1-5  compterm -1422.390520259687
+Not growing [3, 4, 5]
+p1-6  compterm -852.8355629532136
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 21
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0225124,"veg"=>99.7073), "p1", "a", 20, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0219614,"veg"=>99.6841), "p1", "a", 20, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 22
+p1-1  compterm 1.0
+p1-1 should grow 0.011605159576092075
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011876127715410752
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+p1-5  compterm -1422.390520259687
+Not growing [3, 4, 5]
+p1-6  compterm -852.8355629532136
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 22
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0109073,"veg"=>99.7073), "p1", "a", 21, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0100853,"veg"=>99.6841), "p1", "a", 21, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 23
+p1-1  compterm 1.0
+p1-1 should grow 0.011648876987847424
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011716121710597346
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+p1-5  compterm -1422.390520259687
+Not growing [3, 4, 5]
+p1-6  compterm -852.8355629532136
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 23
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.000741603,"veg"=>99.7073), "p1", "a", 22, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.00163085,"veg"=>99.6841), "p1", "a", 22, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 24
+p1-1  compterm 1.0
+p1-1 should grow 0.011743886156142812
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011991458301347036
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+p1-5  compterm -1422.390520259687
+Not growing [3, 4, 5]
+p1-6  compterm -852.8355629532136
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 24
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0124855,"veg"=>99.7073), "p1", "a", 23, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0136223,"veg"=>99.6841), "p1", "a", 23, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 25
+p1-1  compterm 1.0
+p1-1 should grow 0.011828817928188896
+p1-1-a grew VEG 0.011828817928188896
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011838704780685128
+p1-2-a grew VEG 0.011838704780685128
+Not growing Int64[]
+p1-3  compterm -1422.390520259687
+Not growing [3]
+p1-4  compterm -852.8355629532136
+Not growing [3, 4]
+p1-5  compterm -1422.390520259687
+Not growing [3, 4, 5]
+p1-6  compterm -852.8355629532136
+Not growing [3, 4, 5, 6]
+Dispersing: Int64[]
+Establishing seeds: [3, 4, 5, 6]
+Dying orgs: Int64[]
+WEEK 26
+p1-1  compterm 1.0
+p1-1 should grow 0.01192751579553542
+p1-1-a grew VEG 0.01192751579553542
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011770697857874043
+p1-2-a grew VEG 0.011770697857874043
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 27
+p1-1  compterm 1.0
+p1-1 should grow 0.011547463030534345
+p1-1-a grew VEG 0.011547463030534345
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011800682572295464
+p1-2-a grew VEG 0.011800682572295464
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 28
+p1-1  compterm 1.0
+p1-1 should grow 0.011801919467208188
+p1-1-a grew VEG 0.011801919467208188
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01175684209471723
+p1-2-a grew VEG 0.01175684209471723
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 29
+p1-1  compterm 1.0
+p1-1 should grow 0.01185716895715943
+p1-1-a grew VEG 0.01185716895715943
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011783529125657896
+p1-2-a grew VEG 0.011783529125657896
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 30
+p1-1  compterm 1.0
+p1-1 should grow 0.011730537707715986
+p1-1-a grew VEG 0.011730537707715986
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011752847135149569
+p1-2-a grew VEG 0.011752847135149569
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 31
+p1-1  compterm 1.0
+p1-1 should grow 0.01193394505366276
+p1-1-a grew VEG 0.01193394505366276
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011947556915142434
+p1-2-a grew VEG 0.011947556915142434
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 32
+p1-1  compterm 1.0
+p1-1 should grow 0.011875316295915568
+p1-1-a grew VEG 0.011875316295915568
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011672586904142341
+p1-2-a grew VEG 0.011672586904142341
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 33
+p1-1  compterm 1.0
+p1-1 should grow 0.011600714365329275
+p1-1-a grew VEG 0.011600714365329275
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011527933911411537
+p1-2-a grew VEG 0.011527933911411537
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 34
+p1-1  compterm 1.0
+p1-1 should grow 0.011933710209184082
+p1-1-a grew VEG 0.011933710209184082
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011928126807535147
+p1-2-a grew VEG 0.011928126807535147
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 35
+p1-1  compterm 1.0
+p1-1 should grow 0.011560909333510196
+p1-1-a grew VEG 0.011560909333510196
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.0119628129814713
+p1-2-a grew VEG 0.0119628129814713
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 36
+p1-1  compterm 1.0
+p1-1 should grow 0.011774797376958813
+p1-1-a grew VEG 0.011774797376958813
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011861635485920136
+p1-2-a grew VEG 0.011861635485920136
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 37
+p1-1  compterm 1.0
+p1-1 should grow 0.011862237746416095
+p1-1-a grew VEG 0.011862237746416095
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011869583165036036
+p1-2-a grew VEG 0.011869583165036036
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 38
+p1-1  compterm 1.0
+p1-1 should grow 0.011812049727077419
+p1-1-a grew VEG 0.011812049727077419
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011933867675192764
+p1-2-a grew VEG 0.011933867675192764
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 39
+p1-1  compterm 1.0
+p1-1 should grow 0.011717121199642886
+p1-1-a grew VEG 0.011717121199642886
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011887267799891603
+p1-2-a grew VEG 0.011887267799891603
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 40
+p1-1  compterm 1.0
+p1-1 should grow 0.011730409494710032
+p1-1-a grew VEG 0.011730409494710032
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011767713202764587
+p1-2-a grew VEG 0.011767713202764587
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 41
+p1-1  compterm 1.0
+p1-1 should grow 0.011940770897684713
+p1-1-a grew VEG 0.011940770897684713
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011699288454664196
+p1-2-a grew VEG 0.011699288454664196
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 42
+p1-1  compterm 1.0
+p1-1 should grow 0.01179463659135737
+p1-1-a grew VEG 0.01179463659135737
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011873490233597848
+p1-2-a grew VEG 0.011873490233597848
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 43
+p1-1  compterm 1.0
+p1-1 should grow 0.01177171385440702
+p1-1-a grew VEG 0.01177171385440702
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011755384689766238
+p1-2-a grew VEG 0.011755384689766238
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 44
+p1-1  compterm 1.0
+p1-1 should grow 0.012041138775630454
+p1-1-a grew VEG 0.012041138775630454
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011892182748120863
+p1-2-a grew VEG 0.011892182748120863
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 45
+p1-1  compterm 1.0
+p1-1 should grow 0.011785326268434902
+p1-1-a grew VEG 0.011785326268434902
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011884226324739833
+p1-2-a grew VEG 0.011884226324739833
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 46
+p1-1  compterm 1.0
+p1-1 should grow 0.011679209616037033
+p1-1-a grew VEG 0.011679209616037033
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011499383110167032
+p1-2-a grew VEG 0.011499383110167032
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 47
+p1-1  compterm 1.0
+p1-1 should grow 0.011892355682241597
+p1-1-a grew VEG 0.011892355682241597
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011916538378307619
+p1-2-a grew VEG 0.011916538378307619
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 48
+p1-1  compterm 1.0
+p1-1 should grow 0.011862955605985393
+p1-1-a grew VEG 0.011862955605985393
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01173561275094799
+p1-2-a grew VEG 0.01173561275094799
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 49
+p1-1  compterm 1.0
+p1-1 should grow 0.011652363710766823
+p1-1-a grew VEG 0.011652363710766823
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011859178659366346
+p1-2-a grew VEG 0.011859178659366346
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 50
+p1-1  compterm 1.0
+p1-1 should grow 0.011870931333782983
+p1-1-a grew VEG 0.011870931333782983
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011866115657451506
+p1-2-a grew VEG 0.011866115657451506
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 51
+p1-1  compterm 1.0
+p1-1 should grow 0.011766498527340455
+p1-1-a grew VEG 0.011766498527340455
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01173116997984142
+p1-2-a grew VEG 0.01173116997984142
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 52
+p1-1  compterm 1.0
+p1-1 should grow 0.011567075777675689
+p1-1-a grew VEG 0.011567075777675689
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011824806205368714
+p1-2-a grew VEG 0.011824806205368714
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 53
+p1-1  compterm 1.0
+p1-1 should grow 0.011684327031663928
+p1-1-a grew VEG 0.011684327031663928
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011893436830799266
+p1-2-a grew VEG 0.011893436830799266
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 54
+p1-1  compterm 1.0
+p1-1 should grow 0.011768538113064378
+p1-1-a grew VEG 0.011768538113064378
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011819843153125292
+p1-2-a grew VEG 0.011819843153125292
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 55
+p1-1  compterm 1.0
+p1-1 should grow 0.011873050299810114
+p1-1-a grew VEG 0.011873050299810114
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01183623940355991
+p1-2-a grew VEG 0.01183623940355991
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 56
+p1-1  compterm 1.0
+p1-1 should grow 0.012006064355948306
+p1-1-a grew VEG 0.012006064355948306
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011731078471089356
+p1-2-a grew VEG 0.011731078471089356
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 57
+p1-1  compterm 1.0
+p1-1 should grow 0.011871746157043717
+p1-1-a grew VEG 0.011871746157043717
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011781533284045688
+p1-2-a grew VEG 0.011781533284045688
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 58
+p1-1  compterm 1.0
+p1-1 should grow 0.011927948611585608
+p1-1-a grew VEG 0.011927948611585608
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011873541334641292
+p1-2-a grew VEG 0.011873541334641292
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 59
+p1-1  compterm 1.0
+p1-1 should grow 0.011893797895215745
+p1-1-a grew VEG 0.011893797895215745
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011816608640587905
+p1-2-a grew VEG 0.011816608640587905
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 60
+p1-1  compterm 1.0
+p1-1 should grow 0.01157468522309218
+p1-1-a grew VEG 0.01157468522309218
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011890039303370853
+p1-2-a grew VEG 0.011890039303370853
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 61
+p1-1  compterm 1.0
+p1-1 should grow 0.011750664260594887
+p1-1-a grew VEG 0.011750664260594887
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011974594247475113
+p1-2-a grew VEG 0.011974594247475113
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 62
+p1-1  compterm 1.0
+p1-1 should grow 0.011815489860188173
+p1-1-a grew VEG 0.011815489860188173
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011874518418861873
+p1-2-a grew VEG 0.011874518418861873
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 63
+p1-1  compterm 1.0
+p1-1 should grow 0.011811542288504548
+p1-1-a grew VEG 0.011811542288504548
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011779774918131695
+p1-2-a grew VEG 0.011779774918131695
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 64
+p1-1  compterm 1.0
+p1-1 should grow 0.011874605640197428
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011752259858890246
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 64
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0243601,"veg"=>100.167), "p1", "a", 63, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0253746,"veg"=>100.145), "p1", "a", 63, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 65
+p1-1  compterm 1.0
+p1-1 should grow 0.011685116762114582
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011816800918978769
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 65
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0339548,"veg"=>100.167), "p1", "a", 64, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0328086,"veg"=>100.145), "p1", "a", 64, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 66
+p1-1  compterm 1.0
+p1-1 should grow 0.012205198477466319
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011666376884297794
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+Reproducing: [1, 2] week 66
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0217496,"veg"=>100.167), "p1", "a", 65, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0211423,"veg"=>100.145), "p1", "a", 65, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 67
+p1-1  compterm 1.0
+p1-1 should grow 0.011801851082479947
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011864032681047368
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+Reproducing: [1, 2] week 67
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.00994774,"veg"=>100.167), "p1", "a", 66, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.00927822,"veg"=>100.145), "p1", "a", 66, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 68
+p1-1  compterm 1.0
+p1-1 should grow 0.011562671880130167
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011856778831505184
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+Reproducing: [1, 2] week 68
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.00161493,"veg"=>100.167), "p1", "a", 67, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.00257855,"veg"=>100.145), "p1", "a", 67, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 69
+p1-1  compterm 1.0
+p1-1 should grow 0.011982287148377409
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011620963833858227
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+Reproducing: [1, 2] week 69
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0135972,"veg"=>100.167), "p1", "a", 68, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0141995,"veg"=>100.145), "p1", "a", 68, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 70
+p1-1  compterm 1.0
+p1-1 should grow 0.011701071057220201
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011746125272956381
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+Reproducing: [1, 2] week 70
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0252983,"veg"=>100.167), "p1", "a", 69, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0259456,"veg"=>100.145), "p1", "a", 69, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 71
+p1-1  compterm 1.0
+p1-1 should grow 0.012122909773579719
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011688777763523055
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+Reproducing: [1, 2] week 71
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0325788,"veg"=>100.167), "p1", "a", 70, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0323656,"veg"=>100.145), "p1", "a", 70, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 72
+p1-1  compterm 1.0
+p1-1 should grow 0.011772302195937799
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011944195658965612
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+p1-5  compterm -1428.9633411800683
+Not growing [3, 4, 5]
+p1-6  compterm -856.7858855841819
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 72
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0208065,"veg"=>100.167), "p1", "a", 71, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0204214,"veg"=>100.145), "p1", "a", 71, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 73
+p1-1  compterm 1.0
+p1-1 should grow 0.011800234274135126
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011981995160052009
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+p1-5  compterm -1428.9633411800683
+Not growing [3, 4, 5]
+p1-6  compterm -856.7858855841819
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 73
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.00900626,"veg"=>100.167), "p1", "a", 72, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.00843939,"veg"=>100.145), "p1", "a", 72, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 74
+p1-1  compterm 1.0
+p1-1 should grow 0.011630059511377093
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011759178662845132
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+p1-5  compterm -1428.9633411800683
+Not growing [3, 4, 5]
+p1-6  compterm -856.7858855841819
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 74
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0026238,"veg"=>100.167), "p1", "a", 73, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.00331979,"veg"=>100.145), "p1", "a", 73, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 75
+p1-1  compterm 1.0
+p1-1 should grow 0.011914700047424696
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011952212642374758
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+p1-5  compterm -1428.9633411800683
+Not growing [3, 4, 5]
+p1-6  compterm -856.7858855841819
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 75
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0145385,"veg"=>100.167), "p1", "a", 74, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.015272,"veg"=>100.145), "p1", "a", 74, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 76
+p1-1  compterm 1.0
+p1-1 should grow 0.01206393161663943
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011643586822658876
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+p1-5  compterm -1428.9633411800683
+Not growing [3, 4, 5]
+p1-6  compterm -856.7858855841819
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 76
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0266024,"veg"=>100.167), "p1", "a", 75, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0269156,"veg"=>100.145), "p1", "a", 75, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 77
+p1-1  compterm 1.0
+p1-1 should grow 0.011753031725153105
+p1-1-a grew VEG 0.011753031725153105
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01182225568639607
+p1-2-a grew VEG 0.01182225568639607
+Not growing Int64[]
+p1-3  compterm -1428.9633411800683
+Not growing [3]
+p1-4  compterm -856.7858855841819
+Not growing [3, 4]
+p1-5  compterm -1428.9633411800683
+Not growing [3, 4, 5]
+p1-6  compterm -856.7858855841819
+Not growing [3, 4, 5, 6]
+Dispersing: Int64[]
+Establishing seeds: [3, 4, 5, 6]
+Dying orgs: Int64[]
+WEEK 78
+p1-1  compterm 1.0
+p1-1 should grow 0.01163370433386028
+p1-1-a grew VEG 0.01163370433386028
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011818446394293422
+p1-2-a grew VEG 0.011818446394293422
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 79
+p1-1  compterm 1.0
+p1-1 should grow 0.011941789511994642
+p1-1-a grew VEG 0.011941789511994642
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011789845207599712
+p1-2-a grew VEG 0.011789845207599712
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 80
+p1-1  compterm 1.0
+p1-1 should grow 0.011856762941500362
+p1-1-a grew VEG 0.011856762941500362
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012009168332470755
+p1-2-a grew VEG 0.012009168332470755
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 81
+p1-1  compterm 1.0
+p1-1 should grow 0.011753013937370436
+p1-1-a grew VEG 0.011753013937370436
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011777728126676698
+p1-2-a grew VEG 0.011777728126676698
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 82
+p1-1  compterm 1.0
+p1-1 should grow 0.011803689125411798
+p1-1-a grew VEG 0.011803689125411798
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01169003707388975
+p1-2-a grew VEG 0.01169003707388975
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 83
+p1-1  compterm 1.0
+p1-1 should grow 0.011990028056825358
+p1-1-a grew VEG 0.011990028056825358
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01207372794048154
+p1-2-a grew VEG 0.01207372794048154
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 84
+p1-1  compterm 1.0
+p1-1 should grow 0.01185738883886359
+p1-1-a grew VEG 0.01185738883886359
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011935183796474968
+p1-2-a grew VEG 0.011935183796474968
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 85
+p1-1  compterm 1.0
+p1-1 should grow 0.011742087029867326
+p1-1-a grew VEG 0.011742087029867326
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012037504784328608
+p1-2-a grew VEG 0.012037504784328608
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 86
+p1-1  compterm 1.0
+p1-1 should grow 0.012082760811496585
+p1-1-a grew VEG 0.012082760811496585
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011756694316452414
+p1-2-a grew VEG 0.011756694316452414
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 87
+p1-1  compterm 1.0
+p1-1 should grow 0.011972273337475598
+p1-1-a grew VEG 0.011972273337475598
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011709081806029129
+p1-2-a grew VEG 0.011709081806029129
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 88
+p1-1  compterm 1.0
+p1-1 should grow 0.011891963345580599
+p1-1-a grew VEG 0.011891963345580599
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011810676189271408
+p1-2-a grew VEG 0.011810676189271408
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 89
+p1-1  compterm 1.0
+p1-1 should grow 0.011868565613042835
+p1-1-a grew VEG 0.011868565613042835
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011969528736186869
+p1-2-a grew VEG 0.011969528736186869
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 90
+p1-1  compterm 1.0
+p1-1 should grow 0.011827048588430965
+p1-1-a grew VEG 0.011827048588430965
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011662783640362056
+p1-2-a grew VEG 0.011662783640362056
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 91
+p1-1  compterm 1.0
+p1-1 should grow 0.01165928994883122
+p1-1-a grew VEG 0.01165928994883122
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011818087703846049
+p1-2-a grew VEG 0.011818087703846049
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 92
+p1-1  compterm 1.0
+p1-1 should grow 0.011720961504604768
+p1-1-a grew VEG 0.011720961504604768
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011719253912985348
+p1-2-a grew VEG 0.011719253912985348
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 93
+p1-1  compterm 1.0
+p1-1 should grow 0.011802531409713215
+p1-1-a grew VEG 0.011802531409713215
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011738721109678286
+p1-2-a grew VEG 0.011738721109678286
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 94
+p1-1  compterm 1.0
+p1-1 should grow 0.011809660338940903
+p1-1-a grew VEG 0.011809660338940903
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011733640795708456
+p1-2-a grew VEG 0.011733640795708456
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 95
+p1-1  compterm 1.0
+p1-1 should grow 0.011790497591306915
+p1-1-a grew VEG 0.011790497591306915
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011704999104483714
+p1-2-a grew VEG 0.011704999104483714
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 96
+p1-1  compterm 1.0
+p1-1 should grow 0.012007035504363812
+p1-1-a grew VEG 0.012007035504363812
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011933412405559403
+p1-2-a grew VEG 0.011933412405559403
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 97
+p1-1  compterm 1.0
+p1-1 should grow 0.01200563022244255
+p1-1-a grew VEG 0.01200563022244255
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011930937465298476
+p1-2-a grew VEG 0.011930937465298476
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 98
+p1-1  compterm 1.0
+p1-1 should grow 0.011606199082421009
+p1-1-a grew VEG 0.011606199082421009
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011881149702021232
+p1-2-a grew VEG 0.011881149702021232
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 99
+p1-1  compterm 1.0
+p1-1 should grow 0.011870362140894177
+p1-1-a grew VEG 0.011870362140894177
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011963319105817976
+p1-2-a grew VEG 0.011963319105817976
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 100
+p1-1  compterm 1.0
+p1-1 should grow 0.01175950213472971
+p1-1-a grew VEG 0.01175950213472971
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011960223960074878
+p1-2-a grew VEG 0.011960223960074878
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 101
+p1-1  compterm 1.0
+p1-1 should grow 0.011904078554420033
+p1-1-a grew VEG 0.011904078554420033
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011917277837853036
+p1-2-a grew VEG 0.011917277837853036
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 102
+p1-1  compterm 1.0
+p1-1 should grow 0.011829475449778507
+p1-1-a grew VEG 0.011829475449778507
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011867628422392595
+p1-2-a grew VEG 0.011867628422392595
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 103
+p1-1  compterm 1.0
+p1-1 should grow 0.011764116156191908
+p1-1-a grew VEG 0.011764116156191908
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01167883702138257
+p1-2-a grew VEG 0.01167883702138257
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 104
+p1-1  compterm 1.0
+p1-1 should grow 0.011984766040147534
+p1-1-a grew VEG 0.011984766040147534
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011951817188991631
+p1-2-a grew VEG 0.011951817188991631
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 105
+p1-1  compterm 1.0
+p1-1 should grow 0.011837682846828073
+p1-1-a grew VEG 0.011837682846828073
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011901519540825904
+p1-2-a grew VEG 0.011901519540825904
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 106
+p1-1  compterm 1.0
+p1-1 should grow 0.011973513557782003
+p1-1-a grew VEG 0.011973513557782003
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011826338426675917
+p1-2-a grew VEG 0.011826338426675917
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 107
+p1-1  compterm 1.0
+p1-1 should grow 0.011647302710247451
+p1-1-a grew VEG 0.011647302710247451
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011794259752691124
+p1-2-a grew VEG 0.011794259752691124
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 108
+p1-1  compterm 1.0
+p1-1 should grow 0.011775809156276398
+p1-1-a grew VEG 0.011775809156276398
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01180801078018988
+p1-2-a grew VEG 0.01180801078018988
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 109
+p1-1  compterm 1.0
+p1-1 should grow 0.011797118562658578
+p1-1-a grew VEG 0.011797118562658578
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011967982963567141
+p1-2-a grew VEG 0.011967982963567141
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 110
+p1-1  compterm 1.0
+p1-1 should grow 0.011852667051633396
+p1-1-a grew VEG 0.011852667051633396
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012014401430202727
+p1-2-a grew VEG 0.012014401430202727
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 111
+p1-1  compterm 1.0
+p1-1 should grow 0.01183614004416492
+p1-1-a grew VEG 0.01183614004416492
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.0117929374839331
+p1-2-a grew VEG 0.0117929374839331
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 112
+p1-1  compterm 1.0
+p1-1 should grow 0.01179110518983629
+p1-1-a grew VEG 0.01179110518983629
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011811893768390766
+p1-2-a grew VEG 0.011811893768390766
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 113
+p1-1  compterm 1.0
+p1-1 should grow 0.011908838676286601
+p1-1-a grew VEG 0.011908838676286601
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011777918011082784
+p1-2-a grew VEG 0.011777918011082784
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 114
+p1-1  compterm 1.0
+p1-1 should grow 0.011913130778169087
+p1-1-a grew VEG 0.011913130778169087
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011755187001137712
+p1-2-a grew VEG 0.011755187001137712
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 115
+p1-1  compterm 1.0
+p1-1 should grow 0.011857116573504838
+p1-1-a grew VEG 0.011857116573504838
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011894751007229903
+p1-2-a grew VEG 0.011894751007229903
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 116
+p1-1  compterm 1.0
+p1-1 should grow 0.012041956199664186
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011738983739146414
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 116
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0313556,"veg"=>100.629), "p1", "a", 115, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0313454,"veg"=>100.607), "p1", "a", 115, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 117
+p1-1  compterm 1.0
+p1-1 should grow 0.011775754090128536
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011962701630120327
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+Reproducing: [1, 2] week 117
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0195799,"veg"=>100.629), "p1", "a", 116, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0193827,"veg"=>100.607), "p1", "a", 116, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 118
+p1-1  compterm 1.0
+p1-1 should grow 0.011586010851826426
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011866816502232898
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+Reproducing: [1, 2] week 118
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.00799385,"veg"=>100.629), "p1", "a", 117, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.00751591,"veg"=>100.607), "p1", "a", 117, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 119
+p1-1  compterm 1.0
+p1-1 should grow 0.01195973353951918
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01200381084366463
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+Reproducing: [1, 2] week 119
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.00396588,"veg"=>100.629), "p1", "a", 118, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0044879,"veg"=>100.607), "p1", "a", 118, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 120
+p1-1  compterm 1.0
+p1-1 should grow 0.011948136176004952
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011658377916165426
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+Reproducing: [1, 2] week 120
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.015914,"veg"=>100.629), "p1", "a", 119, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0161463,"veg"=>100.607), "p1", "a", 119, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 121
+p1-1  compterm 1.0
+p1-1 should grow 0.01188781361824615
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011886855761572864
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+Reproducing: [1, 2] week 121
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0278018,"veg"=>100.629), "p1", "a", 120, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0280331,"veg"=>100.607), "p1", "a", 120, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 122
+p1-1  compterm 1.0
+p1-1 should grow 0.012013221891159363
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011798270490646098
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+Reproducing: [1, 2] week 122
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0301849,"veg"=>100.629), "p1", "a", 121, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0301686,"veg"=>100.607), "p1", "a", 121, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 123
+p1-1  compterm 1.0
+p1-1 should grow 0.011862744285136995
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011778444936712368
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+p1-5  compterm -1435.558750300399
+Not growing [3, 4, 5]
+p1-6  compterm -860.7459470236065
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 123
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0183222,"veg"=>100.629), "p1", "a", 122, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0183901,"veg"=>100.607), "p1", "a", 122, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 124
+p1-1  compterm 1.0
+p1-1 should grow 0.01187008635867328
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011884434729530866
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+p1-5  compterm -1435.558750300399
+Not growing [3, 4, 5]
+p1-6  compterm -860.7459470236065
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 124
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.00645211,"veg"=>100.629), "p1", "a", 123, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.00650571,"veg"=>100.607), "p1", "a", 123, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 125
+p1-1  compterm 1.0
+p1-1 should grow 0.012069144627906522
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01202956456793883
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+p1-5  compterm -1435.558750300399
+Not growing [3, 4, 5]
+p1-6  compterm -860.7459470236065
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 125
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.00561703,"veg"=>100.629), "p1", "a", 124, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.00552385,"veg"=>100.607), "p1", "a", 124, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 126
+p1-1  compterm 1.0
+p1-1 should grow 0.012060547564294047
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011830815643359593
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+p1-5  compterm -1435.558750300399
+Not growing [3, 4, 5]
+p1-6  compterm -860.7459470236065
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 126
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0176776,"veg"=>100.629), "p1", "a", 125, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0173547,"veg"=>100.607), "p1", "a", 125, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 127
+p1-1  compterm 1.0
+p1-1 should grow 0.01179524553324178
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012031874255053905
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+p1-5  compterm -1435.558750300399
+Not growing [3, 4, 5]
+p1-6  compterm -860.7459470236065
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 127
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0294728,"veg"=>100.629), "p1", "a", 126, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0293865,"veg"=>100.607), "p1", "a", 126, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 128
+p1-1  compterm 1.0
+p1-1 should grow 0.01193768496946519
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011845687061420031
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+p1-5  compterm -1435.558750300399
+Not growing [3, 4, 5]
+p1-6  compterm -860.7459470236065
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 128
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0285895,"veg"=>100.629), "p1", "a", 127, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0287678,"veg"=>100.607), "p1", "a", 127, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 129
+p1-1  compterm 1.0
+p1-1 should grow 0.011949091374540354
+p1-1-a grew VEG 0.011949091374540354
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011878413643388538
+p1-2-a grew VEG 0.011878413643388538
+Not growing Int64[]
+p1-3  compterm -1435.558750300399
+Not growing [3]
+p1-4  compterm -860.7459470236065
+Not growing [3, 4]
+p1-5  compterm -1435.558750300399
+Not growing [3, 4, 5]
+p1-6  compterm -860.7459470236065
+Not growing [3, 4, 5, 6]
+p1-7  compterm -1435.558750300399
+Not growing [3, 4, 5, 6, 7]
+p1-8  compterm -860.7459470236065
+Not growing [3, 4, 5, 6, 7, 8]
+Dispersing: Int64[]
+Establishing seeds: [3, 4, 5, 6, 7, 8]
+Dying orgs: Int64[]
+WEEK 130
+p1-1  compterm 1.0
+p1-1 should grow 0.011879941011078046
+p1-1-a grew VEG 0.011879941011078046
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011988996936585004
+p1-2-a grew VEG 0.011988996936585004
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 131
+p1-1  compterm 1.0
+p1-1 should grow 0.011787830861218604
+p1-1-a grew VEG 0.011787830861218604
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011950036103308009
+p1-2-a grew VEG 0.011950036103308009
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 132
+p1-1  compterm 1.0
+p1-1 should grow 0.01179951799583283
+p1-1-a grew VEG 0.01179951799583283
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01178718540345321
+p1-2-a grew VEG 0.01178718540345321
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 133
+p1-1  compterm 1.0
+p1-1 should grow 0.011971449795532444
+p1-1-a grew VEG 0.011971449795532444
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011785567709370713
+p1-2-a grew VEG 0.011785567709370713
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 134
+p1-1  compterm 1.0
+p1-1 should grow 0.01187658253272409
+p1-1-a grew VEG 0.01187658253272409
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011701690767661262
+p1-2-a grew VEG 0.011701690767661262
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 135
+p1-1  compterm 1.0
+p1-1 should grow 0.011813945373312753
+p1-1-a grew VEG 0.011813945373312753
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011977042349718872
+p1-2-a grew VEG 0.011977042349718872
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 136
+p1-1  compterm 1.0
+p1-1 should grow 0.011923997393582388
+p1-1-a grew VEG 0.011923997393582388
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011924993757852883
+p1-2-a grew VEG 0.011924993757852883
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 137
+p1-1  compterm 1.0
+p1-1 should grow 0.012011950404191825
+p1-1-a grew VEG 0.012011950404191825
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011762389861749977
+p1-2-a grew VEG 0.011762389861749977
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 138
+p1-1  compterm 1.0
+p1-1 should grow 0.011972941050052737
+p1-1-a grew VEG 0.011972941050052737
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01181305991313405
+p1-2-a grew VEG 0.01181305991313405
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 139
+p1-1  compterm 1.0
+p1-1 should grow 0.011983665647632584
+p1-1-a grew VEG 0.011983665647632584
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011935179119511368
+p1-2-a grew VEG 0.011935179119511368
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 140
+p1-1  compterm 1.0
+p1-1 should grow 0.011979537364101036
+p1-1-a grew VEG 0.011979537364101036
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011862658404216075
+p1-2-a grew VEG 0.011862658404216075
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 141
+p1-1  compterm 1.0
+p1-1 should grow 0.011956405649802822
+p1-1-a grew VEG 0.011956405649802822
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011925047424557135
+p1-2-a grew VEG 0.011925047424557135
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 142
+p1-1  compterm 1.0
+p1-1 should grow 0.011907361989382307
+p1-1-a grew VEG 0.011907361989382307
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011855348356558095
+p1-2-a grew VEG 0.011855348356558095
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 143
+p1-1  compterm 1.0
+p1-1 should grow 0.01199323336860441
+p1-1-a grew VEG 0.01199323336860441
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011732061428357227
+p1-2-a grew VEG 0.011732061428357227
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 144
+p1-1  compterm 1.0
+p1-1 should grow 0.011923834625845925
+p1-1-a grew VEG 0.011923834625845925
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011869109645160605
+p1-2-a grew VEG 0.011869109645160605
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 145
+p1-1  compterm 1.0
+p1-1 should grow 0.011918137327892684
+p1-1-a grew VEG 0.011918137327892684
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011780984027551547
+p1-2-a grew VEG 0.011780984027551547
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 146
+p1-1  compterm 1.0
+p1-1 should grow 0.011928094138030528
+p1-1-a grew VEG 0.011928094138030528
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01177271908515874
+p1-2-a grew VEG 0.01177271908515874
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 147
+p1-1  compterm 1.0
+p1-1 should grow 0.011863218728852489
+p1-1-a grew VEG 0.011863218728852489
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011873025632352352
+p1-2-a grew VEG 0.011873025632352352
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 148
+p1-1  compterm 1.0
+p1-1 should grow 0.012143212176676086
+p1-1-a grew VEG 0.012143212176676086
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012006015219216024
+p1-2-a grew VEG 0.012006015219216024
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 149
+p1-1  compterm 1.0
+p1-1 should grow 0.011919000836239264
+p1-1-a grew VEG 0.011919000836239264
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011932338382847664
+p1-2-a grew VEG 0.011932338382847664
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 150
+p1-1  compterm 1.0
+p1-1 should grow 0.011790349091776701
+p1-1-a grew VEG 0.011790349091776701
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01206652994803093
+p1-2-a grew VEG 0.01206652994803093
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 151
+p1-1  compterm 1.0
+p1-1 should grow 0.011828517320086059
+p1-1-a grew VEG 0.011828517320086059
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011577441690848754
+p1-2-a grew VEG 0.011577441690848754
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 152
+p1-1  compterm 1.0
+p1-1 should grow 0.011949799771843113
+p1-1-a grew VEG 0.011949799771843113
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012034414672895326
+p1-2-a grew VEG 0.012034414672895326
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 153
+p1-1  compterm 1.0
+p1-1 should grow 0.011860010384498135
+p1-1-a grew VEG 0.011860010384498135
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01194869931339156
+p1-2-a grew VEG 0.01194869931339156
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 154
+p1-1  compterm 1.0
+p1-1 should grow 0.011787234772292595
+p1-1-a grew VEG 0.011787234772292595
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011702867987891257
+p1-2-a grew VEG 0.011702867987891257
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 155
+p1-1  compterm 1.0
+p1-1 should grow 0.01202698575846924
+p1-1-a grew VEG 0.01202698575846924
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011991703936408868
+p1-2-a grew VEG 0.011991703936408868
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 156
+p1-1  compterm 1.0
+p1-1 should grow 0.012002393978425735
+p1-1-a grew VEG 0.012002393978425735
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012114851125915744
+p1-2-a grew VEG 0.012114851125915744
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 157
+p1-1  compterm 1.0
+p1-1 should grow 0.012061971024821679
+p1-1-a grew VEG 0.012061971024821679
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01212282978625592
+p1-2-a grew VEG 0.01212282978625592
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 158
+p1-1  compterm 1.0
+p1-1 should grow 0.01171102603550383
+p1-1-a grew VEG 0.01171102603550383
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011905461405581783
+p1-2-a grew VEG 0.011905461405581783
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 159
+p1-1  compterm 1.0
+p1-1 should grow 0.011935210296642873
+p1-1-a grew VEG 0.011935210296642873
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011886116373592347
+p1-2-a grew VEG 0.011886116373592347
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 160
+p1-1  compterm 1.0
+p1-1 should grow 0.012125374298472581
+p1-1-a grew VEG 0.012125374298472581
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011996010512752264
+p1-2-a grew VEG 0.011996010512752264
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 161
+p1-1  compterm 1.0
+p1-1 should grow 0.012008722423958255
+p1-1-a grew VEG 0.012008722423958255
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011987713173745033
+p1-2-a grew VEG 0.011987713173745033
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 162
+p1-1  compterm 1.0
+p1-1 should grow 0.011900841396575598
+p1-1-a grew VEG 0.011900841396575598
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011644097189207569
+p1-2-a grew VEG 0.011644097189207569
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 163
+p1-1  compterm 1.0
+p1-1 should grow 0.012041067789419529
+p1-1-a grew VEG 0.012041067789419529
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011958490661468014
+p1-2-a grew VEG 0.011958490661468014
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 164
+p1-1  compterm 1.0
+p1-1 should grow 0.011870885943030582
+p1-1-a grew VEG 0.011870885943030582
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011823150375585552
+p1-2-a grew VEG 0.011823150375585552
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 165
+p1-1  compterm 1.0
+p1-1 should grow 0.011883162077492062
+p1-1-a grew VEG 0.011883162077492062
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011889495300003572
+p1-2-a grew VEG 0.011889495300003572
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 166
+p1-1  compterm 1.0
+p1-1 should grow 0.01194732384368401
+p1-1-a grew VEG 0.01194732384368401
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011692979315060918
+p1-2-a grew VEG 0.011692979315060918
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 167
+p1-1  compterm 1.0
+p1-1 should grow 0.011815933226987044
+p1-1-a grew VEG 0.011815933226987044
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011866150115373742
+p1-2-a grew VEG 0.011866150115373742
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 168
+p1-1  compterm 1.0
+p1-1 should grow 0.01187724532603335
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011875587503153411
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 168
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0167122,"veg"=>101.094), "p1", "a", 167, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0168922,"veg"=>101.07), "p1", "a", 167, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 169
+p1-1  compterm 1.0
+p1-1 should grow 0.01185174007516544
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011917624630684154
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 169
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.00486051,"veg"=>101.094), "p1", "a", 168, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.00497456,"veg"=>101.07), "p1", "a", 168, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 170
+p1-1  compterm 1.0
+p1-1 should grow 0.01194194839285538
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011963040313899598
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 170
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.00708144,"veg"=>101.094), "p1", "a", 169, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.00698848,"veg"=>101.07), "p1", "a", 169, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 171
+p1-1  compterm 1.0
+p1-1 should grow 0.011966380765628575
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011993719586907136
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 171
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0190478,"veg"=>101.094), "p1", "a", 170, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0189822,"veg"=>101.07), "p1", "a", 170, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 172
+p1-1  compterm 1.0
+p1-1 should grow 0.01186836752451204
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01177135819473389
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 172
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0309162,"veg"=>101.094), "p1", "a", 171, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0307536,"veg"=>101.07), "p1", "a", 171, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 173
+p1-1  compterm 1.0
+p1-1 should grow 0.011971527346625682
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01207171858313644
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 173
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0271123,"veg"=>101.094), "p1", "a", 172, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0271747,"veg"=>101.07), "p1", "a", 172, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 174
+p1-1  compterm 1.0
+p1-1 should grow 0.012037180071158256
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011832591769996705
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1442.202318287242
+Not growing [3]
+p1-4  compterm -864.7172858755124
+Not growing [3, 4]
+Reproducing: [1, 2] week 174
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0150751,"veg"=>101.094), "p1", "a", 173, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0153421,"veg"=>101.07), "p1", "a", 173, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 175
+p1-1  compterm 1.0
+p1-1 should grow 0.011912183583416008
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01188772898555146
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1442.202318287242
+Not growing [3]
+p1-4  compterm -864.7172858755124
+Not growing [3, 4]
+Reproducing: [1, 2] week 175
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.00316292,"veg"=>101.094), "p1", "a", 174, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0034544,"veg"=>101.07), "p1", "a", 174, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 176
+p1-1  compterm 1.0
+p1-1 should grow 0.01192945869070053
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012087967733358173
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1442.202318287242
+Not growing [3]
+p1-4  compterm -864.7172858755124
+Not growing [3, 4]
+Reproducing: [1, 2] week 176
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.00876654,"veg"=>101.094), "p1", "a", 175, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.00863357,"veg"=>101.07), "p1", "a", 175, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 177
+p1-1  compterm 1.0
+p1-1 should grow 0.011958211132521143
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011916109820670139
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1442.202318287242
+Not growing [3]
+p1-4  compterm -864.7172858755124
+Not growing [3, 4]
+Reproducing: [1, 2] week 177
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0207248,"veg"=>101.094), "p1", "a", 176, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0205497,"veg"=>101.07), "p1", "a", 176, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 178
+p1-1  compterm 1.0
+p1-1 should grow 0.012091177404116235
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011827050138137266
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1442.202318287242
+Not growing [3]
+p1-4  compterm -864.7172858755124
+Not growing [3, 4]
+Reproducing: [1, 2] week 178
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0328159,"veg"=>101.094), "p1", "a", 177, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0323767,"veg"=>101.07), "p1", "a", 177, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 179
+p1-1  compterm 1.0
+p1-1 should grow 0.011795592151678034
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01203221735645305
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1442.202318287242
+Not growing [3]
+p1-4  compterm -864.7172858755124
+Not growing [3, 4]
+Reproducing: [1, 2] week 179
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0253885,"veg"=>101.094), "p1", "a", 178, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0255911,"veg"=>101.07), "p1", "a", 178, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 180
+p1-1  compterm 1.0
+p1-1 should grow 0.01190504761817661
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011894026997553065
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1442.202318287242
+Not growing [3]
+p1-4  compterm -864.7172858755124
+Not growing [3, 4]
+p1-5  compterm -1442.202318287242
+Not growing [3, 4, 5]
+p1-6  compterm -864.7172858755124
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 180
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0134834,"veg"=>101.094), "p1", "a", 179, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.013697,"veg"=>101.07), "p1", "a", 179, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 181
+p1-1  compterm 1.0
+p1-1 should grow 0.011950348546449819
+p1-1-a grew VEG 0.011950348546449819
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011920149570461088
+p1-2-a grew VEG 0.011920149570461088
+Not growing Int64[]
+p1-3  compterm -1442.202318287242
+Not growing [3]
+p1-4  compterm -864.7172858755124
+Not growing [3, 4]
+p1-5  compterm -1442.202318287242
+Not growing [3, 4, 5]
+p1-6  compterm -864.7172858755124
+Not growing [3, 4, 5, 6]
+Dispersing: Int64[]
+Establishing seeds: [3, 4, 5, 6]
+Dying orgs: Int64[]
+WEEK 182
+p1-1  compterm 1.0
+p1-1 should grow 0.011589645924114277
+p1-1-a grew VEG 0.011589645924114277
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011923011739623844
+p1-2-a grew VEG 0.011923011739623844
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 183
+p1-1  compterm 1.0
+p1-1 should grow 0.011870399562283541
+p1-1-a grew VEG 0.011870399562283541
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011603681913165692
+p1-2-a grew VEG 0.011603681913165692
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 184
+p1-1  compterm 1.0
+p1-1 should grow 0.012023653836397167
+p1-1-a grew VEG 0.012023653836397167
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012020237332244773
+p1-2-a grew VEG 0.012020237332244773
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 185
+p1-1  compterm 1.0
+p1-1 should grow 0.011879216853404385
+p1-1-a grew VEG 0.011879216853404385
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012034071437703475
+p1-2-a grew VEG 0.012034071437703475
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 186
+p1-1  compterm 1.0
+p1-1 should grow 0.011986119406485616
+p1-1-a grew VEG 0.011986119406485616
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011739818749263907
+p1-2-a grew VEG 0.011739818749263907
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 187
+p1-1  compterm 1.0
+p1-1 should grow 0.011841546346999897
+p1-1-a grew VEG 0.011841546346999897
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011556155040128349
+p1-2-a grew VEG 0.011556155040128349
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 188
+p1-1  compterm 1.0
+p1-1 should grow 0.01171821408582657
+p1-1-a grew VEG 0.01171821408582657
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011826850159989322
+p1-2-a grew VEG 0.011826850159989322
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 189
+p1-1  compterm 1.0
+p1-1 should grow 0.011842876672993899
+p1-1-a grew VEG 0.011842876672993899
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01198659307717358
+p1-2-a grew VEG 0.01198659307717358
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 190
+p1-1  compterm 1.0
+p1-1 should grow 0.011878287577835338
+p1-1-a grew VEG 0.011878287577835338
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011675379974906749
+p1-2-a grew VEG 0.011675379974906749
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 191
+p1-1  compterm 1.0
+p1-1 should grow 0.011950552481497578
+p1-1-a grew VEG 0.011950552481497578
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01208678809962415
+p1-2-a grew VEG 0.01208678809962415
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 192
+p1-1  compterm 1.0
+p1-1 should grow 0.01201052011980953
+p1-1-a grew VEG 0.01201052011980953
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012029543143954718
+p1-2-a grew VEG 0.012029543143954718
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 193
+p1-1  compterm 1.0
+p1-1 should grow 0.011828905299205654
+p1-1-a grew VEG 0.011828905299205654
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011869754611502201
+p1-2-a grew VEG 0.011869754611502201
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 194
+p1-1  compterm 1.0
+p1-1 should grow 0.011877982420016276
+p1-1-a grew VEG 0.011877982420016276
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01188415066128589
+p1-2-a grew VEG 0.01188415066128589
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 195
+p1-1  compterm 1.0
+p1-1 should grow 0.011827060978296158
+p1-1-a grew VEG 0.011827060978296158
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01186015483978969
+p1-2-a grew VEG 0.01186015483978969
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 196
+p1-1  compterm 1.0
+p1-1 should grow 0.011819132901680147
+p1-1-a grew VEG 0.011819132901680147
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012037410697742204
+p1-2-a grew VEG 0.012037410697742204
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 197
+p1-1  compterm 1.0
+p1-1 should grow 0.011942774039526052
+p1-1-a grew VEG 0.011942774039526052
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011972066595857157
+p1-2-a grew VEG 0.011972066595857157
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 198
+p1-1  compterm 1.0
+p1-1 should grow 0.011846485758714803
+p1-1-a grew VEG 0.011846485758714803
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012133046636963431
+p1-2-a grew VEG 0.012133046636963431
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 199
+p1-1  compterm 1.0
+p1-1 should grow 0.011793201148335859
+p1-1-a grew VEG 0.011793201148335859
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011728910413827537
+p1-2-a grew VEG 0.011728910413827537
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 200
+p1-1  compterm 1.0
+p1-1 should grow 0.011845241269399185
+p1-1-a grew VEG 0.011845241269399185
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011925997904905821
+p1-2-a grew VEG 0.011925997904905821
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 201
+p1-1  compterm 1.0
+p1-1 should grow 0.011941217047654435
+p1-1-a grew VEG 0.011941217047654435
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012094176898137113
+p1-2-a grew VEG 0.012094176898137113
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 202
+p1-1  compterm 1.0
+p1-1 should grow 0.012016657414080395
+p1-1-a grew VEG 0.012016657414080395
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012010576103291003
+p1-2-a grew VEG 0.012010576103291003
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 203
+p1-1  compterm 1.0
+p1-1 should grow 0.011665414954584806
+p1-1-a grew VEG 0.011665414954584806
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011878046927965635
+p1-2-a grew VEG 0.011878046927965635
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 204
+p1-1  compterm 1.0
+p1-1 should grow 0.012082226352177294
+p1-1-a grew VEG 0.012082226352177294
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011783792447725563
+p1-2-a grew VEG 0.011783792447725563
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 205
+p1-1  compterm 1.0
+p1-1 should grow 0.012008575217758735
+p1-1-a grew VEG 0.012008575217758735
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011809404866884554
+p1-2-a grew VEG 0.011809404866884554
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 206
+p1-1  compterm 1.0
+p1-1 should grow 0.01191900632282158
+p1-1-a grew VEG 0.01191900632282158
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011829181856043005
+p1-2-a grew VEG 0.011829181856043005
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 207
+p1-1  compterm 1.0
+p1-1 should grow 0.011897741696808664
+p1-1-a grew VEG 0.011897741696808664
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01197762110934156
+p1-2-a grew VEG 0.01197762110934156
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 208
+p1-1  compterm 1.0
+p1-1 should grow 0.011835477162054258
+p1-1-a grew VEG 0.011835477162054258
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011899630686102482
+p1-2-a grew VEG 0.011899630686102482
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 209
+p1-1  compterm 1.0
+p1-1 should grow 0.011711857457109771
+p1-1-a grew VEG 0.011711857457109771
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011833462673319903
+p1-2-a grew VEG 0.011833462673319903
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 210
+p1-1  compterm 1.0
+p1-1 should grow 0.011869161700364412
+p1-1-a grew VEG 0.011869161700364412
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01186846150429333
+p1-2-a grew VEG 0.01186846150429333
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 211
+p1-1  compterm 1.0
+p1-1 should grow 0.011966963600059848
+p1-1-a grew VEG 0.011966963600059848
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011766636600241612
+p1-2-a grew VEG 0.011766636600241612
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 212
+p1-1  compterm 1.0
+p1-1 should grow 0.011837578553807746
+p1-1-a grew VEG 0.011837578553807746
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011816282998605382
+p1-2-a grew VEG 0.011816282998605382
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 213
+p1-1  compterm 1.0
+p1-1 should grow 0.012120042725598142
+p1-1-a grew VEG 0.012120042725598142
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011856436028649112
+p1-2-a grew VEG 0.011856436028649112
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 214
+p1-1  compterm 1.0
+p1-1 should grow 0.012023249232426099
+p1-1-a grew VEG 0.012023249232426099
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011809612094346061
+p1-2-a grew VEG 0.011809612094346061
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 215
+p1-1  compterm 1.0
+p1-1 should grow 0.011937657333987418
+p1-1-a grew VEG 0.011937657333987418
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01192047831875469
+p1-2-a grew VEG 0.01192047831875469
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 216
+p1-1  compterm 1.0
+p1-1 should grow 0.011860245807267161
+p1-1-a grew VEG 0.011860245807267161
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012099897948153903
+p1-2-a grew VEG 0.012099897948153903
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 217
+p1-1  compterm 1.0
+p1-1 should grow 0.01206528124527726
+p1-1-a grew VEG 0.01206528124527726
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01181396364605289
+p1-2-a grew VEG 0.01181396364605289
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 218
+p1-1  compterm 1.0
+p1-1 should grow 0.011859468512045385
+p1-1-a grew VEG 0.011859468512045385
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012075649722696126
+p1-2-a grew VEG 0.012075649722696126
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 219
+p1-1  compterm 1.0
+p1-1 should grow 0.012090645234289729
+p1-1-a grew VEG 0.012090645234289729
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011923267659376117
+p1-2-a grew VEG 0.011923267659376117
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 220
+p1-1  compterm 1.0
+p1-1 should grow 0.011888549700181642
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01181533930329323
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 220
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.00159488,"veg"=>101.558), "p1", "a", 219, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.00188169,"veg"=>101.534), "p1", "a", 219, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 221
+p1-1  compterm 1.0
+p1-1 should grow 0.01167298588879046
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011804822405258023
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 221
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0100781,"veg"=>101.558), "p1", "a", 220, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.00992313,"veg"=>101.534), "p1", "a", 220, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 222
+p1-1  compterm 1.0
+p1-1 should grow 0.011784150834432093
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011828679654285502
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 222
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0218623,"veg"=>101.558), "p1", "a", 221, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0217518,"veg"=>101.534), "p1", "a", 221, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 223
+p1-1  compterm 1.0
+p1-1 should grow 0.012071009499962145
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011748481772753
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 223
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0339333,"veg"=>101.558), "p1", "a", 222, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0335003,"veg"=>101.534), "p1", "a", 222, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 224
+p1-1  compterm 1.0
+p1-1 should grow 0.011907882892615584
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012014987367072993
+p1-2-a is FLOWERING
+Not growing Int64[]
+Reproducing: [1, 2] week 224
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0241589,"veg"=>101.558), "p1", "a", 223, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0244847,"veg"=>101.534), "p1", "a", 223, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 225
+p1-1  compterm 1.0
+p1-1 should grow 0.011845817105697688
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012063277647141284
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1448.831327327235
+Not growing [3]
+p1-4  compterm -868.6934031842842
+Not growing [3, 4]
+Reproducing: [1, 2] week 225
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.012313,"veg"=>101.558), "p1", "a", 224, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0124214,"veg"=>101.534), "p1", "a", 224, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 226
+p1-1  compterm 1.0
+p1-1 should grow 0.012155239814606342
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01195501765110255
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1448.831327327235
+Not growing [3]
+p1-4  compterm -868.6934031842842
+Not growing [3, 4]
+Reproducing: [1, 2] week 226
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.000157795,"veg"=>101.558), "p1", "a", 225, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.000466424,"veg"=>101.534), "p1", "a", 225, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 227
+p1-1  compterm 1.0
+p1-1 should grow 0.01194574178169663
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01188574560249832
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1448.831327327235
+Not growing [3]
+p1-4  compterm -868.6934031842842
+Not growing [3, 4]
+Reproducing: [1, 2] week 227
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0117879,"veg"=>101.558), "p1", "a", 226, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0114193,"veg"=>101.534), "p1", "a", 226, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 228
+p1-1  compterm 1.0
+p1-1 should grow 0.012044189506871089
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011748983199030174
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1448.831327327235
+Not growing [3]
+p1-4  compterm -868.6934031842842
+Not growing [3, 4]
+Reproducing: [1, 2] week 228
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.0238321,"veg"=>101.558), "p1", "a", 227, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.0231683,"veg"=>101.534), "p1", "a", 227, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 229
+p1-1  compterm 1.0
+p1-1 should grow 0.012089505790485911
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01206085515446283
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1448.831327327235
+Not growing [3]
+p1-4  compterm -868.6934031842842
+Not growing [3, 4]
+Reproducing: [1, 2] week 229
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0340784,"veg"=>101.558), "p1", "a", 228, false, String["A" "A"], 2): 1
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0347708,"veg"=>101.534), "p1", "a", 228, false, String["A" "A"], 2): 1
+Dying orgs: Int64[]
+WEEK 230
+p1-1  compterm 1.0
+p1-1 should grow 0.011980571693756584
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011840290453483705
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1448.831327327235
+Not growing [3]
+p1-4  compterm -868.6934031842842
+Not growing [3, 4]
+p1-5  compterm -1448.831327327235
+Not growing [3, 4, 5]
+p1-6  compterm -868.6934031842842
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 230
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0220978,"veg"=>101.558), "p1", "a", 229, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0229305,"veg"=>101.534), "p1", "a", 229, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 231
+p1-1  compterm 1.0
+p1-1 should grow 0.011771595528527651
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012006482092901841
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1448.831327327235
+Not growing [3]
+p1-4  compterm -868.6934031842842
+Not growing [3, 4]
+p1-5  compterm -1448.831327327235
+Not growing [3, 4, 5]
+p1-6  compterm -868.6934031842842
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 231
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>-0.0103262,"veg"=>101.558), "p1", "a", 230, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>-0.0109241,"veg"=>101.534), "p1", "a", 230, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 232
+p1-1  compterm 1.0
+p1-1 should grow 0.011989069300809452
+p1-1-a is FLOWERING
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011889710585998935
+p1-2-a is FLOWERING
+Not growing Int64[]
+p1-3  compterm -1448.831327327235
+Not growing [3]
+p1-4  compterm -868.6934031842842
+Not growing [3, 4]
+p1-5  compterm -1448.831327327235
+Not growing [3, 4, 5]
+p1-6  compterm -868.6934031842842
+Not growing [3, 4, 5, 6]
+Reproducing: [1, 2] week 232
+Offspring of Organisms.Organism("p1-1", (7, 3, 1), "p1", Dict("reprd"=>0.00166288,"veg"=>101.558), "p1", "a", 231, false, String["A" "A"], 2): 0
+Offspring of Organisms.Organism("p1-2", (33, 12, 1), "p1", Dict("reprd"=>0.000965643,"veg"=>101.534), "p1", "a", 231, false, String["A" "A"], 2): 0
+Dying orgs: Int64[]
+WEEK 233
+p1-1  compterm 1.0
+p1-1 should grow 0.011926650245395225
+p1-1-a grew VEG 0.011926650245395225
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011936818863225649
+p1-2-a grew VEG 0.011936818863225649
+Not growing Int64[]
+p1-3  compterm -1448.831327327235
+Not growing [3]
+p1-4  compterm -868.6934031842842
+Not growing [3, 4]
+p1-5  compterm -1448.831327327235
+Not growing [3, 4, 5]
+p1-6  compterm -868.6934031842842
+Not growing [3, 4, 5, 6]
+Dispersing: Int64[]
+Establishing seeds: [3, 4, 5, 6]
+Dying orgs: Int64[]
+WEEK 234
+p1-1  compterm 1.0
+p1-1 should grow 0.011728594814629602
+p1-1-a grew VEG 0.011728594814629602
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012184187487203792
+p1-2-a grew VEG 0.012184187487203792
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 235
+p1-1  compterm 1.0
+p1-1 should grow 0.012134264107392346
+p1-1-a grew VEG 0.012134264107392346
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011978420914891964
+p1-2-a grew VEG 0.011978420914891964
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 236
+p1-1  compterm 1.0
+p1-1 should grow 0.011859461258075204
+p1-1-a grew VEG 0.011859461258075204
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012120479014262369
+p1-2-a grew VEG 0.012120479014262369
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 237
+p1-1  compterm 1.0
+p1-1 should grow 0.011774715000095352
+p1-1-a grew VEG 0.011774715000095352
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011980462252605425
+p1-2-a grew VEG 0.011980462252605425
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 238
+p1-1  compterm 1.0
+p1-1 should grow 0.011983731502333698
+p1-1-a grew VEG 0.011983731502333698
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011799185640271114
+p1-2-a grew VEG 0.011799185640271114
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 239
+p1-1  compterm 1.0
+p1-1 should grow 0.011834413519822652
+p1-1-a grew VEG 0.011834413519822652
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011782708404075535
+p1-2-a grew VEG 0.011782708404075535
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 240
+p1-1  compterm 1.0
+p1-1 should grow 0.011966308578731742
+p1-1-a grew VEG 0.011966308578731742
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011903677220745458
+p1-2-a grew VEG 0.011903677220745458
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 241
+p1-1  compterm 1.0
+p1-1 should grow 0.012002145815559312
+p1-1-a grew VEG 0.012002145815559312
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011911206470732261
+p1-2-a grew VEG 0.011911206470732261
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 242
+p1-1  compterm 1.0
+p1-1 should grow 0.012063472391510647
+p1-1-a grew VEG 0.012063472391510647
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01179860350317767
+p1-2-a grew VEG 0.01179860350317767
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 243
+p1-1  compterm 1.0
+p1-1 should grow 0.011803393793558707
+p1-1-a grew VEG 0.011803393793558707
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012100770525595436
+p1-2-a grew VEG 0.012100770525595436
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 244
+p1-1  compterm 1.0
+p1-1 should grow 0.01199443510530842
+p1-1-a grew VEG 0.01199443510530842
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011764060796950634
+p1-2-a grew VEG 0.011764060796950634
+Not growing Int64[]
+Dispersing: Int64[]
+Establishing seeds: Int64[]
+Dying orgs: Int64[]
+WEEK 245
+p1-1  compterm 1.0
+p1-1 should grow 0.012000819214566964
+p1-1-a grew VEG 0.012000819214566964
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012196213265780407
+p1-2-a grew VEG 0.012196213265780407
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 246
+p1-1  compterm 1.0
+p1-1 should grow 0.012062443825453989
+p1-1-a grew VEG 0.012062443825453989
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012026192986415106
+p1-2-a grew VEG 0.012026192986415106
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 247
+p1-1  compterm 1.0
+p1-1 should grow 0.011779228814106969
+p1-1-a grew VEG 0.011779228814106969
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012112037039913127
+p1-2-a grew VEG 0.012112037039913127
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 248
+p1-1  compterm 1.0
+p1-1 should grow 0.01190042470617734
+p1-1-a grew VEG 0.01190042470617734
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012262149815182664
+p1-2-a grew VEG 0.012262149815182664
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 249
+p1-1  compterm 1.0
+p1-1 should grow 0.011722316688927096
+p1-1-a grew VEG 0.011722316688927096
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012023758729255566
+p1-2-a grew VEG 0.012023758729255566
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 250
+p1-1  compterm 1.0
+p1-1 should grow 0.01185817614307445
+p1-1-a grew VEG 0.01185817614307445
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012002725326448567
+p1-2-a grew VEG 0.012002725326448567
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 251
+p1-1  compterm 1.0
+p1-1 should grow 0.011896590284408237
+p1-1-a grew VEG 0.011896590284408237
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012157073202074088
+p1-2-a grew VEG 0.012157073202074088
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 252
+p1-1  compterm 1.0
+p1-1 should grow 0.011786204808838747
+p1-1-a grew VEG 0.011786204808838747
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011998581131635188
+p1-2-a grew VEG 0.011998581131635188
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 253
+p1-1  compterm 1.0
+p1-1 should grow 0.012034283349217252
+p1-1-a grew VEG 0.012034283349217252
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011919204664697657
+p1-2-a grew VEG 0.011919204664697657
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 254
+p1-1  compterm 1.0
+p1-1 should grow 0.011962477493431366
+p1-1-a grew VEG 0.011962477493431366
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011857262646844542
+p1-2-a grew VEG 0.011857262646844542
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 255
+p1-1  compterm 1.0
+p1-1 should grow 0.011735012395977684
+p1-1-a grew VEG 0.011735012395977684
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011869384270456036
+p1-2-a grew VEG 0.011869384270456036
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 256
+p1-1  compterm 1.0
+p1-1 should grow 0.011963973733351846
+p1-1-a grew VEG 0.011963973733351846
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.01196022725504561
+p1-2-a grew VEG 0.01196022725504561
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 257
+p1-1  compterm 1.0
+p1-1 should grow 0.012307983424829326
+p1-1-a grew VEG 0.012307983424829326
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012027065466380965
+p1-2-a grew VEG 0.012027065466380965
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 258
+p1-1  compterm 1.0
+p1-1 should grow 0.011867216883911064
+p1-1-a grew VEG 0.011867216883911064
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012038148216820546
+p1-2-a grew VEG 0.012038148216820546
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 259
+p1-1  compterm 1.0
+p1-1 should grow 0.011943879188396143
+p1-1-a grew VEG 0.011943879188396143
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.012211061637995187
+p1-2-a grew VEG 0.012211061637995187
+Not growing Int64[]
+Dying orgs: Int64[]
+WEEK 260
+p1-1  compterm 1.0
+p1-1 should grow 0.011919568316913516
+p1-1-a grew VEG 0.011919568316913516
+Not growing Int64[]
+p1-2  compterm 1.0
+p1-2 should grow 0.011817745729937443
+p1-2-a grew VEG 0.011817745729937443
+Not growing Int64[]
+Dying orgs: Int64[]
