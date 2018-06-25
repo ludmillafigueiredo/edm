@@ -1,7 +1,7 @@
 tests.jl
 img/
 parameters_pubs/
-models_docs/*
+model_docs/*
 #dev_log.org#
 ED-*
 profilingED.sh

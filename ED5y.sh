@@ -4,4 +4,4 @@
 #SBATCH --output=ED-%j.o
 #SBATCH --error=ED-%j.e
 
-/home/luf74xx/builds/julia-d386e40c17/bin/julia main.jl --simID "singlesp1-5y" --landconfig "home/luf74xx/Dokumente/model/inputs/landpars1m.csv" --spinput "home/luf74xx/Dokumente/model/inputs/singlespinput1.csv" --timesteps "260"
+/home/luf74xx/builds/julia-d386e40c17/bin/julia main.jl --simID "singlesp1-5y" --landconfig "/home/luf74xx/Dokumente/model/inputs/landpars1m.csv" --spinput "/home/luf74xx/Dokumente/model/inputs/singlespinput1.csv" --temp_ts "/home/luf74xx/Dokumente/model/inputs/envtimeseries_19995y.csv" --timesteps "260"
