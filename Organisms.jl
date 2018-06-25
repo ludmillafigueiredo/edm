@@ -541,19 +541,25 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
         
 	if o in seeds
             Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-        elseif rem(orgs[o].age,52) >= orgsref.max_span[orgs[o].sp]
-            Bm = 1
+             mprob = 1 - exp(-Bm)
+        elseif (orgs[o].age/52) >= orgsref.max_span[orgs[o].sp]
+            mprob = 1
+            #unity test
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim,"$(orgs[o].id) $(orgs[o].stage) dying of old age")
+            end
         elseif o in nogrowth
             Bm = orgsref.b0am[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
             # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             #     println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
             # end)
+            mprob = 1 - exp(-Bm)
         else
-            Bm = 0            
+            mprob = 0            
         end
         
-        mprob = 1 - exp(-Bm)
+       
         if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
             push!(deaths, o)
         else
