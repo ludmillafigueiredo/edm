@@ -28,7 +28,7 @@ const λ_ant = 0.2
 mutable struct OrgsRef
 #species::Dict{String,String}
 sp_id::Array{String, 1}
-kernel::Dict{String,Int}
+kernel::Dict{String,String}
 e_mu::Dict{String,Float64}
 e_sd::Dict{String,Float64}
 b0g::Dict{String,Float64}
@@ -64,7 +64,7 @@ genotype::Array{String,2} #initialize separately
 radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
 #Organism() = new()
 end
-Organism(id,location,sp,biomass) = Organism(id,location,sp,biomass,"a", 0,false,["A" "A"],0) #this is individuals are initialized in the beginning of the simulationy
+Organism(id,location,sp,mass) = Organism(id,location,sp,mass,"a", 0,false,["A" "A"],0) #this is individuals are initialized in the beginning of the simulationy
 # TODO fgroups are sps for now
 
 """
@@ -122,7 +122,7 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
 
     for o in competing
         x, y, frag = orgs[o].location
-        orgs[o].radius = round(Int64, (sqrt(orgs[o].biomass["veg"]^(2/3)) - 1)/2, RoundUp)
+        orgs[o].radius = round(Int64, (sqrt(orgs[o].mass["veg"]^(2/3)) - 1)/2, RoundUp)
 
         r = orgs[o].radius # separated for debugging
 
@@ -153,7 +153,7 @@ end
         compete(landscape, orgs)
         Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
         """
-function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism)
+function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,settings::Dict{String, Any})
 
     x, y, frag = org.location
     sp = org.sp
@@ -228,7 +228,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                     error("Seed or egg trying to compete.")
                 end
                 
-                grown_mass = b0*(compterm *sum(collect(values(orgs[o].biomass))))^(3/4)*exp(-aE/(Boltz*T))
+                grown_mass = b0*(compterm *sum(collect(values(orgs[o].mass))))^(3/4)*exp(-aE/(Boltz*T))
                 # unity test
                 open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                     println(sim, "$(orgs[o].id) should grow $grown_mass")
@@ -238,12 +238,12 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                 #TODO make it more ellaborate and includde trade-offs
                 if orgs[o].stage == "j"
                     # juveniles grow
-                    orgs[o].biomass["veg"] += grown_mass
+                    orgs[o].mass["veg"] += grown_mass
                     # unity test
                     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                         println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
                     end
-                elseif orgs[o].stage == "a" && (sum(collect(keys(orgs[o].mass))) >= 0.2*orgsref.max_mass[sp]) && (orgsref.floron[sp] <= t < orgsref.floroff[sp])
+                elseif orgs[o].stage == "a" && (sum(collect(values(orgs[o].mass))) >= 0.2*orgsref.max_mass[sp]) && (orgsref.floron[sp] <= t < orgsref.floroff[sp])
                     # adults invest in reproduction
                     #unity test
                     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -254,8 +254,8 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                     else
                         orgs[o].mass["reprd"] = grown_mass
                     end
-                elseif orgs[o].stage == "a" #&& orgs[o].biomass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce
-                    orgs[o].biomass["veg"] += grown_mass
+                elseif orgs[o].stage == "a" #&& orgs[o].mass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce
+                    orgs[o].mass["veg"] += grown_mass
                     # unity test
                     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                         println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
@@ -369,8 +369,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
     for o in ferts
 
         emu = orgsref.e_mu[orgs[o].sp]
-        offs =  round(Int64, /(orgs[o].biomass["reprd"],emu), RoundDown)
-        orgs[o].biomass["reprd"] -= (offs * emu)
+        offs =  round(Int64, /(orgs[o].mass["reprd"],emu), RoundDown)
+        orgs[o].mass["reprd"] -= (offs * emu)
 
         #unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -435,11 +435,11 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
     lost = Int64[]
 
     for d in dispersing
-        if orgsref.kernel[orgs[d].sp] == "ant"
+        if orgsref.kernel[orgs[d].sp] == "a"
             dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
-        elseif orgsref.kernel[orgs[d].sp] == "wind"
+        elseif orgsref.kernel[orgs[d].sp] == "w"
             dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])
-        elseif orgsref.kernel[orgs[d].sp] == "windant"
+        elseif orgsref.kernel[orgs[d].sp] == "wa"
             µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
             dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
         else
@@ -549,7 +549,8 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
             # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             #     println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
             # end)
-            
+        else
+            Bm = 0            
         end
         
         mprob = 1 - exp(-Bm)

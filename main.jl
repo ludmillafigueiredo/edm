@@ -80,31 +80,73 @@ Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a 
 
 function read_spinput(settings::Dict{String,Any})
 
-    #spinputtbl = loadtable(abspath(pwd(),"inputs/spinput.csv"))
+    #spinputtbl = loadtable(abspath(pwd(),"inputs/species.csv"))
     spinputtbl = loadtable(settings["spinput"])
 
     orgsref = OrgsRef(Array(rows(spinputtbl,:sp_id)),
-                      Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:kernel)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:e_mu)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:e_sd)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:pb0g)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0em)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0am)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0eg)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:b0ag)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sestra)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:dyad)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:floron)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:floroff)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:sripe)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:seedon)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:seedoff)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_mass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:min_mass)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:max_span)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mass_mu)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:mass_sd)[i] for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] => rows(spinputtbl,:abund)[i] for i in 1:length(rows(spinputtbl,:sp_id)))
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:kernel)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:e_mu)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:e_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0g)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0em)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0am)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0jg)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0ag)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:sestra)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:dyad)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:floron)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:floroff)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:sripe)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:seedon)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:seedoff)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:max_mass)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:min_mass)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:max_span)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:mass_mu)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:mass_sd)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:abund)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id)))
     )
     return orgsref
 end
@@ -126,7 +168,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
     open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
         #TODO better extract and arrange the field values
         for o in 1:length(orgs)
-            writedlm(output, [t orgs[o].id orgs[o].location orgs[o].sp orgs[o].biomass orgs[o].fgroup orgs[o].stage orgs[o].age orgs[o].reped orgs[o].genotype orgs[o].radius])
+            writedlm(output, [t orgs[o].id orgs[o].location orgs[o].sp orgs[o].mass orgs[o].stage orgs[o].age orgs[o].mated orgs[o].genotype orgs[o].radius])
         end
     end
 
