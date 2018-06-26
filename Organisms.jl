@@ -337,7 +337,7 @@ end
     Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
     GEnetic comes here
     """
-function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int)
+function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict{String, Any})
     ready = find(x->x.mass["repr"] > 0, orgs)
     for r in ready
         orgs[r].mated = true
@@ -387,10 +387,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
                                      (length(orgs) + length(offspring) + 1)) ,
                               orgs[o].location, #stays with mom until release
                               orgs[o].sp,
-                              Dict("veg" => rand(Distributions.Normal
-                                                 (orgsref.e_mu[orgs[o].sp]
-                                                  ,orgsref.e_sd[orgs[o].sp])
-                                                 ,1)[1]),
+                              Dict("veg" => rand(Distributions.Normal(orgsref.e_mu[orgs[o].sp]
+                                                                      ,orgsref.e_sd[orgs[o].sp]),1)[1]),
             "e",
             0,
             false,

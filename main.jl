@@ -257,7 +257,7 @@ function simulate()
 
         develop!(orgs,orgsref)
 
-        mate!(orgs,t)
+        mate!(orgs,t,settings)
 
         mkoffspring!(orgs,t,settings,orgsref)
 
