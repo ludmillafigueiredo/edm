@@ -240,8 +240,7 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                     # juveniles grow
                     orgs[o].mass["veg"] += grown_mass
                     # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")
-                    do sim
+                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
                         println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
                     end
                 elseif orgs[o].stage == "a" &&
@@ -400,8 +399,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
 
             push!(offspring, embryo)
 	    #unitest
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")
-            do sim
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
                 println(sim, "Pushed new org ", embryo, " into offpring")
 
             end
