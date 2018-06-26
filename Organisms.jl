@@ -243,7 +243,10 @@ function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{O
                     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                         println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
                     end
-                elseif orgs[o].stage == "a" && (sum(collect(values(orgs[o].mass))) >= 0.2*orgsref.max_mass[sp]) && (orgsref.floron[sp] <= t < orgsref.floroff[sp])
+                elseif orgs[o].stage == "a" &&
+                    (sum(collect(values(orgs[o].mass))) >=
+                     0.2*orgsref.max_mass[sp]) &&
+                    (orgsref.floron[sp] <= rem(t,52) < orgsref.floroff[sp])
                     # adults invest in reproduction
                     #unity test
                     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -369,7 +372,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
     for o in ferts
 
         emu = orgsref.e_mu[orgs[o].sp]
-        offs =  round(Int64, /(orgs[o].mass["reprd"],emu), RoundDown)
+       offs =  round(Int64, /(orgs[o].mass["reprd"],emu), RoundDown)
         orgs[o].mass["reprd"] -= (offs * emu)
 
         #unity test
@@ -380,19 +383,24 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
         for n in 1:offs
             #TODO check for a quicker way of creating several objects of composite-type
 
-            embryo = Organism(string(orgs[o].sp,"-", (length(orgs) + length(offspring) + 1)) ,
+            embryo = Organism(string(orgs[o].sp,"-",
+                                     (length(orgs) + length(offspring) + 1)) ,
                               orgs[o].location, #stays with mom until release
                               orgs[o].sp,
-                              Dict("veg" => rand(Distributions.Normal(orgsref.e_mu[orgs[o].sp],orgsref.e_sd[orgs[o].sp]),1)[1]), #use seed size for the fgroup
-                              "e",
-                              0,
+                              Dict("veg" => rand(Distributions.Normal
+                                                 (orgsref.e_mu[orgs[o].sp]
+                                                  ,orgsref.e_sd[orgs[o].sp])
+                                                 ,1)[1]),
+            "e",
+            0,
             false,
             ["A" "A"], #come from function
             0)
 
             push!(offspring, embryo)
 	    #unitest
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")
+            do sim
                 println(sim, "Pushed new org ", embryo, " into offpring")
 
             end

@@ -257,6 +257,8 @@ function simulate()
 
         develop!(orgs,orgsref)
 
+        mate!(orgs,t)
+
         mkoffspring!(orgs,t,settings,orgsref)
 
         disperse!(mylandscape,orgs,t,settings,orgsref)
