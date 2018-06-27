@@ -263,14 +263,18 @@ Calculates biomass gain according to MTE rate and depending on competition. Comp
                     elseif orgs[o].stage == "a" &&
                         (orgsref.floron[sp] <= rem(t,52) < orgsref.floroff[sp]) && (sum(collect(values(orgs[o].mass))) >= 0.2*orgsref.max_mass[sp])
                         # adults invest in reproduction
-                        #unity test
-                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING")
-                        end
-                        if haskey(orgs[o].mass,"reprd")
-                            orgs[o].mass["reprd"] += grown_mass
+                        if haskey(orgs[o].mass,"repr")
+                            orgs[o].mass["repr"] += grown_mass
+                            #unity test
+                            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                                println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
+                            end
                         else
-                            orgs[o].mass["reprd"] = grown_mass
+                            orgs[o].mass["repr"] = grown_mass
+                            #unity test
+                            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                                println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
+                            end
                         end
                     elseif orgs[o].stage == "a" #&& orgs[o].mass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce
                         orgs[o].mass["veg"] += grown_mass
@@ -387,8 +391,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
     for o in ferts
 
         emu = orgsref.e_mu[orgs[o].sp]
-        offs =  round(Int64, /(orgs[o].mass["reprd"],emu), RoundDown)
-        orgs[o].mass["reprd"] -= (offs * emu)
+        offs =  round(Int64, /(orgs[o].mass["repr"],emu), RoundDown)
+        orgs[o].mass["repr"] -= (offs * emu)
 
         #unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -619,12 +623,12 @@ end
 #             if frag == orgs[o].location[3]
 #                 if orgs[o].location[1:2] in collect(Iterators.product(x-1:x+1,y-1:y+1))
 #                     #check sp, self and already reproduced
-#                     # if (sp == orgs[o].sp && !(Base.isequal(org, orgs[o])) && org.reprd == false && orgs[o].reprd = false)
+#                     # if (sp == orgs[o].sp && !(Base.isequal(org, orgs[o])) && org.repr == false && orgs[o].repr = false)
 #                     #     #TODO add stochasticity
-#                     #     org.reprd = true
-#                     #     orgs[o].reprd = true
+#                     #     org.repr = true
+#                     #     orgs[o].repr = true
 #                     #
-#                     #     parents_genes = [org.genotype, orgs[o].reprd]
+#                     #     parents_genes = [org.genotype, orgs[o].repr]
 #                     # end
 #                 end
 #             end
