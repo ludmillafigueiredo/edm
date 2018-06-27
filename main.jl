@@ -251,7 +251,7 @@ function simulate()
             println(sim, "WEEK $t")
         end
 
-        projvegmass!(mylandscape,orgs)
+        projvegmass!(mylandscape,orgs, settings)
 
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref)
 

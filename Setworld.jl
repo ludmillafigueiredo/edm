@@ -98,7 +98,8 @@ function updateenv!(landscape::Array{Setworld.WorldCell,N} where N, t::Int64, la
 			# weekly update temperature
 			landscape[cell].temp = rand(Normal(landpars.meantempts[1],landpars.sdtempts[1]),1)[1] + tK
 			# weekly update precipitation
-			landscape[cell].precpt = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]),1)[1]
+		    landscape[cell].precpt = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]),1)[1]
+                    landscape[cell].neighs = Dict()
 		end
 	#end
 

@@ -116,7 +116,7 @@ end
         projvegmass!(landscape,orgs)
         Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
         """
-function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organism,1})
+function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organism,1}, settings::Dict{String, Any})
     
     competing = find(x->(x.stage == "a" || x.stage == "j"),orgs) #juveniles com ashard as adults, but have higher growth rate and lower mortality
 
@@ -131,9 +131,9 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
         projmass = /(orgs[o].mass["veg"], ((2*r+1)^2))
 
         # unity test
-        # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        #     println(sim, orgs[o].id," has ",orgs[o].biomass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
-        # end
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim, orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
+        end
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
             if !checkbounds(Bool,landscape[:,:,frag],j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
@@ -141,8 +141,18 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
             else
                 if haskey(landscape[i,j,frag].neighs,"p")
                     landscape[i,j,frag].neighs["p"] += projmass
+                    # unity test
+                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                        println(sim, orgs[o].id," has found a neighbor.")
+                    end
+                    
                 else
                     landscape[i,j,frag].neighs["p"] = projmass
+                    # unity test
+                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                        println(sim, orgs[o].id," has no neighbor") #ugly format to avoid risking some anoying errors that have been happening
+                    end
+                    
                 end
             end
         end
@@ -167,122 +177,127 @@ function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
             # #unity test
-            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #     println(sim, "$(org.id) out of bound projection at $(org.location)")
-            #end
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, "$(org.id) out of bound projection at $(org.location)")
+            end
+        elseif j == y && i == x # steming point is "is stronger", doesnt compete
+            continue
         elseif haskey(landscape[i,j,frag].neighs,"p")
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs["p"] - /(org.mass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
+            # unity test
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
+            end
         end
+
+        compterm = /((org.mass["veg"] - nbsum), org.mass["veg"])
+        # unity test
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim, "$(org.id) radius = $r and compterm = $compterm")
+        end
+
+        return compterm
     end
-
-    compterm = /(org.mass["veg"] - nbsum, org.mass["veg"])
-    # # unity test
-    # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    #     println(sim, "$(org.id) radius = $r and compterm = $compterm")
-    # end
-
-    return compterm
 end
 
+
+    """
+allocate!(orgs, landscape, aE, Boltz, OrgsRef)
+Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
-        allocate!(orgs, landscape, aE, Boltz, OrgsRef)
-        Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
-"""
-function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
-    #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
-    nogrowth = Int64[]
+    function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
+        #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
+        nogrowth = Int64[]
 
-    #TODO filter insects out?
-    for o in 1:length(orgs)
+        #TODO filter insects out?
+        for o in 1:length(orgs)
 
-	if orgs[o].stage == "e" #embryos dont allocate because they dont grow
-	    continue
-	else
+	    if orgs[o].stage == "e" #embryos dont allocate because they dont grow
+	        continue
+	    else
 
-            # 2.a Get local temperature
-            T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
+                # 2.a Get local temperature
+                T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
-            # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
-            # Any cost related to insufficient minimal biomass goes into the survival probability function
-            # 2.b Check for competition
+                # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
+                # Any cost related to insufficient minimal biomass goes into the survival probability function
+                # 2.b Check for competition
 
-            compterm = compete(landscape, orgs[o], settings)
-            # unity test
-            #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[o].id, "  compterm $compterm")
-            end
-
-            if compterm <= 0
-                #2.c Those not growing will have higher chance of dying
-                push!(nogrowth,o)
-            else
-                sp = orgs[o].sp 
-                # seedling and adults grow at different rates
-                if orgs[o].stage == "j"
-                    b0 = orgsref.b0jg[sp]
-                elseif orgs[o].stage == "a"
-                    b0 = orgsref.b0ag[sp]
-                else
-                    error("Seed or egg trying to compete.")
-                end
-                
-                grown_mass = b0*(compterm *sum(collect(values(orgs[o].mass))))^(3/4)*exp(-aE/(Boltz*T))
+                compterm = compete(landscape, orgs[o], settings)
                 # unity test
+                #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
                 open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(sim, "$(orgs[o].id) should grow $grown_mass")
+                    println(sim, orgs[o].id, "  compterm $compterm")
                 end
 
-                #Resource allocation schedule
-                #TODO make it more ellaborate and includde trade-offs
-                if orgs[o].stage == "j"
-                    # juveniles grow
-                    orgs[o].mass["veg"] += grown_mass
-                    # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
-                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
-                    end
-                elseif orgs[o].stage == "a" &&
-                    (sum(collect(values(orgs[o].mass))) >=
-                     0.2*orgsref.max_mass[sp]) &&
-                    (orgsref.floron[sp] <= rem(t,52) < orgsref.floroff[sp])
-                    # adults invest in reproduction
-                    #unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING")
-                    end
-                    if haskey(orgs[o].mass,"reprd")
-                        orgs[o].mass["reprd"] += grown_mass
-                    else
-                        orgs[o].mass["reprd"] = grown_mass
-                    end
-                elseif orgs[o].stage == "a" #&& orgs[o].mass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce
-                    orgs[o].mass["veg"] += grown_mass
-                    # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
-                    end
+                if compterm <= 0
+                    #2.c Those not growing will have higher chance of dying
+                    push!(nogrowth,o)
                 else
-                    error("Seed or egg trying to allocate.")
+                    sp = orgs[o].sp 
+                    # seedling and adults grow at different rates
+                    if orgs[o].stage == "j"
+                        b0 = orgsref.b0jg[sp]
+                    elseif orgs[o].stage == "a"
+                        b0 = orgsref.b0ag[sp]
+                    else
+                        error("Seed or egg trying to compete.")
+                    end
+                    
+                    grown_mass = b0*(compterm *sum(collect(values(orgs[o].mass))))^(3/4)*exp(-aE/(Boltz*T))
+                    # unity test
+                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                        println(sim, "$(orgs[o].id) should grow $grown_mass")
+                    end
+
+                    #Resource allocation schedule
+                    #TODO make it more ellaborate and includde trade-offs
+                    if orgs[o].stage == "j"
+                        # juveniles grow
+                        orgs[o].mass["veg"] += grown_mass
+                        # unity test
+                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
+                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
+                        end
+                    elseif orgs[o].stage == "a" &&
+                        (orgsref.floron[sp] <= rem(t,52) < orgsref.floroff[sp]) && (sum(collect(values(orgs[o].mass))) >= 0.2*orgsref.max_mass[sp])
+                        # adults invest in reproduction
+                        #unity test
+                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING")
+                        end
+                        if haskey(orgs[o].mass,"reprd")
+                            orgs[o].mass["reprd"] += grown_mass
+                        else
+                            orgs[o].mass["reprd"] = grown_mass
+                        end
+                    elseif orgs[o].stage == "a" #&& orgs[o].mass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce
+                        orgs[o].mass["veg"] += grown_mass
+                        # unity test
+                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
+                        end
+                    else
+                        error("Seed or egg trying to allocate.")
+                    end
                 end
-            end
 
-            #unity test
-            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #     println(sim, "current biomass: $(orgs[o].biomass)")
-            # end
-
-            # unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, "Not growing $nogrowth")
+                #unity test
+                # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                #     println(sim, "current biomass: $(orgs[o].biomass)")
+                # end
             end
         end
+
+        # unity test
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim, "Not growing $nogrowth")
+        end
+
+        return nogrowth
+
     end
-
-    return nogrowth
-
-end
 
 """
 develop!()
@@ -372,7 +387,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
     for o in ferts
 
         emu = orgsref.e_mu[orgs[o].sp]
-       offs =  round(Int64, /(orgs[o].mass["reprd"],emu), RoundDown)
+        offs =  round(Int64, /(orgs[o].mass["reprd"],emu), RoundDown)
         orgs[o].mass["reprd"] -= (offs * emu)
 
         #unity test
@@ -546,7 +561,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
         
 	if o in seeds
             Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-             mprob = 1 - exp(-Bm)
+            mprob = 1 - exp(-Bm)
         elseif (orgs[o].age/52) >= orgsref.max_span[orgs[o].sp]
             mprob = 1
             #unity test
@@ -564,7 +579,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
             mprob = 0            
         end
         
-       
+        
         if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
             push!(deaths, o)
         else
