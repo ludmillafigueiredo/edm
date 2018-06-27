@@ -159,16 +159,30 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
 
 
     if t == 1
+        header = hcat(["week"],
+                      reshape(string.(fieldnames(Organism)[1:3]),1,3),
+                      ["veg" "repr"],
+                      reshape(string.(fieldnames(Organism)[5:end-2]),1,length(fieldnames(Organism)[5:end-2])),
+                      ["chrm1" "chrm2" "radius"])#for non-diploid Orgs? string.(fieldnames(Organism))
         open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "w") do output
-            header = append!(["week"], string.(append!(fieldnames(Organism)[1:end-2], ["chrm1" "chrm2" "radius"]))) #for non-diploid Orgs? string.(fieldnames(Organism))
-            writedlm(output, reshape(header, 1, length(header)))
+            writedlm(output, header) #reshape(header, 1, length(header)))
         end
     end
 
     open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
         #TODO better extract and arrange the field values
         for o in 1:length(orgs)
-            writedlm(output, [t orgs[o].id orgs[o].location orgs[o].sp orgs[o].mass orgs[o].stage orgs[o].age orgs[o].mated orgs[o].genotype orgs[o].radius])
+            writedlm(output, hcat(t,
+                                  orgs[o].id,
+                                  orgs[o].location,
+                                  orgs[o].sp,
+                                  orgs[o].mass["veg"],
+                                  orgs[o].mass["repr"],
+                                  orgs[o].stage,
+                                  orgs[o].age,
+                                  orgs[o].mated,
+                                  orgs[o].genotype,
+                                  orgs[o].radius))
         end
     end
 
