@@ -11,7 +11,7 @@ using DataValues
 using Setworld
 using Fileprep
 
-export Organism, OrgsRef, newOrgs, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!
+export Organism, OrgsRef, newOrgs, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!
 
 #TODO put them in OrgsRef
 const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
@@ -87,7 +87,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
     `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
         `quant::Int64` is nb of new individuals or offspring to be created
         """
-function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::OrgsRef)
+function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::Organisms.OrgsRef)
 
     orgs = Organism[]
 
@@ -102,7 +102,8 @@ function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::OrgsRef
                 neworg = Organism(string(s, "-", length(orgs) + 1), #sp_id isnt ind id!
                                   (XYs[i,1],XYs[i,2],frag),
                                   s,
-                                  Dict("veg" => rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])), "repr" => 0))
+                                  Dict("veg" => rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])),
+                                       "repr" => 0))
                 push!(orgs, neworg)
             end
         end
@@ -122,8 +123,12 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
 
     for o in competing
         x, y, frag = orgs[o].location
-        orgs[o].radius = round(Int64, (sqrt(orgs[o].mass["veg"]^(2/3)) - 1)/2, RoundUp)
+        orgs[o].radius = round(Int64, (sqrt(orgs[o].mass["veg"]^(2/3)) - 1)/2, RoundUp) 
 
+        if orgs[o].radius == 0  #TODO: hotfix, check a more sound solution: vegetative mass - 1 might be too much for juveniles, especially the young ones
+            orgs[o].radius = 1
+        end
+        
         r = orgs[o].radius # separated for debugging
 
         #sp = orgs[o].sp
@@ -210,12 +215,14 @@ Calculates biomass gain according to MTE rate and depending on competition. Comp
         #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
         nogrowth = Int64[]
 
-        #TODO filter insects out?
-        for o in 1:length(orgs)
+        growing = find(x -> x.stage in ("a","j"), orgs)
 
-	    if orgs[o].stage == "e" #embryos dont allocate because they dont grow
-	        continue
-	    else
+        #TODO filter insects out?
+        for o in growing
+
+	   # if orgs[o].stage == "e" #embryos dont allocate because they dont grow
+	    #    continue
+	    #else
 
                 # 2.a Get local temperature
                 T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
@@ -291,7 +298,7 @@ Calculates biomass gain according to MTE rate and depending on competition. Comp
                 # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                 #     println(sim, "current biomass: $(orgs[o].biomass)")
                 # end
-            end
+           # end
         end
 
         # unity test
@@ -312,7 +319,7 @@ function develop!(orgs::Array{Organism,N} where N, orgsref::Organisms.OrgsRef)
     juvs = find(x->x.stage == "j",orgs)
 
     for j in juvs
-        if orgs[j].mass["veg"] >= orgsref.min_mass[orgs[j]]
+        if orgs[j].mass["veg"] >= orgsref.min_mass[orgs[j].sp]
             orgs[j].stage = "a"
         end
     end
@@ -407,7 +414,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
                               orgs[o].location, #stays with mom until release
                               orgs[o].sp,
                               Dict("veg" => rand(Distributions.Normal(orgsref.e_mu[orgs[o].sp]
-                                                                      ,orgsref.e_sd[orgs[o].sp]),1)[1]),
+                                                                      ,orgsref.e_sd[orgs[o].sp]),1)[1],
+                                   "repr" => 0),
             "e",
             0,
             false,
@@ -515,7 +523,7 @@ end
 establish!
 Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
     """
-function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organisms.Organism, N} where N, settings::Dict{String, Any})
+function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organisms.Organism, N} where N, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
@@ -536,7 +544,7 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
     	    end
 	end
 
-        if germinate(orgs[o])
+        if germinate(orgs[o], orgsref)
             orgs[o].stage = "j"
 	    #unity test
    	    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -595,6 +603,22 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
         println(sim, "Dying orgs: $deaths")
     end
     deleteat!(orgs, deaths)
+end
+
+"""
+    shedd!()
+    Plants loose their reproductive biomasses at the end of the reproductive season.
+"""
+function shedd!(orgs::Array{Organisms.Organism,N} where N, orgsref::Organisms.OrgsRef, t::Int)
+    
+    flowering = find(x -> x.sp[1] == "p" && x.mass["repr"] > 0 , orgs) # avoid listing species that have already shedded
+
+    for f in flowering
+        if rem(t,52) > orgsref.floroff[orgs[f].sp]
+            orgs[f].mass["repr"] = 0
+        end
+    end
+    
 end
 
 """

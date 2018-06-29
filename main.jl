@@ -169,9 +169,9 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         end
     end
 
-    open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
-        #TODO better extract and arrange the field values
-        for o in 1:length(orgs)
+    #TODO better extract and arrange the field values
+    for o in 1:length(orgs)
+        open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
             writedlm(output, hcat(t,
                                   orgs[o].id,
                                   orgs[o].location,
@@ -277,9 +277,11 @@ function simulate()
 
         disperse!(mylandscape,orgs,t,settings,orgsref)
 
-        establish!(mylandscape,orgs,settings)
+        establish!(mylandscape,orgs,settings,orgsref)
         
         survive!(mylandscape,orgs,nogrowth,settings, orgsref)
+
+        shedd!(orgs,orgsref,t)
 
         # output weekly
         orgstable(orgsref, landpars, orgs,t,settings)
