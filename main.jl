@@ -200,25 +200,25 @@ end
 simulate!()
 """
 function simulate()
-    #   INITIALIZATION
+    # INITIALIZATION
     settings = parse_commandline()
-    #unity test
+    # unity test
     println(keys(settings))
 
     landpars = read_landpars(settings)
-    #unity test
+    # unity test
     println("Land init stored in object of type $(typeof(landpars))")
 
     orgsref = read_spinput(settings)
-    #unity test
+    # unity test
     println("Sp info stored in object of type $(typeof(orgsref))")
 
     mylandscape = landscape_init(landpars)
-    #unity test
+    # unity test
     println("Landscape initialized: type $(typeof(mylandscape))")
 
     orgs = newOrgs(mylandscape, orgsref)
-    #unity test
+    # unity test
     println("Plants initialized: type $(typeof(orgs))")
 
     # unity test
@@ -238,15 +238,19 @@ function simulate()
     open(string("EDoutputs/",settings["simID"],"/simID"),"w") do ID
         println(ID, settings)
     end
+    # START ID SIMULATION LOG
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"w") do sim
+        println(sim, "Simulation: ",settings["simID"],now())
+    end
 
     # MODEL RUN
     for t in 1:settings["timesteps"]
 
         println("running week $t")
 
-        # UPDATE TEMPERATURE
+        #UPDATE LANDSCAPE: weekly temperature and projected biomass
         if t != 1
-            updateenv!(mylandscape,t, landpars)
+            updateenv!(mylandscape, t, landpars)
         end
 
         # DISTURBANCE
@@ -260,6 +264,8 @@ function simulate()
         #                break
         #        end
         #end
+
+        # LIFE CYCLES
 
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, "WEEK $t")
@@ -285,15 +291,6 @@ function simulate()
 
         # output weekly
         orgstable(orgsref, landpars, orgs,t,settings)
-
-        ## DISTURBANCES
-        ##
-        ## Dynamical landscape change
-        # if t #something
-        #     function update_landscape!()
-        # end
-        ## Invasion
-        # read_orgs(invasivefile)
 
     end
 

@@ -446,7 +446,7 @@ function release!()
 end
 
 """
-    disperse!(offspring)
+    disperse!(landscape, orgs, t, seetings, orgsref,)
     Seeds are dispersed.
     """
 function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
@@ -458,7 +458,7 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
     #  dispersa adultos
     # end
     # find indexes in orgs if embryos that are in the right to be dispersed and which releasing season is happening at t
-    dispersing = filter(x -> orgsref.seedon[x.sp] <= rem(t,52) < orgsref.seedoff[x.sp], filter(x -> (x.stage == "e" && x.age == 0), orgs)) #didnt mange to pipeline those, weird metho error
+    dispersing = filter(x -> (orgsref.seedon[x.sp] <= rem(t,52) < orgsref.seedoff[x.sp] && x.stage == "e" && x.age == 0), orgs)
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Dispersing: $dispersing")
