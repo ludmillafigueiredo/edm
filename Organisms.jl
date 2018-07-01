@@ -87,7 +87,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
     `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
         `quant::Int64` is nb of new individuals or offspring to be created
         """
-function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::Organisms.OrgsRef)
+function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::Organisms.OrgsRef)#, id_counter::Int)
 
     orgs = Organism[]
 
@@ -99,7 +99,7 @@ function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::Organis
                        rand(1:size(landscape,2),orgsref.abund[s]))
 
             for i in 1:orgsref.abund[s]
-                neworg = Organism(string(s, "-", length(orgs) + 1), #sp_id isnt ind id!
+                neworg = Organism(string(s, "-", length(orgs) + 1), #sp_id isnt ind id! # id_counter += id_counter
                                   (XYs[i,1],XYs[i,2],frag),
                                   s,
                                   Dict("veg" => rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])),
@@ -467,21 +467,33 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
     lost = Int64[]
 
     for d in dispersing
-        if orgsref.seedon[orgs[d].sp] <= rem(t,52) < orgsref.seedoff[orgs[d].sp]
+        if (orgsref.seedon[orgs[d].sp] <= rem(t,52) && rem(t,52) < orgsref.seedoff[orgs[d].sp]) #seeds are dispersed during release
             if orgsref.kernel[orgs[d].sp] == "a"
                 dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
+                #unity test
+                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(sim, "$(orgs[d].id) ant dispersal kernel")
+                end
             elseif orgsref.kernel[orgs[d].sp] == "w"
                 dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])
+                 #unity test
+                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(sim, "$(orgs[d].id) wind dispersal kernel")
+                end
             elseif orgsref.kernel[orgs[d].sp] == "wa"
                 µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
                 dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
+                 #unity test
+                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(sim, "$(orgs[d].id) $µ dispersal kernel")
+                end
             else
                 error("Check dispersal kernel input for species $(orgs[d].sp).")
             end
             
             #unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[d].id,"Calculated dispersal distance: $dist")
+                println(sim, "$(orgs[d].id) dispersal distance: $dist")
             end
 
             # Find patch
@@ -502,6 +514,11 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
                 open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                     println(sim, orgs[d].id," dispersed $dist but died")
                 end
+            end
+        else
+            #unity test
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, orgs[d].id,"Not releasing seeds.")
             end
         end
     end
@@ -537,7 +554,7 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
     lost = Int64[]
 
     for o in establishing
-        if orgsref.seedon[orgs[d].sp] <= rem(t,52) #only after release and dispersal a seed can establish
+        if orgsref.seedon[orgs[o].sp] <= rem(t,52) #only after release and dispersal a seed can establish
             orgcell = orgs[o].location
             if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]].neighs,"p")
                 push!(lost,o)
@@ -566,7 +583,7 @@ end
     Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
     plants in nogrwth are subjected to two probability rates
     """
-function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
+function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N,t::Int,settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
 
     deaths = Int64[]
     seeds = find(x -> x.stage == "e", orgs)    
@@ -576,8 +593,12 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
         T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
         
 	if o in seeds
-            Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-            mprob = 1 - exp(-Bm)
+            if orgsref.seedon[orgs[o].sp] < rem(t,52) #seeds that are still in the mother plant cant die
+                Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+                mprob = 1 - exp(-Bm)
+            else
+                continue
+            end 
         elseif (orgs[o].age/52) >= orgsref.max_span[orgs[o].sp]
             mprob = 1
             #unity test
