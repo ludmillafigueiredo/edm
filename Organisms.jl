@@ -458,7 +458,7 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
     #  dispersa adultos
     # end
     # find indexes in orgs if embryos that are in the right to be dispersed and which releasing season is happening at t
-    dispersing = filter(x -> (orgsref.seedon[x.sp] <= rem(t,52) < orgsref.seedoff[x.sp] && x.stage == "e" && x.age == 0), orgs)
+    dispersing = find(x -> (x.stage == "e" && x.age == 0), orgs)
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Dispersing: $dispersing")
@@ -467,39 +467,41 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
     lost = Int64[]
 
     for d in dispersing
-        if orgsref.kernel[orgs[d].sp] == "a"
-            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
-        elseif orgsref.kernel[orgs[d].sp] == "w"
-            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])
-        elseif orgsref.kernel[orgs[d].sp] == "wa"
-            µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
-            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
-        else
-            error("Check dispersal kernel input.")
-        end
-
-        #unity test
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, orgs[d].id,"Calculated dispersal distance: $dist")
-        end
-
-        # Find patch
-        θ = rand([0 0.5π π 1.5π]) # TODO tentar rand(0:2)*pi?
-        xdest = orgs[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
-        ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
-        fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
-
-        if checkboundaries(landscape, xdest, ydest, fdest)
-            orgs[d].location = (xdest,ydest,fdest)
-            #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[d].id," dispersed $dist")
+        if orgsref.seedon[orgs[d].sp] <= rem(t,52) < orgsref.seedoff[orgs[d].sp]
+            if orgsref.kernel[orgs[d].sp] == "a"
+                dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
+            elseif orgsref.kernel[orgs[d].sp] == "w"
+                dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])
+            elseif orgsref.kernel[orgs[d].sp] == "wa"
+                µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
+                dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
+            else
+                error("Check dispersal kernel input for species $(orgs[d].sp).")
             end
-        else
-            push!(lost,d)
+            
             #unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[d].id," dispersed $dist but died")
+                println(sim, orgs[d].id,"Calculated dispersal distance: $dist")
+            end
+
+            # Find patch
+            θ = rand([0 0.5π π 1.5π]) # TODO tentar rand(0:2)*pi?
+            xdest = orgs[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
+            ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
+            fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
+
+            if checkboundaries(landscape, xdest, ydest, fdest)
+                orgs[d].location = (xdest,ydest,fdest)
+                #unity test
+                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(sim, orgs[d].id," dispersed $dist")
+                end
+            else
+                push!(lost,d)
+                #unity test
+                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(sim, orgs[d].id," dispersed $dist but died")
+                end
             end
         end
     end
@@ -523,7 +525,7 @@ end
 establish!
 Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
     """
-function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organisms.Organism, N} where N, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
+function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
@@ -535,22 +537,24 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
     lost = Int64[]
 
     for o in establishing
-        orgcell = orgs[o].location
-        if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]].neighs,"p")
-            #push!(lost,o)
-	    #unity test
-   	    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        	println(sim, "$o falling into occupied cell")
-    	    end
-	end
+        if orgsref.seedon[orgs[d].sp] <= rem(t,52) #only after release and dispersal a seed can establish
+            orgcell = orgs[o].location
+            if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]].neighs,"p")
+                push!(lost,o)
+	        #unity test
+   	        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        	    println(sim, "$o falling into occupied cell and died")
+    	        end
+	    end
 
-        if germinate(orgs[o], orgsref)
-            orgs[o].stage = "j"
-	    #unity test
-   	    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        	println(sim, "Became juvenile: $o")
-    	    end
-            # the ones that dont germinate but are older than 1 year die
+            if germinate(orgs[o], orgsref)
+                orgs[o].stage = "j"
+	        #unity test
+   	        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        	    println(sim, "Became juvenile: $o")
+    	        end
+                # the ones that dont germinate but are older than 1 year die
+            end
         end
         
     end
@@ -611,7 +615,7 @@ end
 """
 function shedd!(orgs::Array{Organisms.Organism,N} where N, orgsref::Organisms.OrgsRef, t::Int)
     
-    flowering = find(x -> x.sp[1] == "p" && x.mass["repr"] > 0 , orgs) # avoid listing species that have already shedded
+    flowering = find(x -> (x.sp[1] == "p" && x.mass["repr"] > 0), orgs) 
 
     for f in flowering
         if rem(t,52) > orgsref.floroff[orgs[f].sp]

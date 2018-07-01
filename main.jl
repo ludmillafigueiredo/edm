@@ -240,7 +240,7 @@ function simulate()
     end
     # START ID SIMULATION LOG
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"w") do sim
-        println(sim, "Simulation: ",settings["simID"],now())
+        println(sim,string("Simulation: ",settings["simID"],now()))
     end
 
     # MODEL RUN
@@ -283,7 +283,7 @@ function simulate()
 
         disperse!(mylandscape,orgs,t,settings,orgsref)
 
-        establish!(mylandscape,orgs,settings,orgsref)
+        establish!(mylandscape,orgs,t,settings,orgsref)
         
         survive!(mylandscape,orgs,nogrowth,settings, orgsref)
 
