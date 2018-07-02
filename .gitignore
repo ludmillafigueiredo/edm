@@ -7,5 +7,6 @@ ED-*
 profilingED.sh
 singlesimulations
 slurm-43915.out
-
+EDoutputs/*
+analysis/*
 .Rproj.user
