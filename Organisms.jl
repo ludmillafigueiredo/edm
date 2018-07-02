@@ -636,10 +636,10 @@ end
 """
 function shedd!(orgs::Array{Organisms.Organism,N} where N, orgsref::Organisms.OrgsRef, t::Int)
     
-    flowering = find(x -> (x.sp[1] == "p" && x.mass["repr"] > 0), orgs) 
+    flowering = find(x -> (x.sp[1] == 'p' && x.mass["repr"] > 0), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char (''). 
 
     for f in flowering
-        if rem(t,52) > orgsref.floroff[orgs[f].sp]
+        if rem(t,52) >= orgsref.floroff[orgs[f].sp]
             orgs[f].mass["repr"] = 0
         end
     end
