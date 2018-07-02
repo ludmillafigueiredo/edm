@@ -1,12 +1,13 @@
 tests.jl
 img/
-parameters_pubs/
+parameters_pubs/*
 model_docs/*
 #dev_log.org#
 ED-*
-profilingED.sh
+*.sh
 singlesimulations
-slurm-43915.out
+*.o
+*.e
 EDoutputs/*
 analysis/*
 .Rproj.user

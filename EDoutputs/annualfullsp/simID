@@ -1,1 +1,0 @@
-Dict{String,Any}(Pair{String,Any}("spinput", "/home/ludmilla/model/inputs/spinput.csv"),Pair{String,Any}("temp_ts", "/home/ludmilla/model/inputs/envtimeseries.csv"),Pair{String,Any}("landconfig", "/home/ludmilla/model/inputs/landpars.csv"),Pair{String,Any}("timesteps", 52),Pair{String,Any}("simID", "annualfullsp"))

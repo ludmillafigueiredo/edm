@@ -1,7 +1,0 @@
-WEEK 1
-WEEK 1
-Not growing Int64[]
-Dying orgs: Int64[]
-WEEK 1
-Not growing Int64[]
-Dying orgs: Int64[]

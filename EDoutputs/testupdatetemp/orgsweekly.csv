@@ -1,3 +1,0 @@
-week	id	location	sp	biomass	fgroup	stage	age	reped	chrm1	chrm2	radius
-1	p1-1	(2710, 7248, 1)	p1	Dict("veg"=>99.5781)	p1	a	1	false	A	A	2
-1	p1-2	(2579, 6654, 1)	p1	Dict("veg"=>99.5555)	p1	a	1	false	A	A	2
