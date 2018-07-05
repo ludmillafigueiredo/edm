@@ -593,7 +593,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
         T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
         
 	if o in seeds
-            if orgsref.seedon[orgs[o].sp] < rem(t,52) #seeds that are still in the mother plant cant die
+            if rem(t,52) > orgsref.seedon[orgs[o].sp] #seeds that are still in the mother plant cant die. If their release season has started, they are not anymore
                 Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
                 mprob = 1 - exp(-Bm)
             else
