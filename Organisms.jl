@@ -11,7 +11,7 @@ using DataValues
 using Setworld
 using Fileprep
 
-export Organism, OrgsRef, newOrgs, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!
+export Organism, OrgsRef, newOrgs!, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!
 
 #TODO put them in OrgsRef
 const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
@@ -87,7 +87,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
     `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
         `quant::Int64` is nb of new individuals or offspring to be created
         """
-function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::Organisms.OrgsRef)#, id_counter::Int)
+function newOrgs!(landscape::Array{Setworld.WorldCell,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int)
 
     orgs = Organism[]
 
@@ -99,18 +99,22 @@ function newOrgs(landscape::Array{Setworld.WorldCell,N} where N,orgsref::Organis
                        rand(1:size(landscape,2),orgsref.abund[s]))
 
             for i in 1:orgsref.abund[s]
-                neworg = Organism(string(s, "-", length(orgs) + 1), #sp_id isnt ind id! # id_counter += id_counter
+
+                id_counter += 1 # update individual counter
+                
+                neworg = Organism(hex(id_counter + 1),
                                   (XYs[i,1],XYs[i,2],frag),
                                   s,
                                   Dict("veg" => rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])),
                                        "repr" => 0))
+                
                 push!(orgs, neworg)
             end
         end
     end
     #TODO different fgroups have different metabolic rates. Get it form OrgsRef
     #TODO or make sure that it has varied in the global scope as well rather export it?
-    return orgs
+    return orgs, id_counter
 end
 
 """
@@ -378,7 +382,7 @@ end
     mkoffspring!()
     After mating happened (marked in `reped`), calculate the amount of offspring
     """
-function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
+function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int)
     #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
     #     pollination()
@@ -407,10 +411,10 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
         end
 
         for n in 1:offs
-            #TODO check for a quicker way of creating several objects of composite-type
+            
+            id_counter += 1 # update individual counter
 
-            embryo = Organism(string(orgs[o].sp,"-",
-                                     (length(orgs) + length(offspring) + 1)) ,
+            embryo = Organism(hex(id_counter),
                               orgs[o].location, #stays with mom until release
                               orgs[o].sp,
                               Dict("veg" => rand(Distributions.Normal(orgsref.e_mu[orgs[o].sp]

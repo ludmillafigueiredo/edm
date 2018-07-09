@@ -201,23 +201,31 @@ simulate!()
 """
 function simulate()
     # INITIALIZATION
+    # Read in command line arguments
     settings = parse_commandline()
     # unity test
     println(keys(settings))
 
+    # Store landscape configuration
     landpars = read_landpars(settings)
     # unity test
     println("Land init stored in object of type $(typeof(landpars))")
 
+    # Store species information
     orgsref = read_spinput(settings)
     # unity test
     println("Sp info stored in object of type $(typeof(orgsref))")
 
+    # Create landscape
     mylandscape = landscape_init(landpars)
     # unity test
     println("Landscape initialized: type $(typeof(mylandscape))")
 
-    orgs = newOrgs(mylandscape, orgsref)
+    # Initialize individual tagger: It tags all individuals ever created. It does not change if individuals die, so there is no risk of re-use of a tag.
+    id_counter = 0
+    
+    # Create initial individuals
+    orgs, id_counter = newOrgs!(mylandscape, orgsref, id_counter)
     # unity test
     println("Plants initialized: type $(typeof(orgs))")
 
@@ -279,7 +287,7 @@ function simulate()
 
         mate!(orgs,t,settings)
 
-        mkoffspring!(orgs,t,settings,orgsref)
+        mkoffspring!(orgs,t,settings,orgsref, id_counter)
 
         disperse!(mylandscape,orgs,t,settings,orgsref)
 
