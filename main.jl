@@ -287,7 +287,7 @@ function simulate()
 
         mate!(orgs,t,settings)
 
-        mkoffspring!(orgs,t,settings,orgsref, id_counter)
+        id_counter = mkoffspring!(orgs,t,settings,orgsref, id_counter)
 
         disperse!(mylandscape,orgs,t,settings,orgsref)
 

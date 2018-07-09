@@ -102,7 +102,7 @@ function newOrgs!(landscape::Array{Setworld.WorldCell,N} where N,orgsref::Organi
 
                 id_counter += 1 # update individual counter
                 
-                neworg = Organism(hex(id_counter + 1),
+                neworg = Organism(hex(id_counter),
                                   (XYs[i,1],XYs[i,2],frag),
                                   s,
                                   Dict("veg" => rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])),
@@ -439,6 +439,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
 	println(sim, "Total offspring this summer: " ,offspring)
     end
+
+    return id_counter
     
 end
 
