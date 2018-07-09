@@ -139,9 +139,9 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
         projmass = /(orgs[o].mass["veg"], ((2*r+1)^2))
 
         # unity test
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
-        end
+        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+         #   println(sim, orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
+        #end
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
             if !checkbounds(Bool,landscape[:,:,frag],j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
@@ -150,9 +150,9 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
                 if haskey(landscape[i,j,frag].neighs,"p")
                     landscape[i,j,frag].neighs["p"] += projmass
                     # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, orgs[o].id," has found a neighbor.")
-                    end
+                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                     #   println(sim, orgs[o].id," has found a neighbor.")
+                    #end
                     
                 else
                     landscape[i,j,frag].neighs["p"] = projmass
@@ -185,9 +185,9 @@ function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
             # #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, "$(org.id) out of bound projection at $(org.location)")
-            end
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+             #   println(sim, "$(org.id) out of bound projection at $(org.location)")
+            #end
         elseif j == y && i == x # steming point is "is stronger", doesnt compete
             continue
         elseif haskey(landscape[i,j,frag].neighs,"p")
@@ -237,9 +237,9 @@ Calculates biomass gain according to MTE rate and depending on competition. Comp
                 compterm = compete(landscape, orgs[o], settings)
                 # unity test
                 #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
-                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(sim, orgs[o].id, "  compterm $compterm")
-                end
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                #    println(sim, orgs[o].id, "  compterm $compterm")
+                #end
 
                 if compterm <= 0
                     #2.c Those not growing will have higher chance of dying
@@ -257,9 +257,9 @@ Calculates biomass gain according to MTE rate and depending on competition. Comp
                     
                     grown_mass = b0*(compterm *sum(collect(values(orgs[o].mass))))^(3/4)*exp(-aE/(Boltz*T))
                     # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, "$(orgs[o].id) should grow $grown_mass")
-                    end
+                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    #    println(sim, "$(orgs[o].id) should grow $grown_mass")
+                    #end
 
                     #Resource allocation schedule
                     #TODO make it more ellaborate and includde trade-offs
@@ -267,31 +267,31 @@ Calculates biomass gain according to MTE rate and depending on competition. Comp
                         # juveniles grow
                         orgs[o].mass["veg"] += grown_mass
                         # unity test
-                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
-                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
-                        end
+                        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
+                        #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
+                        #end
                     elseif orgs[o].stage == "a" &&
                         (orgsref.floron[sp] <= rem(t,52) < orgsref.floroff[sp]) && (sum(collect(values(orgs[o].mass))) >= 0.2*orgsref.max_mass[sp])
                         # adults invest in reproduction
                         if haskey(orgs[o].mass,"repr")
                             orgs[o].mass["repr"] += grown_mass
                             #unity test
-                            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                                println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
-                            end
+                            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                            #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
+                            #end
                         else
                             orgs[o].mass["repr"] = grown_mass
                             #unity test
-                            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                                println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
-                            end
+                            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                            #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
+                            #end
                         end
                     elseif orgs[o].stage == "a" #&& orgs[o].mass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce
                         orgs[o].mass["veg"] += grown_mass
                         # unity test
-                        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                            println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
-                        end
+                        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                        #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
+                        #end
                     else
                         error("Seed or egg trying to allocate.")
                     end
@@ -305,9 +305,9 @@ Calculates biomass gain according to MTE rate and depending on competition. Comp
         end
 
         # unity test
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, "Not growing $nogrowth")
-        end
+        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        #    println(sim, "Not growing $nogrowth")
+        #end
 
         return nogrowth
 
@@ -476,22 +476,22 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
             if orgsref.kernel[orgs[d].sp] == "a"
                 dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
                 #unity test
-                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(sim, "$(orgs[d].id) ant dispersal kernel")
-                end
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                #    println(sim, "$(orgs[d].id) ant dispersal kernel")
+                #end
             elseif orgsref.kernel[orgs[d].sp] == "w"
                 dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])
                  #unity test
-                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(sim, "$(orgs[d].id) wind dispersal kernel")
-                end
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                #    println(sim, "$(orgs[d].id) wind dispersal kernel")
+                #end
             elseif orgsref.kernel[orgs[d].sp] == "wa"
                 µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
                 dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
                  #unity test
-                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(sim, "$(orgs[d].id) $µ dispersal kernel")
-                end
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                #    println(sim, "$(orgs[d].id) $µ dispersal kernel")
+                #end
             else
                 error("Check dispersal kernel input for species $(orgs[d].sp).")
             end
@@ -523,7 +523,7 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
         else
             #unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[d].id,"Not releasing seeds.")
+                println(sim, orgs[d].id, orgs[d].sp," Not releasing seeds.")
             end
         end
     end
@@ -564,18 +564,17 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
             if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]].neighs,"p")
                 push!(lost,o)
 	        #unity test
-   	        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        	    println(sim, "$o falling into occupied cell and died")
-    	        end
+   	        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        	#    println(sim, "$o falling into occupied cell and died")
+    	        #end
 	    end
 
             if germinate(orgs[o], orgsref)
                 orgs[o].stage = "j"
 	        #unity test
-   	        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        	    println(sim, "Became juvenile: $o")
-    	        end
-                # the ones that dont germinate but are older than 1 year die
+   	        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        	#    println(sim, "Became juvenile: $o")
+    	        #end
             end
         end
         
@@ -615,7 +614,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
             # unity test
             # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             #     println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
-            # end)
+            # end
             mprob = 1 - exp(-Bm)
         else
             mprob = 0            

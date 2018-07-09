@@ -183,14 +183,6 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         end
     end
 
-    if t == settings["timesteps"]
-        open(string("EDoutputs/",settings["simID"],"/simulationID",t), "w") do output
-            println(output, "Initial conditions:")
-            println(output, dump(orgsref))
-            println(output, dump(landpars))
-        end
-        println("End of simulation")
-    end
 end
 
 """
