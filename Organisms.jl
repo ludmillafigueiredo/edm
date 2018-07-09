@@ -40,7 +40,6 @@ sestra::Dict{String,Int}
 dyad::Dict{String,Float64}
 floron::Dict{String,Int}
 floroff::Dict{String,Int}
-sripe::Dict{String,Int}
 seedon::Dict{String,Int}
 seedoff::Dict{String,Int}
 max_mass::Dict{String,Float64}

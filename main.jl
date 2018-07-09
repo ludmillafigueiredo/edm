@@ -121,9 +121,6 @@ function read_spinput(settings::Dict{String,Any})
          rows(spinputtbl,:floroff)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
-         rows(spinputtbl,:sripe)[i]
-         for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:seedon)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
