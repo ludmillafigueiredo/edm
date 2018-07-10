@@ -358,7 +358,8 @@ reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
     Will probably call mate!()
     """
-function reproduce!()
+function reproduce!(settings::Dict{String, Any})
+    
 end
 
 """
@@ -366,15 +367,43 @@ end
     Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
     GEnetic comes here
     """
-function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict{String, Any})
-    ready = find(x->x.mass["repr"] > 0, orgs)
-    for r in ready
-        orgs[r].mated = true
+function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict{String, Any}, pollscen, tp, remain, regime)
+
+    ready = find(x->x.mass["repr"] > 0, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
+
+    # POLLINATION INDEPENDENT SCENARIO: as long as there is reproductive allocation, there is reproduction. Clonality is virtually useless
+    if pollscen == "indep"
+        for r in ready
+            orgs[r].mated = true
+        end
+    # POLLINATION DEPENDENT SCENARIO:
+    elseif pollscen == "equal"
+        
+        if t >= tp
+            if regime == "exp"
+                pollinated = rand(repro, length(repro)* exp(-(t-tp)) * kp * 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
+                # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
+                for p in pollinated
+                    orgs[p].mated = true
+                end
+            elseif regime == "constant"
+                pollinated = rand(repro, length(repro)* pb * kp * 10^(-3))
+            end
+        else
+            pollinated = rand(repro, length(repro) * 1 * kp * 10^(-3)) # while there is no pertubation, all (pb = 1) visited plants are reproducing
+            for p in pollinated 
+                orgs[p].mated = true
+            end
+        end
+        
+        # elif settings["insect"] == "spec"
+        #   ready = rand(length(repro)* pb * kp * 10-³), repro)
     end
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Enough reproductive biomass: $ready week $t")
+        println(sim, "Reproducing: $ready week $t, because ", settings["insect"])
     end
+    
 end
 
 """

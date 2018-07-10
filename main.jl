@@ -29,21 +29,33 @@ function parse_commandline()
 
     @add_arg_table sets begin
         "--simID"
-        help = "Name of the folder (string type) where outputs will be stored."
+        help = "Name of the folder (string type)
+where outputs will be stored."
         arg_type = String
         required = true
+        
         "--spinput"
         help = "Name of file with species list."
         arg_type = String
         default = abspath(pwd(),"inputs/species.csv")
+
+        "insect"
+        help = "How to explicitly model insects:
+pollination-independent reproduction \"indep\";
+equal pollination loss for all species \"equal\"."
+        arg_type = String
+        default = abspath(pwd(),"inputs/insect.csv")
+        
         "--landconfig"
         help = "Name of file with simulation parameters: areas of fragments, mean (and s.d.) temperature, total running time."
         arg_type = String
         default = abspath(pwd(),"inputs/landpars.csv")
+
         "--timesteps"
         help = "Duration of simulation in weeks."
         arg_type = Int
         default = 52
+
         "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
@@ -149,11 +161,27 @@ function read_spinput(settings::Dict{String,Any})
 end
 
 """
+implicit_insect(settings)
+Reads how insects are going to be implicitly simulated.
+"""
+function implicit_insect(settings::Dict{String,Any})
+
+    insectsinput = loadtable(settings["insect"])
+    
+    interaction = select(insectsinput, :interaction)
+    pollscen = select(insectsinput, :pollscen) # pollination scenario
+    tp = select(insectsinput, :tp) # time of perturbation
+    remain = selection(insectsinput, :remain) # remain proportion of insects right after pertubation
+    regime = select(insectsinput, :regime) # regime of loss
+    
+    return interaction, pollscen, tp, remain, regime
+end
+
+"""
 outputorgs(orgs,t,settingsfrgou)
 Saves a long format table with the organisms field informations.
 """
 function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
-
 
     if t == 1
         header = hcat(["week"],
@@ -166,23 +194,23 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         end
     end
 
-    #TODO better extract and arrange the field values
-    for o in 1:length(orgs)
-        open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
-            writedlm(output, hcat(t,
-                                  orgs[o].id,
-                                  orgs[o].location,
-                                  orgs[o].sp,
-                                  orgs[o].mass["veg"],
-                                  orgs[o].mass["repr"],
-                                  orgs[o].stage,
-                                  orgs[o].age,
-                                  orgs[o].mated,
-                                  orgs[o].genotype,
-                                  orgs[o].radius))
+    if rem(t,4) == 0 # output monthly
+        for o in 1:length(orgs)
+            open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
+                writedlm(output, hcat(t,
+                                      orgs[o].id,
+                                      orgs[o].location,
+                                      orgs[o].sp,
+                                      orgs[o].mass["veg"],
+                                      orgs[o].mass["repr"],
+                                      orgs[o].stage,
+                                      orgs[o].age,
+                                      orgs[o].mated,
+                orgs[o].genotype,
+                orgs[o].radius))
+            end
         end
     end
-
 end
 
 """
@@ -205,6 +233,9 @@ function simulate()
     # unity test
     println("Sp info stored in object of type $(typeof(orgsref))")
 
+    # Set insects implicit simulation
+    interaction, pollscen, tp, remain, regime = implicit_insect(settings)
+    
     # Create landscape
     mylandscape = landscape_init(landpars)
     # unity test
@@ -274,9 +305,9 @@ function simulate()
 
         develop!(orgs,orgsref)
 
-        mate!(orgs,t,settings)
+        mate!(orgs,t,settings,pollscen,tp,remain,regime, kp = 1)
 
-        id_counter = mkoffspring!(orgs,t,settings,orgsref, id_counter)
+        id_counter = mkoffspring!(orgs,t,settings,orgsref,id_counter)
 
         disperse!(mylandscape,orgs,t,settings,orgsref)
 
