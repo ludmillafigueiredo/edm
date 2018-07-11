@@ -106,7 +106,7 @@ function destroyarea!(landscape::Array{Setworld.WorldCell, 3}, loss::Float64)
     # index of the cells still availble:
     available = find(x -> x.avail == true, landscape)
     # number of cells to be destroyed:
-    lostarea = round(Int,loss*available, RoundUp) 
+    lostarea = round(Int,loss*length(available), RoundUp) 
 
     # Unity test
     if lostarea > length(available)
