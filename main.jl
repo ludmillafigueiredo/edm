@@ -39,7 +39,7 @@ where outputs will be stored."
         arg_type = String
         default = abspath(pwd(),"inputs/species.csv")
 
-        "insect"
+        "--insect"
         help = "How to explicitly model insects:
 pollination-independent reproduction \"indep\";
 equal pollination loss for all species \"equal\"."
@@ -51,6 +51,10 @@ equal pollination loss for all species \"equal\"."
         arg_type = String
         default = abspath(pwd(),"inputs/landpars.csv")
 
+        "--disturb"
+        help = "Type of environmental disturbance to be implemented: habitat area loss \"loss\", habitat fragmentation \"frag\" or temperature change \"temp\""
+        arg_type = String
+
         "--timesteps"
         help = "Duration of simulation in weeks."
         arg_type = Int
@@ -59,7 +63,7 @@ equal pollination loss for all species \"equal\"."
         "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
-        default = abspath(pwd(),"inputs/envtimeseries_1999.csv")
+        default = abspath(pwd(),"inputs/temp1917_2017.csv")
     end
 
     return parse_args(sets) # returning a dictionnary of strings is useful because they can passed as keywords to Julia function
@@ -246,12 +250,10 @@ function simulate()
     
     # Create initial individuals
     orgs, id_counter = newOrgs!(mylandscape, orgsref, id_counter)
-    # unity test
+    
     println("Plants initialized: type $(typeof(orgs))")
 
-    # unity test
     println("Starting simulation")
-
 
     try
         mkpath("EDoutputs/$(settings["simID"])")
@@ -266,7 +268,7 @@ function simulate()
     open(string("EDoutputs/",settings["simID"],"/simID"),"w") do ID
         println(ID, settings)
     end
-    # START ID SIMULATION LOG
+    # START ID SIMULATION LOG FILE
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"w") do sim
         println(sim,string("Simulation: ",settings["simID"],now()))
     end
@@ -282,19 +284,48 @@ function simulate()
         end
 
         # DISTURBANCE
-        #if haskey(settings, "disturb")
-        #        # select function according to keyword: loss, frag, temp
-        #        if settings["disturb"] == "loss"
-        #        elseif settings["disturb"] == "frag"
-        #        elseif settings["disturb"] == "temp"
-        #        else
-        #                error("Please specify one of the disturbance scenarios with `--disturb`:\nhabitat area loss (`loss??),\nhabitat fragmentation (`frag`) or\ntemperature change (`temp`)")
-        #                break
-        #        end
-        #end
-
+        if haskey(settings, "disturb")
+            # read in the disturbance file, if not done so yet
+            if !isdefined(:disturbtbl)
+                # select file according to keyword: loss, frag, temp
+                if settings["disturb"] == "loss"
+                    disturbtbl = loadtable(abspath(pwd(),"inputs/arealoss.csv"))
+                    tdist = select(disturbtbl,:time)
+                elseif settings["disturb"] == "frag"
+                    disturbtbl = loadtable(abspath(pwd(),"inputs/fragmentation.csv"))
+                    tdist = select(disturbtbl,:time)
+                elseif settings["disturb"] == "temp"
+                    continue
+                    println("Temperature change is simulated with
+                            the provided temperature file.")
+                else
+                    error("Please specify one of the disturbance scenarios with `--disturb`:
+                          \n\"loss\" for habitat area loss,
+                          \n\"frag\" for habitat fragmentation or
+                          \n\"temp\" for temperature change (`temp`)")
+                    break
+                end
+            else
+                if t in tdist
+                    if settings["disturb"] == "loss"
+                        loss = select(filter(x -> x.time == t,disturbtbl),
+                                      :proportion)[1] # select returns an array
+                        destroyarea!(mylandscape,loss)
+                        destroyorgs!(orgs, mylandscape)
+                        
+                    elseif settings["disturb"] == "frag"
+                        # fragment!(mylandscape,orgs)
+                        continue #while fragment is not implemented
+                    end
+                else
+                    continue
+                end
+            end
+        end
+        
         # LIFE CYCLES
 
+        # unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, "WEEK $t")
         end
@@ -317,7 +348,7 @@ function simulate()
 
         shedd!(orgs,orgsref,t)
 
-        # output weekly
+        # OUTPUT
         orgstable(orgsref, landpars, orgs,t,settings)
 
     end

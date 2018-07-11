@@ -11,7 +11,7 @@ using DataValues
 using Setworld
 using Fileprep
 
-export Organism, OrgsRef, newOrgs!, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!
+export Organism, OrgsRef, newOrgs!, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!
 
 #TODO put them in OrgsRef
 const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
@@ -358,7 +358,7 @@ reproduce!(landscape,orgs)
 Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
     Will probably call mate!()
     """
-function reproduce!(settings::Dict{String, Any})
+function reproduce!()
     
 end
 
@@ -648,8 +648,7 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
         else
             mprob = 0            
         end
-        
-        
+                
         if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
             push!(deaths, o)
         else
@@ -677,6 +676,24 @@ function shedd!(orgs::Array{Organisms.Organism,N} where N, orgsref::Organisms.Or
         end
     end
     
+end
+
+"""
+destroyorgs!(orgs)
+Kill organisms that where in the lost habitats.
+"""
+function destroyorgs!(orgs::Array{Organisms.Organism, N} where N, landscape::Array{Setworld.WorldCell, N} where N)
+    #KILL ORGANISMS in the destroyed
+    kills = []
+    for o in 1:length(orgs)
+        x,y,f = orgs[o].location[1],orgs[o].location[2],orgs[o].location[3]
+        if landscape[x,y,f].avail == false
+            push!(kills,o)
+        end        
+    end
+    if length(kills) > 0 # delete at index 0 generates an error
+        deleteat!(orgs, kills)
+    end
 end
 
 """

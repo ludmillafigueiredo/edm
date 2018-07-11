@@ -20,7 +20,7 @@ module Setworld
 
 using Distributions
 
-export LandPars, WorldCell, landscape_init, updateenv!
+export LandPars, WorldCell, landscape_init, updateenv!, destroyarea!
 
 const tK = 273.15 # °C to K converter
 
@@ -80,35 +80,49 @@ function landscape_init(landpars::LandPars)
 end
 
 """
-arealoss!()
-
-"""
-function arealoss!(landscape,settings::Dict{String,Any})
-
-end
-
-"""
 updateenv!(landscape,t)
 Update temperature and precipitation values according to the weekly input data (weekly means and ).
 """
 function updateenv!(landscape::Array{Setworld.WorldCell,N} where N, t::Int64, landpars::LandPars)
-	#TODO Unity test
-	#for frag in 1:size(landscape,3) #every fragment # all fragments get the same temperature
-		for cell in eachindex(landscape)
-			# weekly update temperature
-			landscape[cell].temp = rand(Normal(landpars.meantempts[1],landpars.sdtempts[1]),1)[1] + tK
-			# weekly update precipitation
-		    landscape[cell].precpt = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]),1)[1]
-                    landscape[cell].neighs = Dict()
-		end
-	#end
+    #TODO Unity test
+    #for frag in 1:size(landscape,3) #every fragment # all fragments get the same temperature
+    for cell in eachindex(landscape)
+	# weekly update temperature
+	landscape[cell].temp = rand(Normal(landpars.meantempts[1],landpars.sdtempts[1]),1)[1] + tK
+	# weekly update precipitation
+	landscape[cell].precpt = rand(Normal(landpars.meanprects[t],landpars.sdprects[t]),1)[1]
+        landscape[cell].neighs = Dict()
+    end
+    #end
 
+end
+
+"""
+destroyarea!()
+Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
+"""
+function destroyarea!(landscape::Array{Setworld.WorldCell, 3}, loss::Float64)
+    # DESTROY HABITAT
+    # index of the cells still availble:
+    available = find(x -> x.avail == true, landscape)
+    # number of cells to be destroyed:
+    lostarea = round(Int,loss*available, RoundUp) 
+
+    # Unity test
+    if lostarea > length(available)
+        error("Destroying more than the available area.")
+    end
+
+    # go through landscape indexes of the first n cells from the still available
+    for cell in available[1:lostarea] 
+        mylandscape[cell].avail = false # and destroy them
+    end    
 end
 
 """
 fragmentation!()
 """
-function fragmentation!(landscape::Array{Setworld.WorldCell,3}, t, settings::Dict{String,Any})
+function fragment!(landscape::Array{Setworld.WorldCell,3}, t, settings::Dict{String,Any})
 end
 
 end
