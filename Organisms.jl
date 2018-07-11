@@ -367,7 +367,7 @@ end
     Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
     GEnetic comes here
     """
-function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict{String, Any}, pollscen, tp, remain, regime)
+function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict{String, Any}, pollscen, tp, remain, regime, kp)
 
     ready = find(x->x.mass["repr"] > 0, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
 
@@ -381,23 +381,23 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
         
         if t >= tp
             if regime == "exp"
-                pollinated = rand(repro, length(repro)* exp(-(t-tp)) * kp * 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
+                pollinated = rand(ready, length(ready)* exp(-(t-tp)) * kp * 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
                 # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
                 for p in pollinated
                     orgs[p].mated = true
                 end
             elseif regime == "constant"
-                pollinated = rand(repro, length(repro)* pb * kp * 10^(-3))
+                pollinated = rand(ready, length(ready)* remain * kp * 10^(-3))
             end
         else
-            pollinated = rand(repro, length(repro) * 1 * kp * 10^(-3)) # while there is no pertubation, all (pb = 1) visited plants are reproducing
+            pollinated = rand(ready, length(ready) * 1 * kp * 10^(-3)) # while there is no pertubation, all (pb = 1) visited plants are reproducing
             for p in pollinated 
                 orgs[p].mated = true
             end
         end
         
         # elif settings["insect"] == "spec"
-        #   ready = rand(length(repro)* pb * kp * 10-³), repro)
+        #   ready = rand(length(repro)* remain * kp * 10-³), repro)
     end
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim

@@ -171,7 +171,7 @@ function implicit_insect(settings::Dict{String,Any})
     interaction = select(insectsinput, :interaction)
     pollscen = select(insectsinput, :pollscen) # pollination scenario
     tp = select(insectsinput, :tp) # time of perturbation
-    remain = selection(insectsinput, :remain) # remain proportion of insects right after pertubation
+    remain = select(insectsinput, :remain) # remain proportion of insects right after pertubation
     regime = select(insectsinput, :regime) # regime of loss
     
     return interaction, pollscen, tp, remain, regime
