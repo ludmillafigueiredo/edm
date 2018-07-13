@@ -476,14 +476,24 @@ end
     release!()
     Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
     """
-function release!()
+function release!(landscape,(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
+    # Individuals being released in any given week are:
+    # in embryo stage
+    # in their seed release period (seedon <= t <= seedoff for the species)
+    # Their number will depend on how much time there is still left for seed release and dispersal
+    seeds = filter(x -> x.stage == "e" && x.age == 0 && orgsref.seedon[x.sp] >= t, orgs) # using a condition "outside" orgs might not workthis condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it does do contain, it throws an error.
+    for spp in getfield.(seeds, :sp)
+        ntodisp = length(seeds.sp == spp)/(orgsref.seedoff[spp] - t + 1) # +1 to account for Organisms that release all at once
+        dispersing = rand(seeds,ntodisp)
+        disperse!(landscape,dispersing,t,settings,orgsref) #TODO how to simplify calling all the arguments that release! doesnt need
+    end
 end
 
 """
     disperse!(landscape, orgs, t, seetings, orgsref,)
     Seeds are dispersed.
     """
-function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
+function disperse!(landscape::Array{Setworld.WorldCell,N} where N,dispersing::Array{Organisms.Organism, N} where N, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
 
     #TODO include insects
     # if achar plant (fgroup?)
@@ -492,16 +502,18 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
     #  dispersa adultos
     # end
     # find indexes in orgs if embryos that are in the right to be dispersed and which releasing season is happening at t
-    dispersing = find(x -> (x.stage == "e" && x.age == 0), orgs)
+    
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Dispersing: $dispersing")
     end
 
+    dispersingorgs = indexin(dispersing, orgs) #find the indexes of dispersing individuals in orgs to record in this array, instead of `dispersing`
+
     lost = Int64[]
 
-    for d in dispersing
-        if (orgsref.seedon[orgs[d].sp] <= rem(t,52) && rem(t,52) < orgsref.seedoff[orgs[d].sp]) #seeds are dispersed during release
+    for d in dispersingorgs
+       # if (orgsref.seedon[dispersing[d].sp] <= rem(t,52) && rem(t,52) < orgsref.seedoff[orgs[d].sp]) #seeds are dispersed during release
             if orgsref.kernel[orgs[d].sp] == "a"
                 dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
                 #unity test
@@ -549,12 +561,12 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Or
                     println(sim, orgs[d].id," dispersed $dist but died")
                 end
             end
-        else
+        # else
             #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[d].id, orgs[d].sp," Not releasing seeds.")
-            end
-        end
+           # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+           #     println(sim, orgs[d].id, orgs[d].sp," Not releasing seeds.")
+           # end
+        # end
     end
     deleteat!(orgs,lost)
 end
