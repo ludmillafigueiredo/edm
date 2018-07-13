@@ -11,9 +11,9 @@ using DataValues
 using Setworld
 using Fileprep
 
-export Organism, OrgsRef, newOrgs!, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!
+export Organism, OrgsRef, newOrgs!, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!, release!
 
-#TODO put them in OrgsRef
+# Set up model constants
 const Boltz = 8.62e-5 # eV/K Brown & Sibly MTE book chap 2
 const aE = 0.65 # eV Brown & Sibly MTE book chap 2
 const µ_wind = 0.1
@@ -476,7 +476,7 @@ end
     release!()
     Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
     """
-function release!(landscape,(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
+function release!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
     # Individuals being released in any given week are:
     # in embryo stage
     # in their seed release period (seedon <= t <= seedoff for the species)

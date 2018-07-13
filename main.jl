@@ -340,7 +340,7 @@ function simulate()
 
         id_counter = mkoffspring!(orgs,t,settings,orgsref,id_counter)
 
-        disperse!(mylandscape,orgs,t,settings,orgsref)
+        release!(mylandscape,orgs,t,settings,orgsref)
 
         establish!(mylandscape,orgs,t,settings,orgsref)
         
