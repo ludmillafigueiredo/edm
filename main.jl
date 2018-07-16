@@ -54,6 +54,7 @@ equal pollination loss for all species \"equal\"."
         "--disturb"
         help = "Type of environmental disturbance to be implemented: habitat area loss \"loss\", habitat fragmentation \"frag\" or temperature change \"temp\""
         arg_type = String
+        default = "none"
 
         "--timesteps"
         help = "Duration of simulation in weeks."
@@ -199,19 +200,60 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
     end
 
     if rem(t,4) == 0 # output monthly
-        for o in 1:length(orgs)
-            open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
-                writedlm(output, hcat(t,
-                                      orgs[o].id,
-                                      orgs[o].location,
-                                      orgs[o].sp,
-                                      orgs[o].mass["veg"],
-                                      orgs[o].mass["repr"],
-                                      orgs[o].stage,
-                                      orgs[o].age,
-                                      orgs[o].mated,
-                orgs[o].genotype,
-                orgs[o].radius))
+    for o in 1:length(orgs)
+        open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
+            writedlm(output, hcat(t,
+                                  orgs[o].id,
+                                  orgs[o].location,
+                                  orgs[o].sp,
+                                  orgs[o].mass["veg"],
+                                  orgs[o].mass["repr"],
+                                  orgs[o].stage,
+                                  orgs[o].age,
+                                  orgs[o].mated,
+            orgs[o].genotype,
+            orgs[o].radius))
+        end
+    end
+    end
+end
+
+
+"""
+disturb!()
+
+"""
+function disturb!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
+    # read in the disturbance file, if not done so yet
+    if !isdefined(:disturbtbl)
+        # select file according to keyword: loss, frag, temp
+        if settings["disturb"] == "loss"
+            disturbtbl = loadtable(abspath(pwd(),"inputs/arealoss.csv"))
+            tdist = select(disturbtbl,:time)
+        elseif settings["disturb"] == "frag"
+            disturbtbl = loadtable(abspath(pwd(),"inputs/fragmentation.csv"))
+            tdist = select(disturbtbl,:time)
+        elseif settings["disturb"] == "temp"
+            #continue
+            println("Temperature change is simulated with
+                    the provided temperature file.")
+        else
+            error("Please specify one of the disturbance scenarios with `--disturb`:
+                  \n\"none\" if no disturbance should be simulated,
+                  \n\"loss\" for habitat area loss,
+                  \n\"frag\" for habitat fragmentation,
+                  \n\"temp\" for temperature change.")
+        end
+    else
+        if t in tdist
+            if settings["disturb"] == "loss"
+                loss = select(filter(x -> x.time == t,disturbtbl),
+                              :proportion)[1] # select returns an array
+                Setworld.destroyarea!(landscape,loss)
+                Organisms.destroyorgs!(orgs, landscape)
+            elseif settings["disturb"] == "frag"
+                # fragment!(mylandscape,orgs)
+                #while fragment is not implemented
             end
         end
     end
@@ -284,59 +326,23 @@ function simulate()
         end
 
         # DISTURBANCE
-        if haskey(settings, "disturb")
-            # read in the disturbance file, if not done so yet
-            if !isdefined(:disturbtbl)
-                # select file according to keyword: loss, frag, temp
-                if settings["disturb"] == "loss"
-                    disturbtbl = loadtable(abspath(pwd(),"inputs/arealoss.csv"))
-                    tdist = select(disturbtbl,:time)
-                elseif settings["disturb"] == "frag"
-                    disturbtbl = loadtable(abspath(pwd(),"inputs/fragmentation.csv"))
-                    tdist = select(disturbtbl,:time)
-                elseif settings["disturb"] == "temp"
-                    continue
-                    println("Temperature change is simulated with
-                            the provided temperature file.")
-                else
-                    error("Please specify one of the disturbance scenarios with `--disturb`:
-                          \n\"loss\" for habitat area loss,
-                          \n\"frag\" for habitat fragmentation or
-                          \n\"temp\" for temperature change (`temp`)")
-                    break
-                end
-            else
-                if t in tdist
-                    if settings["disturb"] == "loss"
-                        loss = select(filter(x -> x.time == t,disturbtbl),
-                                      :proportion)[1] # select returns an array
-                        destroyarea!(mylandscape,loss)
-                        destroyorgs!(orgs, mylandscape)
-                        
-                    elseif settings["disturb"] == "frag"
-                        # fragment!(mylandscape,orgs)
-                        continue #while fragment is not implemented
-                    end
-                else
-                    continue
-                end
-            end
+        if settings["disturb"] != "none"  
+            disturb!(mylandscape,orgs,t,settings)
         end
         
-        # LIFE CYCLES
-
         # unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, "WEEK $t")
         end
 
+        # LIFE CYCLES
         projvegmass!(mylandscape,orgs, settings)
 
         nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref)
 
         develop!(orgs,orgsref)
 
-        mate!(orgs,t,settings,pollscen,tp,remain,regime, kp = 1)
+        mate!(orgs,t,settings,pollscen,tp,remain,regime, 1)
 
         id_counter = mkoffspring!(orgs,t,settings,orgsref,id_counter)
 
@@ -350,9 +356,6 @@ function simulate()
 
         # OUTPUT
         orgstable(orgsref, landpars, orgs,t,settings)
-
     end
-
 end
-
 simulate()
