@@ -157,9 +157,9 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
                 else
                     landscape[i,j,frag].neighs["p"] = projmass
                     # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, orgs[o].id," has no neighbor") #ugly format to avoid risking some anoying errors that have been happening
-                    end
+                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    #    println(sim, orgs[o].id," has no neighbor") #ugly format to avoid risking some anoying errors that have been happening
+                    #end
                     
                 end
             end
@@ -694,7 +694,7 @@ end
 destroyorgs!(orgs)
 Kill organisms that where in the lost habitats.
 """
-function destroyorgs!(orgs::Array{Organisms.Organism, N} where N, landscape::Array{Setworld.WorldCell, N} where N)
+function destroyorgs!(orgs::Array{Organisms.Organism, N} where N, landscape::Array{Setworld.WorldCell, N} where N, settings::Dict{String,Any})
     #KILL ORGANISMS in the destroyed
     kills = []
     for o in 1:length(orgs)
@@ -705,6 +705,10 @@ function destroyorgs!(orgs::Array{Organisms.Organism, N} where N, landscape::Arr
     end
     if length(kills) > 0 # delete at index 0 generates an error
         deleteat!(orgs, kills)
+    end
+    #unity test
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println(sim, "Killed orgs: $kills")
     end
 end
 

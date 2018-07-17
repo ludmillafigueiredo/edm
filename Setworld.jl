@@ -101,7 +101,7 @@ end
 destroyarea!()
 Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
 """
-function destroyarea!(landscape::Array{Setworld.WorldCell, 3}, loss::Float64)
+function destroyarea!(landscape::Array{Setworld.WorldCell, N} where N, loss::Float64, settings::Dict{String,Any})
     # DESTROY HABITAT
     # index of the cells still availble:
     available = find(x -> x.avail == true, landscape)
@@ -115,8 +115,13 @@ function destroyarea!(landscape::Array{Setworld.WorldCell, 3}, loss::Float64)
 
     # go through landscape indexes of the first n cells from the still available
     for cell in available[1:lostarea] 
-        mylandscape[cell].avail = false # and destroy them
-    end    
+        landscape[cell].avail = false # and destroy them
+    end
+
+    #unity test
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println(sim, "Number of destroyed cells: $lostarea")
+    end
 end
 
 """
