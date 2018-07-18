@@ -173,13 +173,13 @@ function implicit_insect(settings::Dict{String,Any})
 
     insectsinput = loadtable(settings["insect"])
     
-    interaction = select(insectsinput, :interaction)
-    pollscen = select(insectsinput, :pollscen) # pollination scenario
-    tp = select(insectsinput, :tp) # time of perturbation
-    remain = select(insectsinput, :remain) # remain proportion of insects right after pertubation
-    regime = select(insectsinput, :regime) # regime of loss
+    interaction = select(insectsinput, :interaction)[1]
+    scen = select(insectsinput, :scen)[1] # pollination scenario
+    tp = select(insectsinput, :tp)[1] # time of perturbation
+    remain = select(insectsinput, :remain)[1] # remain proportion of insects right after pertubation
+    regime = select(insectsinput, :regime)[1] # regime of loss
     
-    return interaction, pollscen, tp, remain, regime
+    return interaction, scen, tp, remain, regime
 end
 
 """
@@ -281,7 +281,7 @@ function simulate()
     println("Sp info stored in object of type $(typeof(orgsref))")
 
     # Set insects implicit simulation
-    interaction, pollscen, tp, remain, regime = implicit_insect(settings)
+    interaction, scen, tp, remain, regime = implicit_insect(settings)
     
     # Create landscape
     mylandscape = landscape_init(landpars)
@@ -342,11 +342,13 @@ function simulate()
 
         develop!(orgs,orgsref)
 
-        mate!(orgs,t,settings,pollscen,tp,remain,regime, 1)
+        mate!(orgs,t,settings,scen,tp,remain,regime, 1)
 
         id_counter = mkoffspring!(orgs,t,settings,orgsref,id_counter)
 
-        release!(mylandscape,orgs,t,settings,orgsref)
+        seedsi = release!(mylandscape,orgs,t,settings,orgsref)
+
+        disperse!(mylandscape,seedsi,orgs,t,settings,orgsref)
 
         establish!(mylandscape,orgs,t,settings,orgsref)
         

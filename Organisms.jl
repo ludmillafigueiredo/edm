@@ -367,19 +367,31 @@ end
     Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
     GEnetic comes here
     """
-function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict{String, Any}, pollscen, tp, remain, regime, kp)
+function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict{String, Any}, scen, tp, remain, regime, kp)
 
     ready = find(x->x.mass["repr"] > 0, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
 
     # POLLINATION INDEPENDENT SCENARIO: as long as there is reproductive allocation, there is reproduction. Clonality is virtually useless
-    if pollscen == "indep"
+    if scen == "indep"
         for r in ready
             orgs[r].mated = true
         end
-    # POLLINATION DEPENDENT SCENARIO:
-    elseif pollscen == "equal"
+
+        # unity test
+        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+            println("Pollination scenario: $scen")
+            end
         
+    # POLLINATION DEPENDENT SCENARIO:
+    elseif scen == "equal"
+
+        # unity test
+        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+            println("Pollination scenario: $scen")
+            end
+
         if t >= tp
+            #TODO !!! this evaluation only implements continuous pollination loss, no pulse scenarios
             if regime == "exp"
                 pollinated = rand(ready, length(ready)* exp(-(t-tp)) * kp * 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
                 # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
@@ -398,10 +410,14 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
         
         # elif settings["insect"] == "spec"
         #   ready = rand(length(repro)* remain * kp * 10-³), repro)
+    else
+        error("Please chose a pollination scenario \"scen\" in insect.csv:
+              - \"indep\": pollination independent scenario,
+              - \"depend\": pollination dependent scenario, with supplementary info for simulating.")
     end
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Reproducing: $ready week $t, because ", settings["insect"])
+        println(sim, "Reproducing: $ready week $t, because of $scen scenario.")
     end
     
 end
@@ -455,7 +471,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
             0)
 
             push!(offspring, embryo)
-	    #unitest
+	    #unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
                 println(sim, "Pushed new org ", embryo, " into offpring")
 
@@ -463,7 +479,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
         end
     end
     append!(orgs, offspring)
-    #unitest
+    #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
 	println(sim, "Total offspring this summer: " ,offspring)
     end
@@ -480,20 +496,29 @@ function release!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
     # Individuals being released in any given week are:
     # in embryo stage
     # in their seed release period (seedon <= t <= seedoff for the species)
-    # Their number will depend on how much time there is still left for seed release and dispersal
-    seeds = filter(x -> x.stage == "e" && x.age == 0 && orgsref.seedon[x.sp] >= t, orgs) # using a condition "outside" orgs might not workthis condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it does do contain, it throws an error.
-    for spp in getfield.(seeds, :sp)
-        ntodisp = length(seeds.sp == spp)/(orgsref.seedoff[spp] - t + 1) # +1 to account for Organisms that release all at once
-        dispersing = rand(seeds,ntodisp)
-        disperse!(landscape,dispersing,t,settings,orgsref) #TODO how to simplify calling all the arguments that release! doesnt need
-    end
+    seedsi = find(x -> x.stage == "e" && x.age == 0 && orgsref.seedon[x.sp] <= rem(t,52) < orgsref.seedoff[x.sp], orgs) # using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it does do contain, it throws an error.
+    # attempt at having a uniform seed release: The number of seeds will depend on how much time there is still left for seed release and dispersal
+    #oseeds = orgs[seeds]
+    #idispersing = []
+    #for spp in getfield.(oseeds, :sp) #recognize which are the species dispersing in current timestep
+        #for s in seeds ##use orgs somewhere here?
+        #seeds2 = filter(x-> x.sp == spp, seeds) #gather all individuals of sp
+        #if orgsref.seed[orgs[s]]
+        #ttodisp = find(x -> x.sp == spp, oseeds) #total that could be dispersed
+        #ntodisp = Int(floor(length(ttodisp)/(orgsref.seedoff[spp] - t + 1))) # divide their quantity during the whole reprodutive season (+1 to account for Organisms that release all at once)
+        #append!(idispersing,
+                #rand(find(x -> x.sp == spp && x.id in getfield.(oseeds, :id), orgs), ntodisp)) # select a quantity at random
+        #disperse!(landscape,idispersing,orgs,t,settings,orgsref) #TODO how to simplify calling all the arguments that release! doesnt need
+    #end      
+    #end
+    return seedsi
 end
 
 """
     disperse!(landscape, orgs, t, seetings, orgsref,)
     Seeds are dispersed.
     """
-function disperse!(landscape::Array{Setworld.WorldCell,N} where N,dispersing::Array{Organisms.Organism, N} where N, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
+function disperse!(landscape::Array{Setworld.WorldCell,N} where N,seedsi, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
 
     #TODO include insects
     # if achar plant (fgroup?)
@@ -505,14 +530,12 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,dispersing::Ar
     
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Dispersing: $dispersing")
+        println(sim, "Dispersing: $seedsi")
     end
-
-    dispersingorgs = indexin(dispersing, orgs) #find the indexes of dispersing individuals in orgs to record in this array, instead of `dispersing`
 
     lost = Int64[]
 
-    for d in dispersingorgs
+    for d in seedsi #
        # if (orgsref.seedon[dispersing[d].sp] <= rem(t,52) && rem(t,52) < orgsref.seedoff[orgs[d].sp]) #seeds are dispersed during release
             if orgsref.kernel[orgs[d].sp] == "a"
                 dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
@@ -567,6 +590,10 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,dispersing::Ar
            #     println(sim, orgs[d].id, orgs[d].sp," Not releasing seeds.")
            # end
         # end
+    end
+    #unity test
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println(sim,"Lost $lost")
     end
     deleteat!(orgs,lost)
 end
@@ -638,13 +665,13 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
         T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
         
 	if o in seeds
-            if rem(t,52) > orgsref.seedon[orgs[o].sp] #seeds that are still in the mother plant cant die. If their release season has started, they are not anymore
+            if rem(t,52) > orgsref.seedoff[orgs[o].sp] #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
                 Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
                 mprob = 1 - exp(-Bm)
             else
                 continue
             end 
-        elseif (orgs[o].age/52) >= orgsref.max_span[orgs[o].sp]
+        elseif (orgs[o].age/52) >= orgsref.max_span[orgs[o].sp] #oldies die
             mprob = 1
             #unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
