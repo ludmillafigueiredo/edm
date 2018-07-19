@@ -8,6 +8,7 @@ module Organisms
 using Distributions
 using JuliaDB
 using DataValues
+using StatsBase
 using Setworld
 using Fileprep
 
@@ -370,7 +371,7 @@ end
 function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict{String, Any}, scen, tp, remain, regime, kp)
 
     ready = find(x->x.mass["repr"] > 0, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
-    pollinated = 0
+    pollinated = []
 
     # POLLINATION INDEPENDENT SCENARIO: as long as there is reproductive allocation, there is reproduction. Clonality is virtually useless
     if length(ready) > 0 # check if there is anyone flowering 
@@ -385,7 +386,7 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
                 println("Pollination scenario: $scen")
             end
             
-            # POLLINATION DEPENDENT SCENARIO:
+        # POLLINATION DEPENDENT SCENARIO:
         elseif scen == "equal"
 
             # unity test
@@ -394,28 +395,48 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
             end
 
             if t < tp
-                #TODO !!! this evaluation only implements continuous pollination loss, no pulse scenarios        pollinated = ready
                 pollinated = ready
                 for p in pollinated 
                     orgs[p].mated = true
                 end
-            else
-                
-                if t == tp && regime == "pulse"
-                    pollinated = rand(ready, Int(floor(length(ready)* exp(-(t-tp)) * kp))) #* 10^(-3)) 
+            else 
+                if regime == "pulse"
+                    if t == tp # pollination lost only once
+                        pollinated = sample(ready,n=Int(floor(length(ready)* exp(-(t-tp)) * kp)), replace = false, ordered = true) #* 10^(-3)) 
+                    else
+                        pollinated = ready
+                    end
+
                     for p in pollinated
                         orgs[p].mated = true
                     end
+                    
                 elseif regime == "exp"
-                    pollinated = rand(ready, Int(floor(length(ready)* exp(-(t-tp)) * kp))) #* 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
+                    pollinated = sample(ready, Int(floor(length(ready)* exp(-(t-tp)) * kp)), replace = false, ordered = true) #* 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
                     # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
                     for p in pollinated
                         orgs[p].mated = true
                     end
                 elseif regime == "const"
-                    pollinated = rand(ready, Int(floor(length(ready)* remain * kp))) #* 10^(-3))
+                    pollinated = sample(ready, Int(floor(length(ready)* remain * kp)), replace = false, ordered = true) #* 10^(-3))
+                    # unity test
+                        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                            println("Pollinated in $regime regime: $pollinated")
+                        end 
+                    for p in pollinated
+                        orgs[p].mated = true
+                        # unity test
+                        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                            println("$(orgs[p].id) can reproduce? $(orgs[p].mated)")
+                        end 
+                    end
+                else
+                    error("Please chose a pollination scenario \"scen\" in insect.csv:
+                          - \"pulse\":
+                          - \"const\": or
+                          - \"exp\"")                    
                 end
-               
+                
             end
             
             # elif settings["insect"] == "spec"
@@ -430,7 +451,8 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
     
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Reproducing: $ready week $t, because of $scen scenario \n Actually reprod: $pollinated , because $scen .")
+        println(sim, "Reproducing: $ready week $t.
+                \nActually reprod: $pollinated , because $regime.")
     end
     
 end
@@ -490,6 +512,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
 
             end
         end
+        orgs[o].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
     end
     append!(orgs, offspring)
     #unity test
