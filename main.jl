@@ -199,7 +199,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         end
     end
 
-    if rem(t,4) == 0 # output monthly
+    if rem(t,1) == 0 # output monthly
     for o in 1:length(orgs)
         open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
             writedlm(output, hcat(t,

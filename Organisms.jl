@@ -370,54 +370,67 @@ end
 function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict{String, Any}, scen, tp, remain, regime, kp)
 
     ready = find(x->x.mass["repr"] > 0, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
+    pollinated = 0
 
     # POLLINATION INDEPENDENT SCENARIO: as long as there is reproductive allocation, there is reproduction. Clonality is virtually useless
-    if scen == "indep"
-        for r in ready
-            orgs[r].mated = true
-        end
-
-        # unity test
-        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-            println("Pollination scenario: $scen")
-            end
+    if length(ready) > 0 # check if there is anyone flowering 
         
-    # POLLINATION DEPENDENT SCENARIO:
-    elseif scen == "equal"
-
-        # unity test
-        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-            println("Pollination scenario: $scen")
+        if scen == "indep"
+            for r in ready
+                orgs[r].mated = true
             end
 
-        if t >= tp
-            #TODO !!! this evaluation only implements continuous pollination loss, no pulse scenarios
-            if regime == "exp"
-                pollinated = rand(ready, length(ready)* exp(-(t-tp)) * kp * 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
-                # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
-                for p in pollinated
+            # unity test
+            open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                println("Pollination scenario: $scen")
+            end
+            
+            # POLLINATION DEPENDENT SCENARIO:
+        elseif scen == "equal"
+
+            # unity test
+            open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                println("Pollination scenario: $scen")
+            end
+
+            if t < tp
+                #TODO !!! this evaluation only implements continuous pollination loss, no pulse scenarios        pollinated = ready
+                pollinated = ready
+                for p in pollinated 
                     orgs[p].mated = true
                 end
-            elseif regime == "constant"
-                pollinated = rand(ready, length(ready)* remain * kp * 10^(-3))
+            else
+                
+                if t == tp && regime == "pulse"
+                    pollinated = rand(ready, Int(floor(length(ready)* exp(-(t-tp)) * kp))) #* 10^(-3)) 
+                    for p in pollinated
+                        orgs[p].mated = true
+                    end
+                elseif regime == "exp"
+                    pollinated = rand(ready, Int(floor(length(ready)* exp(-(t-tp)) * kp))) #* 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
+                    # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
+                    for p in pollinated
+                        orgs[p].mated = true
+                    end
+                elseif regime == "const"
+                    pollinated = rand(ready, Int(floor(length(ready)* remain * kp))) #* 10^(-3))
+                end
+               
             end
+            
+            # elif settings["insect"] == "spec"
+            #   ready = rand(length(repro)* remain * kp * 10-³), repro)
         else
-            pollinated = rand(ready, length(ready) * 1 * kp * 10^(-3)) # while there is no pertubation, all (pb = 1) visited plants are reproducing
-            for p in pollinated 
-                orgs[p].mated = true
-            end
+            error("Please chose a pollination scenario \"scen\" in insect.csv:
+                  - \"indep\": pollination independent scenario,
+                  - \"depend\": pollination dependent scenario, with supplementary info for simulating.")
         end
-        
-        # elif settings["insect"] == "spec"
-        #   ready = rand(length(repro)* remain * kp * 10-³), repro)
-    else
-        error("Please chose a pollination scenario \"scen\" in insect.csv:
-              - \"indep\": pollination independent scenario,
-              - \"depend\": pollination dependent scenario, with supplementary info for simulating.")
+
     end
+    
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Reproducing: $ready week $t, because of $scen scenario.")
+        println(sim, "Reproducing: $ready week $t, because of $scen scenario \n Actually reprod: $pollinated , because $scen .")
     end
     
 end
