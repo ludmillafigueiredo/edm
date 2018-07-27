@@ -44,7 +44,7 @@ where outputs will be stored."
 pollination-independent reproduction \"indep\";
 equal pollination loss for all species \"equal\"."
         arg_type = String
-        default = abspath(pwd(),"inputs/insect.csv")
+        default = abspath(pwd(),"inputs/insects.csv")
         
         "--landconfig"
         help = "Name of file with simulation parameters: areas of fragments, mean (and s.d.) temperature, total running time."
@@ -199,7 +199,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         end
     end
 
-    if rem(t,1) == 0 # output monthly
+    if rem(t,8) == 0 # output bi-monthly
     for o in 1:length(orgs)
         open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
             writedlm(output, hcat(t,
@@ -326,10 +326,8 @@ function simulate()
         end
 
         #UPDATE LANDSCAPE: weekly temperature and projected biomass
-        if t != 1
-            updateenv!(mylandscape, t, landpars)
-        end
-
+        T = updateenv!(mylandscape, t, landpars)
+        
         # DISTURBANCE
         if settings["disturb"] != "none"  
            disturb!(mylandscape,orgs,t,settings)
@@ -338,7 +336,7 @@ function simulate()
         # LIFE CYCLES
         projvegmass!(mylandscape,orgs, settings)
 
-        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref)
+        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref, T)
 
         develop!(orgs,orgsref)
 
@@ -352,7 +350,7 @@ function simulate()
 
         establish!(mylandscape,orgs,t,settings,orgsref)
         
-        survive!(mylandscape,orgs,nogrowth,t,settings,orgsref)
+        survive!(mylandscape,orgs,nogrowth,t,settings,orgsref,T)
 
         shedd!(orgs,orgsref,t)
 

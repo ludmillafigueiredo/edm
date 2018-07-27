@@ -1,3 +1,4 @@
+
 """
 This module contains the
 
@@ -139,7 +140,7 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
 
         projmass = /(orgs[o].mass["veg"], ((2*r+1)^2))
 
-        # unity test
+        # unitytest
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
          #   println(sim, orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
         #end
@@ -195,16 +196,18 @@ function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag].neighs["p"] - /(org.mass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
             # unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
-            end
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+             println(org.id," has nbsum = ", nbsum)
+               # println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
+            #end
         end
 
         compterm = /((org.mass["veg"] - nbsum), org.mass["veg"])
         # unity test
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, "$(org.id) radius = $r and compterm = $compterm")
-        end
+        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+         println("$(org.id) radius = $r and compterm = $compterm")
+            #println(sim, "$(org.id) radius = $r and compterm = $compterm")
+        #end
 
         return compterm
     end
@@ -215,21 +218,17 @@ end
 allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
-    function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
+    function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
         #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
         nogrowth = Int64[]
 
         growing = find(x -> x.stage in ("a","j"), orgs)
-
-        #TODO filter insects out?
+        
         for o in growing
 
-	   # if orgs[o].stage == "e" #embryos dont allocate because they dont grow
-	    #    continue
-	    #else
-
                 # 2.a Get local temperature
-                T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
+            #T = meantempts[t] + tK
+                #landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
                 # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
                 # Any cost related to insufficient minimal biomass goes into the survival probability function
@@ -382,17 +381,17 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
             end
 
             # unity test
-            open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+            #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
                 println("Pollination scenario: $scen")
-            end
+            #end
             
         # POLLINATION DEPENDENT SCENARIO:
         elseif scen == "equal"
 
             # unity test
-            open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+            #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
                 println("Pollination scenario: $scen")
-            end
+            #end
 
             if t < tp
                 pollinated = ready
@@ -420,15 +419,15 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
                 elseif regime == "const"
                     pollinated = sample(ready, Int(floor(length(ready)* remain * kp)), replace = false, ordered = true) #* 10^(-3))
                     # unity test
-                        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                        #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
                             println("Pollinated in $regime regime: $pollinated")
-                        end 
+                        #end 
                     for p in pollinated
                         orgs[p].mated = true
                         # unity test
-                        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                        #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
                             println("$(orgs[p].id) can reproduce? $(orgs[p].mated)")
-                        end 
+                        #end 
                     end
                 else
                     error("Please chose a pollination scenario \"scen\" in insect.csv:
@@ -450,10 +449,10 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
     end
     
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Reproducing: $ready week $t.
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println("Reproducing: $ready week $t.
                 \nActually reprod: $pollinated , because $regime.")
-    end
+    #end
     
 end
 
@@ -472,9 +471,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
     ferts = find(x -> x.mated == true, orgs)
     
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Reproducing: $ferts week $t")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println("Reproducing: $ferts week $t")
+    #end
 
     offspring = Organism[]
 
@@ -485,9 +484,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
         orgs[o].mass["repr"] -= (offs * emu)
 
         #unity test
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, "Number of offspring of ", orgs[o].id, ": ",offs)
-        end
+        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println("Number of offspring of ", orgs[o].id, ": ",offs)
+        #end
 
         for n in 1:offs
             
@@ -507,18 +506,18 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
 
             push!(offspring, embryo)
 	    #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
-                println(sim, "Pushed new org ", embryo, " into offpring")
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
+                println("Pushed new org ", embryo, " into offpring")
 
-            end
+            #end
         end
         orgs[o].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
     end
     append!(orgs, offspring)
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-	println(sim, "Total offspring this summer: " ,offspring)
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+	println("Total offspring this summer: " ,offspring)
+    #end
 
     return id_counter
     
@@ -565,9 +564,9 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,seedsi, orgs::
     # find indexes in orgs if embryos that are in the right to be dispersed and which releasing season is happening at t
     
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Dispersing: $seedsi")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println("Dispersing: $seedsi")
+    #end
 
     lost = Int64[]
 
@@ -597,9 +596,9 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,seedsi, orgs::
             end
             
             #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, "$(orgs[d].id) dispersal distance: $dist")
-            end
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println("$(orgs[d].id) dispersal distance: $dist")
+            #end
 
             # Find patch
             θ = rand([0 0.5π π 1.5π]) # TODO tentar rand(0:2)*pi?
@@ -610,15 +609,15 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,seedsi, orgs::
             if checkboundaries(landscape, xdest, ydest, fdest)
                 orgs[d].location = (xdest,ydest,fdest)
                 #unity test
-                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(sim, orgs[d].id," dispersed $dist")
-                end
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(orgs[d].id," dispersed $dist")
+                #end
             else
                 push!(lost,d)
                 #unity test
-                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(sim, orgs[d].id," dispersed $dist but died")
-                end
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(orgs[d].id," dispersed $dist but died")
+                #end
             end
         # else
             #unity test
@@ -628,9 +627,9 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,seedsi, orgs::
         # end
     end
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim,"Lost $lost")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println("Lost $lost")
+    #end
     deleteat!(orgs,lost)
 end
 
@@ -656,9 +655,9 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
     establishing = find(x -> x.stage == "e", orgs)
 
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Establishing seeds: $establishing")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println("Establishing seeds: $establishing")
+    #end
 
     lost = Int64[]
 
@@ -691,14 +690,14 @@ end
     Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
     plants in nogrwth are subjected to two probability rates
     """
-function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N,t::Int,settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
+function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N,t::Int,settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
 
     deaths = Int64[]
     seeds = find(x -> x.stage == "e", orgs)    
 
     for o in 1:length(orgs)
 
-        T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
+        #T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
         
 	if o in seeds
             if rem(t,52) > orgsref.seedoff[orgs[o].sp] #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
@@ -710,9 +709,9 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
         elseif (orgs[o].age/52) >= orgsref.max_span[orgs[o].sp] #oldies die
             mprob = 1
             #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim,"$(orgs[o].id) $(orgs[o].stage) dying of old age")
-            end
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println("$(orgs[o].id) $(orgs[o].stage) dying of old age")
+            #end
         elseif o in nogrowth
             Bm = orgsref.b0am[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
@@ -731,9 +730,9 @@ function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Org
         end
     end
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Dying orgs: $deaths")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println("Dying orgs: $deaths")
+    #end
     deleteat!(orgs, deaths)
 end
 
@@ -770,9 +769,9 @@ function destroyorgs!(orgs::Array{Organisms.Organism, N} where N, landscape::Arr
         deleteat!(orgs, kills)
     end
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Killed orgs: $kills")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println("Killed orgs: $kills")
+    #end
 end
 
 """
