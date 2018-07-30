@@ -51,31 +51,20 @@ end
 
 # Functions
 function landscape_init(landpars::LandPars)
-    landscape = WorldCell[]
 
+    landscape = WorldCell[]
+    
     for frag in collect(1:landpars.nfrags)
 
-	fragment = WorldCell[]
-
-	#fragt = rand(Normal(landpars.meantempts[1],landpars.sdtempts[1]),1)[1] + tK
-	#fragp = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]),1)[1]
-	for y in collect(1:landpars.fylength[frag]), x in 1:(landpars.fxlength[frag])
-	    newcell = WorldCell(true,
-			        #fragt,
-			        #fragp,
-			        Dict())
-	    push!(fragment,newcell)
-	end
-	fragment = reshape(fragment,landpars.fxlength[frag],landpars.fylength[frag])
-	# add the fragment to the landscape structure
+        fragment = fill(WorldCell(true, Dict("p" => 0)), landpars.fxlength[frag],landpars.fylength[frag])
+	
 	if frag == 1
 	    landscape = fragment #when empty, landscape cant cat with frag
 	else
 	    landscape = cat(3,landscape, frag)
 	end
     end
-    # reshaping is easier then going through every index of a 3D landscape, creating a WorldCell cell there and parameterizing it. x in inner loop matches reshape order
-    #TODO check reshaping for landscape with frags of different sizes
+    
     return landscape
 end
 
@@ -84,17 +73,18 @@ end
             Update temperature and precipitation values according to the weekly input data (weekly means and ).
             """
 function updateenv!(landscape::Array{Setworld.WorldCell,N} where N, t::Int64, landpars::LandPars)
-    #TODO Unity test
-    #for frag in 1:size(landscape,3) #every fragment # all fragments get the same temperature
+
     T = landpars.meantempts[t] + tK
-    for cell in eachindex(landscape)
-	# weekly update temperature
-	#landscape[cell].temp = rand(Normal(landpars.meantempts[t],landpars.sdtempts[t]),1)[1] + tK
-	# weekly update precipitation #TODO eliminate precipitation from landscape, since it is unnecessary
-	#landscape[cell].precpt = rand(Normal(landpars.meanprects[1],landpars.sdprects[1]),1)[1]
-        landscape[cell].neighs = Dict()
+    #unity test
+    println("Temperature for week $t: $T")
+
+    if t != 1
+        occupied = find(x -> isempty(x.neighs), landscape)
+        for cell in occupied
+	    empty!(landscape[occupied].neighs)
+        end
     end
-    #end
+    
     return T
 end
 

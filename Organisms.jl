@@ -142,7 +142,7 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
 
         # unitytest
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-         #   println(sim, orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
+         println(orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
         #end
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
@@ -150,17 +150,18 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
                 continue
             else
                 if haskey(landscape[i,j,frag].neighs,"p")
+                    #println("Already projected in x = $i, y = $j:", landscape[i,j,frag].neighs["p"])
                     landscape[i,j,frag].neighs["p"] += projmass
                     # unity test
                     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                     #   println(sim, orgs[o].id," has found a neighbor.")
+                        println(orgs[o].id,"is in $(orgs[o].location) and  has found a neighbor.")
                     #end
                     
                 else
                     landscape[i,j,frag].neighs["p"] = projmass
                     # unity test
                     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    #    println(sim, orgs[o].id," has no neighbor") #ugly format to avoid risking some anoying errors that have been happening
+                        println(orgs[o].id," has no neighbor")
                     #end
                     
                 end
