@@ -20,7 +20,7 @@ module Setworld
 
 using Distributions
 
-export LandPars, WorldCell, landscape_init, updateenv!, destroyarea!
+export LandPars, landscape_init, updateenv!, destroyarea!
 
 const tK = 273.15 # °C to K converter
 
@@ -35,28 +35,14 @@ sdprects::Array{Float64,1} # this is probably gonna go
 nfrags::Int64
 end
 
-#Types
-mutable struct WorldCell
-avail::Bool
-#temp::Float64
-#precpt::Float64
-neighs::Dict{String,Float64}
-end
-
-mutable struct PollCell
-floralres::Dict #ind => amount of floral resource projected in the cell
-end
-
-#WorldCell() = WorldCell(false, 0.0, 0.0, Dict())
-
 # Functions
 function landscape_init(landpars::LandPars)
 
-    landscape = WorldCell[]
+    landscape = Array{Dict} #if created only inside the loop, remains a local variable
     
     for frag in collect(1:landpars.nfrags)
 
-        fragment = fill(WorldCell(true, Dict("p" => 0)), landpars.fxlength[frag],landpars.fylength[frag])
+        fragment = fill(Dict(), landpars.fxlength[frag],landpars.fylength[frag])
 	
 	if frag == 1
 	    landscape = fragment #when empty, landscape cant cat with frag
@@ -64,24 +50,26 @@ function landscape_init(landpars::LandPars)
 	    landscape = cat(3,landscape, frag)
 	end
     end
+
+    landavail = fill(true,size(landscape))
     
-    return landscape
+    return landscape, landavail
 end
 
 """
             updateenv!(landscape,t)
             Update temperature and precipitation values according to the weekly input data (weekly means and ).
             """
-function updateenv!(landscape::Array{Setworld.WorldCell,N} where N, t::Int64, landpars::LandPars)
+function updateenv!(landscape::Array{Dict{Any,Any}}, t::Int64, landpars::LandPars)
 
     T = landpars.meantempts[t] + tK
     #unity test
     println("Temperature for week $t: $T")
 
     if t != 1
-        occupied = find(x -> isempty(x.neighs), landscape)
+        occupied = find(x -> isempty(x), landscape)
         for cell in occupied
-	    empty!(landscape[occupied].neighs)
+	    empty!(landscape[occupied])
         end
     end
     
@@ -92,10 +80,10 @@ end
             destroyarea!()
             Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
                 """
-function destroyarea!(landscape::Array{Setworld.WorldCell, N} where N, loss::Float64, settings::Dict{String,Any})
+function destroyarea!(landavail::Array{Bool}, loss::Float64, settings::Dict{String,Any})
     # DESTROY HABITAT
     # index of the cells still availble:
-    available = find(x -> x.avail == true, landscape)
+    available = find(x -> x == true, landavail)
     # number of cells to be destroyed:
     lostarea = round(Int,loss*length(available), RoundUp) 
 
@@ -106,7 +94,7 @@ function destroyarea!(landscape::Array{Setworld.WorldCell, N} where N, loss::Flo
 
     # go through landscape indexes of the first n cells from the still available
     for cell in available[1:lostarea] 
-        landscape[cell].avail = false # and destroy them
+        landavail[cell] = false # and destroy them
     end
 
     #unity test
@@ -118,7 +106,7 @@ end
 """
                 fragmentation!()
                 """
-function fragment!(landscape::Array{Setworld.WorldCell,3}, t, settings::Dict{String,Any})
+function fragment!(landscape::Array{Dict{Any,Any}}, t, settings::Dict{String,Any})
 end
 
 end

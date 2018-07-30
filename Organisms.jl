@@ -88,16 +88,16 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
     `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
         `quant::Int64` is nb of new individuals or offspring to be created
         """
-function newOrgs!(landscape::Array{Setworld.WorldCell,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int)
+function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int)
 
     orgs = Organism[]
 
-    for frag in 1:size(landscape,3)
+    for frag in 1:size(landavail,3)
 
         for s in orgsref.sp_id
 
-            XYs = hcat(rand(1:size(landscape,1),orgsref.abund[s]),
-                       rand(1:size(landscape,2),orgsref.abund[s]))
+            XYs = hcat(rand(1:size(landavail,1),orgsref.abund[s]),
+                       rand(1:size(landavail,2),orgsref.abund[s]))
 
             for i in 1:orgsref.abund[s]
 
@@ -122,7 +122,7 @@ end
         projvegmass!(landscape,orgs)
         Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
         """
-function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Array{Organism,1}, settings::Dict{String, Any})
+function projvegmass!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, settings::Dict{String, Any})
     
     competing = find(x->(x.stage == "a" || x.stage == "j"),orgs) #juveniles com ashard as adults, but have higher growth rate and lower mortality
 
@@ -136,32 +136,30 @@ function projvegmass!(landscape::Array{Setworld.WorldCell, N} where N, orgs::Arr
         
         r = orgs[o].radius # separated for debugging
 
-        #sp = orgs[o].sp
-
         projmass = /(orgs[o].mass["veg"], ((2*r+1)^2))
 
         # unitytest
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-         println(orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
+        #println(orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
         #end
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
             if !checkbounds(Bool,landscape[:,:,frag],j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
                 continue
             else
-                if haskey(landscape[i,j,frag].neighs,"p")
-                    #println("Already projected in x = $i, y = $j:", landscape[i,j,frag].neighs["p"])
-                    landscape[i,j,frag].neighs["p"] += projmass
+                if haskey(landscape[i,j,frag],"p")
+                    #println("Already projected in x = $i, y = $j:", landscape[i,j,frag]["p"])
+                    landscape[i,j,frag]["p"] += projmass
                     # unity test
                     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(orgs[o].id,"is in $(orgs[o].location) and  has found a neighbor.")
+                        #println(orgs[o].id,"is in $(orgs[o].location) and  has found a neighbor.")
                     #end
                     
                 else
-                    landscape[i,j,frag].neighs["p"] = projmass
+                    landscape[i,j,frag] = Dict("p" => projmass)
                     # unity test
                     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(orgs[o].id," has no neighbor")
+                        #println(orgs[o].id," has no neighbor")
                     #end
                     
                 end
@@ -174,7 +172,7 @@ end
         compete(landscape, orgs)
         Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
         """
-function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,settings::Dict{String, Any})
+function compete(landscape::Array{Dict{Any,Any}}, org::Organism,settings::Dict{String, Any})
 
     x, y, frag = org.location
     sp = org.sp
@@ -193,12 +191,12 @@ function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,
             #end
         elseif j == y && i == x # steming point is "is stronger", doesnt compete
             continue
-        elseif haskey(landscape[i,j,frag].neighs,"p")
+        elseif haskey(landscape[i,j,frag],"p")
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
-            nbsum += landscape[i,j,frag].neighs["p"] - /(org.mass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
+            nbsum += landscape[i,j,frag]["p"] - /(org.mass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
             # unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-             println(org.id," has nbsum = ", nbsum)
+             #println(org.id," has nbsum = ", nbsum)
                # println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
             #end
         end
@@ -206,12 +204,11 @@ function compete(landscape::Array{Setworld.WorldCell, N} where N, org::Organism,
         compterm = /((org.mass["veg"] - nbsum), org.mass["veg"])
         # unity test
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-         println("$(org.id) radius = $r and compterm = $compterm")
+         #println("$(org.id) radius = $r and compterm = $compterm")
             #println(sim, "$(org.id) radius = $r and compterm = $compterm")
         #end
-
-        return compterm
     end
+    return compterm
 end
 
 
@@ -219,7 +216,7 @@ end
 allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
-    function allocate!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
+    function allocate!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
         #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
         nogrowth = Int64[]
 
@@ -335,9 +332,9 @@ end
 checkboundaries(sourcefrag,xdest, ydest, fdest)
 `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
 """
-function checkboundaries(landscape::Array{Setworld.WorldCell,N} where N, xdest::Int64, ydest::Int64, fdest::Int64) #TODO is this function necessary?
+function checkboundaries(landavail::Array{Bool,N} where N, xdest::Int64, ydest::Int64, fdest::Int64) #TODO is this function necessary?
     #check inside frag
-    if checkbounds(Bool, landscape[:,:,fdest], xdest, ydest)
+    if checkbounds(Bool, landavail[:,:,fdest], xdest, ydest)
         inbound = true
     else
         # if LandPars.nfrags > 1
@@ -452,7 +449,7 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println("Reproducing: $ready week $t.
-                \nActually reprod: $pollinated , because $regime.")
+                Actually reprod: $pollinated , because $scen and $regime.")
     #end
     
 end
@@ -528,7 +525,7 @@ end
     release!()
     Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
     """
-function release!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
+function release!(orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
     # Individuals being released in any given week are:
     # in embryo stage
     # in their seed release period (seedon <= t <= seedoff for the species)
@@ -554,16 +551,8 @@ end
     disperse!(landscape, orgs, t, seetings, orgsref,)
     Seeds are dispersed.
     """
-function disperse!(landscape::Array{Setworld.WorldCell,N} where N,seedsi, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
+function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
 
-    #TODO include insects
-    # if achar plant (fgroup?)
-    #  dipersar xovens
-    # else
-    #  dispersa adultos
-    # end
-    # find indexes in orgs if embryos that are in the right to be dispersed and which releasing season is happening at t
-    
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println("Dispersing: $seedsi")
@@ -571,9 +560,8 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,seedsi, orgs::
 
     lost = Int64[]
 
-    for d in seedsi #
-       # if (orgsref.seedon[dispersing[d].sp] <= rem(t,52) && rem(t,52) < orgsref.seedoff[orgs[d].sp]) #seeds are dispersed during release
-            if orgsref.kernel[orgs[d].sp] == "a"
+    for d in seedsi
+        if orgsref.kernel[orgs[d].sp] == "a"
                 dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
                 #unity test
                 #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -607,7 +595,7 @@ function disperse!(landscape::Array{Setworld.WorldCell,N} where N,seedsi, orgs::
             ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
             fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
 
-            if checkboundaries(landscape, xdest, ydest, fdest)
+            if checkboundaries(landavail, xdest, ydest, fdest) && landavail(xdest, ydest, fdest) == true
                 orgs[d].location = (xdest,ydest,fdest)
                 #unity test
                 #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -651,7 +639,7 @@ end
 establish!
 Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
     """
-function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
+function establish!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
@@ -665,7 +653,7 @@ function establish!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{
     for o in establishing
         if orgsref.seedon[orgs[o].sp] <= rem(t,52) #only after release and dispersal a seed can establish
             orgcell = orgs[o].location
-            if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]].neighs,"p")
+            if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]],["p"])
                 push!(lost,o)
 	        #unity test
    	        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -691,7 +679,7 @@ end
     Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
     plants in nogrwth are subjected to two probability rates
     """
-function survive!(landscape::Array{Setworld.WorldCell,N} where N,orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N,t::Int,settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
+function survive!(orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N,t::Int,settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
 
     deaths = Int64[]
     seeds = find(x -> x.stage == "e", orgs)    
@@ -757,12 +745,12 @@ end
 destroyorgs!(orgs)
 Kill organisms that where in the lost habitats.
 """
-function destroyorgs!(orgs::Array{Organisms.Organism, N} where N, landscape::Array{Setworld.WorldCell, N} where N, settings::Dict{String,Any})
+function destroyorgs!(orgs::Array{Organisms.Organism, N} where N, landavail::Array{Dict{Any,Any}}, settings::Dict{String,Any})
     #KILL ORGANISMS in the destroyed
     kills = []
     for o in 1:length(orgs)
         x,y,f = orgs[o].location[1],orgs[o].location[2],orgs[o].location[3]
-        if landscape[x,y,f].avail == false
+        if landavail[x,y,f] == false
             push!(kills,o)
         end        
     end

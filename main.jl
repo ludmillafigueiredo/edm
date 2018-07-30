@@ -215,15 +215,15 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
             orgs[o].radius))
         end
     end
+        #TODO output orgsref and ladpars
     end
 end
-
 
 """
 disturb!()
 
 """
-function disturb!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
+function disturb!(landscape::Array{Dict{Any,Any}}, landavail::Array{Bool,N} where N, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
     # read in the disturbance file, if not done so yet
     #if !isdefined(:disturbtbl)
         # select file according to keyword: loss, frag, temp
@@ -249,8 +249,8 @@ function disturb!(landscape::Array{Setworld.WorldCell,N} where N, orgs::Array{Or
             if settings["disturb"] == "loss"
                 loss = select(filter(x -> x.time == t,disturbtbl),
                               :proportion)[1] # select returns an array
-                Setworld.destroyarea!(landscape,loss,settings)
-                Organisms.destroyorgs!(orgs,landscape,settings)
+                Setworld.destroyarea!(landavail,loss,settings)
+                Organisms.destroyorgs!(orgs,landavail,settings)
             elseif settings["disturb"] == "frag"
                 # fragment!(mylandscape,orgs)
                 #while fragment is not implemented
@@ -284,7 +284,7 @@ function simulate()
     interaction, scen, tp, remain, regime = implicit_insect(settings)
     
     # Create landscape
-    mylandscape = landscape_init(landpars)
+    mylandscape, landavail = landscape_init(landpars)
     # unity test
     println("Landscape initialized: type $(typeof(mylandscape))")
 
@@ -292,7 +292,7 @@ function simulate()
     id_counter = 0
     
     # Create initial individuals
-    orgs, id_counter = newOrgs!(mylandscape, orgsref, id_counter)
+    orgs, id_counter = newOrgs!(landavail, orgsref, id_counter)
     
     println("Plants initialized: type $(typeof(orgs))")
 
@@ -330,7 +330,7 @@ function simulate()
         
         # DISTURBANCE
         if settings["disturb"] != "none"  
-           disturb!(mylandscape,orgs,t,settings)
+           disturb!(mylandscape,landavail,orgs,t,settings)
         end
 
         # LIFE CYCLES
@@ -344,13 +344,13 @@ function simulate()
 
         id_counter = mkoffspring!(orgs,t,settings,orgsref,id_counter)
 
-        seedsi = release!(mylandscape,orgs,t,settings,orgsref)
+        seedsi = release!(orgs,t,settings,orgsref)
 
-        disperse!(mylandscape,seedsi,orgs,t,settings,orgsref)
+        disperse!(landavail,seedsi,orgs,t,settings,orgsref)
 
         establish!(mylandscape,orgs,t,settings,orgsref)
         
-        survive!(mylandscape,orgs,nogrowth,t,settings,orgsref,T)
+        survive!(orgs,nogrowth,t,settings,orgsref,T)
 
         shedd!(orgs,orgsref,t)
 
