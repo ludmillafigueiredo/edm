@@ -140,7 +140,7 @@ function projvegmass!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, 
 
         # unitytest
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        #println(orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
+        println(orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
         #end
 
         for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
@@ -200,14 +200,15 @@ function compete(landscape::Array{Dict{Any,Any}}, org::Organism,settings::Dict{S
                # println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
             #end
         end
+    end
 
-        compterm = /((org.mass["veg"] - nbsum), org.mass["veg"])
+    compterm = /((org.mass["veg"] - nbsum), org.mass["veg"])
         # unity test
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-         #println("$(org.id) radius = $r and compterm = $compterm")
+         println("$(org.id) radius = $r and compterm = $compterm")
             #println(sim, "$(org.id) radius = $r and compterm = $compterm")
         #end
-    end
+    
     return compterm
 end
 
