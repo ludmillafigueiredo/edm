@@ -1,2 +1,2 @@
-sp_id,kernel,e_mu,e_sd,b0g,b0g_sd,b0em,b0em,b0am,b0am_sd,b0jg,b0jg_sd,b0ag,b0ag,sestra,dyad,floron,floron_sd,floroff,floroff_sd,sripe,seedon,seedon_sd,seedoff,seedoff_sd,max_mass,min_mass,max_span,max_span_sd,mass_mu,mass_sd,abund
-p1,wa,1.00,0.00,1502900000000.00,150290000.00,1502900000000.00,15029000.00,47527000000.00,4752700.00,670260000.00,6702.60,335130000.00,3351.30,0.00,0.00,12.00,2.00,24.00,2.00,8.00,32.00,2.00,37.00,2.00,5000.00,500.00,50.00,5.00,3000.00,0.01,20.00
+sp_id,kernel,kernel_sd,e_mu,e_sd,b0g,b0g_sd,b0em,b0em_sd,b0am,b0am_sd,b0jg,b0jg_sd,b0ag,b0ag_sd,sestra,dyad,floron,floron_sd,floroff,floroff_sd,sripe,seedon,seedon_sd,seedoff,seedoff_sd,max_mass,min_mass,max_span,max_span_sd,mass_mu,mass_sd,abund
+p1,wa,0.001,1.00,0.00,1502900000000.00,150290000.00,1502900000000.00,15029000.00,47527000000.00,4752700.00,670260000.00,6702.60,335130000.00,3351.30,0.00,0.00,12.00,2.00,24.00,2.00,8.00,32.00,2.00,37.00,2.00,5000.00,500.00,50.00,5.00,3000.00,0.01,20.00
