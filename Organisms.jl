@@ -57,16 +57,34 @@ id::String
 location::Tuple # (x,y,frag)
 sp::String #sp id, easier to read
 mass::Dict
-#fgroup::String # Plant, insect or more precise functional group
+## Evolvable traits
+kernel::String
+e_mu::Float64
+b0g::Float64
+b0em::Float64
+b0am::Float64
+b0jg::Float64
+b0ag::Float64
+#sestra::Int
+#dyad::Float64
+floron::Int
+floroff::Int
+seedon::Int
+seedoff::Int
+#max_mass::Float64
+#min_mass::Float64
+max_span::Int64
+#mass_mu::Float64
+#mass_sd::Float64
+## State variables
 stage::String #e,j,a
 age::Int64 # controls passing stages, phenology and
 mated::Bool # TODO is it necessary?
 genotype::Array{String,2} #initialize separately
-radius::Int64 # TODO reproductive and vegetative area of influence. Not Tuple because not
+radius::Int64
 #Organism() = new()
 end
-Organism(id,location,sp,mass) = Organism(id,location,sp,mass,"a", 0,false,["A" "A"],0) #this is individuals are initialized in the beginning of the simulationy
-# TODO fgroups are sps for now
+Organism(id,location,sp,mass) = Organism(id,location,sp,mass,"a", 0,false,["A" "A"],0) #these individuals are initialized in the beginning of the simulation
 
 """
 newOrg(fgroups, init_abund, biomassμ, biomasssd)
@@ -88,7 +106,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
     `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
         `quant::Int64` is nb of new individuals or offspring to be created
         """
-function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int)
+function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int, mode::String)
 
     orgs = Organism[]
 
@@ -107,15 +125,39 @@ function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, i
                                   (XYs[i,1],XYs[i,2],frag),
                                   s,
                                   Dict("veg" => rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])),
-                                       "repr" => 0))
+                                       "repr" => 0),
+                                  rand(Distributions.Normal(orgsref.kernel[s],
+                                                            orgsref.kernel_sd[s])), #kernel
+                rand(Distributions.Normal(orgsref.e_mu[s],
+                                          orgsref.e_sd[s])), #e_mu
+                rand(Distributions.Normal(orgsref.b0g[s],
+                                          orgsref.b0g_sd[s])), #b0g
+                rand(Distributions.Normal(orgsref.b0em[s],
+                                          orgsref.b0em_sd[s])), #b0em
+                rand(Distributions.Normal(orgsref.b0am[s],
+                                          orgsref.b0am_sd[s])), #b0am
+                rand(Distributions.Normal(orgsref.b0jg[s],
+                                          orgsref.b0jg_sd[s])), #b0jg
+                rand(Distributions.Normal(orgsref.b0ag[s],
+                                          orgsref.b0ag_sd[s])), #b0ag
+                rand(Distributions.Normal(orgsref.floron[s],
+                                          orgsref.floron_sd[s])), #floron
+                rand(Distributions.Normal(orgsref.floroff[s],
+                                          orgsref.floroff_sd[s])), #floroff
+                rand(Distributions.Normal(orgsref.seedon[s],
+                                          orgsref.seedon_sd[s])), #seedon
+                rand(Distributions.Normal(orgsref.seedoff[s],
+                                          orgsref.seedoff_sd[s])), #seedoff
+                rand(Distributions.Normal(orgsref.max_span[s],
+                                          orgsref.max_span_sd[s]))) #max_span
                 
                 push!(orgs, neworg)
             end
         end
     end
-    #TODO different fgroups have different metabolic rates. Get it form OrgsRef
-    #TODO or make sure that it has varied in the global scope as well rather export it?
+
     return orgs, id_counter
+
 end
 
 """
@@ -152,14 +194,14 @@ function projvegmass!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, 
                     landscape[i,j,frag]["p"] += projmass
                     # unity test
                     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        #println(orgs[o].id,"is in $(orgs[o].location) and  has found a neighbor.")
+                    #println(orgs[o].id,"is in $(orgs[o].location) and  has found a neighbor.")
                     #end
                     
                 else
                     landscape[i,j,frag] = Dict("p" => projmass)
                     # unity test
                     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        #println(orgs[o].id," has no neighbor")
+                    #println(orgs[o].id," has no neighbor")
                     #end
                     
                 end
@@ -169,9 +211,9 @@ function projvegmass!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, 
 end
 
 """
-        compete(landscape, orgs)
-        Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
-        """
+compete(landscape, orgs)
+Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
+"""
 function compete(landscape::Array{Dict{Any,Any}}, org::Organism,settings::Dict{String, Any})
 
     x, y, frag = org.location
@@ -187,7 +229,7 @@ function compete(landscape::Array{Dict{Any,Any}}, org::Organism,settings::Dict{S
             continue
             # #unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-             #   println(sim, "$(org.id) out of bound projection at $(org.location)")
+            #   println(sim, "$(org.id) out of bound projection at $(org.location)")
             #end
         elseif j == y && i == x # steming point is "is stronger", doesnt compete
             continue
@@ -196,121 +238,120 @@ function compete(landscape::Array{Dict{Any,Any}}, org::Organism,settings::Dict{S
             nbsum += landscape[i,j,frag]["p"] - /(org.mass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
             # unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-             #println(org.id," has nbsum = ", nbsum)
-               # println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
+            #println(org.id," has nbsum = ", nbsum)
+            # println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
             #end
         end
     end
 
     compterm = /((org.mass["veg"] - nbsum), org.mass["veg"])
-        # unity test
-        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-         println("$(org.id) radius = $r and compterm = $compterm")
-            #println(sim, "$(org.id) radius = $r and compterm = $compterm")
-        #end
+    # unity test
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    println("$(org.id) radius = $r and compterm = $compterm")
+    #println(sim, "$(org.id) radius = $r and compterm = $compterm")
+    #end
     
     return compterm
 end
 
 
-    """
+"""
 allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
-    function allocate!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
-        #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
-        nogrowth = Int64[]
+function allocate!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
+    #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
+    nogrowth = Int64[]
 
-        growing = find(x -> x.stage in ("a","j"), orgs)
-        
-        for o in growing
+    growing = find(x -> x.stage in ("a","j"), orgs)
+    
+    for o in growing
 
-                # 2.a Get local temperature
-            #T = meantempts[t] + tK
-                #landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
+        # 2.a Get local temperature
+        #T = meantempts[t] + tK
+        #landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
-                # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
-                # Any cost related to insufficient minimal biomass goes into the survival probability function
-                # 2.b Check for competition
+        # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
+        # Any cost related to insufficient minimal biomass goes into the survival probability function
+        # 2.b Check for competition
 
-                compterm = compete(landscape, orgs[o], settings)
-                # unity test
-                #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #    println(sim, orgs[o].id, "  compterm $compterm")
-                #end
-
-                if compterm <= 0
-                    #2.c Those not growing will have higher chance of dying
-                    push!(nogrowth,o)
-                else
-                    sp = orgs[o].sp 
-                    # seedling and adults grow at different rates
-                    if orgs[o].stage == "j"
-                        b0 = orgsref.b0jg[sp]
-                    elseif orgs[o].stage == "a"
-                        b0 = orgsref.b0ag[sp]
-                    else
-                        error("Seed or egg trying to compete.")
-                    end
-                    
-                    grown_mass = b0*(compterm *sum(collect(values(orgs[o].mass))))^(3/4)*exp(-aE/(Boltz*T))
-                    # unity test
-                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    #    println(sim, "$(orgs[o].id) should grow $grown_mass")
-                    #end
-
-                    #Resource allocation schedule
-                    #TODO make it more ellaborate and includde trade-offs
-                    if orgs[o].stage == "j"
-                        # juveniles grow
-                        orgs[o].mass["veg"] += grown_mass
-                        # unity test
-                        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
-                        #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
-                        #end
-                    elseif orgs[o].stage == "a" &&
-                        (orgsref.floron[sp] <= rem(t,52) < orgsref.floroff[sp]) && (sum(collect(values(orgs[o].mass))) >= 0.2*orgsref.max_mass[sp])
-                        # adults invest in reproduction
-                        if haskey(orgs[o].mass,"repr")
-                            orgs[o].mass["repr"] += grown_mass
-                            #unity test
-                            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                            #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
-                            #end
-                        else
-                            orgs[o].mass["repr"] = grown_mass
-                            #unity test
-                            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                            #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
-                            #end
-                        end
-                    elseif orgs[o].stage == "a" #&& orgs[o].mass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce
-                        orgs[o].mass["veg"] += grown_mass
-                        # unity test
-                        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
-                        #end
-                    else
-                        error("Seed or egg trying to allocate.")
-                    end
-                end
-
-                #unity test
-                # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #     println(sim, "current biomass: $(orgs[o].biomass)")
-                # end
-           # end
-        end
-
+        compterm = compete(landscape, orgs[o], settings)
         # unity test
+        #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        #    println(sim, "Not growing $nogrowth")
+        #    println(sim, orgs[o].id, "  compterm $compterm")
         #end
 
-        return nogrowth
+        if compterm <= 0
+            #2.c Those not growing will have higher chance of dying
+            push!(nogrowth,o)
+        else
+            # seedling and adults grow at different rates
+            if orgs[o].stage == "j"
+                b0 = orgs[o].b0jg
+            elseif orgs[o].stage == "a"
+                b0 = orgs[o].b0ag
+            else
+                error("Seed or egg trying to compete.")
+            end
+            
+            grown_mass = b0*(compterm *sum(collect(values(orgs[o].mass))))^(3/4)*exp(-aE/(Boltz*T))
+            # unity test
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #    println(sim, "$(orgs[o].id) should grow $grown_mass")
+            #end
 
+            #Resource allocation schedule
+            #TODO make it more ellaborate and includde trade-offs
+            if orgs[o].stage == "j"
+                # juveniles grow
+                orgs[o].mass["veg"] += grown_mass
+                # unity test
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
+                #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
+                #end
+            elseif orgs[o].stage == "a" &&
+                (orgs[o].floron <= rem(t,52) < orgs[o].floroff) && (sum(collect(values(orgs[o].mass))) >= 0.2*orgsref.max_mass[orgs[o].sp])
+                # adults invest in reproduction
+                if haskey(orgs[o].mass,"repr")
+                    orgs[o].mass["repr"] += grown_mass
+                    #unity test
+                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
+                    #end
+                else
+                    orgs[o].mass["repr"] = grown_mass
+                    #unity test
+                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
+                    #end
+                end
+            elseif orgs[o].stage == "a" #&& orgs[o].mass["veg"] < 50 # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce
+                orgs[o].mass["veg"] += grown_mass
+                # unity test
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew VEG $grown_mass")
+                #end
+            else
+                error("Seed or egg trying to allocate.")
+            end
+        end
+
+        #unity test
+        # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        #     println(sim, "current biomass: $(orgs[o].biomass)")
+        # end
+        # end
     end
+
+    # unity test
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    #    println(sim, "Not growing $nogrowth")
+    #end
+
+    return nogrowth
+
+end
 
 """
 develop!()
@@ -381,15 +422,15 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
 
             # unity test
             #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                println("Pollination scenario: $scen")
+            println("Pollination scenario: $scen")
             #end
             
-        # POLLINATION DEPENDENT SCENARIO:
+            # POLLINATION DEPENDENT SCENARIO:
         elseif scen == "equal"
 
             # unity test
             #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                println("Pollination scenario: $scen")
+            println("Pollination scenario: $scen")
             #end
 
             if t < tp
@@ -418,14 +459,14 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
                 elseif regime == "const"
                     pollinated = sample(ready, Int(floor(length(ready)* remain * kp)), replace = false, ordered = true) #* 10^(-3))
                     # unity test
-                        #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                            println("Pollinated in $regime regime: $pollinated")
-                        #end 
+                    #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                    println("Pollinated in $regime regime: $pollinated")
+                    #end 
                     for p in pollinated
                         orgs[p].mated = true
                         # unity test
                         #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                            println("$(orgs[p].id) can reproduce? $(orgs[p].mated)")
+                        println("$(orgs[p].id) can reproduce? $(orgs[p].mated)")
                         #end 
                     end
                 else
@@ -449,8 +490,8 @@ function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict
     
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println("Reproducing: $ready week $t.
-                Actually reprod: $pollinated , because $scen and $regime.")
+    println("Reproducing: $ready week $t.
+            Actually reprod: $pollinated , because $scen and $regime.")
     #end
     
 end
@@ -467,55 +508,66 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
     #     parents_genes = mate!()
     # end
 
-    ferts = find(x -> x.mated == true, orgs)
-    
-    #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println("Reproducing: $ferts week $t")
-    #end
+    for sp in unique(getfield.(orgs, :sp_id))
 
-    offspring = Organism[]
+        ferts = find(x -> x.mated == true && x.sp == sp, orgs)
 
-    for o in ferts
-
-        emu = orgsref.e_mu[orgs[o].sp]
-        offs =  round(Int64, /(orgs[o].mass["repr"],emu), RoundDown)
-        orgs[o].mass["repr"] -= (offs * emu)
-
+        # organize trait distributions of current adults: for each spp in orgs, get the traits distributions
+        traitdist = find(x -> x.sp == sp && x.stage == "a", orgs)
+        
         #unity test
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println("Number of offspring of ", orgs[o].id, ": ",offs)
+        println("Reproducing: $ferts week $t")
         #end
 
-        for n in 1:offs
-            
-            id_counter += 1 # update individual counter
+        offspring = Organism[]
 
-            embryo = Organism(hex(id_counter),
-                              orgs[o].location, #stays with mom until release
-                              orgs[o].sp,
-                              Dict("veg" => rand(Distributions.Normal(orgsref.e_mu[orgs[o].sp]
-                                                                      ,orgsref.e_sd[orgs[o].sp]),1)[1],
-                                   "repr" => 0),
-            "e",
-            0,
-            false,
-            ["A" "A"], #come from function
-            0)
+        for o in ferts
 
-            push!(offspring, embryo)
-	    #unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
+            emu = orgsref.e_mu[orgs[o].sp]
+            offs =  round(Int64, /(orgs[o].mass["repr"],emu), RoundDown)
+            orgs[o].mass["repr"] -= (offs * emu)
+            traitsi = rand(traitdist) # rdmly get an individual from which to copy the traits
+
+            #unity test
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println("Number of offspring of ", orgs[o].id, ": ",offs)
+            #end
+
+            for n in 1:offs
+                
+                id_counter += 1 # update individual counter
+
+                # copy everything to get hereditary traits
+                embryo = deepcopy(orgs[traitsi])
+                # set embryos own individual characteristics
+                embryo.id = hex(id_counter)
+                embryo.location = orgs[o].location #stays with mom until release
+                embryo.mass = Dict("veg" => rand(Distributions.Normal(orgs[traitsi].e_mu,
+                                                                      orgs[traitsi].e_sd),1)[1],
+                                   "repr" => 0)
+                
+                embryo.stage = "e"
+                embryo.age = 0
+                embryo.mated = false
+                embryo.genotype = ["A" "A"] #come from function
+                embryo.radius = 0
+
+                push!(offspring, embryo)
+	        #unity test
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
                 println("Pushed new org ", embryo, " into offpring")
 
-            #end
+                #end
+            end
+            orgs[o].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
         end
-        orgs[o].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
     end
+    
     append!(orgs, offspring)
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-	println("Total offspring this summer: " ,offspring)
+    println("Total offspring this summer: " ,offspring)
     #end
 
     return id_counter
@@ -523,102 +575,102 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
 end
 
 """
-    release!()
-    Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
-    """
+release!()
+Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
+"""
 function release!(orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
     # Individuals being released in any given week are:
     # in embryo stage
     # in their seed release period (seedon <= t <= seedoff for the species)
-    seedsi = find(x -> x.stage == "e" && x.age == 0 && orgsref.seedon[x.sp] <= rem(t,52) < orgsref.seedoff[x.sp], orgs) # using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it does do contain, it throws an error.
+    seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, orgs) # using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it does do contain, it throws an error.
     # attempt at having a uniform seed release: The number of seeds will depend on how much time there is still left for seed release and dispersal
     #oseeds = orgs[seeds]
     #idispersing = []
     #for spp in getfield.(oseeds, :sp) #recognize which are the species dispersing in current timestep
-        #for s in seeds ##use orgs somewhere here?
-        #seeds2 = filter(x-> x.sp == spp, seeds) #gather all individuals of sp
-        #if orgsref.seed[orgs[s]]
-        #ttodisp = find(x -> x.sp == spp, oseeds) #total that could be dispersed
-        #ntodisp = Int(floor(length(ttodisp)/(orgsref.seedoff[spp] - t + 1))) # divide their quantity during the whole reprodutive season (+1 to account for Organisms that release all at once)
-        #append!(idispersing,
-                #rand(find(x -> x.sp == spp && x.id in getfield.(oseeds, :id), orgs), ntodisp)) # select a quantity at random
-        #disperse!(landscape,idispersing,orgs,t,settings,orgsref) #TODO how to simplify calling all the arguments that release! doesnt need
+    #for s in seeds ##use orgs somewhere here?
+    #seeds2 = filter(x-> x.sp == spp, seeds) #gather all individuals of sp
+    #if orgsref.seed[orgs[s]]
+    #ttodisp = find(x -> x.sp == spp, oseeds) #total that could be dispersed
+    #ntodisp = Int(floor(length(ttodisp)/(orgsref.seedoff[spp] - t + 1))) # divide their quantity during the whole reprodutive season (+1 to account for Organisms that release all at once)
+    #append!(idispersing,
+    #rand(find(x -> x.sp == spp && x.id in getfield.(oseeds, :id), orgs), ntodisp)) # select a quantity at random
+    #disperse!(landscape,idispersing,orgs,t,settings,orgsref) #TODO how to simplify calling all the arguments that release! doesnt need
     #end      
     #end
     return seedsi
 end
 
 """
-    disperse!(landscape, orgs, t, seetings, orgsref,)
-    Seeds are dispersed.
-    """
+disperse!(landscape, orgs, t, seetings, orgsref,)
+Seeds are dispersed.
+"""
 function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
 
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println("Dispersing: $seedsi")
+    println("Dispersing: $seedsi")
     #end
 
     lost = Int64[]
 
     for d in seedsi
-        if orgsref.kernel[orgs[d].sp] == "a"
-                dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
-                #unity test
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #    println(sim, "$(orgs[d].id) ant dispersal kernel")
-                #end
-            elseif orgsref.kernel[orgs[d].sp] == "w"
-                dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])
-                 #unity test
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #    println(sim, "$(orgs[d].id) wind dispersal kernel")
-                #end
-            elseif orgsref.kernel[orgs[d].sp] == "wa"
-                µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
-                dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
-                 #unity test
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #    println(sim, "$(orgs[d].id) $µ dispersal kernel")
-                #end
-            else
-                error("Check dispersal kernel input for species $(orgs[d].sp).")
-            end
-            
+        if orgs[d].kernel == "a"
+            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
             #unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println("$(orgs[d].id) dispersal distance: $dist")
+            #    println(sim, "$(orgs[d].id) ant dispersal kernel")
             #end
-
-            # Find patch
-            θ = rand([0 0.5π π 1.5π]) # TODO tentar rand(0:2)*pi?
-            xdest = orgs[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
-            ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
-            fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
-
-            if checkboundaries(landavail, xdest, ydest, fdest) && landavail(xdest, ydest, fdest) == true
-                orgs[d].location = (xdest,ydest,fdest)
-                #unity test
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(orgs[d].id," dispersed $dist")
-                #end
-            else
-                push!(lost,d)
-                #unity test
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(orgs[d].id," dispersed $dist but died")
-                #end
-            end
-        # else
+        elseif orgs[d].kernel == "w"
+            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])
             #unity test
-           # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-           #     println(sim, orgs[d].id, orgs[d].sp," Not releasing seeds.")
-           # end
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #    println(sim, "$(orgs[d].id) wind dispersal kernel")
+            #end
+        elseif orgs[d].kernel == "wa"
+            µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
+            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
+            #unity test
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #    println(sim, "$(orgs[d].id) $µ dispersal kernel")
+            #end
+        else
+            error("Check dispersal kernel input for species $(orgs[d].sp).")
+        end
+        
+        #unity test
+        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println("$(orgs[d].id) dispersal distance: $dist")
+        #end
+
+        # Find patch
+        θ = rand([0 0.5π π 1.5π]) # TODO tentar rand(0:2)*pi?
+        xdest = orgs[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
+        ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
+        fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
+
+        if checkboundaries(landavail, xdest, ydest, fdest) && landavail(xdest, ydest, fdest) == true
+            orgs[d].location = (xdest,ydest,fdest)
+            #unity test
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(orgs[d].id," dispersed $dist")
+            #end
+        else
+            push!(lost,d)
+            #unity test
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(orgs[d].id," dispersed $dist but died")
+            #end
+        end
+        # else
+        #unity test
+        # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        #     println(sim, orgs[d].id, orgs[d].sp," Not releasing seeds.")
+        # end
         # end
     end
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println("Lost $lost")
+    println("Lost $lost")
     #end
     deleteat!(orgs,lost)
 end
@@ -627,8 +679,8 @@ end
 germinate(org)
 Seeds have a probability of germinating (`gprob`).
 """
-function germinate(org::Organisms.Organism, orgsref::Organisms.OrgsRef)
-    gprob = 1 - exp(-orgsref.b0jg[org.sp])
+function germinate(org::Organisms.Organism)
+    gprob = 1 - exp(-org.b0jg)
     germ = false
     if 1 == rand(Distributions.Binomial(1,gprob))
         germ = true
@@ -646,13 +698,13 @@ function establish!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organisms.Organ
 
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println("Establishing seeds: $establishing")
+    println("Establishing seeds: $establishing")
     #end
 
     lost = Int64[]
 
     for o in establishing
-        if orgsref.seedon[orgs[o].sp] <= rem(t,52) #only after release and dispersal a seed can establish
+        if orgs[o].seedon <= rem(t,52) #only after release and dispersal a seed can establish
             orgcell = orgs[o].location
             if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]],["p"])
                 push!(lost,o)
@@ -662,7 +714,7 @@ function establish!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organisms.Organ
     	        #end
 	    end
 
-            if germinate(orgs[o], orgsref)
+            if germinate(orgs[o])
                 orgs[o].stage = "j"
 	        #unity test
    	        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -690,20 +742,20 @@ function survive!(orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int
         #T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
         
 	if o in seeds
-            if rem(t,52) > orgsref.seedoff[orgs[o].sp] #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
-                Bm = orgsref.b0em[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+            if rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
+                Bm = orgs[o].b0em * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
                 mprob = 1 - exp(-Bm)
             else
                 continue
             end 
-        elseif (orgs[o].age/52) >= orgsref.max_span[orgs[o].sp] #oldies die
+        elseif (orgs[o].age/52) >= orgs[o].max_span #oldies die
             mprob = 1
             #unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println("$(orgs[o].id) $(orgs[o].stage) dying of old age")
+            println("$(orgs[o].id) $(orgs[o].stage) dying of old age")
             #end
         elseif o in nogrowth
-            Bm = orgsref.b0am[orgs[o].sp] * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+            Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
             # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             #     println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
@@ -712,7 +764,7 @@ function survive!(orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int
         else
             mprob = 0            
         end
-                
+        
         if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
             push!(deaths, o)
         else
@@ -721,7 +773,7 @@ function survive!(orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int
     end
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println("Dying orgs: $deaths")
+    println("Dying orgs: $deaths")
     #end
     deleteat!(orgs, deaths)
 end
@@ -735,7 +787,7 @@ function shedd!(orgs::Array{Organisms.Organism,N} where N, orgsref::Organisms.Or
     flowering = find(x -> (x.mass["repr"] > 0), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char (''). 
 
     for f in flowering
-        if rem(t,52) > orgsref.floroff[orgs[f].sp]
+        if rem(t,52) > orgs[f].floroff
             orgs[f].mass["repr"] = 0
         end
     end
@@ -760,14 +812,14 @@ function destroyorgs!(orgs::Array{Organisms.Organism, N} where N, landavail::Arr
     end
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println("Killed orgs: $kills")
+    println("Killed orgs: $kills")
     #end
 end
 
 """
-    pollination!()
-    Simulates plant-insect encounters and effective pollen transfer.
-    """
+pollination!()
+Simulates plant-insect encounters and effective pollen transfer.
+"""
 #TODO find a not too cumbersome way of modelling pollen transfer: draw from Poisot's probability
 
 # """

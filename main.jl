@@ -105,6 +105,9 @@ function read_spinput(settings::Dict{String,Any})
                            rows(spinputtbl,:kernel)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:kernel_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:e_mu)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
@@ -114,16 +117,31 @@ function read_spinput(settings::Dict{String,Any})
          rows(spinputtbl,:b0g)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0g_sd)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:b0em)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0em_sd)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:b0am)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0am_sd)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:b0jg)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0jg_sd)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:b0ag)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0ag_sd)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:sestra)[i]
@@ -135,13 +153,25 @@ function read_spinput(settings::Dict{String,Any})
          rows(spinputtbl,:floron)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:floron_sd)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:floroff)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:floroff_sd)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:seedon)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:seedon_sd)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:seedoff)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:seedoff_sd)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:max_mass)[i]
@@ -151,6 +181,9 @@ function read_spinput(settings::Dict{String,Any})
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:max_span)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:max_span_sd)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:mass_mu)[i]
@@ -199,7 +232,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         end
     end
 
-    if rem(t,8) == 0 # output bi-monthly
+    if rem(t,1) == 0 # output bi-monthly
     for o in 1:length(orgs)
         open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
             writedlm(output, hcat(t,
