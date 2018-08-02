@@ -31,22 +31,33 @@ mutable struct OrgsRef
 #species::Dict{String,String}
 sp_id::Array{String, 1}
 kernel::Dict{String,String}
+kernel_sd::Dict{String,Float64}
 e_mu::Dict{String,Float64}
 e_sd::Dict{String,Float64}
 b0g::Dict{String,Float64}
+b0g_sd::Dict{String,Float64}
 b0em::Dict{String,Float64}
+b0em_sd::Dict{String,Float64}
 b0am::Dict{String,Float64}
+b0am_sd::Dict{String,Float64}
 b0jg::Dict{String,Float64}
+b0jg_sd::Dict{String,Float64}
 b0ag::Dict{String,Float64}
+b0ag_sd::Dict{String,Float64}
 sestra::Dict{String,Int}
 dyad::Dict{String,Float64}
 floron::Dict{String,Int}
+floron_sd::Dict{String,Int}
 floroff::Dict{String,Int}
+floroff_sd::Dict{String,Int}
 seedon::Dict{String,Int}
+seedon_sd::Dict{String,Int}
 seedoff::Dict{String,Int}
+seedoff_sd::Dict{String,Int}
 max_mass::Dict{String,Float64}
 min_mass::Dict{String,Float64}
 max_span::Dict{String,Int64}
+max_span_sd::Dict{String,Int64}
 mass_mu::Dict{String,Float64}
 mass_sd::Dict{String,Float64}
 abund::Dict{String,Int}
@@ -84,7 +95,7 @@ genotype::Array{String,2} #initialize separately
 radius::Int64
 #Organism() = new()
 end
-Organism(id,location,sp,mass) = Organism(id,location,sp,mass,"a", 0,false,["A" "A"],0) #these individuals are initialized in the beginning of the simulation
+Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_span) = Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_span,"a", 0,false,["A" "A"],0) #these individuals are initialized in the beginning of the simulation
 
 """
 newOrg(fgroups, init_abund, biomassμ, biomasssd)
@@ -106,7 +117,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
     `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
         `quant::Int64` is nb of new individuals or offspring to be created
         """
-function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int, mode::String)
+function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int)
 
     orgs = Organism[]
 
@@ -126,8 +137,7 @@ function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, i
                                   s,
                                   Dict("veg" => rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])),
                                        "repr" => 0),
-                                  rand(Distributions.Normal(orgsref.kernel[s],
-                                                            orgsref.kernel_sd[s])), #kernel
+                                  orgsref.kernel[s], #kernel
                 rand(Distributions.Normal(orgsref.e_mu[s],
                                           orgsref.e_sd[s])), #e_mu
                 rand(Distributions.Normal(orgsref.b0g[s],
@@ -140,16 +150,16 @@ function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, i
                                           orgsref.b0jg_sd[s])), #b0jg
                 rand(Distributions.Normal(orgsref.b0ag[s],
                                           orgsref.b0ag_sd[s])), #b0ag
-                rand(Distributions.Normal(orgsref.floron[s],
-                                          orgsref.floron_sd[s])), #floron
-                rand(Distributions.Normal(orgsref.floroff[s],
-                                          orgsref.floroff_sd[s])), #floroff
-                rand(Distributions.Normal(orgsref.seedon[s],
-                                          orgsref.seedon_sd[s])), #seedon
-                rand(Distributions.Normal(orgsref.seedoff[s],
-                                          orgsref.seedoff_sd[s])), #seedoff
-                rand(Distributions.Normal(orgsref.max_span[s],
-                                          orgsref.max_span_sd[s]))) #max_span
+                Int(round(rand(Distributions.Normal(orgsref.floron[s],
+                                          orgsref.floron_sd[s])),RoundUp)), #floron
+                Int(round(rand(Distributions.Normal(orgsref.floroff[s],
+                                          orgsref.floroff_sd[s])),RoundUp)), #floroff
+                Int(round(rand(Distributions.Normal(orgsref.seedon[s],
+                                          orgsref.seedon_sd[s])),RoundUp)), #seedon
+                Int(round(rand(Distributions.Normal(orgsref.seedoff[s],
+                                          orgsref.seedoff_sd[s])),RoundUp)), #seedoff
+                Int(round(rand(Distributions.Normal(orgsref.max_span[s],
+                                          orgsref.max_span_sd[s])),RoundUp))) #max_span
                 
                 push!(orgs, neworg)
             end
