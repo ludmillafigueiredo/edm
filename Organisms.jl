@@ -518,7 +518,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
     #     parents_genes = mate!()
     # end
 
-    for sp in unique(getfield.(orgs, :sp_id))
+offspring = Organism[]
+
+    for sp in unique(getfield.(orgs, :sp))
 
         ferts = find(x -> x.mated == true && x.sp == sp, orgs)
 
@@ -529,8 +531,6 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println("Reproducing: $ferts week $t")
         #end
-
-        offspring = Organism[]
 
         for o in ferts
 
@@ -566,7 +566,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, setti
                 push!(offspring, embryo)
 	        #unity test
                 #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
-                println("Pushed new org ", embryo, " into offpring")
+                println("Pushed new org ", embryo, " into offspring")
 
                 #end
             end
