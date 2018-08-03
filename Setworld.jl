@@ -67,8 +67,8 @@ function updateenv!(landscape::Array{Dict{Any,Any}}, t::Int64, landpars::LandPar
     println("Temperature for week $t: $T")
 
     if t != 1
-        occupied = find(x -> isempty(x), landscape)
-        println("Cells to be reset: $occupied.")
+        occupied = find(x -> !isempty(x), landscape)
+        #println("Cells to be reset: $occupied.")
         for cell in occupied
 	    empty!(landscape[occupied])
         end
