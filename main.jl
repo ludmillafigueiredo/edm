@@ -39,6 +39,11 @@ where outputs will be stored."
         arg_type = String
         default = abspath(pwd(),"inputs/species.csv")
 
+        "--tdist"
+        help = "Initial trait value distribution"
+        arg_type = String
+        default = "unif"
+
         "--insect"
         help = "How to explicitly model insects:
 pollination-independent reproduction \"indep\";
@@ -61,6 +66,11 @@ equal pollination loss for all species \"equal\"."
         arg_type = Int
         default = 52
 
+        "--tout"
+        help = "Frequency of output (number of weeks)"
+        arg_type = Int
+        required = true
+        
         "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
@@ -180,6 +190,9 @@ function read_spinput(settings::Dict{String,Any})
          rows(spinputtbl,:min_mass)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:min_mass_sd)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:max_span)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
@@ -235,7 +248,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         end
     end
 
-    if rem(t,1) == 0 # output bi-monthly
+    if rem(t,settings["tout"]) == 0 # output bi-monthly
         for o in 1:length(orgs)
             open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
                 writedlm(output, hcat(t,
@@ -330,7 +343,7 @@ function simulate()
     id_counter = 0
     
     # Create initial individuals
-    orgs, id_counter = newOrgs!(landavail, orgsref, id_counter)
+    orgs, id_counter = newOrgs!(landavail, orgsref, id_counter, settings["tdist"])
     
     println("Plants initialized: type $(typeof(orgs))")
 

@@ -56,6 +56,7 @@ seedoff::Dict{String,Int}
 seedoff_sd::Dict{String,Int}
 max_mass::Dict{String,Float64}
 min_mass::Dict{String,Float64}
+min_mass_sd::Dict{String,Float64}
 max_span::Dict{String,Int64}
 max_span_sd::Dict{String,Int64}
 mass_mu::Dict{String,Float64}
@@ -68,7 +69,7 @@ id::String
 location::Tuple # (x,y,frag)
 sp::String #sp id, easier to read
 mass::Dict
-## Evolvable traits
+#### Evolvable traits ####
 kernel::String
 e_mu::Float64
 b0g::Float64
@@ -83,11 +84,11 @@ floroff::Int
 seedon::Int
 seedoff::Int
 #max_mass::Float64
-#min_mass::Float64
+min_mass::Float64
 max_span::Int64
 #mass_mu::Float64
 #mass_sd::Float64
-## State variables
+#### State variables ####
 stage::String #e,j,a
 age::Int64 # controls passing stages, phenology and
 mated::Bool # TODO is it necessary?
@@ -117,7 +118,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
     `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
         `quant::Int64` is nb of new individuals or offspring to be created
         """
-function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int)
+function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int, tdist::String)
 
     orgs = Organism[]
 
@@ -131,42 +132,80 @@ function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, i
             for i in 1:orgsref.abund[s]
 
                 id_counter += 1 # update individual counter
-                
-                neworg = Organism(hex(id_counter),
-                                  (XYs[i,1],XYs[i,2],frag),
-                                  s,
-                                  Dict("veg" => rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])),
-                                       "repr" => 0),
-                                  orgsref.kernel[s], #kernel
-                rand(Distributions.Normal(orgsref.e_mu[s],
-                                          orgsref.e_sd[s])), #e_mu
-                rand(Distributions.Normal(orgsref.b0g[s],
-                                          orgsref.b0g_sd[s])), #b0g
-                rand(Distributions.Normal(orgsref.b0em[s],
-                                          orgsref.b0em_sd[s])), #b0em
-                rand(Distributions.Normal(orgsref.b0am[s],
-                                          orgsref.b0am_sd[s])), #b0am
-                rand(Distributions.Normal(orgsref.b0jg[s],
-                                          orgsref.b0jg_sd[s])), #b0jg
-                rand(Distributions.Normal(orgsref.b0ag[s],
-                                          orgsref.b0ag_sd[s])), #b0ag
-                Int(round(rand(Distributions.Normal(orgsref.floron[s],
-                                          orgsref.floron_sd[s])),RoundUp)), #floron
-                Int(round(rand(Distributions.Normal(orgsref.floroff[s],
-                                          orgsref.floroff_sd[s])),RoundUp)), #floroff
-                Int(round(rand(Distributions.Normal(orgsref.seedon[s],
-                                          orgsref.seedon_sd[s])),RoundUp)), #seedon
-                Int(round(rand(Distributions.Normal(orgsref.seedoff[s],
-                                          orgsref.seedoff_sd[s])),RoundUp)), #seedoff
-                Int(round(rand(Distributions.Normal(orgsref.max_span[s],
-                                          orgsref.max_span_sd[s])),RoundUp))) #max_span
-                
-                push!(orgs, neworg)
-            end
-        end
-    end
 
-    return orgs, id_counter
+                if tdist == "normal"
+                    
+                    neworg = Organism(hex(id_counter),
+                                      (XYs[i,1],XYs[i,2],frag),
+                                      s,
+                                      Dict("veg" => rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])),
+                                           "repr" => 0),
+                                      orgsref.kernel[s], #kernel
+                                      rand(Distributions.Normal(orgsref.e_mu[s],
+                                                                orgsref.e_sd[s])), #e_mu
+                    rand(Distributions.Normal(orgsref.b0g[s],
+                                              orgsref.b0g_sd[s])), #b0g
+                    rand(Distributions.Normal(orgsref.b0em[s],
+                                              orgsref.b0em_sd[s])), #b0em
+                    rand(Distributions.Normal(orgsref.b0am[s],
+                                              orgsref.b0am_sd[s])), #b0am
+                    rand(Distributions.Normal(orgsref.b0jg[s],
+                                              orgsref.b0jg_sd[s])), #b0jg
+                    rand(Distributions.Normal(orgsref.b0ag[s],
+                                              orgsref.b0ag_sd[s])), #b0ag
+                    Int(round(rand(Distributions.Normal(orgsref.floron[s],
+                                                        orgsref.floron_sd[s])),RoundUp)), #floron
+                    Int(round(rand(Distributions.Normal(orgsref.floroff[s],
+                                                        orgsref.floroff_sd[s])),RoundUp)), #floroff
+                    Int(round(rand(Distributions.Normal(orgsref.seedon[s],
+                                                        orgsref.seedon_sd[s])),RoundUp)), #seedon
+                    Int(round(rand(Distributions.Normal(orgsref.seedoff[s],
+                                                        orgsref.seedoff_sd[s])),RoundUp)), #seedoff
+                    Int(round(rand(Distributions.Normal(orgsref.max_span[s],
+                                                        orgsref.max_span_sd[s])),RoundUp))) #max_span
+                    
+                    push!(orgs, neworg)
+                    
+                else
+                    neworg = Organism(hex(id_counter),
+                                      (XYs[i,1],XYs[i,2],frag),
+                                      s,
+                                      Dict("veg" => rand(Distributions.Uniform(orgsref.mass_mu[s],orgsref.mass_sd[s])),
+                                           "repr" => 0),
+                                      orgsref.kernel[s], #kernel
+                                      rand(Distributions.Uniform(orgsref.e_mu[s],
+                                                                 orgsref.e_sd[s])), #e_mu
+                    rand(Distributions.Uniform(orgsref.b0g[s],
+                                               orgsref.b0g_sd[s])), #b0g
+                    rand(Distributions.Uniform(orgsref.b0em[s],
+                                               orgsref.b0em_sd[s])), #b0em
+                    rand(Distributions.Uniform(orgsref.b0am[s],
+                                               orgsref.b0am_sd[s])), #b0am
+                    rand(Distributions.Uniform(orgsref.b0jg[s],
+                                               orgsref.b0jg_sd[s])), #b0jg
+                    rand(Distributions.Uniform(orgsref.b0ag[s],
+                                               orgsref.b0ag_sd[s])), #b0ag
+                    Int(round(rand(Distributions.Uniform(orgsref.floron[s],
+                                                         orgsref.floron_sd[s])),RoundUp)), #floron
+                    Int(round(rand(Distributions.Uniform(orgsref.floroff[s],
+                                                         orgsref.floroff_sd[s])),RoundUp)), #floroff
+                    Int(round(rand(Distributions.Uniform(orgsref.seedon[s],
+                                                         orgsref.seedon_sd[s])),RoundUp)), #seedon
+                    Int(round(rand(Distributions.Uniform(orgsref.seedoff[s],
+                                                         orgsref.seedoff_sd[s])),RoundUp)), #seedoff
+                    Int(round(rand(Distributions.Uniform(orgsref.min_mass[s],
+                                                         orgsref.min_mass_sd[s])),RoundUp)), #min_mass to become adult
+                    Int(round(rand(Distributions.Uniform(orgsref.max_span[s],
+                                                         orgsref.max_span_sd[s])),RoundUp))) #max_span
+                    
+                    push!(orgs, neworg)
+                end
+                
+            end
+end
+end
+
+return orgs, id_counter
 
 end
 
@@ -180,7 +219,7 @@ function projvegmass!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, 
 
     for o in competing
         x, y, frag = orgs[o].location
-        orgs[o].radius = round(Int64, (1/16) * (sqrt(orgs[o].mass["veg"]^(2/3)) - 1)/2, RoundUp) # multiply by 0.2 because weiner uses 1cm2 projections, and my cells are 16 cm2
+        orgs[o].radius = round(Int64, (1/4) * (sqrt(orgs[o].mass["veg"]^(2/3)) - 1)/2, RoundUp) # multiply by 0.2 because weiner uses 1cm2 projections, and my cells are 16 cm2
 
         if orgs[o].radius == 0  #TODO: hotfix, check a more sound solution: vegetative mass - 1 might be too much for juveniles, especially the young ones
             orgs[o].radius = 1
@@ -374,7 +413,7 @@ function develop!(orgs::Array{Organism,N} where N, orgsref::Organisms.OrgsRef)
     juvs = find(x->x.stage == "j",orgs)
 
     for j in juvs
-        if orgs[j].mass["veg"] >= orgsref.min_mass[orgs[j].sp]
+        if orgs[j].mass["veg"] >= orgs[j].min_mass
             orgs[j].stage = "a"
         end
     end
@@ -552,7 +591,7 @@ offspring = Organism[]
 
                 # copy everything to get hereditary traits
                 embryo = deepcopy(orgs[traitsi])
-                # set embryos own individual characteristics
+                # set embryos own individual non-evolutionary traits
                 embryo.id = hex(id_counter)
                 embryo.location = orgs[o].location #stays with mom until release
                 embryo.mass = Dict("veg" => orgs[traitsi].e_mu,
