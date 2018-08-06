@@ -362,7 +362,7 @@ function allocate!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, t::
                 #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
                 #end
             elseif orgs[o].stage == "a" &&
-                (orgs[o].floron <= rem(t,52) < orgs[o].floroff) && (sum(collect(values(orgs[o].mass))) >= 0.2*orgsref.max_mass[orgs[o].sp])
+                (orgs[o].floron <= rem(t,52) < orgs[o].floroff) && (sum(collect(values(orgs[o].mass))) >= 0.2*(orgs[o].e_mu*1000/(2.14^2)))
                 # adults invest in reproduction
                 if haskey(orgs[o].mass,"repr")
                     orgs[o].mass["repr"] += grown_mass
