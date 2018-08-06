@@ -239,16 +239,17 @@ function compete(landscape::Array{Dict{Any,Any}}, org::Organism,settings::Dict{S
             continue
             # #unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #   println(sim, "$(org.id) out of bound projection at $(org.location)")
+            #   println(sim, "$(org.id) out of bound projection at $(org.location)")\
+            println("$(org.id) out of bound projection at $(org.location)")
             #end
-        elseif j == y && i == x # steming point is "is stronger", doesnt compete
+        elseif j == y && i == x # steming point is "stronger", doesnt compete
             continue
         elseif haskey(landscape[i,j,frag],"p")
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
             nbsum += landscape[i,j,frag]["p"] - /(org.mass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
             # unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #println(org.id," has nbsum = ", nbsum)
+            println(org.id," has nbsum = ", nbsum, "from $i, $j")
             # println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
             #end
         end
