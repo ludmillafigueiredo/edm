@@ -180,7 +180,7 @@ function projvegmass!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, 
 
     for o in competing
         x, y, frag = orgs[o].location
-        orgs[o].radius = round(Int64, (sqrt(orgs[o].mass["veg"]^(2/3)) - 1)/2, RoundUp) 
+        orgs[o].radius = round(Int64, (1/16) * (sqrt(orgs[o].mass["veg"]^(2/3)) - 1)/2, RoundUp) # multiply by 0.2 because weiner uses 1cm2 projections, and my cells are 16 cm2
 
         if orgs[o].radius == 0  #TODO: hotfix, check a more sound solution: vegetative mass - 1 might be too much for juveniles, especially the young ones
             orgs[o].radius = 1
@@ -200,19 +200,20 @@ function projvegmass!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, 
                 continue
             else
                 if haskey(landscape[i,j,frag],"p")
-                    #println("Already projected in x = $i, y = $j:", landscape[i,j,frag]["p"])
+                   
                     landscape[i,j,frag]["p"] += projmass
                     # unity test
-                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    #println(orgs[o].id,"is in $(orgs[o].location) and  has found a neighbor.")
-                    #end
+                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                        println(sim, orgs[o].id,"is in $(orgs[o].location) and  has found a neighbor.")
+                        println(sim, "Already projected in x = $i, y = $j:", landscape[i,j,frag]["p"])
+                    end
                     
                 else
                     landscape[i,j,frag] = Dict("p" => projmass)
                     # unity test
-                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    #println(orgs[o].id," has no neighbor")
-                    #end
+                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(sim, orgs[o].id," has no neighbor")
+                    end
                     
                 end
             end
@@ -238,20 +239,20 @@ function compete(landscape::Array{Dict{Any,Any}}, org::Organism,settings::Dict{S
         if !checkbounds(Bool,landscape[:,:,frag],i,j)
             continue
             # #unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #   println(sim, "$(org.id) out of bound projection at $(org.location)")\
-            println("$(org.id) out of bound projection at $(org.location)")
-            #end
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+               println(sim, "$(org.id) out of bound projection at $(org.location)")
+            #println("$(org.id) out of bound projection at $(org.location)")
+            end
         elseif j == y && i == x # steming point is "stronger", doesnt compete
             continue
         elseif haskey(landscape[i,j,frag],"p")
             #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
-            nbsum += landscape[i,j,frag]["p"] - /(org.mass["veg"],(2*r+1)^2) #sum vegetative biomass of neighbors only (exclude focus plant own biomass)
+            nbsum += (landscape[i,j,frag]["p"] - /(org.mass["veg"],(2*r+1)^2)) #sum vegetative biomass of neighbors only (exclude focus plant own biomass projection in that cell)
             # unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(org.id," has nbsum = ", nbsum, "from $i, $j")
-            # println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
-            #end
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #println(org.id," has nbsum = ", nbsum, "from $i, $j")
+            println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
+            end
         end
     end
 
@@ -554,8 +555,7 @@ offspring = Organism[]
                 # set embryos own individual characteristics
                 embryo.id = hex(id_counter)
                 embryo.location = orgs[o].location #stays with mom until release
-                embryo.mass = Dict("veg" => rand(Distributions.Normal(orgs[traitsi].e_mu,
-                                                                      orgs[traitsi].e_sd),1)[1],
+                embryo.mass = Dict("veg" => orgs[traitsi].e_mu,
                                    "repr" => 0)
                 
                 embryo.stage = "e"
@@ -659,7 +659,7 @@ function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organism
         ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
         fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
 
-        if checkboundaries(landavail, xdest, ydest, fdest) && landavail(xdest, ydest, fdest) == true
+        if checkboundaries(landavail, xdest, ydest, fdest) && landavail[xdest, ydest, fdest] == true
             orgs[d].location = (xdest,ydest,fdest)
             #unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim

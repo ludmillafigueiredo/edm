@@ -219,7 +219,7 @@ end
 outputorgs(orgs,t,settingsfrgou)
 Saves a long format table with the organisms field informations.
 """
-function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
+function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs::Array{Organisms.Organism, N} where N,landscape::Array{Dict{Any,Any}}, t::Int64, settings::Dict{String,Any})
 
     if t == 1
         header = hcat(["week"],
@@ -230,28 +230,33 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
+        open(string("EDoutputs/", settings["simID"], "/landscape.csv"), "w") do landoutput
+            println(landoutput, landscape[1,1:end,1])
+        end
     end
 
     if rem(t,1) == 0 # output bi-monthly
-    for o in 1:length(orgs)
-        open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
-            writedlm(output, hcat(t,
-                                  orgs[o].id,
-                                  orgs[o].location,
-                                  orgs[o].sp,
-                                  orgs[o].mass["veg"],
-                                  orgs[o].mass["repr"],
-                                  orgs[o].stage,
-                                  orgs[o].age,
-                                  orgs[o].mated,
-            orgs[o].genotype,
-            orgs[o].radius))
+        for o in 1:length(orgs)
+            open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
+                writedlm(output, hcat(t,
+                                      orgs[o].id,
+                                      orgs[o].location,
+                                      orgs[o].sp,
+                                      orgs[o].mass["veg"],
+                                      orgs[o].mass["repr"],
+                                      orgs[o].stage,
+                                      orgs[o].age,
+                                      orgs[o].mated,
+                orgs[o].genotype,
+                orgs[o].radius))
+            end
+        end
+        #TODO output orgsref and ladpars
+        open(string("EDoutputs/", settings["simID"], "/landscape.csv"), "a") do landoutput
+            println(landoutput,landscape[1,1:end,1])
         end
     end
-        #TODO output orgsref and ladpars
-    end
 end
-
 """
 disturb!()
 
@@ -388,7 +393,7 @@ function simulate()
         shedd!(orgs,orgsref,t)
 
         # OUTPUT
-        orgstable(orgsref, landpars, orgs,t,settings)
+        orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
     end
 end
 simulate()
