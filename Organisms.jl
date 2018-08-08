@@ -83,7 +83,7 @@ floron::Int
 floroff::Int
 seedon::Int
 seedoff::Int
-#max_mass::Float64
+max_mass::Float64
 min_mass::Float64
 max_span::Int64
 #mass_mu::Float64
@@ -96,7 +96,7 @@ genotype::Array{String,2} #initialize separately
 radius::Int64
 #Organism() = new()
 end
-Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_span) = Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_span,"a", 0,false,["A" "A"],0) #these individuals are initialized in the beginning of the simulation
+Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,min_mass,max_span) = Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,min_mass,max_span,"a", 0,false,["A" "A"],0) #these individuals are initialized in the beginning of the simulation
 
 """
 newOrg(fgroups, init_abund, biomassμ, biomasssd)
@@ -186,18 +186,21 @@ function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, i
                     rand(Distributions.Uniform(orgsref.b0ag[s],
                                                orgsref.b0ag_sd[s])), #b0ag
                     Int(round(rand(Distributions.Uniform(orgsref.floron[s],
-                                                         orgsref.floron_sd[s])),RoundUp)), #floron
+                                                         orgsref.floron[s] + orgsref.floron_sd[s])),RoundUp)), #floron
                     Int(round(rand(Distributions.Uniform(orgsref.floroff[s],
-                                                         orgsref.floroff_sd[s])),RoundUp)), #floroff
+                                                         orgsref.floroff[s] + orgsref.floroff_sd[s])),RoundUp)), #floroff
                     Int(round(rand(Distributions.Uniform(orgsref.seedon[s],
-                                                         orgsref.seedon_sd[s])),RoundUp)), #seedon
+                                                         orgsref.seedon[s] + orgsref.seedon_sd[s])),RoundUp)), #seedon
                     Int(round(rand(Distributions.Uniform(orgsref.seedoff[s],
-                                                         orgsref.seedoff_sd[s])),RoundUp)), #seedoff
-                    Int(round(rand(Distributions.Uniform(orgsref.min_mass[s],
-                                                         orgsref.min_mass_sd[s])),RoundUp)), #min_mass to become adult
+                                                         orgsref.seedoff[s] + orgsref.seedoff_sd[s])),RoundUp)), #seedoff
+                    0.0,
+                    rand(Distributions.Uniform(orgsref.min_mass[s],
+                                               orgsref.min_mass[s] + orgsref.min_mass_sd[s])), #min_mass to become adult
                     Int(round(rand(Distributions.Uniform(orgsref.max_span[s],
-                                                         orgsref.max_span_sd[s])),RoundUp))) #max_span
-                    
+                                                         orgsref.max_span[s] + orgsref.max_span_sd[s])),RoundUp))) #max_span
+
+                    neworg.max_mass = (neworg.e_mu*1000/2.14)^2
+                                       
                     push!(orgs, neworg)
                 end
                 
@@ -362,7 +365,7 @@ function allocate!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, t::
                 #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
                 #end
             elseif orgs[o].stage == "a" &&
-                (orgs[o].floron <= rem(t,52) < orgs[o].floroff) && (sum(collect(values(orgs[o].mass))) >= 0.2*(orgs[o].e_mu*1000/(2.14^2)))
+                (orgs[o].floron <= rem(t,52) < orgs[o].floroff) && (sum(collect(values(orgs[o].mass))) >= 0.2*(orgs[o].max_mass))
                 # adults invest in reproduction
                 if haskey(orgs[o].mass,"repr")
                     orgs[o].mass["repr"] += grown_mass
@@ -413,7 +416,7 @@ function develop!(orgs::Array{Organism,N} where N, orgsref::Organisms.OrgsRef)
     juvs = find(x->x.stage == "j",orgs)
 
     for j in juvs
-        if orgs[j].mass["veg"] >= orgs[j].min_mass
+        if orgs[j].mass["veg"] >= orgs[j].min_mass*sum(values(orgs[j].mass))
             orgs[j].stage = "a"
         end
     end
@@ -591,12 +594,15 @@ offspring = Organism[]
 
                 # copy everything to get hereditary traits
                 embryo = deepcopy(orgs[traitsi])
+
+                # reset min. adult mass and max_mass
+                embryo.max_mass = (embryo.e_mu*1000/2.14)^2
+                
                 # set embryos own individual non-evolutionary traits
                 embryo.id = hex(id_counter)
                 embryo.location = orgs[o].location #stays with mom until release
                 embryo.mass = Dict("veg" => orgs[traitsi].e_mu,
                                    "repr" => 0)
-                
                 embryo.stage = "e"
                 embryo.age = 0
                 embryo.mated = false
