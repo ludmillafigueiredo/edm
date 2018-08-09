@@ -96,7 +96,7 @@ genotype::Array{String,2} #initialize separately
 radius::Int64
 #Organism() = new()
 end
-Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,min_mass,max_span) = Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,min_mass,max_span,"a", 0,false,["A" "A"],0) #these individuals are initialized in the beginning of the simulation
+Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,min_mass,max_span) = Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,min_mass,max_span,"a", 26,false,["A" "A"],0) #these individuals are initialized in the beginning of the simulation
 
 """
 newOrg(fgroups, init_abund, biomassμ, biomasssd)
@@ -116,7 +116,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
     `sex` sexual reproduction
     `clone` assexual reproduction
     `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
-        `quant::Int64` is nb of new individuals or offspring to be created
+    `quant::Int64` is nb of new individuals or offspring to be created
         """
 function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int, tdist::String)
 
@@ -170,8 +170,8 @@ function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, i
                     neworg = Organism(hex(id_counter),
                                       (XYs[i,1],XYs[i,2],frag),
                                       s,
-                                      Dict("veg" => rand(Distributions.Uniform(orgsref.mass_mu[s],orgsref.mass_sd[s])),
-                                           "repr" => 0),
+                                      Dict("veg" => 0.0,
+                                           "repr" => 0.0),
                                       orgsref.kernel[s], #kernel
                                       rand(Distributions.Uniform(orgsref.e_mu[s],
                                                                  orgsref.e_sd[s])), #e_mu
@@ -200,7 +200,8 @@ function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, i
                                                          orgsref.max_span[s] + orgsref.max_span_sd[s])),RoundUp))) #max_span
 
                     neworg.max_mass = (neworg.e_mu*1000/2.14)^2
-                                       
+                    neworg.mass["veg"] = neworg.max_mass * 0.5
+                   
                     push!(orgs, neworg)
                 end
                 
