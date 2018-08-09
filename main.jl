@@ -60,6 +60,10 @@ equal pollination loss for all species \"equal\"."
         help = "Type of environmental disturbance to be implemented: habitat area loss \"loss\", habitat fragmentation \"frag\" or temperature change \"temp\""
         arg_type = String
         default = "none"
+        
+        "--areafile"
+        arg_type = String
+        default = abspath(pwd(),"inputs/arealoss.csv")
 
         "--timesteps"
         help = "Duration of simulation in weeks."
@@ -279,7 +283,7 @@ function disturb!(landscape::Array{Dict{Any,Any}}, landavail::Array{Bool,N} wher
     #if !isdefined(:disturbtbl)
         # select file according to keyword: loss, frag, temp
         if settings["disturb"] == "loss"
-            disturbtbl = loadtable(abspath(pwd(),"inputs/arealoss.csv"))
+            disturbtbl = loadtable(settings["areafile"])
             tdist = select(disturbtbl,:time)
         elseif settings["disturb"] == "frag"
             disturbtbl = loadtable(abspath(pwd(),"inputs/fragmentation.csv"))
