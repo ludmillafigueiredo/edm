@@ -582,19 +582,62 @@ offspring = Organism[]
             emu = orgsref.e_mu[orgs[o].sp]
             offs =  round(Int64, /(orgs[o].mass["repr"],emu), RoundDown)
             orgs[o].mass["repr"] -= (offs * emu)
-            traitsi = rand(traitdist) # rdmly get an individual from which to copy the traits
 
             #unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println("Number of offspring of ", orgs[o].id, ": ",offs)
             #end
 
+            # get phylogenetic constraint: variance of the distribution
+            sp = orgs[o].sp
+            conspp = filter(x -> x.sp == sp, orgs)
+
+            e_mudist = Array{Float64}(1,length(conspp)) 
+            b0gdist = Array{Float64}(1,length(conspp))
+            b0emdist = Array{Float64}(1,length(conspp))
+            b0amdist = Array{Float64}(1,length(conspp))
+            b0jgdist = Array{Float64}(1,length(conspp))
+            b0agdist = Array{Float64}(1,length(conspp))
+            florondist = Array{Int}(1,length(conspp))
+            floroffdist = Array{Int}(1,length(conspp))
+            seedondist = Array{Int}(1,length(conspp))
+            seedoffdist = Array{Int}(1,length(conspp))
+            min_massdist = Array{Float64}(1,length(conspp))
+            max_spandist = Array{Int64}(1,length(conspp))
+
+            for i in eachindex(conspp)
+                e_mudist[i] = conspp[i].e_mu 
+                b0gdist[i] = conspp[i].b0g
+                b0emdist[i] = conspp[i].b0em
+                b0amdist[i] = conspp[i].b0am
+                b0jgdist[i] = conspp[i].b0jg
+                b0agdist[i] = conspp[i].b0ag
+                florondist[i] = conspp[i].floron
+                floroffdist[i] = conspp[i].floroff
+                seedondist[i] = conspp[i].seedon
+                seedoffdist[i] = conspp[i].seedoff
+                min_massdist[i] = conspp[i].min_mass
+                max_spandist[i] = conspp[i].max_span
+            end
+            
             for n in 1:offs
                 
                 id_counter += 1 # update individual counter
 
-                # copy everything to get hereditary traits
-                embryo = deepcopy(orgs[traitsi])
+                embryo = deepcopy(orgs[o])
+
+                embryo.e_mu += Distributions.Normal(0, std(embryo.e_mu/e_mudist))
+                embryo.b0g += Distributions.Normal(0, std(embryo.b0g/b0gdist))
+                embryo.b0em += Distributions.Normal(0,std(embryo.b0em/b0emdist))
+                embryo.b0am += Distributions.Normal(0,std(embryo.b0am/b0amdist))
+                embryo.b0jg += Distributions.Normal(0,std(embryo.b0jg/b0jgdist))
+                embryo.b0ag += Distributions.Normal(0,std(embryo.b0ag/b0agdist))
+                embryo.floron += Distributions.Normal(0,std(embryo.floron/florondist))
+                embryo.floroff += Distributions.Normal(0,std(embryo.floroff/floroffdist))
+                embryo.seedon += Distributions.Normal(0,std(embryo.seedon/seedondist))
+                embryo.seedoff += Distributions.Normal(0,std(embryo.seedoff/seedoffdist))
+                embryo.min_mass += Distributions.Normal(0, std(embryo.min_mass/min_massdist))
+                embryo.max_span += Distributions.Normal(0, std(embryo.max_span/max_spandist))
 
                 # reset min. adult mass and max_mass
                 embryo.max_mass = (embryo.e_mu*1000/2.14)^2
