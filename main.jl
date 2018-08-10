@@ -6,8 +6,6 @@
 EDDir = pwd()
 push!(LOAD_PATH,EDDir)
 
-srand(123)
-
 # Load Julia & model packages
 using ArgParse
 using Distributions
@@ -34,7 +32,12 @@ where outputs will be stored."
         arg_type = String
         required = true
         
-        "--spinput"
+	"--rseed"
+	help = "Seed for RNG"
+	arg_type = Int
+	required = true
+	
+	"--spinput"
         help = "Name of file with species list."
         arg_type = String
         default = abspath(pwd(),"inputs/species.csv")
@@ -83,6 +86,7 @@ equal pollination loss for all species \"equal\"."
 
     return parse_args(sets) # returning a dictionnary of strings is useful because they can passed as keywords to Julia function
 end
+
 
 """
 read_landin(settings)
@@ -322,6 +326,9 @@ function simulate()
     # INITIALIZATION
     # Read in command line arguments
     settings = parse_commandline()
+
+    srand(setting["rseed"])
+
     # unity test
     println(keys(settings))
 

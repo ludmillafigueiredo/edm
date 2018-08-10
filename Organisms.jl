@@ -626,18 +626,18 @@ offspring = Organism[]
 
                 embryo = deepcopy(orgs[o])
 
-                embryo.e_mu += Distributions.Normal(0, std(embryo.e_mu/e_mudist))
-                embryo.b0g += Distributions.Normal(0, std(embryo.b0g/b0gdist))
-                embryo.b0em += Distributions.Normal(0,std(embryo.b0em/b0emdist))
-                embryo.b0am += Distributions.Normal(0,std(embryo.b0am/b0amdist))
-                embryo.b0jg += Distributions.Normal(0,std(embryo.b0jg/b0jgdist))
-                embryo.b0ag += Distributions.Normal(0,std(embryo.b0ag/b0agdist))
-                embryo.floron += Distributions.Normal(0,std(embryo.floron/florondist))
-                embryo.floroff += Distributions.Normal(0,std(embryo.floroff/floroffdist))
-                embryo.seedon += Distributions.Normal(0,std(embryo.seedon/seedondist))
-                embryo.seedoff += Distributions.Normal(0,std(embryo.seedoff/seedoffdist))
-                embryo.min_mass += Distributions.Normal(0, std(embryo.min_mass/min_massdist))
-                embryo.max_span += Distributions.Normal(0, std(embryo.max_span/max_spandist))
+                embryo.e_mu += Distributions.Normal(0,std(e_mudist))
+                embryo.b0g += Distributions.Normal(0,std(b0gdist))
+                embryo.b0em += Distributions.Normal(0,std(b0emdist))
+                embryo.b0am += Distributions.Normal(0,std(b0amdist))
+                embryo.b0jg += Distributions.Normal(0,std(b0jgdist))
+                embryo.b0ag += Distributions.Normal(0,std(b0agdist))
+                embryo.floron += Distributions.Normal(0,std(florondist))
+                embryo.floroff += Distributions.Normal(0,std(floroffdist))
+                embryo.seedon += Distributions.Normal(0,std(seedondist))
+                embryo.seedoff += Distributions.Normal(0,std(seedoffdist))
+                embryo.min_mass += Distributions.Normal(0,std(min_massdist))
+                embryo.max_span += Distributions.Normal(0,std(max_spandist))
 
                 # reset min. adult mass and max_mass
                 embryo.max_mass = (embryo.e_mu*1000/2.14)^2
