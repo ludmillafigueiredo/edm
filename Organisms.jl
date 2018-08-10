@@ -525,15 +525,15 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
                 elseif regime == "const"
                     pollinated = sample(ready, Int(floor(length(ready)* remain * kp)), replace = false, ordered = true) #* 10^(-3))
                     # unity test
-                    #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                    println("Pollinated in $regime regime: $pollinated")
-                    #end 
+                    open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                    println(sim,"Pollinated in $regime regime: $pollinated")
+                    end 
                     for p in pollinated
                         orgs[p].mated = true
                         # unity test
-                        #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                        println("$(orgs[p].id) can reproduce? $(orgs[p].mated)")
-                        #end 
+                        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                        println(sim,"$(orgs[p].id) can reproduce? $(orgs[p].mated)")
+                        end 
                     end
                 else
                     error("Please chose a pollination scenario \"scen\" in insect.csv:
@@ -555,10 +555,10 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
     end
     
     #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
     println("Reproducing: $ready week $t.
             Actually reprod: $pollinated , because $scen and $regime.")
-    #end
+    end
     
 end
 
@@ -781,7 +781,7 @@ function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organi
     end
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    println("Lost $lost")
+    println("Lost $(length(lost))")
     #end
     deleteat!(orgs,lost)
 end
@@ -872,15 +872,15 @@ function survive!(orgs::Array{Organisms.Organism,1}, nogrowth::Array{Int64,1}, c
         elseif (orgs[o].age/52) >= orgs[o].max_span #oldies die
             mprob = 1
             #unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println("$(orgs[o].id) $(orgs[o].stage) dying of old age")
-            #end
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim, "$(orgs[o].id) $(orgs[o].stage) dying of old age")
+            end
         elseif o in nogrowth
             Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
-            # open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println("$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
-            # end
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
+            end
             mprob = 1 - exp(-Bm)
         elseif currentk > K # density-dependent mortality
             println("Current biomass bigger than capacity.")
@@ -905,9 +905,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, nogrowth::Array{Int64,1}, c
         end
     end
     #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    println("Dying orgs: $deaths")
-    #end
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    println(sim, "Dying orgs: $(length(deaths))")
+    end
     deleteat!(orgs, deaths)
 end
 
@@ -944,9 +944,9 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,2
         deleteat!(orgs, kills)
     end
     #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    println("Killed orgs: $kills")
-    #end
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    println("Killed orgs: $(length(kills))")
+    end
 end
 
 """
