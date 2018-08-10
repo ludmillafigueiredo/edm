@@ -38,11 +38,11 @@ end
 # Functions
 function landscape_init(landpars::LandPars)
 
-    landscape = Array{Dict} #if created only inside the loop, remains a local variable
+    landscape = Array{Dict{String,Float64}} #if created only inside the loop, remains a local variable
     
     for frag in collect(1:landpars.nfrags)
 
-        fragment = fill(Dict(), landpars.fxlength[frag],landpars.fylength[frag])
+        fragment = fill(Dict{String,Float64}(), landpars.fxlength[frag],landpars.fylength[frag])
 	
 	if frag == 1
 	    landscape = fragment #when empty, landscape cant cat with frag
@@ -60,7 +60,7 @@ end
             updateenv!(landscape,t)
             Update temperature and precipitation values according to the weekly input data (weekly means and ).
             """
-function updateenv!(landscape::Array{Dict{Any,Any}}, t::Int64, landpars::LandPars)
+function updateenv!(landscape::Array{Dict{String,Float64},2}, t::Int64, landpars::LandPars)
 
     T = landpars.meantempts[t] + tK
     #unity test
@@ -82,7 +82,7 @@ end
             destroyarea!()
             Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
                 """
-function destroyarea!(landavail::Array{Bool}, loss::Float64, settings::Dict{String,Any})
+function destroyarea!(landavail::Array{Bool,2}, loss::Float64, settings::Dict{String,Any})
     # DESTROY HABITAT
     # index of the cells still availble:
     available = find(x -> x == true, landavail)
@@ -108,7 +108,7 @@ end
 """
                 fragmentation!()
                 """
-function fragment!(landscape::Array{Dict{Any,Any}}, t, settings::Dict{String,Any})
+function fragment!(landscape::Array{Dict{String,Float64}}, t, settings::Dict{String,Any})
 end
 
 end

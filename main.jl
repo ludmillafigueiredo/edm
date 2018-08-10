@@ -240,7 +240,7 @@ end
 outputorgs(orgs,t,settingsfrgou)
 Saves a long format table with the organisms field informations.
 """
-function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs::Array{Organisms.Organism, N} where N,landscape::Array{Dict{Any,Any}}, t::Int64, settings::Dict{String,Any})
+function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs::Array{Organisms.Organism,1},landscape::Array{Dict{String,Float64},2}, t::Int64, settings::Dict{String,Any})
 
     if t == 1
         header = hcat(["week"],
@@ -282,7 +282,7 @@ end
 disturb!()
 
 """
-function disturb!(landscape::Array{Dict{Any,Any}}, landavail::Array{Bool,N} where N, orgs::Array{Organisms.Organism, N} where N, t::Int64, settings::Dict{String,Any})
+function disturb!(landscape::Array{Dict{String,Float64},2}, landavail::Array{Bool,2}, orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any})
     # read in the disturbance file, if not done so yet
     #if !isdefined(:disturbtbl)
         # select file according to keyword: loss, frag, temp
@@ -327,7 +327,7 @@ function simulate()
     # Read in command line arguments
     settings = parse_commandline()
 
-    srand(setting["rseed"])
+    srand(settings["rseed"])
 
     # unity test
     println(keys(settings))

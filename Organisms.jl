@@ -118,7 +118,7 @@ newOrg() creates new `init_abund` individuals of each  functional group (`fgroup
     `parent_s::Array{Organism,N}` array with single parent for clones, both for sexual reproduction
     `quant::Int64` is nb of new individuals or offspring to be created
         """
-function newOrgs!(landavail::Array{Bool,N} where N,orgsref::Organisms.OrgsRef, id_counter::Int, tdist::String)
+function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counter::Int, tdist::String)
 
     orgs = Organism[]
 
@@ -217,7 +217,7 @@ end
         projvegmass!(landscape,orgs)
         Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
         """
-function projvegmass!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, settings::Dict{String, Any})
+function projvegmass!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organism,1}, settings::Dict{String, Any})
     
     competing = find(x->(x.stage == "a" || x.stage == "j"),orgs) #juveniles com ashard as adults, but have higher growth rate and lower mortality
 
@@ -268,7 +268,7 @@ end
 compete(landscape, orgs)
 Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
 """
-function compete(landscape::Array{Dict{Any,Any}}, org::Organism,settings::Dict{String, Any})
+function compete(landscape::Array{Dict{String, Float64},2}, org::Organism,settings::Dict{String, Any})
 
     x, y, frag = org.location
     sp = org.sp
@@ -314,7 +314,7 @@ end
 allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
-function allocate!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
+function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
     #1. Initialize storage of those that are ont growing and have higher prob of dying (later)
     nogrowth = Int64[]
 
@@ -412,7 +412,7 @@ end
 develop!()
 Controls individual stage transition.
 """
-function develop!(orgs::Array{Organism,N} where N, orgsref::Organisms.OrgsRef)
+function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
     #TODO plant growth
     juvs = find(x->x.stage == "j",orgs)
 
@@ -429,7 +429,7 @@ end
 checkboundaries(sourcefrag,xdest, ydest, fdest)
 `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
 """
-function checkboundaries(landavail::Array{Bool,N} where N, xdest::Int64, ydest::Int64, fdest::Int64) #TODO is this function necessary?
+function checkboundaries(landavail::Array{Bool,2}, xdest::Int64, ydest::Int64, fdest::Int64) #TODO is this function necessary?
     #check inside frag
     if checkbounds(Bool, landavail[:,:,fdest], xdest, ydest)
         inbound = true
@@ -462,7 +462,7 @@ end
     Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
     GEnetic comes here
     """
-function mate!(orgs::Array{Organisms.Organism,N} where N, t::Int, settings::Dict{String, Any}, scen, tp, remain, regime, kp)
+function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen, tp, remain, regime, kp)
 
     ready = find(x->x.mass["repr"] > 0, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
     pollinated = []
@@ -555,7 +555,7 @@ end
     mkoffspring!()
     After mating happened (marked in `reped`), calculate the amount of offspring
     """
-function mkoffspring!(orgs::Array{Organisms.Organism,N} where N, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int)
+function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int)
     #TODO sort out reproduction mode (pollination or not) according to functional group
     # if # pollination depending plants
     #     pollination()
@@ -626,18 +626,18 @@ offspring = Organism[]
 
                 embryo = deepcopy(orgs[o])
 
-                embryo.e_mu += Distributions.Normal(0,std(e_mudist))
-                embryo.b0g += Distributions.Normal(0,std(b0gdist))
-                embryo.b0em += Distributions.Normal(0,std(b0emdist))
-                embryo.b0am += Distributions.Normal(0,std(b0amdist))
-                embryo.b0jg += Distributions.Normal(0,std(b0jgdist))
-                embryo.b0ag += Distributions.Normal(0,std(b0agdist))
-                embryo.floron += Distributions.Normal(0,std(florondist))
-                embryo.floroff += Distributions.Normal(0,std(floroffdist))
-                embryo.seedon += Distributions.Normal(0,std(seedondist))
-                embryo.seedoff += Distributions.Normal(0,std(seedoffdist))
-                embryo.min_mass += Distributions.Normal(0,std(min_massdist))
-                embryo.max_span += Distributions.Normal(0,std(max_spandist))
+                embryo.e_mu += rand(Distributions.Normal(0,std(e_mudist)))
+                embryo.b0g += rand(Distributions.Normal(0,std(b0gdist)))
+                embryo.b0em += rand(Distributions.Normal(0,std(b0emdist)))
+                embryo.b0am += rand(Distributions.Normal(0,std(b0amdist)))
+                embryo.b0jg += rand(Distributions.Normal(0,std(b0jgdist)))
+                embryo.b0ag += rand(Distributions.Normal(0,std(b0agdist)))
+                embryo.floron += Int(round(rand(Distributions.Normal(0,std(florondist))),RoundUp))
+                embryo.floroff += Int(round(rand(Distributions.Normal(0,std(floroffdist))),RoundUp))
+                embryo.seedon += Int(round(rand(Distributions.Normal(0,std(seedondist))),RoundUp))
+                embryo.seedoff += Int(round(rand(Distributions.Normal(0,std(seedoffdist))),RoundUp))
+                embryo.min_mass += rand(Distributions.Normal(0,std(min_massdist)))
+                embryo.max_span += Int(round(rand(Distributions.Normal(0,std(max_spandist))),RoundUp))
 
                 # reset min. adult mass and max_mass
                 embryo.max_mass = (embryo.e_mu*1000/2.14)^2
@@ -678,7 +678,7 @@ end
 release!()
 Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
 """
-function release!(orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
+function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
     # Individuals being released in any given week are:
     # in embryo stage
     # in their seed release period (seedon <= t <= seedoff for the species)
@@ -704,7 +704,7 @@ end
 disperse!(landscape, orgs, t, seetings, orgsref,)
 Seeds are dispersed.
 """
-function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
+function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
 
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -792,7 +792,7 @@ end
 establish!
 Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
     """
-function establish!(landscape::Array{Dict{Any,Any}}, orgs::Array{Organisms.Organism, N} where N, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
+function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
@@ -832,7 +832,7 @@ end
     Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
     plants in nogrwth are subjected to two probability rates
     """
-function survive!(orgs::Array{Organisms.Organism,N} where N, nogrowth::Array{Int64,N} where N,t::Int,settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
+function survive!(orgs::Array{Organisms.Organism,1}, nogrowth::Array{Int64,1},t::Int,settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T)
 
     deaths = Int64[]
     seeds = find(x -> x.stage == "e", orgs)    
@@ -882,7 +882,7 @@ end
     shedd!()
     Plants loose their reproductive biomasses at the end of the reproductive season.
 """
-function shedd!(orgs::Array{Organisms.Organism,N} where N, orgsref::Organisms.OrgsRef, t::Int)
+function shedd!(orgs::Array{Organisms.Organism,1}, orgsref::Organisms.OrgsRef, t::Int)
     
     flowering = find(x -> (x.mass["repr"] > 0), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char (''). 
 
@@ -898,7 +898,7 @@ end
 destroyorgs!(orgs)
 Kill organisms that where in the lost habitats.
 """
-function destroyorgs!(orgs::Array{Organisms.Organism, N} where N, landavail::Array{Dict{Any,Any}}, settings::Dict{String,Any})
+function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,2}, settings::Dict{String,Any})
     #KILL ORGANISMS in the destroyed
     kills = []
     for o in 1:length(orgs)
