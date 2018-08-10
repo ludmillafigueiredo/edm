@@ -42,6 +42,11 @@ where outputs will be stored."
         arg_type = String
         default = abspath(pwd(),"inputs/species.csv")
 
+        "--competition"
+        help = "Type of competition: \"individual\", based on FON or \"capacity\", based on the landscape carrying capacity"
+        arg_type = String
+        default = "capacity"
+        
         "--tdist"
         help = "Initial trait value distribution"
         arg_type = String
@@ -251,6 +256,36 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
+        for o in 1:length(orgs)
+            open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
+                writedlm(output, hcat(t,
+                                      orgs[o].id,
+                                      orgs[o].location,
+                                      orgs[o].sp,
+                                      orgs[o].mass["veg"],
+                                      orgs[o].mass["repr"],
+                                      orgs[o].kernel,
+                                      orgs[o].e_mu,
+                orgs[o].b0g,
+                orgs[o].b0em,
+                orgs[o].b0am,
+                orgs[o].b0jg,
+                orgs[o].b0ag,
+                orgs[o].floron,
+                orgs[o].floroff,
+                orgs[o].seedon,
+                orgs[o].seedoff,
+                orgs[o].max_mass,
+                orgs[o].min_mass,
+                orgs[o].max_span,
+                orgs[o].stage,
+                orgs[o].age,
+                orgs[o].mated,
+                orgs[o].genotype,
+                orgs[o].radius))
+            end
+        end
+        
         open(string("EDoutputs/", settings["simID"], "/landscape.csv"), "w") do landoutput
             println(landoutput, landscape[1,1:end,1])
         end
@@ -265,9 +300,23 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                                       orgs[o].sp,
                                       orgs[o].mass["veg"],
                                       orgs[o].mass["repr"],
-                                      orgs[o].stage,
-                                      orgs[o].age,
-                                      orgs[o].mated,
+                                      orgs[o].kernel,
+                                      orgs[o].e_mu,
+                orgs[o].b0g,
+                orgs[o].b0em,
+                orgs[o].b0am,
+                orgs[o].b0jg,
+                orgs[o].b0ag,
+                orgs[o].floron,
+                orgs[o].floroff,
+                orgs[o].seedon,
+                orgs[o].seedoff,
+                orgs[o].max_mass,
+                orgs[o].min_mass,
+                orgs[o].max_span,
+                orgs[o].stage,
+                orgs[o].age,
+                orgs[o].mated,
                 orgs[o].genotype,
                 orgs[o].radius))
             end
@@ -396,9 +445,11 @@ function simulate()
         end
 
         # LIFE CYCLES
-        projvegmass!(mylandscape,orgs, settings)
-
-        nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref, T)
+        if settings["competition"] != "capacity"
+            projvegmass!(mylandscape,orgs, settings)
+        end
+        
+        nogrowth, currentk = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
 
         develop!(orgs,orgsref)
 
@@ -412,7 +463,7 @@ function simulate()
 
         establish!(mylandscape,orgs,t,settings,orgsref)
         
-        survive!(orgs,nogrowth,t,settings,orgsref,T)
+        survive!(orgs,nogrowth,currentk,t,settings,orgsref, landpars,T)
 
         shedd!(orgs,orgsref,t)
 
