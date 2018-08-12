@@ -141,18 +141,12 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                       Dict("veg" => 0.5*rand(Distributions.Normal(orgsref.mass_mu[s],orgsref.mass_sd[s])), #0.5 is aboveground biomass
                                            "repr" => 0),
                                       orgsref.kernel[s], #kernel
-                                      rand(Distributions.Normal(orgsref.e_mu[s],
-                                                                orgsref.e_sd[s])), #e_mu
-                    rand(Distributions.Normal(orgsref.b0g[s],
-                                              orgsref.b0g_sd[s])), #b0g
-                    rand(Distributions.Normal(orgsref.b0em[s],
-                                              orgsref.b0em_sd[s])), #b0em
-                    rand(Distributions.Normal(orgsref.b0am[s],
-                                              orgsref.b0am_sd[s])), #b0am
-                    rand(Distributions.Normal(orgsref.b0jg[s],
-                                              orgsref.b0jg_sd[s])), #b0jg
-                    rand(Distributions.Normal(orgsref.b0ag[s],
-                                              orgsref.b0ag_sd[s])), #b0ag
+                                      rand(Distributions.Normal(orgsref.e_mu[s],orgsref.e_sd[s])), #e_mu
+                    rand(Distributions.Normal(orgsref.b0g[s],orgsref.b0g_sd[s])), #b0g
+                    rand(Distributions.Normal(orgsref.b0em[s],orgsref.b0em_sd[s])), #b0em
+                    rand(Distributions.Normal(orgsref.b0am[s],orgsref.b0am_sd[s])), #b0am
+                    rand(Distributions.Normal(orgsref.b0jg[s],orgsref.b0jg_sd[s])), #b0jg
+                    rand(Distributions.Normal(orgsref.b0ag[s],orgsref.b0ag_sd[s])), #b0ag
                     Int(round(rand(Distributions.Normal(orgsref.floron[s],
                                                         orgsref.floron_sd[s])),RoundUp)), #floron
                     Int(round(rand(Distributions.Normal(orgsref.floroff[s],
@@ -164,8 +158,7 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                     Int(round(rand(Distributions.Normal(orgsref.max_span[s],
                                                         orgsref.max_span_sd[s])),RoundUp))) #max_span
                     
-                    push!(orgs, neworg)
-                    
+                    push!(orgs, neworg)                    
                 else
                     neworg = Organism(hex(id_counter),
                                       (XYs[i,1],XYs[i,2],frag),
@@ -173,39 +166,39 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                       Dict("veg" => 0.0,
                                            "repr" => 0.0),
                                       orgsref.kernel[s], #kernel
-                                      rand(Distributions.Uniform(orgsref.e_mu[s],
-                                                                 orgsref.e_sd[s])), #e_mu
-                    rand(Distributions.Uniform(orgsref.b0g[s],
-                                               orgsref.b0g_sd[s])), #b0g
-                    rand(Distributions.Uniform(orgsref.b0em[s],
-                                               orgsref.b0em_sd[s])), #b0em
-                    rand(Distributions.Uniform(orgsref.b0am[s],
-                                               orgsref.b0am_sd[s])), #b0am
-                    rand(Distributions.Uniform(orgsref.b0jg[s],
-                                               orgsref.b0jg_sd[s])), #b0jg
-                    rand(Distributions.Uniform(orgsref.b0ag[s],
-                                               orgsref.b0ag_sd[s])), #b0ag
-                    Int(round(rand(Distributions.Uniform(orgsref.floron[s],
-                                                         orgsref.floron[s] + orgsref.floron_sd[s])),RoundUp)), #floron
-                    Int(round(rand(Distributions.Uniform(orgsref.floron[s] + orgsref.floroff[s],
-                                                         orgsref.floron[s] + orgsref.floroff[s] + orgsref.floroff_sd[s])),RoundUp)), #floroff
-                    Int(round(rand(Distributions.Uniform(orgsref.seedon[s],
-                                                         orgsref.seedon[s] + orgsref.seedon_sd[s])),RoundUp)), #seedon
-                    Int(round(rand(Distributions.Uniform(orgsref.seedon[s] + orgsref.seedoff[s],
-                                                         orgsref.seedon[s] + orgsref.seedoff[s] + orgsref.seedoff_sd[s])),RoundUp)), #seedoff
+                                      rand(Distributions.Uniform(min(orgsref.e_mu[s],orgsref.e_sd[s]),
+                                                                 max(orgsref.e_mu[s],orgsref.e_sd[s]))), #e_mu
+                                           rand(Distributions.Uniform(min(orgsref.b0g[s],orgsref.b0g_sd[s]),
+                                                                      max(orgsref.b0g[s],orgsref.b0g_sd[s]))), #b0g
+                                           rand(Distributions.Uniform(min(orgsref.b0em[s],orgsref.b0em_sd[s]),
+                                                                      max(orgsref.b0em[s],orgsref.b0em_sd[s]))), #b0em
+                    rand(Distributions.Uniform(min(orgsref.b0am[s],orgsref.b0am_sd[s]),
+                                               max(orgsref.b0am[s],orgsref.b0am_sd[s]))), #b0am
+                    rand(Distributions.Uniform(min(orgsref.b0jg[s],orgsref.b0jg_sd[s]),
+                                               max(orgsref.b0jg[s],orgsref.b0jg_sd[s]))), #b0jg
+                    rand(Distributions.Uniform(min(orgsref.b0ag[s],orgsref.b0ag_sd[s]),
+                                               max(orgsref.b0ag[s],orgsref.b0ag_sd[s]))), #b0ag
+                    Int(round(rand(Distributions.Uniform(min(orgsref.floron[s],orgsref.floron[s] + orgsref.floron_sd[s]),
+                                                         max(orgsref.floron[s],orgsref.floron[s] + orgsref.floron_sd[s]))),RoundUp)), #floron
+                    Int(round(rand(Distributions.Uniform(min(orgsref.floron[s] + orgsref.floroff[s],orgsref.floron[s] + orgsref.floroff[s] + orgsref.floroff_sd[s]),
+                                                         max(orgsref.floron[s] + orgsref.floroff[s],orgsref.floron[s] + orgsref.floroff[s] + orgsref.floroff_sd[s]))),RoundUp)), #floroff
+                    Int(round(rand(Distributions.Uniform(min(orgsref.seedon[s],orgsref.seedon[s] + orgsref.seedon_sd[s]),
+                                                         max(orgsref.seedon[s],orgsref.seedon[s] + orgsref.seedon_sd[s]))),RoundUp)), #seedon
+                    Int(round(rand(Distributions.Uniform(min(orgsref.seedon[s] + orgsref.seedoff[s],orgsref.seedon[s] + orgsref.seedoff[s] + orgsref.seedoff_sd[s]),
+                                                         max(orgsref.seedon[s] + orgsref.seedoff[s],orgsref.seedon[s] + orgsref.seedoff[s] + orgsref.seedoff_sd[s]))),RoundUp)), #seedoff
                     0.0,
-                    rand(Distributions.Uniform(orgsref.min_mass[s],
-                                               orgsref.min_mass[s] + orgsref.min_mass_sd[s])), #min_mass to become adult
-                    Int(round(rand(Distributions.Uniform(orgsref.max_span[s],
-                                                         orgsref.max_span[s] + orgsref.max_span_sd[s])),RoundUp))) #max_span
+                    rand(Distributions.Uniform(min(orgsref.min_mass[s],orgsref.min_mass[s] + orgsref.min_mass_sd[s]),
+                                               max(orgsref.min_mass[s],orgsref.min_mass[s] + orgsref.min_mass_sd[s]))), #min_mass to become adult
+Int(round(rand(Distributions.Uniform(min(orgsref.max_span[s],orgsref.max_span[s] + orgsref.max_span_sd[s]),
+                                     max(orgsref.max_span[s],orgsref.max_span[s] + orgsref.max_span_sd[s]))),RoundUp)))#max_span
 
-                    neworg.max_mass = neworg.e_mu*100/5.5
-                    neworg.mass["veg"] = neworg.max_mass * 0.5
-                    
-                    push!(orgs, neworg)
-                end
-                
-            end
+neworg.max_mass = neworg.e_mu*100/5.5
+neworg.mass["veg"] = neworg.max_mass * 0.5
+
+push!(orgs, neworg)
+end
+
+end
 end
 end
 
@@ -556,7 +549,7 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
     
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    println("Reproducing: $ready week $t.
+    println(sim, "Reproducing: $(length(ready)), week $t.
             Actually reprod: $pollinated , because $scen and $regime.")
     end
     
@@ -637,25 +630,25 @@ offspring = Organism[]
 
                 embryo = deepcopy(orgs[o])
 
-                embryo.e_mu += abs(rand(Distributions.Normal(embryo.e_mu,std(e_mudist))))
-                embryo.b0g += rand(Distributions.Normal(0,std(b0gdist)))
-                embryo.b0em += rand(Distributions.Normal(0,std(b0emdist)))
-                embryo.b0am += rand(Distributions.Normal(0,std(b0amdist)))
-                embryo.b0jg += rand(Distributions.Normal(0,std(b0jgdist)))
-                embryo.b0ag += rand(Distributions.Normal(0,std(b0agdist)))
-                embryo.floron += Int(round(rand(Distributions.Normal(0,std(florondist))),RoundUp))
-                embryo.floroff += Int(round(rand(Distributions.Normal(0,std(floroffdist))),RoundUp))
-                embryo.seedon += Int(round(rand(Distributions.Normal(0,std(seedondist))),RoundUp))
-                embryo.seedoff += Int(round(rand(Distributions.Normal(0,std(seedoffdist))),RoundUp))
-                embryo.min_mass += rand(Distributions.Normal(0,std(min_massdist)))
-                embryo.max_span += Int(round(rand(Distributions.Normal(0,std(max_spandist))),RoundUp))
+                embryo.e_mu += abs(rand(Distributions.Normal(embryo.e_mu,std(e_mudist) + 0.00000001)))
+                embryo.b0g += rand(Distributions.Normal(0,std(b0gdist) + 0.00000001))
+                embryo.b0em += rand(Distributions.Normal(0,std(b0emdist) + 0.00000001))
+                embryo.b0am += rand(Distributions.Normal(0,std(b0amdist) + 0.00000001))
+                embryo.b0jg += rand(Distributions.Normal(0,std(b0jgdist) + 0.00000001))
+                embryo.b0ag += rand(Distributions.Normal(0,std(b0agdist) + 0.00000001))
+                embryo.floron += Int(round(rand(Distributions.Normal(0,std(florondist) + 0.00000001)),RoundUp))
+                embryo.floroff += Int(round(rand(Distributions.Normal(0,std(floroffdist) + 0.00000001)),RoundUp))
+                embryo.seedon += Int(round(rand(Distributions.Normal(0,std(seedondist) + 0.00000001)),RoundUp))
+                embryo.seedoff += Int(round(rand(Distributions.Normal(0,std(seedoffdist) + 0.00000001)),RoundUp))
+                embryo.min_mass += rand(Distributions.Normal(0,std(min_massdist) + 0.00000001))
+                embryo.max_span += Int(round(rand(Distributions.Normal(0,std(max_spandist) + 0.00000001)),RoundUp))
 
                 # reset min. adult mass and max_mass
                 embryo.max_mass = embryo.e_mu*100/5.5
                 
                 # set embryos own individual non-evolutionary traits
                 embryo.id = hex(id_counter)
-                embryo.location = orgs[o].location #stays with mom until release
+                embryo.location = orgs[o].location #stays with mom until release 
                 embryo.mass = Dict("veg" => embryo.e_mu,
                                    "repr" => 0.0)
                 embryo.stage = "e"
@@ -677,9 +670,9 @@ offspring = Organism[]
     
     append!(orgs, offspring)
     #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    #println("Total offspring this summer: " ,offspring)
-    #end
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    println(sim, "Total offspring at week $t: " ,length(offspring))
+    end
 
     return id_counter
     
@@ -718,9 +711,9 @@ Seeds are dispersed.
 function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
 
     #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    println("Dispersing: $seedsi")
-    #end
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    println(sim, "Dispersing: $seedsi")
+    end
 
     lost = Int64[]
 
@@ -814,9 +807,9 @@ function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organi
     establishing = find(x -> x.stage == "e", orgs)
 
     #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    #println("Establishing seeds: $establishing")
-    #end
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    println(sim, "$(length(establishing)) seed trying to establish")
+    end
 
     lost = Int64[]
 
