@@ -671,7 +671,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-mean(seedondist) + 0.00000001))),RoundUp))
                 embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-mean(seedoffdist) + 0.00000001))),RoundUp))
                 embryo.min_mass += rand(Distributions.Normal(0,abs(embryo.min_mass-mean(min_massdist) + 0.000001)))
-                embryo.max_span += Int(round(rand(Distributions.Normal(0,abs(embryo.max_span/mean(max_spandist) + 0.00000001))),RoundUp))
+                embryo.max_span += Int(round(rand(Distributions.Normal(0,abs(embryo.max_span-mean(max_spandist) + 0.00000001))),RoundUp))
 
                 # reset min. adult mass and max_mass
                 embryo.max_mass = (embryo.e_mu*1000/2.14)^2
