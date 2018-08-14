@@ -166,35 +166,42 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                       Dict("veg" => 0.0,
                                            "repr" => 0.0),
                                       orgsref.kernel[s], #kernel
-                                      rand(Distributions.Normal(mean(Uniform(min(orgsref.e_mu[s],orgsref.e_sd[s]),max(orgsref.e_mu[s],orgsref.e_sd[s]))),
+                                      rand(Distributions.Normal(mean(Uniform(min(orgsref.e_mu[s],orgsref.e_sd[s]),
+                                                                             max(orgsref.e_mu[s],orgsref.e_sd[s])+0.00000001)),
                                                                 abs(-(orgsref.e_mu[s],orgsref.e_sd[s])/6))), #e_mu
-                    rand(Distributions.Normal(mean(Uniform(min(orgsref.b0g[s],orgsref.b0g_sd[s]),max(orgsref.b0g[s],orgsref.b0g_sd[s]))),
+                    rand(Distributions.Normal(mean(Uniform(min(orgsref.b0g[s],orgsref.b0g_sd[s]),
+                                                           max(orgsref.b0g[s],orgsref.b0g_sd[s])+0.00000001)),
                                               abs(-(orgsref.b0g[s],orgsref.b0g_sd[s])/6))), #b0g
-                    rand(Distributions.Normal(mean(Uniform(min(orgsref.b0em[s],orgsref.b0em_sd[s]),max(orgsref.b0em[s],orgsref.b0em_sd[s]))),
+                    rand(Distributions.Normal(mean(Uniform(min(orgsref.b0em[s],orgsref.b0em_sd[s]),
+                                                           max(orgsref.b0em[s],orgsref.b0em_sd[s])+0.00000001)),
                                               abs(-(orgsref.b0em[s],orgsref.b0em_sd[s])/6))), #b0em
-                    rand(Distributions.Normal(mean(Uniform(min(orgsref.b0am[s],orgsref.b0am_sd[s]), max(orgsref.b0am[s],orgsref.b0am_sd[s]))),
+                    rand(Distributions.Normal(mean(Uniform(min(orgsref.b0am[s],orgsref.b0am_sd[s]),
+                                                           max(orgsref.b0am[s],orgsref.b0am_sd[s])+0.00000001)),
                                               abs(-(orgsref.b0am[s],orgsref.b0am_sd[s])/6))), #b0am
-                    rand(Distributions.Normal(mean(Uniform(min(orgsref.b0jg[s],orgsref.b0jg_sd[s]),max(orgsref.b0jg[s],orgsref.b0jg_sd[s]))),
+                    rand(Distributions.Normal(mean(Uniform(min(orgsref.b0jg[s],orgsref.b0jg_sd[s]),
+                                                           max(orgsref.b0jg[s],orgsref.b0jg_sd[s])+0.00000001)),
                                               abs(-(orgsref.b0jg[s],orgsref.b0jg_sd[s])/6))), #b0jg
-                    rand(Distributions.Normal(mean(Uniform(min(orgsref.b0ag[s],orgsref.b0ag_sd[s]),max(orgsref.b0ag[s],orgsref.b0ag_sd[s]))),
+                    rand(Distributions.Normal(mean(Uniform(min(orgsref.b0ag[s],orgsref.b0ag_sd[s]),
+                                                           max(orgsref.b0ag[s],orgsref.b0ag_sd[s])+0.00000001)),
                                               abs(-(orgsref.b0ag[s],orgsref.b0ag_sd[s])/6))), #b0ag
-                    Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floron[s],orgsref.floron_sd[s]),max(orgsref.floron[s], orgsref.floron_sd[s]))),
+                    Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floron[s],orgsref.floron_sd[s]),
+                                                                     max(orgsref.floron[s],orgsref.floron_sd[s])+0.00000001)),
                                                         abs(-(orgsref.floron[s], orgsref.floron_sd[s])/6))),RoundUp)), #floron
-                    Int(round(rand(Distributions.Normal(mean(Uniform(min( orgsref.floroff[s], orgsref.floroff_sd[s]),
-                                                                     max(orgsref.floroff[s], orgsref.floroff_sd[s]))),
+                    Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floroff[s], orgsref.floroff_sd[s]),
+                                                                     max(orgsref.floroff[s], orgsref.floroff_sd[s])+0.00000001)),
                                                         abs(-(orgsref.floroff[s], orgsref.floroff_sd[s])/6))),RoundUp)), #floroff
                     Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedon[s], orgsref.seedon_sd[s]),
-                                                                     max(orgsref.seedon[s], orgsref.seedon_sd[s]))),
+                                                                     max(orgsref.seedon[s], orgsref.seedon_sd[s])+0.00000001)),
                                                         abs(-(orgsref.seedon[s],orgsref.seedon_sd[s])/6))),RoundUp)), #seedon
 Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedoff[s], orgsref.seedoff_sd[s]),
-                                                 max(orgsref.seedoff[s], orgsref.seedoff_sd[s]))),
-                                    abs(-(orgsref.seedoff[s], orgsref.seedoff_sd[s])/6))),RoundUp)), #seedoff
+                                                 max(orgsref.seedoff[s], orgsref.seedoff_sd[s])+0.00000001)),
+                                    abs(-(orgsref.seedoff[s],orgsref.seedoff_sd[s])/6))),RoundUp)), #seedoff
 0.0,
 rand(Distributions.Normal(mean(Uniform(min(orgsref.min_mass[s], orgsref.min_mass_sd[s]),
-                                       max(orgsref.min_mass[s], orgsref.min_mass_sd[s]))),
+                                       max(orgsref.min_mass[s], orgsref.min_mass_sd[s])+0.00000001)),
                           abs(-(orgsref.min_mass[s], orgsref.min_mass_sd[s])/6))), #min_mass to become adult
 Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.max_span[s], orgsref.max_span_sd[s]),
-                                                 max(orgsref.max_span[s], orgsref.max_span_sd[s]))),
+                                                 max(orgsref.max_span[s], orgsref.max_span_sd[s])+0.00000001)),
                                     abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
 
 neworg.max_mass = (neworg.e_mu*1000/2.14)^2
