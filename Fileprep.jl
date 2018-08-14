@@ -14,8 +14,8 @@ Convert fragments real length values give in `realxlen` and `realylen` from m to
 """
 
 function gridsizes(realxlen::Array{Float64,1}, realylen::Array{Float64,1})
-  xlength = round(Int64,((realxlen.*100)./4), RoundNearestTiesAway)
-  ylength = round(Int64,((realylen.*100)./4), RoundNearestTiesAway)
+  xlength = round(Int64,((realxlen.*100)./5), RoundNearestTiesAway)
+  ylength = round(Int64,((realylen.*100)./5), RoundNearestTiesAway)
   return xlength, ylength
 end
 
@@ -24,7 +24,7 @@ end
 Converts distance values from m to cell size.
 """
 function lengthtocell(d::Float64)
-  celldist = round(Int64,((d.*100)./4), RoundNearestTiesAway)
+  celldist = round(Int64,((d.*100)./5), RoundNearestTiesAway)
   return celldist
 end
 
@@ -37,12 +37,12 @@ Calculate the side length of a square grid of a fragment of `area` m².
 - multiple fragments
 """
 function areatocell(area::Float64)
-  side = round(Int64,((sqrt(area*10000))/4), RoundNearestTiesAway)
+  side = round(Int64,((sqrt(area*10000))/5), RoundNearestTiesAway)
   return side
 end
 
 function areatocell(area::Array{T,1}) where {T<:Number}
-  side = round.(Int64,(sqrt.(area*10000))/4, RoundNearestTiesAway)
+  side = round.(Int64,(sqrt.(area*10000))/5, RoundNearestTiesAway)
   return side
 end
 

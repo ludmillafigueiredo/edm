@@ -463,7 +463,7 @@ function simulate()
 
         establish!(mylandscape,orgs,t,settings,orgsref)
         
-        survive!(orgs,nogrowth,currentk,t,settings,orgsref, landpars,T)
+        survive!(orgs,nogrowth,currentk,t,settings,orgsref,landavail,T)
 
         shedd!(orgs,orgsref,t)
 
