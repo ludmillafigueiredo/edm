@@ -55,6 +55,8 @@ seedon_sd::Dict{String,Int}
 seedoff::Dict{String,Int}
 seedoff_sd::Dict{String,Int}
 max_mass::Dict{String,Float64}
+first_flower::Dict{String,Int64}
+first_flower_sd::Dict{String,Int64}
 max_span::Dict{String,Int64}
 max_span_sd::Dict{String,Int64}
 mass_mu::Dict{String,Float64}
@@ -195,19 +197,15 @@ Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedoff[s], orgsref
                                                  max(orgsref.seedoff[s], orgsref.seedoff_sd[s])+0.00000001)),
                                     abs(-(orgsref.seedoff[s],orgsref.seedoff_sd[s])/6))),RoundUp)), #seedoff
 0.0,
-0,
+Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.first_flower[s], orgsref.first_flower_sd[s]),
+                                                 max(orgsref.first_flower[s], orgsref.first_flower_sd[s])+0.00000001)),
+                                    abs(-(orgsref.max_span[s], orgsref.first_flower[s])/6))),RoundUp)),
 Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.max_span[s], orgsref.max_span_sd[s]),
                                                  max(orgsref.max_span[s], orgsref.max_span_sd[s])+0.00000001)),
                                     abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
 
 neworg.max_mass = (neworg.e_mu*1000/2.14)^2
 neworg.mass["veg"] = neworg.max_mass * 0.5
-# quick fix for the 
-if neworg.max_span > 2
-    neworg.first_flower = round(74.82 + 0.7427*neworg.max_span, RoundUp)
-else
-    neworg.first_flower = 26
-end
 
 push!(orgs, neworg)
 end

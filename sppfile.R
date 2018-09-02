@@ -118,6 +118,11 @@ goetspp <- function(rseed,richp,mode,simID){
   require(tidyverse)
   spp <- read.table(file.path(inputsdir,"traitsleda.csv"), header = TRUE, sep = ",")%>%
     select(sp,seedm,kernels,span,firstflower)%>%
+    mutate(kernels = case_when(
+      kernels == "wind" ~ "w",
+      kernels == "ant" ~ "a",
+      kernels == "windant" ~ "wa"
+    ))%>%
     mutate(span = case_when(
       is.na(span) ~ if_else(firstflower < 75.0, as.integer(1), as.integer(ceiling((firstflower - 77.24)/1.962))),
       TRUE ~ span))%>%
@@ -161,8 +166,10 @@ goetspp <- function(rseed,richp,mode,simID){
     seedoff_min <- rep(37, richp)#runif(richp,4,12); #duration
     seedoff_max <-  seedoff_min + 1#%>% map_dbl(function(x) ifelse(x <= mean(c(4,12)), 4,12)); #duration
     max_mass <- rep(0.0,richp) # calculated once the individual has its see size value
-    max_span_min <- rep(1, richp);
-    max_span_max <- rep(50, richp);
+    first_flower_min <- ceiling(0.8*traits$firstflower)
+    first_flower_max <- ceiling(1.2*traits$firstflower)
+    max_span_min <- ceiling(0.8*traits$span)
+    max_span_max <- ceiling(1.2*traits$span)
     mass_mu_min <- 0.1*max_mass;
     mass_mu_max <- rep(0.0001, richp);
     abund <-ceiling(runif(richp,1,20))
@@ -193,6 +200,8 @@ goetspp <- function(rseed,richp,mode,simID){
                            seedoff = round(seedoff_min,0),
                            seedoff_sd = round(seedoff_max,0),
                            max_mass = max_mass,
+                           first_flower = first_flower_min,
+                           first_flower_sd = first_flower_max,
                            max_span = max_span_min,
                            max_span_sd = max_span_max,
                            mass_mu = mass_mu_min,
