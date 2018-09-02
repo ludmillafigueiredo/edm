@@ -55,8 +55,6 @@ seedon_sd::Dict{String,Int}
 seedoff::Dict{String,Int}
 seedoff_sd::Dict{String,Int}
 max_mass::Dict{String,Float64}
-min_mass::Dict{String,Float64}
-min_mass_sd::Dict{String,Float64}
 max_span::Dict{String,Int64}
 max_span_sd::Dict{String,Int64}
 mass_mu::Dict{String,Float64}
@@ -84,7 +82,7 @@ floroff::Int
 seedon::Int
 seedoff::Int
 max_mass::Float64
-min_mass::Float64
+first_flower::Int64
 max_span::Int64
 #mass_mu::Float64
 #mass_sd::Float64
@@ -96,7 +94,7 @@ genotype::Array{String,2} #initialize separately
 radius::Int64
 #Organism() = new()
 end
-Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,min_mass,max_span) = Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,min_mass,max_span,"a", 26,false,["A" "A"],0) #these individuals are initialized in the beginning of the simulation
+Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,first_flower,max_span,"a", 26,false,["A" "A"],0) #these individuals are initialized in the beginning of the simulation
 
 """
 newOrg(fgroups, init_abund, biomassμ, biomasssd)
@@ -190,22 +188,26 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                     Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floroff[s], orgsref.floroff_sd[s]),
                                                                      max(orgsref.floroff[s], orgsref.floroff_sd[s])+0.00000001)),
                                                         abs(-(orgsref.floroff[s], orgsref.floroff_sd[s])/6))),RoundUp)), #floroff
-                    Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedon[s], orgsref.seedon_sd[s]),
-                                                                     max(orgsref.seedon[s], orgsref.seedon_sd[s])+0.00000001)),
-                                                        abs(-(orgsref.seedon[s],orgsref.seedon_sd[s])/6))),RoundUp)), #seedon
+Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedon[s], orgsref.seedon_sd[s]),
+                                                 max(orgsref.seedon[s], orgsref.seedon_sd[s])+0.00000001)),
+                                    abs(-(orgsref.seedon[s],orgsref.seedon_sd[s])/6))),RoundUp)), #seedon
 Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedoff[s], orgsref.seedoff_sd[s]),
                                                  max(orgsref.seedoff[s], orgsref.seedoff_sd[s])+0.00000001)),
                                     abs(-(orgsref.seedoff[s],orgsref.seedoff_sd[s])/6))),RoundUp)), #seedoff
 0.0,
-rand(Distributions.Normal(mean(Uniform(min(orgsref.min_mass[s], orgsref.min_mass_sd[s]),
-                                       max(orgsref.min_mass[s], orgsref.min_mass_sd[s])+0.00000001)),
-                          abs(-(orgsref.min_mass[s], orgsref.min_mass_sd[s])/6))), #min_mass to become adult
+0,
 Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.max_span[s], orgsref.max_span_sd[s]),
                                                  max(orgsref.max_span[s], orgsref.max_span_sd[s])+0.00000001)),
                                     abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
 
 neworg.max_mass = (neworg.e_mu*1000/2.14)^2
-neworg.mass["veg"] = neworg.max_mass * 0.8
+neworg.mass["veg"] = neworg.max_mass * 0.5
+# quick fix for the 
+if neworg.max_span > 2
+    neworg.first_flower = round(74.82 + 0.7427*neworg.max_span, RoundUp)
+else
+    neworg.first_flower = 26
+end
 
 push!(orgs, neworg)
 end
@@ -364,6 +366,9 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
             #println("$(sum(collect(values(orgs[o].mass))))")
             grown_mass = b0*(sum(collect(values(orgs[o].mass))))^(3/4)*exp(-aE/(Boltz*T))
 
+            if grown_mass <= 0
+                push!(nogrowth,o)
+            end            
             
             # unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -432,11 +437,10 @@ develop!()
 Controls individual stage transition.
 """
 function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
-    #TODO plant growth
     juvs = find(x->x.stage == "j",orgs)
 
     for j in juvs
-        if orgs[j].mass["veg"] >= orgs[j].min_mass*sum(values(orgs[j].mass))
+        if orgs[j].age >= orgs[j].first_flower
             orgs[j].stage = "a"
         end
     end
@@ -575,13 +579,7 @@ end
     After mating happened (marked in `reped`), calculate the amount of offspring
     """
 function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int)
-    #TODO sort out reproduction mode (pollination or not) according to functional group
-    # if # pollination depending plants
-    #     pollination()
-    # elseif "insect"
-    #     parents_genes = mate!()
-    # end
-
+    
     offspring = Organism[]
 
     for sp in unique(getfield.(orgs, :sp))
@@ -602,103 +600,115 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
             offs =  div(orgs[o].mass["repr"], emu)
             # unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds.")
-            end
-            
-            orgs[o].mass["repr"] -= (offs * emu)
-
-            # unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, orgs[o].id, " now has biomass $(orgs[o].mass["repr"]).")
+                println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds.")
             end
 
-            if  orgs[o].mass["repr"] <= 0
-                orgs[o].mass["repr"] = 0
-            end
-            
-
-            #unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println("Number of offspring of ", orgs[o].id, ": ",offs)
-            #end
-
-            # get phylogenetic constraint: variance of the distribution
-            sp = orgs[o].sp
-            conspp = [rand(filter(x -> x.sp == sp, orgs))]
-
-            e_mudist = Array{Float64}(1,length(conspp)) 
-            b0gdist = Array{Float64}(1,length(conspp))
-            b0emdist = Array{Float64}(1,length(conspp))
-            b0amdist = Array{Float64}(1,length(conspp))
-            b0jgdist = Array{Float64}(1,length(conspp))
-            b0agdist = Array{Float64}(1,length(conspp))
-            florondist = Array{Int}(1,length(conspp))
-            floroffdist = Array{Int}(1,length(conspp))
-            seedondist = Array{Int}(1,length(conspp))
-            seedoffdist = Array{Int}(1,length(conspp))
-            min_massdist = Array{Float64}(1,length(conspp))
-            max_spandist = Array{Int64}(1,length(conspp))
-
-            for i in eachindex(conspp)
-                e_mudist[i] = conspp[i].e_mu 
-                b0gdist[i] = conspp[i].b0g
-                b0emdist[i] = conspp[i].b0em
-                b0amdist[i] = conspp[i].b0am
-                b0jgdist[i] = conspp[i].b0jg
-                b0agdist[i] = conspp[i].b0ag
-                florondist[i] = conspp[i].floron
-                floroffdist[i] = conspp[i].floroff
-                seedondist[i] = conspp[i].seedon
-                seedoffdist[i] = conspp[i].seedoff
-                min_massdist[i] = conspp[i].min_mass
-                max_spandist[i] = conspp[i].max_span
-            end
-            
-            for n in 1:offs
+            if offs == 0.0
+                continue
+            else
                 
-                id_counter += 1 # update individual counter
+                orgs[o].mass["repr"] -= (offs * emu)
 
-                embryo = deepcopy(orgs[o])
+                # unity test
+                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                    println(sim, orgs[o].id, " now has biomass $(orgs[o].mass["repr"]).")
+                end
 
-                embryo.e_mu += rand(Distributions.Normal(0,abs(embryo.e_mu-mean(e_mudist) + 0.00000001)))
-                embryo.b0g += rand(Distributions.Normal(0,abs(embryo.b0g-mean(b0gdist) + 0.00000001)))
-                embryo.b0em += rand(Distributions.Normal(0,abs(embryo.b0em-mean(b0emdist) + 0.00000001)))
-                embryo.b0am += rand(Distributions.Normal(0,abs(embryo.b0am-mean(b0amdist) + 0.00000001)))
-                embryo.b0jg += rand(Distributions.Normal(0,abs(embryo.b0jg-mean(b0jgdist) + 0.00000001)))
-                embryo.b0ag += rand(Distributions.Normal(0,abs(embryo.b0ag-mean(b0agdist) + 0.00000001)))
-                embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-mean(florondist) + 0.00000001))),RoundUp))
-                embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-mean(floroffdist) + 0.00000001))),RoundUp))
-                embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-mean(seedondist) + 0.00000001))),RoundUp))
-                embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-mean(seedoffdist) + 0.00000001))),RoundUp))
-                embryo.min_mass += rand(Distributions.Normal(0,abs(embryo.min_mass-mean(min_massdist) + 0.000001)))
-                embryo.max_span += Int(round(rand(Distributions.Normal(0,abs(embryo.max_span-mean(max_spandist) + 0.00000001))),RoundUp))
-
-                # reset min. adult mass and max_mass
-                embryo.max_mass = (embryo.e_mu*1000/2.14)^2
+                if  orgs[o].mass["repr"] <= 0
+                    orgs[o].mass["repr"] = 0
+                end
                 
-                # set embryos own individual non-evolutionary traits
-                embryo.id = hex(id_counter)
-                embryo.location = orgs[o].location #stays with mom until release 
-                embryo.mass = Dict("veg" => embryo.e_mu,
-                                   "repr" => 0.0)
-                embryo.stage = "e"
-                embryo.age = 0
-                embryo.mated = false
-                embryo.genotype = ["A" "A"] #come from function
-                embryo.radius = 0
 
-                push!(offspring, embryo)
-	        #unity test
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
-                #println("Pushed new org ", embryo, " into offspring")
-
+                #unity test
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println("Number of offspring of ", orgs[o].id, ": ",offs)
                 #end
-            end
-            orgs[o].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
-        end
+
+                # get phylogenetic constraint: variance of the distribution
+                sp = orgs[o].sp
+                conspp = [rand(filter(x -> x.sp == sp, orgs))]
+
+                e_mudist = Array{Float64}(1,length(conspp)) 
+                b0gdist = Array{Float64}(1,length(conspp))
+                b0emdist = Array{Float64}(1,length(conspp))
+                b0amdist = Array{Float64}(1,length(conspp))
+                b0jgdist = Array{Float64}(1,length(conspp))
+                b0agdist = Array{Float64}(1,length(conspp))
+                florondist = Array{Int}(1,length(conspp))
+                floroffdist = Array{Int}(1,length(conspp))
+                seedondist = Array{Int}(1,length(conspp))
+                seedoffdist = Array{Int}(1,length(conspp))
+                first_flowerdist = Array{Float64}(1,length(conspp))
+                max_spandist = Array{Int64}(1,length(conspp))
+
+                for i in eachindex(conspp)
+                    e_mudist[i] = conspp[i].e_mu 
+                    b0gdist[i] = conspp[i].b0g
+                    b0emdist[i] = conspp[i].b0em
+                    b0amdist[i] = conspp[i].b0am
+                    b0jgdist[i] = conspp[i].b0jg
+                    b0agdist[i] = conspp[i].b0ag
+                    florondist[i] = conspp[i].floron
+                    floroffdist[i] = conspp[i].floroff
+                    seedondist[i] = conspp[i].seedon
+                    seedoffdist[i] = conspp[i].seedoff
+                    first_flowerdist[i] = conspp[i].first_flower
+                    max_spandist[i] = conspp[i].max_span
+                end
+                
+                for n in 1:offs
+                    
+                    id_counter += 1 # update individual counter
+
+                    embryo = deepcopy(orgs[o])
+
+                    newvalue = rand(Distributions.Normal(0,abs(embryo.e_mu-mean(e_mudist) + 0.00000001)))
+                    embryo.e_mu + newvalue >= orgsref.e_mu[embryo.sp] ? # if seed biomass or minimal biomass would smaller than zero, it does not chenge
+                    embryo.e_mu += newvalue : embryo.e_mu += 0
+                    embryo.b0g += rand(Distributions.Normal(0,abs(embryo.b0g-mean(b0gdist) + 0.00000001)/embryo.b0g))
+                    embryo.b0em += rand(Distributions.Normal(0,abs(embryo.b0em-mean(b0emdist) + 0.00000001)/embryo.b0em))
+                    embryo.b0am += rand(Distributions.Normal(0,abs(embryo.b0am-mean(b0amdist) + 0.00000001)/embryo.b0am))
+                    embryo.b0jg += rand(Distributions.Normal(0,abs(embryo.b0jg-mean(b0jgdist) + 0.00000001)/embryo.b0jg))
+                    embryo.b0ag += rand(Distributions.Normal(0,abs(embryo.b0ag-mean(b0agdist) + 0.00000001)/embryo.b0ag))
+                    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-mean(florondist) + 0.00000001)/embryo.floron)),RoundUp))
+                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-mean(floroffdist) + 0.00000001)/embryo.floroff)),RoundUp))
+                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-mean(seedondist) + 0.00000001)/embryo.seedon)),RoundUp))
+                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-mean(seedoffdist) + 0.00000001)/embryo.seedoff)),RoundUp))
+                    newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.first_flower-mean(first_flowerdist) + 0.00000001)/embryo.first_flower)), RoundUp))
+                    embryo.first_flower + newvalue > 12 ?
+                    embryo.first_flower += newvalue : embryo.first_flower += 0
+                    newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.max_span-mean(max_spandist) + 0.00000001)/embryo.max_span)),RoundUp))
+                    embryo.max_span + newvalue > orgsref.max_span[embryo.sp] ?
+                    embryo.max_span += newvalue : embryo.max_span += 0
+
+                    # reset adult max_mass according to newly set 
+                    embryo.max_mass = (embryo.e_mu*1000/2.14)^2
+                    
+                    # set embryos own individual non-evolutionary traits
+                    embryo.id = hex(id_counter)
+                    embryo.location = orgs[o].location #stays with mom until release 
+                    embryo.mass = Dict("veg" => embryo.e_mu,
+                                       "repr" => 0.0)
+                    embryo.stage = "e"
+                    embryo.age = 0
+                    embryo.mated = false
+                    embryo.genotype = ["A" "A"]
+                    embryo.radius = 0
+
+                    push!(offspring, embryo)
+	            #unity test
+                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
+                    #println("Pushed new org ", embryo, " into offspring")
+                    #end
+                end
+orgs[o].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
+end
+end
+
 end
 
 append!(orgs, offspring)
+
 #unity test
 open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
     println(sim, "Total offspring at week $t: " ,length(offspring))
@@ -858,7 +868,7 @@ function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organi
                 orgs[o].stage = "j"
 	        #unity test
    	        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        	    println(sim, "Became juvenile: $o")
+        	    println(sim, "Became juvenile: $(orgs[o].id)")
     	        end
             end
         end
@@ -872,14 +882,12 @@ end
     Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
     plants in nogrwth are subjected to two probability rates
     """
-function survive!(orgs::Array{Organisms.Organism,1}, nogrowth::Array{Int64,1}, currentk::Float64, t::Int,settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T)
+function survive!(orgs::Array{Organisms.Organism,1}, nogrowth::Array{Int64,1}, currentk::Float64, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T)
 
     deaths = Int64[]
-    seeds = find(x -> x.stage == "e", orgs)
+    seeds = find(x -> x.stage == "e", orgs) 
 
-    # setup density-dependent mortality
-    K = 2*3500000*(length(find(x -> x == true, landavail))*25/10000/10000) #tons to mg
-
+    # Density-independent mortality
     for o in 1:length(orgs)
 
         #T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
@@ -903,15 +911,10 @@ function survive!(orgs::Array{Organisms.Organism,1}, nogrowth::Array{Int64,1}, c
         elseif o in nogrowth
             Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
-            end
-            mprob = 1 - exp(-Bm)
-        elseif currentk > K # density-dependent mortality
-            println("Current biomass bigger than capacity.")
-            over = /(currentk - K,K)
-            Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-            mprob = 1 - exp(-Bm) + over
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+             #   println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
+            #end
+            mprob = 1 - exp(-Bm)               
         else
             mprob = 0            
         end
@@ -923,22 +926,96 @@ function survive!(orgs::Array{Organisms.Organism,1}, nogrowth::Array{Int64,1}, c
         end
         
         if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
+            currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
             push!(deaths, o)
-            currentk -= sum(values(orgs[o].mass)) #update currentk to stop deaths
         else
             orgs[o].age += 1
         end
     end
+    
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim, "Dying orgs: $(length(deaths))")
+        #println("Dying dens-indep orgs: $(length(deaths))")
     end
-    deleteat!(orgs, deaths)
+    
+    deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
+
+    #Density-dependent mortality
+    K = 2*(3.5/100)*(length(find(x -> x == true, landavail))*25) #7 tons/ha = 7g/100
+
+    while currentk >= K
+        println("Current biomass bigger than capacity.")
+
+        seeds = find(x -> x.stage == "s", orgs)
+        juvs = find(x -> x.stage == "j", orgs)
+        adts = find(x -> x.stage == "a", orgs)
+        
+        if length(juvs) >= 1  # Juveniles die first         
+            o = rand(juvs)
+            over = /(currentk - K,K)
+            Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+            mprob = 1 - exp(-Bm) + over
+
+            # fix mortality probability values 
+            if mprob < 0
+                mprob = 0
+            elseif mprob > 1
+                mprob = 1
+            end
+            
+            if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
+                currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
+                deleteat!(orgs,o)
+            else
+                orgs[o].age += 1
+            end
+        elseif length(adts) >= 1 # if there are none, adults second
+            o = rand(adts)
+            over = /(currentk - K,K)
+            Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+            mprob = 1 - exp(-Bm) + over
+
+            # fix mortality probability values 
+            if mprob < 0
+                mprob = 0
+            elseif mprob > 1
+                mprob = 1
+            end
+            
+            if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
+                currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
+                deleteat!(orgs,o)
+            else
+                orgs[o].age += 1
+            end
+        else
+            # Seeds at last
+            o = rand(seeds)
+            over = /(currentk - K,K)
+            Bm = orgs[o].b0em * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+            mprob = 1 - exp(-Bm) + over
+
+            # fix mortality probability values 
+            if mprob < 0
+                mprob = 0
+            elseif mprob > 1
+                mprob = 1
+            end
+            
+            if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
+                currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
+                deleteat!(orgs,o)
+            else
+                orgs[o].age += 1
+            end
+        end  
+    end 
 end
 
 """
-    shedd!()
-    Plants loose their reproductive biomasses at the end of the reproductive season.
+shedd!()
+Plants loose their reproductive biomasses at the end of the reproductive season.
 """
 function shedd!(orgs::Array{Organisms.Organism,1}, orgsref::Organisms.OrgsRef, t::Int)
     

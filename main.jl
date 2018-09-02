@@ -200,12 +200,6 @@ function read_spinput(settings::Dict{String,Any})
          rows(spinputtbl,:max_mass)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
-         rows(spinputtbl,:min_mass)[i]
-         for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] =>
-         rows(spinputtbl,:min_mass_sd)[i]
-         for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:max_span)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
@@ -276,7 +270,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                 orgs[o].seedon,
                 orgs[o].seedoff,
                 orgs[o].max_mass,
-                orgs[o].min_mass,
+                orgs[o].first_flower,
                 orgs[o].max_span,
                 orgs[o].stage,
                 orgs[o].age,
@@ -312,7 +306,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                 orgs[o].seedon,
                 orgs[o].seedoff,
                 orgs[o].max_mass,
-                orgs[o].min_mass,
+                orgs[o].first_flower,
                 orgs[o].max_span,
                 orgs[o].stage,
                 orgs[o].age,
@@ -448,6 +442,9 @@ function simulate()
         if settings["competition"] != "capacity"
             projvegmass!(mylandscape,orgs, settings)
         end
+
+        # OUTPUT: First thing to see how community is initialized
+        orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
         
         nogrowth, currentk = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
 
@@ -466,9 +463,6 @@ function simulate()
         survive!(orgs,nogrowth,currentk,t,settings,orgsref,landavail,T)
 
         shedd!(orgs,orgsref,t)
-
-        # OUTPUT
-        orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
     end
 end
 simulate()
