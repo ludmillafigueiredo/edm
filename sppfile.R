@@ -64,6 +64,8 @@ createsppfile <- function(rseed, richp, sd, simID, tdist, b0g, b0em, b0am, b0ag,
     max_mass <- rep(0.0,richp) # calculated once the individual has its see size value
     max_span_min <- rep(1, richp);
     max_span_max <- rep(50, richp);
+    first_flower_min <- as.numeric(floor(1.962*max_span_min + 77.24))
+    first_flower_max <- as.numeric(floor(1.962*max_span_max + 77.24))
     mass_mu_min <- 0.1*max_mass;
     mass_mu_max <- rep(0.0001, richp);
     abund <-ceiling(runif(richp,1,20));
@@ -95,6 +97,8 @@ createsppfile <- function(rseed, richp, sd, simID, tdist, b0g, b0em, b0am, b0ag,
                            seedoff = round(seedoff_min,0),
                            seedoff_sd = round(seedoff_max,0),
                            max_mass = max_mass,
+                           first_flower = first_flower_min,
+                           first_flower_sd = first_flower_max,
                            max_span = max_span_min,
                            max_span_sd = max_span_max,
                            mass_mu = mass_mu_min,
@@ -118,6 +122,7 @@ goetspp <- function(rseed,richp,mode,simID){
   require(tidyverse)
   spp <- read.table(file.path(inputsdir,"traitsleda.csv"), header = TRUE, sep = ",")%>%
     select(sp,seedm,kernels,span,firstflower)%>%
+    mutate(seedm = 0.001*seedm)%>%
     mutate(kernels = case_when(
       kernels == "wind" ~ "w",
       kernels == "ant" ~ "a",

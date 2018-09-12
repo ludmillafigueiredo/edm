@@ -46,8 +46,9 @@ command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturbf,duration,to
     paste('\"',file.path(EDdir,"inputs",tempf),'\"', sep = ""), 
     sep = " ")
   if (cluster == "gaia") {
-    file.create(file.path(EDdir,paste(simID,".sh", sep = "")))
-    bashscript <- file(file.path(EDdir,paste(simID,".sh", sep = "")))
+    scriptname <- paste(simID,".sh", sep = "")
+    file.create(file.path(EDdir,scriptname))
+    bashscript <- file(file.path(EDdir,scriptname))
     writeLines(c("#!/bin/bash",
                  "#SBATCH -n 12 #number of cores",
                  "#SBATCH --mem-per-cpu=8G",
@@ -57,6 +58,9 @@ command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturbf,duration,to
                  command),
                bashscript)
   }else{
-    return (command)
+    scriptname <- paste(simID,"hpc.txt", sep = "")
+    file.create(file.path(file.path("/home/luf74xx/Dokumente/model"),scriptname )) # I create the scripts on Gaia, not in the HPC
+    hpcscript <- file(file.path(file.path("/home/luf74xx/Dokumente/model"),scriptname))
+    writeLines(command,hpcscript)
     }
 }
