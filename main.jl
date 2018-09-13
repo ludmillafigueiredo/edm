@@ -60,10 +60,15 @@ equal pollination loss for all species \"equal\"."
         default = abspath(pwd(),"inputs/insects.csv")
         
         "--landconfig"
-        help = "Name of file with simulation parameters: areas of fragments, mean (and s.d.) temperature, total running time."
+        help = "Name of file with landscape size values: areas of fragments, mean (and s.d.) temperature."
         arg_type = String
         default = abspath(pwd(),"inputs/landpars.csv")
 
+        "--connects"
+        help = "Connectivity matrix of distances between fragments."
+        arg_type = String
+        default = abspath(pwd(),"inputs/connectssingle.csv")
+        
         "--disturb"
         help = "Type of environmental disturbance to be implemented: habitat area loss \"loss\", habitat fragmentation \"frag\" or temperature change \"temp\""
         arg_type = String
@@ -383,6 +388,7 @@ function simulate()
 
     # Store landscape configuration
     landpars = read_landpars(settings)
+    connects = read(settings["connects"])
     # unity test
     println("Land init stored in object of type $(typeof(landpars))")
 
@@ -462,7 +468,9 @@ function simulate()
 
         seedsi = release!(orgs,t,settings,orgsref)
 
-        disperse!(landavail,seedsi,orgs,t,settings,orgsref)
+        Ah = length(find( x -> x ==true, landavail))*25*0.0001
+        AT = sort(reshape(connects,prod(size(connects))), rev = true) |> (y -> length(y) > 1 ? prod(y[1:2]) : (length(y) == 2 ? sum(con)^2 : Ah)) 
+        disperse!(landavail,seedsi,orgs,t,settings,orgsref, connects, AT, Ah)
 
         establish!(mylandscape,orgs,t,settings,orgsref)
         

@@ -721,24 +721,8 @@ release!()
 Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
 """
 function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
-    # Individuals being released in any given week are:
-    # in embryo stage
-    # in their seed release period (seedon <= t <= seedoff for the species)
+    # Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
     seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, orgs) # using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it does do contain, it throws an error.
-    # attempt at having a uniform seed release: The number of seeds will depend on how much time there is still left for seed release and dispersal
-    #oseeds = orgs[seeds]
-    #idispersing = []
-    #for spp in getfield.(oseeds, :sp) #recognize which are the species dispersing in current timestep
-    #for s in seeds ##use orgs somewhere here?
-    #seeds2 = filter(x-> x.sp == spp, seeds) #gather all individuals of sp
-    #if orgsref.seed[orgs[s]]
-    #ttodisp = find(x -> x.sp == spp, oseeds) #total that could be dispersed
-    #ntodisp = Int(floor(length(ttodisp)/(orgsref.seedoff[spp] - t + 1))) # divide their quantity during the whole reprodutive season (+1 to account for Organisms that release all at once)
-    #append!(idispersing,
-    #rand(find(x -> x.sp == spp && x.id in getfield.(oseeds, :id), orgs), ntodisp)) # select a quantity at random
-    #disperse!(landscape,idispersing,orgs,t,settings,orgsref) #TODO how to simplify calling all the arguments that release! doesnt need
-    #end      
-    #end
     return seedsi
 end
 
@@ -746,7 +730,7 @@ end
 disperse!(landscape, orgs, t, seetings, orgsref,)
 Seeds are dispersed.
 """
-function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef)
+function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, connects::Array{Float64,2}, AT::Float64, Ah:Float64)
 
     #unity test
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -788,19 +772,25 @@ function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organi
         θ = rand([0 0.5π π 1.5π]) # TODO tentar rand(0:2)*pi?
         xdest = orgs[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
         ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
-        fdest = orgs[d].location[3] #TODO is landing inside the same fragment as the source, for now
+        fsource = orgs[d].location[3] 
 
-        if checkboundaries(landavail, xdest, ydest, fdest) && landavail[xdest, ydest, fdest] == true
-            orgs[d].location = (xdest,ydest,fdest)
+        if checkboundaries(landavail, xdest, ydest, fsource) && landavail[xdest, ydest, fsource] == true # intra fragment dispersal
+            orgs[d].location = (xdest,ydest,fsource)
             #unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(orgs[d].id," dispersed $dist")
+            #println(orgs[d].id," dispersed $dist")
             #end
-        else
-            push!(lost,d)
+        else # out of fragment. Try another one
+            # check if someone is inside the distance:
+            fdest = find(x -> x <= dist && x > 0, connects[:,fsource]) |> (y -> (length(y) > 0 ? fdest = rand(x) : false))
+            if fdest == false
+                push!(lost,d)
+            else
+                rand(Distributions.Binomial(1,AT/Ah),1)[1] == 1 ? orgs[d].location = (xdest,ydest,fdest) : push!(lost,d)
+            end
             #unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(orgs[d].id," dispersed $dist but died")
+            #println(orgs[d].id," dispersed $dist but died")
             #end
         end
         # else
@@ -825,12 +815,12 @@ function germinate(org::Organisms.Organism)
     gprob = 1 - exp(-org.b0jg)
     if gprob < 0
         gprob = 0
-    else gprob > 1
+    elseif gprob > 1
         gprob = 1
     end
     
     germ = false
-    if 1 == rand(Distributions.Binomial(1,gprob))
+    if 1 == rand(Distributions.Binomial(1,gprob),1)[1]
         germ = true
     end
     return germ
