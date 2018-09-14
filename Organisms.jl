@@ -347,8 +347,6 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
             end
         end
     else
-        # Everybody grows
-        currentk = 0.0
         # seedling and adults grow at different rates
         competing = find(x->(x.stage == "a" || x.stage == "j"),orgs)
         for o in competing
@@ -414,20 +412,12 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
             #     println(sim, "current biomass: $(orgs[o].biomass)")
             # end
             
-            # Carrying capacity based competition: individuals will only compete if the current biomass is beyond carrying capacity
-            currentk += sum(values(orgs[o].mass))
-            
         end
-        
-
+  
         # unity test
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         #    println(sim, "Not growing $nogrowth")
         #end
-
-        println("Total production: $currentk")
-        return nogrowth, currentk
-
     end
 end
 """
@@ -485,7 +475,7 @@ end
     """
 function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen, tp, remain, regime, kp)
 
-    ready = find(x-> x.mass["repr"] > x.e_mu, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
+    ready = find(x-> x.stage == "a" && x.mass["repr"] > x.e_mu, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
     pollinated = []
 
     # POLLINATION INDEPENDENT SCENARIO: as long as there is reproductive allocation, there is reproduction. Clonality is virtually useless
@@ -498,7 +488,7 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
 
             # unity test
             #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-            println("Pollination scenario: $scen")
+            #println("Pollination scenario: $scen")
             #end
             
             # POLLINATION DEPENDENT SCENARIO:
@@ -506,7 +496,7 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
 
             # unity test
             #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-            println("Pollination scenario: $scen")
+            #println("Pollination scenario: $scen")
             #end
 
             if t < tp
@@ -561,7 +551,6 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
                   - \"indep\": pollination independent scenario,
                   - \"depend\": pollination dependent scenario, with supplementary info for simulating.")
         end
-
     end
     
     #unity test
@@ -574,8 +563,8 @@ end
 
 """
     mkoffspring!()
-    After mating happened (marked in `reped`), calculate the amount of offspring
-    """
+After mating happened (marked in `reped`), calculate the amount of offspring
+ """
 function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int)
     
     offspring = Organism[]
@@ -583,9 +572,6 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     for sp in unique(getfield.(orgs, :sp))
 
         ferts = find(x -> x.mated == true && x.sp == sp, orgs)
-
-        # organize trait distributions of current adults: for each spp in orgs, get the traits distributions
-        traitdist = find(x -> x.sp == sp && x.stage == "a", orgs)
         
         #unity test
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -601,7 +587,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds.")
             end
 
-            if offs == 0.0
+            if offs <= 0
                 continue
             else
                 
@@ -615,16 +601,15 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 if  orgs[o].mass["repr"] <= 0
                     orgs[o].mass["repr"] = 0
                 end
-                
 
                 #unity test
                 #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println("Number of offspring of ", orgs[o].id, ": ",offs)
+                #println("Number of offspring of ", orgs[o].id, ": ",offs)
                 #end
 
                 # get phylogenetic constraint: variance of the distribution
                 sp = orgs[o].sp
-                conspp = [rand(filter(x -> x.sp == sp, orgs))]
+                conspp = [rand(filter(x -> x.sp == sp && x.stage == "a", orgs))]
 
                 e_mudist = Array{Float64}(1,length(conspp)) 
                 b0gdist = Array{Float64}(1,length(conspp))
@@ -870,7 +855,7 @@ end
     Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
     plants in nogrwth are subjected to two probability rates
     """
-function survive!(orgs::Array{Organisms.Organism,1}, nogrowth::Array{Int64,1}, currentk::Float64, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T)
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T)
 
     deaths = Int64[]
     seeds = find(x -> x.stage == "e", orgs) 
@@ -896,7 +881,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, nogrowth::Array{Int64,1}, c
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                 println(sim, "$(orgs[o].id) $(orgs[o].stage) dying of old age")
             end
-        elseif o in nogrowth
+        else
             Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim

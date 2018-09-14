@@ -258,11 +258,11 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                       ["veg" "repr"],
                       reshape(string.(fieldnames(Organism)[5:end-2]),1,length(fieldnames(Organism)[5:end-2])),
                       ["chrm1" "chrm2" "radius"])#for non-diploid Orgs? string.(fieldnames(Organism))
-        open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "w") do output
+        open(string("EDoutputs/",settings["simID"],"/orgsweekly.txt"), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
         for o in 1:length(orgs)
-            open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
+            open(string("EDoutputs/",settings["simID"],"/orgsweekly.txt"), "a") do output
                 writedlm(output, hcat(t,
                                       orgs[o].id,
                                       orgs[o].location,
@@ -298,7 +298,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
 
     if rem(t,settings["tout"]) == 0 # output bi-monthly
         for o in 1:length(orgs)
-            open(string("EDoutputs/",settings["simID"],"/orgsweekly.csv"), "a") do output
+            open(string("EDoutputs/",settings["simID"],"/orgsweekly.txt"), "a") do output
                 writedlm(output, hcat(t,
                                       orgs[o].id,
                                       orgs[o].location,
@@ -457,8 +457,14 @@ function simulate()
 
         # OUTPUT: First thing to see how community is initialized
         orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
+
+        masses = zeros(Float64,size(orgs))
+        map!(x -> sum(values(x.mass)),masses,orgs)
+        currentk = sum(masses)
+
+        survive!(orgs,t,currentk,settings,orgsref,landavail,T)
         
-        nogrowth, currentk = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
+        allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
 
         develop!(orgs,orgsref)
 
@@ -473,8 +479,6 @@ function simulate()
         disperse!(landavail,seedsi,orgs,t,settings,orgsref, connects, AT, Ah)
 
         establish!(mylandscape,orgs,t,settings,orgsref)
-        
-        survive!(orgs,nogrowth,currentk,t,settings,orgsref,landavail,T)
 
         shedd!(orgs,orgsref,t)
     end
