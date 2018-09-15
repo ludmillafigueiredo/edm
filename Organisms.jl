@@ -219,103 +219,6 @@ return orgs, id_counter
 end
 
 """
-projvegmass!(landscape,orgs)
-Rewrites the projected mass of each organisms stored in `orgs` into the `neighs` field of `landscape`. This projection means that the total biomass is divided into the square area delimited by the organism's `radius`.
-"""
-function projvegmass!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organism,1}, settings::Dict{String, Any})
-    
-    competing = find(x->(x.stage == "a" || x.stage == "j"),orgs) #juveniles com ashard as adults, but have higher growth rate and lower mortality
-
-    for o in competing
-        x, y, frag = orgs[o].location
-        orgs[o].radius = round(Int64, (1/4) * (sqrt(orgs[o].mass["veg"]^(2/3)) - 1)/2, RoundUp) # multiply by 0.2 because weiner uses 1cm2 projections, and my cells are 16 cm2
-
-        if orgs[o].radius == 0  #TODO: hotfix, check a more sound solution: vegetative mass - 1 might be too much for juveniles, especially the young ones
-            orgs[o].radius = 1
-        end
-        
-        r = orgs[o].radius # separated for debugging
-
-        projmass = /(orgs[o].mass["veg"], ((2*r+1)^2))
-
-        # unitytest
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim, orgs[o].id," has ",orgs[o].mass["veg"], " radius $r and projvegmass:", projmass) #ugly format to avoid risking some anoying errors that have been happening
-        end
-
-        for j in (y-r):(y+r), i in (x-r):(x+r) #TODO usar a funcao da FON Q trabalha com quadrantes? dar mais peso para steming point?
-            if !checkbounds(Bool,landscape[:,:,frag],j,i) # check boundaries: absorbing borders: the biomass is not re-divided to the amount of cells inside the fragment. What is projected outside the fragmetn is actually lost: Edge effect
-                continue
-            else
-                if haskey(landscape[i,j,frag],"p")
-                    
-                    landscape[i,j,frag]["p"] += projmass
-                    # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, orgs[o].id,"is in $(orgs[o].location) and  has found a neighbor.")
-                        println(sim, "Already projected in x = $i, y = $j:", landscape[i,j,frag]["p"])
-                    end
-                    
-                else
-                    landscape[i,j,frag] = Dict("p" => projmass)
-                    # unity test
-                    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                        println(sim, orgs[o].id," has no neighbor")
-                    end
-                    
-                end
-            end
-        end
-    end
-end
-
-"""
-compete(landscape, orgs)
-Each plant in `orgs` will check neighboring cells (inside it's zone of influence radius `r`) and detected overlaying ZOIs. When positive, the proportion of 'free' plant biomass is calculated: (focus plant biomass - sum(non-focus vegetative biomass))/(focus plant biomass), and normalized to the total area of projected biomass .
-"""
-function compete(landscape::Array{Dict{String, Float64},2}, org::Organism,settings::Dict{String, Any})
-
-    x, y, frag = org.location
-    sp = org.sp
-    r = org.radius
-
-    compterm = 0
-    nbsum = 0
-
-    # 2. Look for neighbors in the square area (2r+1) delimited by r
-    for j in (y-r):(y+r), i in (x-r):(x+r)
-        if !checkbounds(Bool,landscape[:,:,frag],i,j)
-            continue
-            # #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, "$(org.id) out of bound projection at $(org.location)")
-                #println("$(org.id) out of bound projection at $(org.location)")
-            end
-        elseif j == y && i == x # steming point is "stronger", doesnt compete
-            continue
-        elseif haskey(landscape[i,j,frag],"p")
-            #landscape[i,j,frag].neighs[fg] > 0 # check the neighborhood of same fgroup for competition
-            nbsum += (landscape[i,j,frag]["p"] - /(org.mass["veg"],(2*r+1)^2)) #sum vegetative biomass of neighbors only (exclude focus plant own biomass projection in that cell)
-            # unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #println(org.id," has nbsum = ", nbsum, "from $i, $j")
-                println(sim, org.id," has nbsum = ", nbsum) #ugly format to avoid risking some anoying errors that have been happening
-            end
-        end
-    end
-
-    compterm = /((org.mass["veg"] - nbsum), org.mass["veg"])
-    # unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        #println("$(org.id) radius = $r and compterm = $compterm")
-        println(sim, "$(org.id) radius = $r and compterm = $compterm")
-    end
-    
-    return compterm
-end
-
-
-"""
 allocate!(orgs, landscape, aE, Boltz, OrgsRef)
 Calculates biomass gain according to MTE rate and depending on competition. Competition is measured via a biomass-based index `compterm` (`compete` function). This term gives the proportion of actual biomass gain an individual has. If competition is too strong (`compterm` < 0), the individual has a higher probability of dying. If not, the biomass is allocated to growth or reproduction, according to the developmental `stage` of the organism and the season (`t`) (plants start allocating to week 12).
 """
@@ -863,7 +766,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, 
 
         #T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
 
-        if sum(values(orgs[o].mass)) <= 0
+        if sum(values(orgs[o].mass)) <= 0 #probably unnecessary
             mprob = 1
         elseif o in seeds
             if rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
@@ -879,7 +782,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, 
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                 println(sim, "$(orgs[o].id) $(orgs[o].stage) dying of old age")
             end
-        else
+        else #juveniles and adults
             Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -891,9 +794,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, 
         end
 
         if mprob < 0
+            error("mprob < 0")
             mprob = 0
         elseif mprob > 1
             mprob = 1
+            error("mprob > 1")
         end
         
         if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
@@ -909,13 +814,14 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, 
         println(sim, "Dying orgs: $(length(deaths))")
         #println("Dying dens-indep orgs: $(length(deaths))")
     end
-    
     deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
 
-    #Density-dependent mortality
-    K = 2*(3.5/100)*(length(find(x -> x == true, landavail))*25) #7 tons/ha = 7g/100
-
-    while currentk >= K
+     #Density-dependent mortality
+    for f in 1:size(mylandscape)[3]
+    K 
+    end
+    
+    while currentk >= cK
         println("Current biomass bigger than capacity.")
 
         seeds = find(x -> x.stage == "s", orgs)
@@ -981,7 +887,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, 
                 orgs[o].age += 1
             end
         end  
-    end 
+    end
 end
 
 """
