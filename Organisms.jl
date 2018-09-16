@@ -316,7 +316,7 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
             # end
             
         end
-  
+        
         # unity test
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         #    println(sim, "Not growing $nogrowth")
@@ -426,15 +426,15 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
                 elseif regime == "const"
                     pollinated = sample(ready, Int(floor(length(ready)* remain * kp)), replace = false, ordered = true) #* 10^(-3))
                     # unity test
-                    open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                        println(sim,"Pollinated in $regime regime: $pollinated")
-                    end 
+                    #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                    #    println(sim,"Pollinated in $regime regime: $pollinated")
+                    #end 
                     for p in pollinated
                         orgs[p].mated = true
                         # unity test
-                        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                            println(sim,"$(orgs[p].id) can reproduce? $(orgs[p].mated)")
-                        end 
+                        #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                        #    println(sim,"$(orgs[p].id) can reproduce? $(orgs[p].mated)")
+                        #end 
                     end
                 else
                     error("Please chose a pollination scenario \"scen\" in insect.csv:
@@ -455,17 +455,17 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
     end
     
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Reproducing: $(length(ready)), week $t.
-                Actually reprod: $pollinated , because $scen and $regime.")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    #    println(sim, "Reproducing: $(length(ready)), week $t.
+    #            Actually reprod: $pollinated , because $scen and $regime.")
+    #end
     
 end
 
 """
     mkoffspring!()
-After mating happened (marked in `reped`), calculate the amount of offspring
- """
+    After mating happened (marked in `reped`), calculate the amount of offspring
+    """
 function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int)
     
     offspring = Organism[]
@@ -484,9 +484,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
             emu = orgs[o].e_mu
             offs =  div(orgs[o].mass["repr"], emu)
             # unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds.")
-            end
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #    println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds.")
+            #end
 
             if offs <= 0
                 continue
@@ -495,9 +495,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 orgs[o].mass["repr"] -= (offs * emu)
 
                 # unity test
-                open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                    println(sim, orgs[o].id, " now has biomass $(orgs[o].mass["repr"]).")
-                end
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                #    println(sim, orgs[o].id, " now has biomass $(orgs[o].mass["repr"]).")
+                #end
 
                 if  orgs[o].mass["repr"] <= 0
                     orgs[o].mass["repr"] = 0
@@ -616,12 +616,12 @@ end
 disperse!(landscape, orgs, t, seetings, orgsref,)
 Seeds are dispersed.
 """
-function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, connects::Array{Float64,2}, AT::Float64, Ah:Float64)
+function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, connects::Array{Float64,2}, AT::Float64, Ah::Float64)
 
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Dispersing: $seedsi")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    #    println(sim, "Dispersing: $seedsi")
+    #end
 
     lost = Int64[]
 
@@ -721,9 +721,9 @@ function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organi
     establishing = find(x -> x.stage == "e", orgs)
 
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "$(length(establishing)) seed trying to establish")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    #    println(sim, "$(length(establishing)) seed trying to establish")
+    #end
 
     lost = Int64[]
 
@@ -733,17 +733,17 @@ function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organi
             if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]],["p"])
                 push!(lost,o)
 	        #unity test
-   	        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        	    println(sim, "$o falling into occupied cell and died")
-    	        end
+   	        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        	#    println(sim, "$o falling into occupied cell and died")
+    	        #end
 	    end
 
             if germinate(orgs[o])
                 orgs[o].stage = "j"
 	        #unity test
-   	        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        	    println(sim, "Became juvenile: $(orgs[o].id)")
-    	        end
+   	        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        	#    println(sim, "Became juvenile: $(orgs[o].id)")
+    	        #end
             end
         end
         
@@ -756,7 +756,7 @@ end
     Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
     plants in nogrwth are subjected to two probability rates
     """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T)
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, ck::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T,mylandscape::Array{Dict{String,Float64},2})
 
     deaths = Int64[]
     seeds = find(x -> x.stage == "e", orgs) 
@@ -771,7 +771,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, 
         elseif o in seeds
             if rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
                 Bm = orgs[o].b0em * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-                println("Bm: $Bm, b0em = $(orgs[o].b0em), seed mass = $(orgs[o].mass["veg"])")
+                #println("Bm: $Bm, b0em = $(orgs[o].b0em), seed mass = $(orgs[o].mass["veg"])")
                 mprob = 1 - exp(-0.1)
             else
                 continue
@@ -779,18 +779,16 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, 
         elseif (orgs[o].age/52) >= orgs[o].max_span #oldies die
             mprob = 1
             #unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, "$(orgs[o].id) $(orgs[o].stage) dying of old age")
-            end
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #    println(sim, "$(orgs[o].id) $(orgs[o].stage) dying of old age")
+            #end
         else #juveniles and adults
             Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-             #   println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
+            #   println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
             #end
-            mprob = 1 - exp(-Bm)               
-        else
-            mprob = 0            
+            mprob = 1 - exp(-Bm)                         
         end
 
         if mprob < 0
@@ -802,7 +800,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, 
         end
         
         if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
-            currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
+            #currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
             push!(deaths, o)
         else
             orgs[o].age += 1
@@ -810,83 +808,88 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, currentk::Float64, 
     end
     
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim, "Dying orgs: $(length(deaths))")
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    #    println(sim, "Dying orgs: $(length(deaths))")
         #println("Dying dens-indep orgs: $(length(deaths))")
-    end
+    #end
     deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
 
-     #Density-dependent mortality
+    #Density-dependent mortality
     for f in 1:size(mylandscape)[3]
-    K 
-    end
-    
-    while currentk >= cK
-        println("Current biomass bigger than capacity.")
+        locs = zeros(Float64,size(orgs))
+        masses = zeros(Float64,size(orgs))
+        map!(x -> x.location,locs,orgs)
+        map!(x -> x.mass["veg"],masses,orgs)
+        # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
+        l = DataFrame(map(col -> getindex.(locs, col), eachindex(first(locs))), [:x, :y, :f])
+        competing = find(nonunique(l)) # indexes in l are the same as in orgs, right?
+        for i in competing
+            #find those that are in the same grid
+            samegrid = filter(x -> x == locs[i], orgs)
+            # sum their weight to see if > than carrying capacity.
+            if sum(masses[samegrid]) > cK
+                for i in samegrid
+                    # if so, start calculating mortalities from the juveniles:
+                    seeds = find(x -> x.stage == "s", samegrid)
+                    juvs = find(x -> x.stage == "j", samegrid)
+                    adts = find(x -> x.stage == "a", samegrid)
+                    
+                    if length(juvs) >= 1  # Juveniles die first         
+                        o = rand(juvs) |> getindex(orgs) # since I have the whole organisms here, I can use it to find its index in orgs, and work directly there
+                        Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+                        mprob = 1 - exp(-Bm) + over
 
-        seeds = find(x -> x.stage == "s", orgs)
-        juvs = find(x -> x.stage == "j", orgs)
-        adts = find(x -> x.stage == "a", orgs)
-        
-        if length(juvs) >= 1  # Juveniles die first         
-            o = rand(juvs)
-            over = /(currentk - K,K)
-            Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-            mprob = 1 - exp(-Bm) + over
+                        # fix mortality probability values 
+                        if mprob < 0
+                            mprob = 0
+                        elseif mprob > 1
+                            mprob = 1
+                        end
+                        
+                        if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
+                            deleteat!(orgs,o)
+                        else
+                            orgs[o].age += 1
+                        end
+                    elseif length(adts) >= 1 # if there are none, adults second
+                        o = rand(adts) |> getindex(orgs)
+                        Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+                        mprob = 1 - exp(-Bm) + over
 
-            # fix mortality probability values 
-            if mprob < 0
-                mprob = 0
-            elseif mprob > 1
-                mprob = 1
-            end
-            
-            if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
-                currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
-                deleteat!(orgs,o)
-            else
-                orgs[o].age += 1
-            end
-        elseif length(adts) >= 1 # if there are none, adults second
-            o = rand(adts)
-            over = /(currentk - K,K)
-            Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-            mprob = 1 - exp(-Bm) + over
+                        # fix mortality probability values 
+                        if mprob < 0
+                            mprob = 0
+                        elseif mprob > 1
+                            mprob = 1
+                        end
+                        
+                        if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
+                            deleteat!(orgs,o)
+                        else
+                            orgs[o].age += 1
+                        end
+                    else
+                        # Seeds at last
+                        o = rand(seeds) |> getindex(orgs)
+                        Bm = orgs[o].b0em * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+                        mprob = 1 - exp(-Bm)
 
-            # fix mortality probability values 
-            if mprob < 0
-                mprob = 0
-            elseif mprob > 1
-                mprob = 1
+                        # fix mortality probability values 
+                        if mprob < 0
+                            mprob = 0
+                        elseif mprob > 1
+                            mprob = 1
+                        end
+                        
+                        if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
+                            deleteat!(orgs,o)
+                        else
+                            orgs[o].age += 1
+                        end
+                    end
+                end
             end
-            
-            if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
-                currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
-                deleteat!(orgs,o)
-            else
-                orgs[o].age += 1
-            end
-        else
-            # Seeds at last
-            o = rand(seeds)
-            over = /(currentk - K,K)
-            Bm = orgs[o].b0em * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-            mprob = 1 - exp(-Bm) + over
-
-            # fix mortality probability values 
-            if mprob < 0
-                mprob = 0
-            elseif mprob > 1
-                mprob = 1
-            end
-            
-            if 1 == rand(Distributions.Binomial(1,mprob),1)[1] || sum(values(orgs[o].mass)) <= 0
-                currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
-                deleteat!(orgs,o)
-            else
-                orgs[o].age += 1
-            end
-        end  
+        end
     end
 end
 
@@ -923,9 +926,9 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,2
         deleteat!(orgs, kills)
     end
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println("Killed orgs: $(length(kills))")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    #    println("Killed orgs: $(length(kills))")
+    #end
 end
 
 """

@@ -443,6 +443,7 @@ function simulate()
         end
 
         #UPDATE LANDSCAPE: weekly temperature and projected biomass
+
         T = updateenv!(mylandscape, t, landpars)
         
         # DISTURBANCE
@@ -458,11 +459,11 @@ function simulate()
         # OUTPUT: First thing to see how community is initialized
         orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
 
-        masses = zeros(Float64,size(orgs))
-        map!(x -> sum(values(x.mass)),masses,orgs)
-        currentk = sum(masses)
-
-        survive!(orgs,t,currentk,settings,orgsref,landavail,T)
+        # Carrying capacity:
+        K = 2*(3.5/100)*(length(find(x -> x == true, landavail))*25) #7 tons/ha = 7g/100
+        cK = K/length(find(x -> x == true, landavail))
+        
+        survive!(orgs,t,cK,settings,orgsref,landavail,T,mylandscape)
         
         allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
 
