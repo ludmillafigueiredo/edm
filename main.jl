@@ -67,7 +67,7 @@ equal pollination loss for all species \"equal\"."
         "--connects"
         help = "Connectivity matrix of distances between fragments."
         arg_type = String
-        default = abspath(pwd(),"inputs/connectssingle.csv")
+        default = abspath(pwd(),"inputs/connects")
         
         "--disturb"
         help = "Type of environmental disturbance to be implemented: habitat area loss \"loss\", habitat fragmentation \"frag\" or temperature change \"temp\""
@@ -388,7 +388,7 @@ function simulate()
 
     # Store landscape configuration
     landpars = read_landpars(settings)
-    connects = read(settings["connects"])
+    connects = readdlm(settings["connects"])
     # unity test
     println("Land init stored in object of type $(typeof(landpars))")
 
@@ -462,8 +462,10 @@ function simulate()
         # Carrying capacity:
         K = 2*(3.5/100)*(length(find(x -> x == true, landavail))*25) #7 tons/ha = 7g/100
         cK = K/length(find(x -> x == true, landavail))
-        
-        survive!(orgs,t,cK,settings,orgsref,landavail,T,mylandscape)
+
+        println("Abundance before mortality: $(length(orgs)).")
+        survive!(orgs,t,cK,settings,orgsref,landavail,T)
+        println("Abundance after mortality: $(length(orgs)).")
         
         allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
 
@@ -476,8 +478,8 @@ function simulate()
         seedsi = release!(orgs,t,settings,orgsref)
 
         Ah = length(find( x -> x ==true, landavail))*25*0.0001
-        AT = sort(reshape(connects,prod(size(connects))), rev = true) |> (y -> length(y) > 1 ? prod(y[1:2]) : (length(y) == 2 ? sum(con)^2 : Ah)) 
-        disperse!(landavail,seedsi,orgs,t,settings,orgsref, connects, AT, Ah)
+        AT = sort(reshape(connects,prod(size(connects))), rev = true) |> (y -> length(y) > 1 ? prod(y[1:2]) : (length(y) == 2 ? sum(connects)^2 : Ah)) 
+        disperse!(landavail,seedsi,orgs,t,settings,orgsref,connects,AT,Ah)
 
         establish!(mylandscape,orgs,t,settings,orgsref)
 
