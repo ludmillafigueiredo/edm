@@ -301,6 +301,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
             open(string("EDoutputs/",settings["simID"],"/orgsweekly.txt"), "a") do output
                 writedlm(output, hcat(t,
                                       orgs[o].id,
+                                      orgs[o].stage,
                                       orgs[o].location,
                                       orgs[o].sp,
                                       orgs[o].mass["veg"],
@@ -319,7 +320,6 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                 orgs[o].max_mass,
                 orgs[o].first_flower,
                 orgs[o].max_span,
-                orgs[o].stage,
                 orgs[o].age,
                 orgs[o].mated,
                 orgs[o].genotype,
