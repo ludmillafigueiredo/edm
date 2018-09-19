@@ -166,27 +166,27 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                     Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floroff[s], orgsref.floroff_sd[s]),
                                                                      max(orgsref.floroff[s], orgsref.floroff_sd[s])+0.00000001)),
                                                         abs(-(orgsref.floroff[s], orgsref.floroff_sd[s])/6))),RoundUp)), #floroff
-Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedon[s], orgsref.seedon_sd[s]),
-                                                 max(orgsref.seedon[s], orgsref.seedon_sd[s])+0.00000001)),
-                                    abs(-(orgsref.seedon[s],orgsref.seedon_sd[s])/6))),RoundUp)), #seedon
-Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedoff[s], orgsref.seedoff_sd[s]),
-                                                 max(orgsref.seedoff[s], orgsref.seedoff_sd[s])+0.00000001)),
-                                    abs(-(orgsref.seedoff[s],orgsref.seedoff_sd[s])/6))),RoundUp)), #seedoff
-0.0,
-Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.first_flower[s], orgsref.first_flower_sd[s]),
-                                                 max(orgsref.first_flower[s], orgsref.first_flower_sd[s])+0.00000001)),
-                                    abs(-(orgsref.max_span[s], orgsref.first_flower[s])/6))),RoundUp)),
-Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.max_span[s], orgsref.max_span_sd[s]),
-                                                 max(orgsref.max_span[s], orgsref.max_span_sd[s])+0.00000001)),
-                                    abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
+                    Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedon[s], orgsref.seedon_sd[s]),
+                                                                     max(orgsref.seedon[s], orgsref.seedon_sd[s])+0.00000001)),
+                                                        abs(-(orgsref.seedon[s],orgsref.seedon_sd[s])/6))),RoundUp)), #seedon
+                    Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedoff[s], orgsref.seedoff_sd[s]),
+                                                                     max(orgsref.seedoff[s], orgsref.seedoff_sd[s])+0.00000001)),
+                                                        abs(-(orgsref.seedoff[s],orgsref.seedoff_sd[s])/6))),RoundUp)), #seedoff
+                    0.0,
+                    Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.first_flower[s], orgsref.first_flower_sd[s]),
+                                                                     max(orgsref.first_flower[s], orgsref.first_flower_sd[s])+0.00000001)),
+                                                        abs(-(orgsref.max_span[s], orgsref.first_flower[s])/6))),RoundUp)),
+                    Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.max_span[s], orgsref.max_span_sd[s]),
+                                                                     max(orgsref.max_span[s], orgsref.max_span_sd[s])+0.00000001)),
+                                                        abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
 
-neworg.max_mass = (neworg.e_mu*1000/2.14)^2
-neworg.mass["veg"] = neworg.max_mass * 0.5
+                    neworg.max_mass = (neworg.e_mu*1000/2.14)^2
+                    neworg.mass["veg"] = neworg.max_mass * 0.5
 
-push!(orgs, neworg)
-end
+                    push!(orgs, neworg)
+                end
 
-end
+            end
 end
 end
 
@@ -710,7 +710,8 @@ end
 function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T)
 
     deaths = Int64[]
-    seeds = find(x -> x.stage == "e", orgs) 
+    seeds = find(x -> x.stage == "e", orgs)
+    mprob = 0
 
     # Density-independent mortality
     for o in 1:length(orgs)
@@ -725,7 +726,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
                 #println("Bm: $Bm, b0em = $(orgs[o].b0em), seed mass = $(orgs[o].mass["veg"])")
                 mprob = 1 - exp(-0.1)
             else
-                continue
+                mprob = 0
             end 
         elseif (orgs[o].age/52) >= orgs[o].max_span #oldies die
             mprob = 1
@@ -733,7 +734,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             #    println(sim, "$(orgs[o].id) $(orgs[o].stage) dying of old age")
             #end
-        else #juveniles and adults
+        elseif orgs[o] == "j"
+            Bm = orgs[o].b0em * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+            #println("Bm: $Bm, b0em = $(orgs[o].b0em), seed mass = $(orgs[o].mass["veg"])")
+            mprob = 1 - exp(-0.1)
+        else #adults
             Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -742,6 +747,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
             mprob = 1 - exp(-Bm)                         
         end
 
+        # Check mortality rate to probability conversion
         if mprob < 0
             error("mprob < 0")
             mprob = 0
@@ -777,13 +783,13 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
     open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
         println("Possibly competing: $(length(fullcells))")
-        end
+    end
     for c in fullcells
         #find those that are in the same grid
         samegrid = filter(x -> x.location == locs[c], orgs)
         open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
             println("N of inds in same cell: $(length(samegrid))")
-            end
+        end
         #println("Inds in same cell $(locs[c]) : $samegrid")
         # sum their weight to see if > than carrying capacity.
         while sum(map(x -> x.mass["veg"],samegrid)) > cK
@@ -795,15 +801,8 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
             if length(juvs) >= 1  # Juveniles die first
                 d = rand(juvs,1)[1]
                 o = find(x -> x.id == d.id, orgs)[1] # since I have the whole organisms here, I can use it to find its index in orgs, and work directly there
-                Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+                Bm = orgs[o].b0em * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
                 mprob = 1 - exp(-Bm)
-
-                # fix mortality probability values 
-                if mprob < 0
-                    mprob = 0
-                elseif mprob > 1
-                    mprob = 1
-                end
                 
             elseif length(adts) >= 1 # if there are none, adults second
                 d = rand(adts,1)[1]
@@ -812,13 +811,6 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
                 #println("o: $(orgs[o].id)")
                 Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
                 mprob = 1 - exp(-Bm)
-
-                # fix mortality probability values 
-                if mprob < 0
-                    mprob = 0
-                elseif mprob > 1
-                    mprob = 1
-                end
                 
             elseif length(seeds) >= 1
                 # Seeds at last
@@ -827,25 +819,31 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
                 Bm = orgs[o].b0em * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
                 mprob = 1 - exp(-Bm)
 
-                # fix mortality probability values 
-                if mprob < 0
-                    mprob = 0
-                elseif mprob > 1
-                    mprob = 1
-                end
+            end
+
+            # Check mortality rate to probability conversion
+            if mprob < 0
+                error("mprob < 0")
+                mprob = 0
+            elseif mprob > 1
+                mprob = 1
+                error("mprob > 1")
             end
             
             if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
-                deleteat!(orgs,o)
+                #currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
+                push!(deaths, o)
+                #println("$(orgs[o].stage) dying INDEP.")
             else
                 orgs[o].age += 1
             end
             samegrid = filter(x -> x.location == locs[i], orgs)
-            open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                println("$(orgs[o].stage) dying DEP.")
-                end
+            #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+            #    println("$(orgs[o].stage) dying DEP.")
+            #end
         end
     end
+deleteat!(orgs, deaths)
 end
 
 """
@@ -861,7 +859,6 @@ function shedd!(orgs::Array{Organisms.Organism,1}, orgsref::Organisms.OrgsRef, t
             orgs[f].mass["repr"] = 0
         end
     end
-    
 end
 
 """
