@@ -64,3 +64,4 @@ command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturbf,duration,to
     writeLines(command,hpcscript)
     }
 }
+
