@@ -181,8 +181,12 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                                         abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
 
                     neworg.max_mass = (neworg.e_mu*1000/2.14)^2
-                    neworg.mass["veg"] = neworg.max_mass * 0.5
-
+                    # initial biomass
+                    if neworg.stage in ["e","j"]
+                        neworg.mass["veg"] = neworg.e_mu
+                    else
+                        neworg.mass["veg"] = neworg.max_mass * 0.5
+                    end
                     push!(orgs, neworg)
                 end
 
@@ -247,7 +251,7 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
             
             if orgs[o].stage == "j"
                 # juveniles grow
-                orgs[o].mass["veg"] += grown_mass 
+                orgs[o].mass["veg"] += grown_mass             
                 # unity test
                 #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
                 #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
@@ -268,7 +272,7 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
                     #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) is FLOWERING repr= ",orgs[o].mass["repr"])
                     #end
                 end
-            elseif orgs[o].stage == "a" && sum(values(orgs[o].mass)) < orgs[o].max_mass # TODO refer it to a 50% of the species biomass #individuals that are too small dont reproduce
+            elseif orgs[o].stage == "a" && sum(values(orgs[o].mass)) < orgs[o].max_mass 
                 orgs[o].mass["veg"] += grown_mass 
             end            
         end
@@ -433,7 +437,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
         for o in ferts
 
             emu = orgs[o].e_mu
-            offs =  div(orgs[o].mass["repr"], emu)
+            offs =  div(0.5*orgs[o].mass["repr"], emu)
             # unity test
             #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             #    println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds.")
@@ -441,6 +445,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
             if offs <= 0
                 continue
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            #    println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds.")
+            #end
             else
                 
                 orgs[o].mass["repr"] -= (offs * emu)
@@ -648,12 +655,13 @@ end
 germinate(org)
 Seeds have a probability of germinating (`gprob`).
 """
-function germinate(org::Organisms.Organism)
-    gprob = 1 - exp(-org.b0jg)
+function germinate(org::Organisms.Organism, T::Float64)
+    Bg = org.b0g * (org.mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+    gprob = 1 - exp(-Bg)
     if gprob < 0
-        gprob = 0
+        error("gprob < 0")
     elseif gprob > 1
-        gprob = 1
+        error("gprob > 1")
     end
     
     germ = false
@@ -667,7 +675,7 @@ end
 establish!
 Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
     """
-function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef)
+function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T::Float64)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
@@ -689,7 +697,7 @@ function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organi
     	        #end
 	    end
 
-            if germinate(orgs[o])
+            if germinate(orgs[o],T)
                 orgs[o].stage = "j"
 	        #unity test
    	        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -708,6 +716,9 @@ end
     plants in nogrwth are subjected to two probability rates
     """
 function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T)
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+            println(sim,"Running mortality")
+    end
 
     deaths = Int64[]
     seeds = find(x -> x.stage == "e", orgs)
@@ -716,15 +727,13 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     # Density-independent mortality
     for o in 1:length(orgs)
 
-        #T = landscape[orgs[o].location[1], orgs[o].location[2], orgs[o].location[3]].temp
-
         if sum(values(orgs[o].mass)) <= 0 #probably unnecessary
             mprob = 1
         elseif o in seeds
             if rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
                 Bm = orgs[o].b0em * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
                 #println("Bm: $Bm, b0em = $(orgs[o].b0em), seed mass = $(orgs[o].mass["veg"])")
-                mprob = 1 - exp(-0.1)
+                mprob = 1 - exp(-Bm)
             else
                 mprob = 0
             end 
@@ -737,7 +746,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
         elseif orgs[o] == "j"
             Bm = orgs[o].b0em * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             #println("Bm: $Bm, b0em = $(orgs[o].b0em), seed mass = $(orgs[o].mass["veg"])")
-            mprob = 1 - exp(-0.1)
+            mprob = 1 - exp(-Bm)
         else #adults
             Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
             # unity test
@@ -750,9 +759,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
         # Check mortality rate to probability conversion
         if mprob < 0
             error("mprob < 0")
-            mprob = 0
+            #mprob = 0
         elseif mprob > 1
-            mprob = 1
+            #mprob = 1
             error("mprob > 1")
         end
         
@@ -766,13 +775,12 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     end
     
     #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    #    println(sim, "Dying orgs: $(length(deaths))")
-    #println("Dying dens-indep orgs: $(length(deaths))")
-    #end
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println(sim,"Dying dens-indep orgs: $(length(deaths))")
+    end
     deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
 
-    #Density-dependent mortalitymap(col -> getindex.(locs, col), eachindex(first(locs)))
+    ## Density-dependent mortality
     locs = fill!(Array{Tuple{Int64,Int64,Int64}}(reverse(size(orgs))),(0,0,0))
     #masses = zeros(Float64,size(orgs))
     map!(x -> x.location,locs,orgs) #probably optimizable
@@ -781,14 +789,14 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     #map!(x -> x.mass["veg"],masses,orgs)
     # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
     fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
-    open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-        println("Possibly competing: $(length(fullcells))")
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+        println(sim,"Possibly competing: $(length(fullcells))")
     end
     for c in fullcells
         #find those that are in the same grid
         samegrid = filter(x -> x.location == locs[c], orgs)
-        open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-            println("N of inds in same cell: $(length(samegrid))")
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+            println(sim,"N of inds in same cell: $(length(samegrid))")
         end
         #println("Inds in same cell $(locs[c]) : $samegrid")
         # sum their weight to see if > than carrying capacity.
@@ -844,6 +852,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
         end
     end
 deleteat!(orgs, deaths)
+open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+    println(sim,"$(length(deaths)) dying.")
+end
 end
 
 """

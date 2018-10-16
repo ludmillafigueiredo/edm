@@ -432,6 +432,9 @@ function simulate()
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"w") do sim
         println(sim,string("Simulation: ",settings["simID"],now()))
     end
+    open(string("EDoutputs/",settings["simID"],"/landlog.txt"),"w") do sim
+        println(sim, "K\tcK")
+    end
 
     # MODEL RUN
     for t in 1:settings["timesteps"]
@@ -451,21 +454,30 @@ function simulate()
            disturb!(mylandscape,landavail,orgs,t,settings)
         end
 
-        # LIFE CYCLES
-        if settings["competition"] != "capacity"
-            projvegmass!(mylandscape,orgs, settings)
-        end
-
         # OUTPUT: First thing to see how community is initialized
         orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
 
         # Carrying capacity:
-        K = 2*(3.5/100)*(length(find(x -> x == true, landavail))*25) #7 tons/ha = 7g/100
+        K = 2*(3.5/100)*(length(find(x -> x == true, landavail))*25) #7 tons/ha = 7g/100cm²
         cK = K/length(find(x -> x == true, landavail))
+        open(string("EDoutputs/",settings["simID"],"/landlog.txt"),"a") do sim
+            writedlm(sim,[K cK])
+        end
+        
+        # LIFE CYCLES
+        #if settings["competition"] != "capacity"
+        #    projvegmass!(mylandscape,orgs, settings)
+        #end
 
-        println("Abundance before mortality: $(length(orgs)).")
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim,"Abundance before mortality: $(length(orgs)).")
+        end
+
         survive!(orgs,t,cK,settings,orgsref,landavail,T)
-        println("Abundance after mortality: $(length(orgs)).")
+
+        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            println(sim,"Abundance after mortality: $(length(orgs)).")
+        end
         
         allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
 
@@ -481,8 +493,8 @@ function simulate()
         AT = sort(reshape(connects,prod(size(connects))), rev = true) |> (y -> length(y) > 1 ? prod(y[1:2]) : (length(y) == 2 ? sum(connects)^2 : Ah)) 
         disperse!(landavail,seedsi,orgs,t,settings,orgsref,connects,AT,Ah)
 
-        establish!(mylandscape,orgs,t,settings,orgsref)
-
+        establish!(mylandscape,orgs,t,settings,orgsref,T)
+        
         shedd!(orgs,orgsref,t)
     end
 end
