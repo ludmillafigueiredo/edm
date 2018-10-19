@@ -180,7 +180,9 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                                                      max(orgsref.max_span[s], orgsref.max_span_sd[s])+0.00000001)),
                                                         abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
 
-                    neworg.max_mass = (neworg.e_mu*1000/2.14)^2
+                    # adult max biomass
+                    neworg.max_mass = (neworg.e_mu*1000*2.14)^2
+                    
                     # initial biomass
                     if neworg.stage in ["e","j"]
                         neworg.mass["veg"] = neworg.e_mu
@@ -188,9 +190,9 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                         neworg.mass["veg"] = neworg.max_mass * 0.5
                     end
                     push!(orgs, neworg)
-                end
+end
 
-            end
+end
 end
 end
 
@@ -446,8 +448,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
             if offs <= 0
                 continue
                 #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #    println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds.")
-            #end
+                #    println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds.")
+                #end
             else
                 
                 orgs[o].mass["repr"] -= (offs * emu)
@@ -655,18 +657,23 @@ end
 germinate(org)
 Seeds have a probability of germinating (`gprob`).
 """
-function germinate(org::Organisms.Organism, T::Float64)
+function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, Any})
     Bg = org.b0g * (org.mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
     gprob = 1 - exp(-Bg)
+    # unity test
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println(sim,"germination rate $Bg and probability $gprob")
+    end
+    
     if gprob < 0
         error("gprob < 0")
     elseif gprob > 1
         error("gprob > 1")
     end
     
-    germ = false
+    germ = true
     if 1 == rand(Distributions.Binomial(1,gprob),1)[1]
-        germ = true
+        germ = false
     end
     return germ
 end
@@ -697,7 +704,7 @@ function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organi
     	        #end
 	    end
 
-            if germinate(orgs[o],T)
+            if germinate(orgs[o],T,settings)
                 orgs[o].stage = "j"
 	        #unity test
    	        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
@@ -716,13 +723,14 @@ end
     plants in nogrwth are subjected to two probability rates
     """
 function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T)
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-            println(sim,"Running mortality")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+    #    println(sim,"Running mortality")
+    #end
 
     deaths = Int64[]
     seeds = find(x -> x.stage == "e", orgs)
     mprob = 0
+    Bm = 0
 
     # Density-independent mortality
     for o in 1:length(orgs)
@@ -749,12 +757,12 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
             mprob = 1 - exp(-Bm)
         else #adults
             Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-            # unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #   println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm")
-            #end
             mprob = 1 - exp(-Bm)                         
         end
+        # unity test
+        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        #    println(sim,"$(orgs[o].id) $(orgs[o].stage) mortality rate $Bm and probability $mprob")
+        #end
 
         # Check mortality rate to probability conversion
         if mprob < 0
@@ -775,10 +783,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     end
     
     #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim,"Dying dens-indep orgs: $(length(deaths))")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    #    println(sim,"Dying dens-indep orgs: $(length(deaths))")
+    #end
     deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
+    deaths = Int64[] # reset
 
     ## Density-dependent mortality
     locs = fill!(Array{Tuple{Int64,Int64,Int64}}(reverse(size(orgs))),(0,0,0))
@@ -789,72 +798,74 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     #map!(x -> x.mass["veg"],masses,orgs)
     # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
     fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-        println(sim,"Possibly competing: $(length(fullcells))")
-    end
-    for c in fullcells
-        #find those that are in the same grid
-        samegrid = filter(x -> x.location == locs[c], orgs)
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-            println(sim,"N of inds in same cell: $(length(samegrid))")
-        end
-        #println("Inds in same cell $(locs[c]) : $samegrid")
-        # sum their weight to see if > than carrying capacity.
-        while sum(map(x -> x.mass["veg"],samegrid)) > cK
-            # if so, start calculating mortalities from the juveniles:
-            seeds = filter(x -> x.stage == "s", samegrid)
-            juvs = filter(x -> x.stage == "j", samegrid)
-            adts = filter(x -> x.stage == "a", samegrid)
-            
-            if length(juvs) >= 1  # Juveniles die first
-                d = rand(juvs,1)[1]
-                o = find(x -> x.id == d.id, orgs)[1] # since I have the whole organisms here, I can use it to find its index in orgs, and work directly there
-                Bm = orgs[o].b0em * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-                mprob = 1 - exp(-Bm)
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+    #    println(sim,"Possibly competing: $(length(fullcells))")
+    #end
+    if length(fullcells) > 0
+        for c in fullcells
+            #find those that are in the same grid
+            samegrid = filter(x -> x.location == locs[c], orgs)
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+                println(sim,"N of inds in same cell: $(length(samegrid))")
+            end
+            #println("Inds in same cell $(locs[c]) : $samegrid")
+            # sum their weight to see if > than carrying capacity.
+            while sum(map(x -> x.mass["veg"],samegrid)) > cK
+                # if so, start calculating mortalities from the juveniles:
+                seeds = filter(x -> x.stage == "s", samegrid)
+                juvs = filter(x -> x.stage == "j", samegrid)
+                adts = filter(x -> x.stage == "a", samegrid)
                 
-            elseif length(adts) >= 1 # if there are none, adults second
-                d = rand(adts,1)[1]
-                #println("d: $(d.id) at $(d.location), type : $(typeof(d))")
-                o =  find(x -> x.id == d.id,orgs)[1]
-                #println("o: $(orgs[o].id)")
-                Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-                mprob = 1 - exp(-Bm)
+                if length(juvs) >= 1  # Juveniles die first
+                    d = rand(juvs,1)[1]
+                    o = find(x -> x.id == d.id, orgs)[1] # since I have the whole organisms here, I can use it to find its index in orgs, and work directly there
+                    Bm = orgs[o].b0em * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+                    mprob = 1 - exp(-Bm)
+                    
+                elseif length(adts) >= 1 # if there are none, adults second
+                    d = rand(adts,1)[1]
+                    #println("d: $(d.id) at $(d.location), type : $(typeof(d))")
+                    o =  find(x -> x.id == d.id,orgs)[1]
+                    #println("o: $(orgs[o].id)")
+                    Bm = orgs[o].b0am * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+                    mprob = 1 - exp(-Bm)
+                    
+                elseif length(seeds) >= 1
+                    # Seeds at last
+                    d = rand(seeds,1)[1]
+                    o = find(x -> x.id == d.id,orgs)[1]
+                    Bm = orgs[o].b0em * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
+                    mprob = 1 - exp(-Bm)
+
+                end
+
+                # Check mortality rate to probability conversion
+                if mprob < 0
+                    error("mprob < 0")
+                    mprob = 0
+                elseif mprob > 1
+                    mprob = 1
+                    error("mprob > 1")
+                end
                 
-            elseif length(seeds) >= 1
-                # Seeds at last
-                d = rand(seeds,1)[1]
-                o = find(x -> x.id == d.id,orgs)[1]
-                Bm = orgs[o].b0em * (sum(collect(values(orgs[o].mass))))^(-1/4)*exp(-aE/(Boltz*T))
-                mprob = 1 - exp(-Bm)
-
+                if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
+                    #currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
+                    push!(deaths, o)
+                    #println("$(orgs[o].stage) dying INDEP.")
+                else
+                    orgs[o].age += 1
+                end
+                samegrid = filter(x -> x.location == locs[i], orgs)
+                #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                #    println("$(orgs[o].stage) dying DEP.")
+                #end
             end
-
-            # Check mortality rate to probability conversion
-            if mprob < 0
-                error("mprob < 0")
-                mprob = 0
-            elseif mprob > 1
-                mprob = 1
-                error("mprob > 1")
-            end
-            
-            if 1 == rand(Distributions.Binomial(1,mprob),1)[1]
-                #currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
-                push!(deaths, o)
-                #println("$(orgs[o].stage) dying INDEP.")
-            else
-                orgs[o].age += 1
-            end
-            samegrid = filter(x -> x.location == locs[i], orgs)
-            #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-            #    println("$(orgs[o].stage) dying DEP.")
-            #end
         end
     end
 deleteat!(orgs, deaths)
-open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-    println(sim,"$(length(deaths)) dying.")
-end
+#open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+#    println(sim,"$(length(deaths)) dying.")
+#end
 end
 
 """
@@ -890,7 +901,7 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,2
     end
     #unity test
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    println("Killed orgs: $(length(kills))")
+    #println("Killed orgs: $(length(kills))")
     #end
 end
 
