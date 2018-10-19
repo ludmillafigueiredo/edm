@@ -457,7 +457,7 @@ function simulate()
         # OUTPUT: First thing to see how community is initialized
         orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
 
-        # Carrying capacity:
+        # Update carring carrying capacity:
         K = 2*(3.5/100)*(length(find(x -> x == true, landavail))*25) #7 tons/ha = 7g/100cm²
         cK = K/length(find(x -> x == true, landavail))
         open(string("EDoutputs/",settings["simID"],"/landlog.txt"),"a") do sim
@@ -469,15 +469,15 @@ function simulate()
         #    projvegmass!(mylandscape,orgs, settings)
         #end
 
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim,"Abundance before mortality: $(length(orgs)).")
-        end
+        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        #    println(sim,"Abundance before mortality: $(length(orgs)).")
+        #end
 
         survive!(orgs,t,cK,settings,orgsref,landavail,T)
 
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            println(sim,"Abundance after mortality: $(length(orgs)).")
-        end
+        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        #    println(sim,"Abundance after mortality: $(length(orgs)).")
+        #end
         
         allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
 

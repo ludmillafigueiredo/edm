@@ -661,9 +661,9 @@ function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, A
     Bg = org.b0g * (org.mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
     gprob = 1 - exp(-Bg)
     # unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        println(sim,"germination rate $Bg and probability $gprob")
-    end
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    #    println(sim,"germination rate $Bg and probability $gprob")
+    #end
     
     if gprob < 0
         error("gprob < 0")
@@ -805,9 +805,10 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
         for c in fullcells
             #find those that are in the same grid
             samegrid = filter(x -> x.location == locs[c], orgs)
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-                println(sim,"N of inds in same cell: $(length(samegrid))")
-            end
+            # unity test
+            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+            #    println(sim,"N of inds in same cell: $(length(samegrid))")
+            #end
             #println("Inds in same cell $(locs[c]) : $samegrid")
             # sum their weight to see if > than carrying capacity.
             while sum(map(x -> x.mass["veg"],samegrid)) > cK
