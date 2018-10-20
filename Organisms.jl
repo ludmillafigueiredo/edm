@@ -288,7 +288,7 @@ function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
     juvs = find(x->x.stage == "j",orgs)
 
     for j in juvs
-        if orgs[j].age >= orgs[j].first_flower || sum(values(orgs[j].mass)) >= 0.8 * orgs[j].max_mass # If an individual grows quite fast, it is more vigorous, and should transfer it to adult fecundity. The only variable capable of transfering this property is the weigh, which, combined with the MTE rate, makes it  generate more offspring
+        if orgs[j].age >= orgs[j].first_flower #|| sum(values(orgs[j].mass)) >= 0.8 * orgs[j].max_mass # If an individual grows quite fast, it is more vigorous, and should transfer it to adult fecundity. The only variable capable of transfering this property is the weigh, which, combined with the MTE rate, makes it  generate more offspring
             orgs[j].stage = "a"
         end
     end
