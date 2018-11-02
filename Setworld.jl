@@ -66,14 +66,14 @@ function updateenv!(landscape::Array{Dict{String,Float64},2}, t::Int64, landpars
     #unity test
     println("Temperature for week $t: $T")
 
-    if t != 1
-        fill!(landscape, Dict())
+    #if t != 1
+        #fill!(landscape, Dict())
         #occupied = find(x -> !isempty(x), landscape)
         #println("Cells to be reset: $occupied.")
         #for cell in occupied
 	    #empty!(landscape[occupied])
         #end
-    end
+    #end
     
     return T
 end
