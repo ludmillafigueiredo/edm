@@ -263,12 +263,13 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
             elseif orgs[o].stage == "a" &&
                 (orgs[o].floron <= rem(t,52) < orgs[o].floroff) && (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].max_mass))
                 # adults invest in reproduction
+                sowingmass = (5.5*10^(-2))*(orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + grown_mass)^0.95
                 if haskey(orgs[o].mass,"repr")
-                    orgs[o].mass["repr"] += grown_mass 
+                    orgs[o].mass["repr"] += sowingmass 
                 else
-                    orgs[o].mass["repr"] = grown_mass
+                    orgs[o].mass["repr"] = sowingmass
                 end
-            elseif orgs[o].stage == "a" && sum(values(orgs[o].mass)) < orgs[o].max_mass 
+            elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].max_mass 
                 orgs[o].mass["veg"] += grown_mass 
             end            
         end
@@ -282,7 +283,7 @@ function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
     juvs = find(x->x.stage == "j",orgs)
 
     for j in juvs
-        if orgs[j].age >= orgs[j].first_flower && sum(values(orgs[j].mass)) >= 0.5 * orgs[j].max_mass # If an individual grows quite fast, it is more vigorous, and should transfer it to adult fecundity. The only variable capable of transfering this property is the weigh, which, combined with the MTE rate, makes it  generate more offspring
+        if orgs[j].age >= orgs[j].first_flower && orgs[j].mass["veg"] >= 0.5*orgs[j].max_mass # If an individual grows quite fast, it is more vigorous, and should transfer it to adult fecundity. The only variable capable of transfering this property is the weigh, which, combined with the MTE rate, makes it  generate more offspring
             orgs[j].stage = "a"
         end
     end
@@ -407,7 +408,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
         for o in ferts
 
             emu = orgs[o].e_mu
-            offs =  div(0.5*orgs[o].mass["repr"], emu)
+            offs =  div(orgs[o].mass["repr"], emu)
             # unity test
             open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
                 println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds of $emu.")
@@ -423,10 +424,6 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 orgs[o].mass["repr"] -= (offs * emu)
 
                 # unity test
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #    println(sim, orgs[o].id, " now has biomass $(orgs[o].mass["repr"]).")
-                #end
-
                 if  orgs[o].mass["repr"] <= 0
                     error("Negative reproductive biomass")
                 end
@@ -729,7 +726,6 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
         end
         
         if 1 == rand(Distributions.Bernoulli(mprob))
-            #currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
             push!(deaths, o)
             #println("$(orgs[o].stage) dying INDEP.")
         else
