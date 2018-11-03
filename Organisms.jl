@@ -17,8 +17,10 @@ using Fileprep
 export Organism, OrgsRef, newOrgs!, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!, release!
 
 # Set up model constants
-const Boltz = 1.38064852e-23 # Alternatively: 8.62e-5 - eV/K Brown & Sibly MTE book chap 2
-const aE = 1e-19 # Alternatively: 0.65 - eV Brown & Sibly MTE book chap 2
+const Boltz = 1.38064852e-23 # Alternatively:
+#const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
+const aE = 1e-19 # Alternatively:
+#const aE = 0.63 #0.65 - eV Brown & Sibly MTE book chap 2
 const µ_wind = 0.1
 const λ_wind = 3
 const µ_ant = 1
@@ -181,7 +183,7 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                                         abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
 
                     # adult max biomass
-                    neworg.max_mass = (neworg.e_mu*1000*2.14)^2
+                    neworg.max_mass = (neworg.e_mu*1000/2.14)^2
                     
                     # initial biomass
                     if neworg.stage in ["e","j"]
@@ -245,7 +247,7 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
             end
 
             #println("$(sum(collect(values(orgs[o].mass))))")
-            grown_mass = b0*(sum(collect(values(orgs[o].mass))))^(3/4)*exp(-aE/(Boltz*T))
+            grown_mass = b0*(orgs[o].mass["veg"])^(3/4)*exp(-aE/(Boltz*T))
 
             if grown_mass <= 0
                 push!(nogrowth,o)
