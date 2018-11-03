@@ -15,8 +15,10 @@ using Fileprep
 using Setworld
 using Organisms
 
-const Boltz = 8.62e-5 # Brown & Sibly MTE book chap 2
-const aE = 0.65 # Brown & Sibly MTE book chap 2
+#const Boltz = 1.38064852e-23 # Alternatively:
+const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
+#const aE = 1e-19
+const aE = 0.63
 #const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter (MTEpar notebook)
 #const plants_mb0 = 9.902 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
 #const plants_fb0 = exp(30.0) # fertility rate
