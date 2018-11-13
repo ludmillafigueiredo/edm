@@ -242,10 +242,9 @@ function implicit_insect(settings::Dict{String,Any})
     interaction = select(insectsinput, :interaction)[1]
     scen = select(insectsinput, :scen)[1] # pollination scenario
     tp = select(insectsinput, :tp)[1] # time of perturbation
-    remain = select(insectsinput, :remain)[1] # remain proportion of insects right after pertubation
     regime = select(insectsinput, :regime)[1] # regime of loss
     
-    return interaction, scen, tp, remain, regime
+    return interaction, scen, tp, regime
 end
 
 """
@@ -254,6 +253,8 @@ Saves a long format table with the organisms field informations.
 """
 function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs::Array{Organisms.Organism,1},landscape::Array{Dict{String,Float64},2}, t::Int64, settings::Dict{String,Any})
 
+    outorgs = find(x -> x.stage != "e", orgs)
+    
     if t == 1
         header = hcat(["week"],
                       reshape(string.(fieldnames(Organism)[1:4]),1,4),
@@ -263,7 +264,8 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         open(string("EDoutputs/",settings["simID"],"/orgsweekly.txt"), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
-        for o in 1:length(orgs)
+                       
+        for o in outorgs
             open(string("EDoutputs/",settings["simID"],"/orgsweekly.txt"), "a") do output
                 writedlm(output, hcat(t,
                                       orgs[o].id,
@@ -298,8 +300,8 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         end
     end
 
-    if rem(t,settings["tout"]) == 0 # output bi-monthly
-        for o in 1:length(orgs)
+    if rem(t,settings["tout"]) == 0 
+        for o in outorgs
             open(string("EDoutputs/",settings["simID"],"/orgsweekly.txt"), "a") do output
                 writedlm(output, hcat(t,
                                       orgs[o].id,
@@ -400,7 +402,7 @@ function simulate()
     println("Sp info stored in object of type $(typeof(orgsref))")
 
     # Set insects implicit simulation
-    interaction, scen, tp, remain, regime = implicit_insect(settings)
+    interaction, scen, td, regime = implicit_insect(settings)
     
     # Create landscape
     mylandscape, landavail = landscape_init(landpars)
@@ -460,32 +462,19 @@ function simulate()
         orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
 
         # Update carring carrying capacity:
-        K = 2*(3.5/100)*(length(find(x -> x == true, landavail))*25) #7 tons/ha = 7g/100cm²
+        K = (3.5/100)*(length(find(x -> x == true, landavail))*25) #3.5 tons/ha = 7g/100cm²
         cK = K/length(find(x -> x == true, landavail))
         open(string("EDoutputs/",settings["simID"],"/landlog.txt"),"a") do sim
             writedlm(sim,[K cK])
         end
         
-        # LIFE CYCLES
-        #if settings["competition"] != "capacity"
-        #    projvegmass!(mylandscape,orgs, settings)
-        #end
-
-        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        #    println(sim,"Abundance before mortality: $(length(orgs)).")
-        #end
-
         survive!(orgs,t,cK,settings,orgsref,landavail,T)
 
-        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        #    println(sim,"Abundance after mortality: $(length(orgs)).")
-        #end
-        
         allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
 
         develop!(orgs,orgsref)
 
-        mate!(orgs,t,settings,scen,tp,remain,regime, 1)
+        mate!(orgs,t,settings,scen,td,regime,1)
 
         id_counter = mkoffspring!(orgs,t,settings,orgsref,id_counter)
 
