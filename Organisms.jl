@@ -17,10 +17,10 @@ using Fileprep
 export Organism, OrgsRef, newOrgs!, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!, release!
 
 # Set up model constants
-const Boltz = 1.38064852e-23 # Alternatively:
-#const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
-const aE = 1e-19 # Alternatively:
-#const aE = 0.63 #0.65 - eV Brown & Sibly MTE book chap 2
+#const Boltz = 1.38064852e-23 # Alternatively:
+const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
+#const aE = 1e-19 # Alternatively:
+const aE = 0.63 #0.65 - eV Brown & Sibly MTE book chap 2
 const µ_wind = 0.1
 const λ_wind = 3
 const µ_ant = 1
@@ -263,7 +263,7 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
             elseif orgs[o].stage == "a" &&
                 (orgs[o].floron <= rem(t,52) < orgs[o].floroff) && (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].max_mass))
                 # adults invest in reproduction
-                sowingmass = (5.5*10^(-2))*(orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + grown_mass)^0.95
+                sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + grown_mass)^0.95)
                 if haskey(orgs[o].mass,"repr")
                     orgs[o].mass["repr"] += sowingmass 
                 else
@@ -283,7 +283,9 @@ function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
     juvs = find(x->x.stage == "j",orgs)
 
     for j in juvs
-        if orgs[j].age >= orgs[j].first_flower && orgs[j].mass["veg"] >= 0.5*orgs[j].max_mass # If an individual grows quite fast, it is more vigorous, and should transfer it to adult fecundity. The only variable capable of transfering this property is the weigh, which, combined with the MTE rate, makes it  generate more offspring
+        if  orgs[j].mass["veg"] >= 0.5*orgs[j].max_mass
+# orgs[j].age >= orgs[j].first_flower
+            # If an individual grows quite fast, it is more vigorous, and should transfer it to adult fecundity. The only variable capable of transfering this property is the weigh, which, combined with the MTE rate, makes it  generate more offspring
             orgs[j].stage = "a"
         end
     end
@@ -326,28 +328,23 @@ end
     Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
     GEnetic comes here
     """
-function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen, tp, remain, regime, kp)
+function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen, td, regime, pl)
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.e_mu, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
     pollinated = []
 
-    # POLLINATION INDEPENDENT SCENARIO: as long as there is reproductive allocation, there is reproduction. Clonality is virtually useless
+    # 100% pollination availability
     if length(ready) > 0 # check if there is anyone flowering         
         if scen == "indep" # if all spps are pollination-independent
             for r in ready
                 orgs[r].mated = true
             end
-            # POLLINATION DEPENDENT SCENARIO:
-        elseif scen == "equal"
-            if t < tp
-                pollinated = ready #??????
-                for p in pollinated 
-                    orgs[p].mated = true
-                end
-            else 
+            # Disturbance pollination scenario
+        elseif scen == "equal" #all species lose pollination randomly (not species-specific)
+            if t >= td
                 if regime == "pulse"
                     if t == tp # pollination lost only once
-                        pollinated = sample(ready,n=Int(floor(length(ready)* exp(-(t-tp)) * kp)), replace = false, ordered = true) #* 10^(-3)) 
+                        pollinated = sample(ready,n=Int(floor(length(ready)* pl)), replace = false, ordered = true) #* 10^(-3)) 
                     else
                         pollinated = ready
                     end
@@ -357,39 +354,35 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
                     end
                     
                 elseif regime == "exp"
-                    pollinated = sample(ready, Int(floor(length(ready)* exp(-(t-tp)) * kp)), replace = false, ordered = true) #* 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
+                    pollinated = sample(ready,n=Int(floor(length(ready)* exp(-(t-td)*pl))), replace = false, ordered = true) #* 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
                     # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
                     for p in pollinated
                         orgs[p].mated = true
                     end
                 elseif regime == "const"
-                    pollinated = sample(ready, Int(floor(length(ready)* remain * kp)), replace = false, ordered = true) #* 10^(-3))
-                    # unity test
-                    #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                    #    println(sim,"Pollinated in $regime regime: $pollinated")
-                    #end 
+                    pollinated = sample(ready, Int(floor(length(ready)* pl)), replace = false, ordered = true) #* 10^(-3))
                     for p in pollinated
                         orgs[p].mated = true
-                        # unity test
-                        #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                        #    println(sim,"$(orgs[p].id) can reproduce? $(orgs[p].mated)")
-                        #end 
                     end
                 else
-                    error("Please chose a pollination scenario \"scen\" in insect.csv:
+                    error("Please chose a pollination regime \"regime\" in insect.csv:
                           - \"pulse\":
                           - \"const\": or
                           - \"exp\"")                    
                 end
-                
             end
-            # elif settings["insect"] == "spec"
-            #   ready = rand(length(repro)* remain * kp * 10-³), repro)
+        elseif scen == "spec" #not yet tested
+            # find species that are supposed to loose pollination at the current timestep
+            pollinated = ready
+            for p in pollinated
+                orgs[p].mated = true
+            end
         else
             error("Please chose a pollination scenario \"scen\" in insect.csv:
                   - \"indep\": pollination independent scenario,
                   - \"depend\": pollination dependent scenario, with supplementary info for simulating.")
         end
+        
     end  
 end
 
@@ -703,13 +696,8 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
             end 
         elseif (orgs[o].age/52) >= orgs[o].max_span #oldies die
             mprob = 1
-            #unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #    println(sim, "$(orgs[o].id) $(orgs[o].stage) dying of old age")
-            #end
         elseif orgs[o] == "j"
             Bm = orgs[o].b0em * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-            #println("Bm: $Bm, b0em = $(orgs[o].b0em), seed mass = $(orgs[o].mass["veg"])")
             mprob = 1 - exp(-Bm)
         else #adults
             Bm = orgs[o].b0am * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
