@@ -219,11 +219,11 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
             (orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
             (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].max_mass))
             # adults in their reproductive season and with enough weight, invest in reproduction
-            sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + grown_mass)^0.95)
+            #sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + grown_mass)^0.95)
             if haskey(orgs[o].mass,"repr")
-                orgs[o].mass["repr"] += sowingmass 
+                orgs[o].mass["repr"] += grown_mass #sowingmass 
             else
-                orgs[o].mass["repr"] = sowingmass
+                orgs[o].mass["repr"] = grown_mass #sowingmass
             end
         elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].max_mass
             # adults that have not yet reached maximum size can still grow vegetative biomass, independently of the season
@@ -353,7 +353,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     clonals = find(x -> x.mated == false && x.sestra = true && orgs[c].mass["repr"] > orgs[c].e_mu, orgs)
     
     for c in clonals
-        offs = div(orgs[c].mass["repr"], orgs[c].e_mu)
+        offs = div(0.5*orgs[c].mass["repr"], orgs[c].e_mu)
 
         if offs <= 0
             continue
@@ -389,7 +389,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
         for o in ferts
 
             emu = orgs[o].e_mu
-            offs =  div(orgs[o].mass["repr"], emu)
+            offs =  div(0.5*orgs[o].mass["repr"], emu)
 
             if offs <= 0
                 continue
