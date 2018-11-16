@@ -144,9 +144,10 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                       Dict("veg" => 0.0,
                                            "repr" => 0.0),
                                       orgsref.kernel[s], #kernel
-                                      rand(Distributions.Normal(mean(Uniform(min(orgsref.e_mu[s],orgsref.e_sd[s]),
-                                                                             max(orgsref.e_mu[s],orgsref.e_sd[s])+0.00000001)),
-                                                                abs(-(orgsref.e_mu[s],orgsref.e_sd[s])/6))), #e_mu
+                                      #rand(Distributions.Normal(mean(Uniform(min(orgsref.e_mu[s],orgsref.e_sd[s]),
+                    #max(orgsref.e_mu[s],orgsref.e_sd[s])+0.00000001)),
+                    rand(collect(values(orgsref.e_mu)),1)[1],
+                                                                #abs(-(orgsref.e_mu[s],orgsref.e_sd[s])/6))), #e_mu
                     rand(Distributions.Normal(mean(Uniform(min(orgsref.b0g[s],orgsref.b0g_sd[s]),
                                                            max(orgsref.b0g[s],orgsref.b0g_sd[s])+0.00000001)),
                                               abs(-(orgsref.b0g[s],orgsref.b0g_sd[s])/6))), #b0g
@@ -183,7 +184,15 @@ function newOrgs!(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                                         abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
 
                     # adult max biomass
-                    neworg.max_mass = (neworg.e_mu*1000/2.14)^2
+                    if neworg.e_mu == 0.0001
+                        neworg.max_mass = 1
+                    elseif neworg.e_mu == 0.0003
+                        neworg.max_mass = 2
+                    elseif neworg.e_mu == 0.001
+                        neworg.max_mass = 5
+                    else
+                        error("Check seed sizes in input")
+                    end
                     
                     # initial biomass
                     if neworg.stage in ["e","j"]
@@ -238,10 +247,12 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
         competing = find(x->(x.stage == "a" || x.stage == "j"),orgs)
         for o in competing
 
-            if orgs[o].stage == "j"
-                b0 = orgs[o].b0jg
-            elseif orgs[o].stage == "a"
-                b0 = orgs[o].b0ag
+            if orgs[o].max_span <= 1
+                b0 = orgs[o].b0ag*100
+            elseif 1 < orgs[o].max_span <= 2
+                b0 = orgs[o].b0ag*15
+            elseif orgs[o].max_span > 2
+                b0 = orgs[o].b0ag*10
             else
                 error("Seed or egg trying to compete.")
             end
@@ -402,16 +413,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
             emu = orgs[o].e_mu
             offs =  div(orgs[o].mass["repr"], emu)
-            # unity test
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds of $emu.")
-            end
 
             if offs <= 0
                 continue
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #    println(sim, orgs[o].id, " has biomass $(orgs[o].mass["repr"]) and produces $offs seeds.")
-                #end
             else
                 
                 orgs[o].mass["repr"] -= (offs * emu)
@@ -535,11 +539,6 @@ disperse!(landscape, orgs, t, seetings, orgsref,)
 Seeds are dispersed.
 """
 function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, connects::Array{Float64,2}, AT::Float64, Ah::Float64)
-
-    #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    #    println(sim, "Dispersing: $seedsi")
-    #end
 
     lost = Int64[]
 
@@ -694,9 +693,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
             else
                 mprob = 0
             end 
-        elseif (orgs[o].age/52) >= orgs[o].max_span #oldies die
+        elseif (orgs[o].age/52) >= orgs[o].max_span*52 #oldies die
             mprob = 1
-        elseif orgs[o] == "j"
+        elseif orgs[o].stage == "j"
             Bm = orgs[o].b0em * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             mprob = 1 - exp(-Bm)
         else #adults
@@ -738,7 +737,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
     fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-    #    println(sim,"Possibly competing: $(length(fullcells))")
+    #    println(sim,"# of cell with competition: $(length(fullcells))")
     #end
     if length(fullcells) > 0
         for c in fullcells
@@ -830,6 +829,23 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,2
     #end
 end
 
+"""
+occupied()
+Finds indexes of occupied cells in the landscape.
+"""
+function occupied(orgs)
+     locs = fill!(Array{Tuple{Int64,Int64,Int64}}(reverse(size(orgs))),(0,0,0))
+    #masses = zeros(Float64,size(orgs))
+    map!(x -> x.location,locs,orgs) #probably optimizable
+    l = DataFrame(locs)
+    #println("$l")
+    #map!(x -> x.mass["veg"],masses,orgs)
+    # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
+    fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
+    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+    #    println(sim,"# of cell with competition: $(length(fullcells))")
+    #end
+    end
 """
 pollination!()
 Simulates plant-insect encounters and effective pollen transfer.
