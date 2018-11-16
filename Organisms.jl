@@ -43,8 +43,8 @@ b0jg::Dict{String,Float64}
 b0jg_sd::Dict{String,Float64}
 b0ag::Dict{String,Float64}
 b0ag_sd::Dict{String,Float64}
-sestra::Dict{String,Int}
-dyad::Dict{String,Float64}
+sestra::Dict{String,Bool}
+#dyad::Dict{String,Float64}
 floron::Dict{String,Int}
 floron_sd::Dict{String,Int}
 floroff::Dict{String,Int}
@@ -77,7 +77,7 @@ b0em::Float64
 b0am::Float64
 b0jg::Float64
 b0ag::Float64
-#sestra::Int
+sestra::Bool
 #dyad::Float64
 floron::Int
 floroff::Int
@@ -137,6 +137,7 @@ function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                 rand(Distributions.Normal(mean(Uniform(min(orgsref.b0ag[s],orgsref.b0ag_sd[s]),
                                                        max(orgsref.b0ag[s],orgsref.b0ag_sd[s])+0.00000001)),
                                           abs(-(orgsref.b0ag[s],orgsref.b0ag_sd[s])/6))), #b0ag
+                orgsref.sestra[s],
                 Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floron[s],orgsref.floron_sd[s]),
                                                                  max(orgsref.floron[s],orgsref.floron_sd[s])+0.00000001)),
                                                     abs(-(orgsref.floron[s], orgsref.floron_sd[s])/6))),RoundUp)), #floron
@@ -280,10 +281,9 @@ function reproduce!()
 end
 
 """
-    mate!()
-    Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
-    GEnetic comes here
-    """
+mate!()
+Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
+"""
 function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen, td, regime, pl)
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.e_mu, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
@@ -337,8 +337,7 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
             error("Please chose a pollination scenario \"scen\" in insect.csv:
                   - \"indep\": pollination independent scenario,
                   - \"depend\": pollination dependent scenario, with supplementary info for simulating.")
-        end
-        
+        end        
     end  
 end
 
@@ -350,10 +349,43 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     
     offspring = Organism[]
 
+    # assexually produced offspring
+    clonals = find(x -> x.mated == false && x.sestra = true && orgs[c].mass["repr"] > orgs[c].e_mu, orgs)
+    
+    for c in clonals
+        offs = div(orgs[c].mass["repr"], orgs[c].e_mu)
+
+        if offs <= 0
+            continue
+        else
+            orgs[o].mass["repr"] -= (offs * orgs[c].e_mu)
+
+            # unity test
+            if  orgs[o].mass["repr"] <= 0
+                error("Negative reproductive biomass") #because offs is an integer, reproductive biomass should not become negative
+            end
+
+            # get a copy of the mother, which the clones will look like 
+            clonetemplate = deepcopy(orgs[c])
+            clonetemplate.stage = "e"
+            clonetemplate.mass["veg"] = orgs[c].e_mu
+            clonetemplate.mass["repr"] = 0.0
+            
+            for o in offs
+                clone = deepcopy(clonetemplate)
+                clone.location = (clonetemplate.location[1] + rand(Distributions.Bernoulli())[1],
+                                  clonetemplate.location[2] + rand(Distributions.Bernoulli())[1],
+                                  clonetemplate.location[3]) # clones are spread in one of the neighboring cells - or in the same as the mother
+                push!(offspring, clone)
+            end
+        end
+    end
+    
+    # sexually produced offspring
     for sp in unique(getfield.(orgs, :sp))
 
         ferts = find(x -> x.mated == true && x.sp == sp, orgs)
-
+        
         for o in ferts
 
             emu = orgs[o].e_mu
@@ -370,10 +402,6 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     error("Negative reproductive biomass")
                 end
 
-                #unity test
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-                #println("Number of offspring of ", orgs[o].id, ": ",offs)
-                #end
 
                 # get phylogenetic constraint: variance of the distribution
                 sp = orgs[o].sp
