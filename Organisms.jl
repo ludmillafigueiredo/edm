@@ -191,73 +191,45 @@ Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T`
 function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef,T::Float64)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
+    
+    growing = find(x->(x.stage == "a" || x.stage == "j"),orgs)
+    for o in growing
 
-    if settings["competition"] != "capacity"
-        growing = find(x -> x.stage in ("a","j"), orgs)
-        for o in growing
-
-            # This MTE rate comes from dry weights: fat storage and whatever reproductive structures too, but not maintenance explicitly
-            # Any cost related to insufficient minimal biomass goes into the survival probability function
-            # 2.b Check for competition
-
-            compterm = compete(landscape, orgs[o], settings)
-            # unity test
-            #println(simulog, org.id," weights",org.biomass["veg"]," had $nbsum g overlap")
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #    println(sim, orgs[o].id, "  compterm $compterm")
-            #end
-            
-            # ZOI based competition
-            if compterm <= 0
-                #2.c Those not growing will have higher chance of dying
-                push!(nogrowth,o)
-            else
-                
-            end
+        # we verified that a species lifespan determines how fast it should grow
+        if orgs[o].max_span <= 1
+            b0 = orgs[o].b0ag*100
+        elseif 1 < orgs[o].max_span <= 2
+            b0 = orgs[o].b0ag*15
+        elseif orgs[o].max_span > 2
+            b0 = orgs[o].b0ag*10
+        else
+            error("Check species maximum lifespan.")
         end
-    else
-        # seedling and adults grow at different rates
-        competing = find(x->(x.stage == "a" || x.stage == "j"),orgs)
-        for o in competing
 
-            if orgs[o].max_span <= 1
-                b0 = orgs[o].b0ag*100
-            elseif 1 < orgs[o].max_span <= 2
-                b0 = orgs[o].b0ag*15
-            elseif orgs[o].max_span > 2
-                b0 = orgs[o].b0ag*10
+        #only vegetative biomass helps growth
+        grown_mass = b0*(orgs[o].mass["veg"])^(3/4)*exp(-aE/(Boltz*T))
+
+        if grown_mass == 0 # if it is not growing, there is no need to allocate
+            push!(nogrowth,o)
+        elseif orgs[o].stage == "j"
+            # juveniles grow vegetative biomass only
+            orgs[o].mass["veg"] += grown_mass 
+        elseif orgs[o].stage == "a" &&
+            (orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
+            (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].max_mass))
+            # adults in their reproductive season and with enough weight, invest in reproduction
+            sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + grown_mass)^0.95)
+            if haskey(orgs[o].mass,"repr")
+                orgs[o].mass["repr"] += sowingmass 
             else
-                error("Seed or egg trying to compete.")
+                orgs[o].mass["repr"] = sowingmass
             end
-
-            #println("$(sum(collect(values(orgs[o].mass))))")
-            grown_mass = b0*(orgs[o].mass["veg"])^(3/4)*exp(-aE/(Boltz*T))
-
-            if grown_mass <= 0
-                push!(nogrowth,o)
-            end            
-            
-            if orgs[o].stage == "j"
-                # juveniles grow
-                orgs[o].mass["veg"] += grown_mass             
-                # unity test
-                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
-                #    println(sim, "$(orgs[o].id)-$(orgs[o].stage) grew $grown_mass")
-                #end
-            elseif orgs[o].stage == "a" &&
-                (orgs[o].floron <= rem(t,52) < orgs[o].floroff) && (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].max_mass))
-                # adults invest in reproduction
-                sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + grown_mass)^0.95)
-                if haskey(orgs[o].mass,"repr")
-                    orgs[o].mass["repr"] += sowingmass 
-                else
-                    orgs[o].mass["repr"] = sowingmass
-                end
-            elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].max_mass 
-                orgs[o].mass["veg"] += grown_mass 
-            end            
-        end
+        elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].max_mass
+            # adults that have not yet reached maximum size can still grow vegetative biomass, independently of the season
+            orgs[o].mass["veg"] += grown_mass 
+        end            
     end
+    
 end
 """
 develop!()
