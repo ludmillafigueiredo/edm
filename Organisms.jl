@@ -92,7 +92,7 @@ mated::Bool
 genotype::Array{String,2} #initialize separately
 radius::Int64 #TODO take it out
 end
-Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,floron,floroff,seedon,seedoff,max_mass,first_flower,max_span,10,false,["A" "A"],0)
+Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,,sestra,floron,floroff,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,seedon,seedoff,max_mass,first_flower,max_span,10,false,["A" "A"],0)
 
 """
 initorgs(landavail, orgsref,id_counter,tdist)
@@ -120,7 +120,7 @@ function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                   s,
                                   Dict("veg" => 0.0,
                                        "repr" => 0.0),
-                                  orgsref.kernel[s],l
+                                  orgsref.kernel[s],
                                   orgsref.e_mu[s],
                                   rand(Distributions.Normal(mean(Uniform(min(orgsref.b0g[s],orgsref.b0g_sd[s]),
                                                                          max(orgsref.b0g[s],orgsref.b0g_sd[s])+0.00000001)),
@@ -350,7 +350,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     offspring = Organism[]
 
     # assexually produced offspring
-    clonals = find(x -> x.mated == false && x.sestra = true && orgs[c].mass["repr"] > orgs[c].e_mu, orgs)
+    clonals = find(x -> x.mated == false && x.sestra == true && x.mass["repr"] > x.e_mu, orgs)
     
     for c in clonals
         offs = div(0.5*orgs[c].mass["repr"], orgs[c].e_mu)
