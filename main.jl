@@ -174,10 +174,13 @@ function read_spinput(settings::Dict{String,Any})
          rows(spinputtbl,:b0ag_sd)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
-         rows(spinputtbl,:sestra)[i]
+         rows(spinputtbl,:sestra)[i] == "true"
          for i in 1:length(rows(spinputtbl,:sp_id))),
+    #Dict(rows(spinputtbl,:sp_id)[i] =>
+    #     rows(spinputtbl,:dyad)[i]
+    #     for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
-         rows(spinputtbl,:dyad)[i]
+         rows(spinputtbl,:max_seedn)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:floron)[i]
@@ -413,7 +416,7 @@ function simulate()
     id_counter = 0
     
     # Create initial individuals
-    orgs, id_counter = newOrgs!(landavail, orgsref, id_counter, settings["tdist"])
+    orgs, id_counter = initorgs(landavail, orgsref, id_counter, settings["tdist"])
     
     println("Plants initialized: type $(typeof(orgs))")
 
