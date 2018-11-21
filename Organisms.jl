@@ -45,6 +45,7 @@ b0ag::Dict{String,Float64}
 b0ag_sd::Dict{String,Float64}
 sestra::Dict{String,Bool}
 #dyad::Dict{String,Float64}
+max_seedn::Dict{String,Int}
 floron::Dict{String,Int}
 floron_sd::Dict{String,Int}
 floroff::Dict{String,Int}
@@ -54,10 +55,10 @@ seedon_sd::Dict{String,Int}
 seedoff::Dict{String,Int}
 seedoff_sd::Dict{String,Int}
 max_mass::Dict{String,Float64}
-first_flower::Dict{String,Int64} #TODO can go. Flowering is mass dependent
-first_flower_sd::Dict{String,Int64}
-max_span::Dict{String,Int64}
-max_span_sd::Dict{String,Int64}
+first_flower::Dict{String,Int} #TODO can go. Flowering is mass dependent
+first_flower_sd::Dict{String,Int}
+max_span::Dict{String,Int}
+max_span_sd::Dict{String,Int}
 mass_mu::Dict{String,Float64}
 mass_sd::Dict{String,Float64}
 abund::Dict{String,Int}
@@ -81,6 +82,7 @@ sestra::Bool
 #dyad::Float64
 floron::Int
 floroff::Int
+wseedn::Int
 seedon::Int
 seedoff::Int
 max_mass::Float64
@@ -92,7 +94,7 @@ mated::Bool
 genotype::Array{String,2} #initialize separately
 radius::Int64 #TODO take it out
 end
-Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,,sestra,floron,floroff,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,seedon,seedoff,max_mass,first_flower,max_span,10,false,["A" "A"],0)
+Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span,10,false,["A" "A"],0)
 
 """
 initorgs(landavail, orgsref,id_counter,tdist)
@@ -144,6 +146,7 @@ function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                 Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floroff[s], orgsref.floroff_sd[s]),
                                                                  max(orgsref.floroff[s], orgsref.floroff_sd[s])+0.00000001)),
                                                     abs(-(orgsref.floroff[s], orgsref.floroff_sd[s])/6))),RoundUp)), #floroff
+                0,
                 Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedon[s], orgsref.seedon_sd[s]),
                                                                  max(orgsref.seedon[s], orgsref.seedon_sd[s])+0.00000001)),
                                                     abs(-(orgsref.seedon[s],orgsref.seedon_sd[s])/6))),RoundUp)), #seedon
@@ -168,6 +171,9 @@ function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                 else
                     error("Check seed sizes in input")
                 end
+
+                # weekly number of seeds
+                neworg.wseedn = Int(round(orgsref.max_seedn[s]/(neworg.floroff-neworg.floron+1)))
                 
                 # initial biomass
                 if neworg.stage in ["e","j"]
@@ -358,6 +364,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
         if offs <= 0
             continue
         else
+            # limit offspring production to the maximal number of seeds the species can produce
+            offs > orgs[o].wseedn ? offs = orgs[o].wseedn : offs
+            
             orgs[o].mass["repr"] -= (offs * orgs[c].e_mu)
 
             # unity test
@@ -385,15 +394,18 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     for sp in unique(getfield.(orgs, :sp))
 
         ferts = find(x -> x.mated == true && x.sp == sp, orgs)
+        # TODO: this loop happens for each species. Faster simulations could be achieved if checking values such as e_mu and max_seedn are taken at the psecies level, rather than individual. If this happens, however, it will hinder species evolution.
         
         for o in ferts
 
             emu = orgs[o].e_mu
-            offs =  div(0.5*orgs[o].mass["repr"], emu)
+            offs = div(0.5*orgs[o].mass["repr"], emu)
 
             if offs <= 0
                 continue
             else
+                # limit offspring production to the maximal number of seeds the species can produce
+                offs > orgs[o].wseedn ? offs = orgs[o].wseedn : offs
                 
                 orgs[o].mass["repr"] -= (offs * emu)
 
