@@ -95,6 +95,11 @@ equal pollination loss for all species \"equal\"."
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
         default = abspath(pwd(),"inputs/temp1917_2017.csv")
+
+        "--timemsg"
+        help = "Output timing to terminal, as well as simulog."
+        arg_type = String
+        default = true
     end
 
     return parse_args(sets) # returning a dictionnary of strings is useful because they can passed as keywords to Julia function
@@ -406,13 +411,13 @@ function fragchange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int
     end
 end
 
-function timing(operation::String, settings::Dict{String,Any}, both::Bool)
+function timing(operation::String, settings::Dict{String,Any})
     timing = string(operation," lasted: ")
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
         println(sim,timing)
     end
     #print to terminal
-    if both
+    if settings["timemsg"]
         println(timing)
     end
 end
@@ -502,7 +507,7 @@ function simulate()
         # OUTPUT: First thing, to see how community is initialized
         tic()
         orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
-        timing("WRITING ORGSOUTPUT", settings, true)
+        timing("WRITING ORGSOUTPUT", settings["timemsg"])
         toc()
 
         # LIFE CYCLE
@@ -528,7 +533,7 @@ function simulate()
         establish!(mylandscape,orgs,t,settings,orgsref,T)
         
         shedd!(orgs,orgsref,t)
-        timing("LIFE CYCLE", settings, true)
+        timing("LIFE CYCLE", settings["timemsg"])
         toc()
     end
 end
