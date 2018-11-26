@@ -88,13 +88,12 @@ seedoff::Int
 max_mass::Float64
 first_flower::Int64
 max_span::Int64
+topt::Float64
 #### State variables #### #TODO put all state variable together
 age::Int64 # control death when older than max. lifespan
 mated::Bool
-genotype::Array{String,2} #initialize separately
-radius::Int64 #TODO take it out
 end
-Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span,10,false,["A" "A"],0)
+Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span,10,false)
 
 """
 initorgs(landavail, orgsref,id_counter,tdist)
@@ -468,12 +467,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.first_flower-mean(first_flowerdist) + 0.00000001)/embryo.first_flower)), RoundUp))
                     embryo.first_flower + newvalue > 12 ?
                     embryo.first_flower += newvalue : embryo.first_flower += 0
-                    newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.max_span-mean(max_spandist) + 0.00000001)/embryo.max_span)),RoundUp))
-                    embryo.max_span + newvalue > orgsref.max_span[embryo.sp] ?
-                    embryo.max_span += newvalue : embryo.max_span += 0
-
-                    # reset adult max_mass according to newly set 
-                    embryo.max_mass = (embryo.e_mu*1000/2.14)^2
+                    #newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.max_span-mean(max_spandist) + 0.00000001)/embryo.max_span)),RoundUp))
+                    #embryo.max_span + newvalue > orgsref.max_span[embryo.sp] ?
+                    #embryo.max_span += newvalue : embryo.max_span += 0
                     
                     # set embryos own individual non-evolutionary traits
                     embryo.id = hex(id_counter)
@@ -483,8 +479,6 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     embryo.stage = "e"
                     embryo.age = 0
                     embryo.mated = false
-                    embryo.genotype = ["A" "A"]
-                    embryo.radius = 0
 
                     push!(offspring, embryo)
 	            #unity test
@@ -668,7 +662,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     # Density-independent mortality
     for o in 1:length(orgs)
 
-        if sum(values(orgs[o].mass)) <= 0 || orgs[o] in nogrowth #probably unnecessary
+        if sum(values(orgs[o].mass)) <= 0 || orgs[o] in nogrowth #probably unnecessary to verify negative or null weights
             mprob = 1
         elseif o in seeds
             if rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
