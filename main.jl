@@ -485,9 +485,10 @@ function simulate()
             disturb!(mylandscape,landavail,orgs,t,settings)
         end
         # Initialize or update landscape properties that are relevant for life cycle processes
-        K, cK = losschange(landavail, settings, t)
-        Ah, AT = fragchange(landavail, settings, t)
-        
+        if t == 1 || (settings["disturb"] in ["loss" "frag"] && t in [(tdist-1) tdist (tdist-1)])
+            K, cK = losschange(landavail, settings, t)
+            Ah, AT = fragchange(landavail, settings, t)
+        end
         # OUTPUT: First thing, to see how community is initialized
         orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
 
