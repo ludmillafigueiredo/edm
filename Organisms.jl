@@ -216,7 +216,7 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
         #only vegetative biomass helps growth
         grown_mass = b0*(orgs[o].mass["veg"])^(3/4)*exp(-aE/(Boltz*T))
 
-        if grown_mass == 0 # if it is not growing, there is no need to allocate
+        if isapprox(grown_mass,0) # if it is not growing, there is no need to allocate
             push!(nogrowth,o)
         elseif orgs[o].stage == "j"
             # juveniles grow vegetative biomass only
@@ -236,7 +236,7 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
             orgs[o].mass["veg"] += grown_mass 
         end            
     end
-    
+    return nogrowth
 end
 """
 develop!()
@@ -655,7 +655,7 @@ end
     Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
     plants in nogrwth are subjected to two probability rates
     """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T)
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T, nogrowth::Array{Int64,1})
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
     #    println(sim,"Running mortality")
     #end
@@ -668,7 +668,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     # Density-independent mortality
     for o in 1:length(orgs)
 
-        if sum(values(orgs[o].mass)) <= 0 #probably unnecessary
+        if sum(values(orgs[o].mass)) <= 0 || orgs[o] in nogrowth #probably unnecessary
             mprob = 1
         elseif o in seeds
             if rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 

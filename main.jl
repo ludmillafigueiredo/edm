@@ -19,10 +19,11 @@ using Organisms
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 #const aE = 1e-19
 const aE = 0.63
-#const plants_gb0 = (10^(10.15))/40 # 10e10.15 is the annual plant biomass production (Ernest et al. 2003) transformed to weekly base, with growth not happening during winter (MTEpar notebook)
-#const plants_mb0 = 9.902 #adjustted accordung to 1 death per individual for 1g (MTEpar notebook)
-#const plants_fb0 = exp(30.0) # fertility rate
-#const seedmassµ = 0.8
+global K = 0.0
+global cK = 0.0
+global Ah = 0.0
+global AT = 0.0
+global nogrowth = Int64[]
 
 function parse_commandline()
     sets = ArgParseSettings() #object that will be populated with the arguments by the macro
@@ -380,30 +381,39 @@ function disturb!(landscape::Array{Dict{String,Float64},2}, landavail::Array{Boo
     #return disturbtbl, tdist
 end
 
-function losschange(landavail::Array{Bool,2}, settings::Dict{String,Array}, t::Int64)
+function losschange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64)
+    
     if t == 1 || (settings["disturb"] == "loss" && t in [(tdist-1) tdist (tdist-1)])
-        K = (1/100)*(length(find(x -> x == true, landavail))*25) #x tons/ha = x.100g/1m²
-        cK = K/length(find(x -> x == true, landavail))
-
         if t == 1
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"w") do sim
                 println(sim, "week\tK\tcK")
             end          
         end
+        global K = (1/100)*(length(find(x -> x == true, landavail))*25) #x tons/ha = x.100g/1m²
+        global cK = K/length(find(x -> x == true, landavail))
         
         open(string("EDoutputs/",settings["simID"],"/landlog.txt"),"a") do sim
             writedlm(sim,[t K cK])
         end
+    end
+    
+end
 
-        return K, cK
+function fragchange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64, connects::Array{Float64,2})
+    if t == 1 || (settings["disturb"] == "frag" && t == tdist) 
+        global Ah = length(find(x -> x == true, landavail))*25*0.0001
+        global AT = sort(reshape(connects,prod(size(connects))), rev = true) |> (y -> length(y) > 1 ? prod(y[1:2]) : (length(y) == 2 ? sum(connects)^2 : Ah))
     end
 end
 
-function fragchange(landavail::Array{Bool,2}, settings::Dict{String,Array}, t::Int64)
-    if t == 1 || (settings["disturb"] == "frag" && t == tdist) 
-        Ah = length(find(x -> x == true, landavail))*25*0.0001
-        AT = sort(reshape(connects,prod(size(connects))), rev = true) |> (y -> length(y) > 1 ? prod(y[1:2]) : (length(y) == 2 ? sum(connects)^2 : Ah))
-        return Ah, AT
+function timing(operation::String, settings::Dict{String,Any}, both::Bool)
+    timing = string(operation," lasted: ")
+    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        println(sim,timing)
+    end
+    #print to terminal
+    if both
+        println(timing)
     end
 end
 
@@ -485,17 +495,25 @@ function simulate()
             disturb!(mylandscape,landavail,orgs,t,settings)
         end
         # Initialize or update landscape properties that are relevant for life cycle processes
-        if t == 1 || (settings["disturb"] in ["loss" "frag"] && t in [(tdist-1) tdist (tdist-1)])
-            K, cK = losschange(landavail, settings, t)
-            Ah, AT = fragchange(landavail, settings, t)
+        if t == 1 || (settings["disturb"] in ["loss" "frag"] && t in [(tdist-1) tdist (tdist+1)])
+            losschange(landavail, settings, t)
+            fragchange(landavail, settings, t, connects)
         end
         # OUTPUT: First thing, to see how community is initialized
+        tic()
         orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
+        timing("WRITING ORGSOUTPUT", settings, true)
+        toc()
 
-        # LIFE CYCLES
-        survive!(orgs,t,cK,settings,orgsref,landavail,T)
+        # LIFE CYCLE
+        tic()
+        if t == 1
+            nogrowth = Int64[]
+        end
 
-        allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
+        survive!(orgs,t,cK,settings,orgsref,landavail,T,nogrowth)
+
+        global nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
 
         develop!(orgs,orgsref)
 
@@ -510,6 +528,8 @@ function simulate()
         establish!(mylandscape,orgs,t,settings,orgsref,T)
         
         shedd!(orgs,orgsref,t)
+        timing("LIFE CYCLE", settings, true)
+        toc()
     end
 end
 simulate()
