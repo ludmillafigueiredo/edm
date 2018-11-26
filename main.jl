@@ -380,6 +380,27 @@ function disturb!(landscape::Array{Dict{String,Float64},2}, landavail::Array{Boo
     #return disturbtbl, tdist
 end
 
+function losschange(landavail::Array{Bool,2}, settings::Dict{String,Array}, t::Int64)
+    if t == 1 || (settings["disturb"] == "loss" && t in [(tdist-1) tdist (tdist-1)]
+        K = (1/100)*(length(find(x -> x == true, landavail))*25) #x tons/ha = x.100g/1m²
+        cK = K/length(find(x -> x == true, landavail))
+        
+        open(string("EDoutputs/",settings["simID"],"/landlog.txt"),"a") do sim
+            writedlm(sim,[t K cK])
+        end
+
+        return K, cK
+    end
+end
+
+function fragchange(landavail::Array{Bool,2}, settings::Dict{String,Array}, t::Int64)
+    if t == 1 || (settings["disturb"] == "frag" && t == tdist) 
+        Ah = length(find(x -> x == true, landavail))*25*0.0001
+        AT = sort(reshape(connects,prod(size(connects))), rev = true) |> (y -> length(y) > 1 ? prod(y[1:2]) : (length(y) == 2 ? sum(connects)^2 : Ah))
+        return Ah, AT
+    end
+end
+
 """
 simulate!()
 """
@@ -439,38 +460,32 @@ function simulate()
     open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"w") do sim
         println(sim,string("Simulation: ",settings["simID"],now()))
     end
-    open(string("EDoutputs/",settings["simID"],"/landlog.txt"),"w") do sim
-        println(sim, "K\tcK")
-    end
-
+    
     # MODEL RUN
     for t in 1:settings["timesteps"]
 
         println("running week $t")
+        
         # unity test
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, "WEEK $t")
         end
 
-        #UPDATE LANDSCAPE: weekly temperature and projected biomass
-
+        # UPDATE LANDSCAPE: weekly temperature and precipitation
         T = updateenv!(mylandscape, t, landpars)
         
         # DISTURBANCE
         if settings["disturb"] != "none"  
-           disturb!(mylandscape,landavail,orgs,t,settings)
+            disturb!(mylandscape,landavail,orgs,t,settings)
         end
-
-        # OUTPUT: First thing to see how community is initialized
+        # Initialize or update landscape properties that are relevant for life cycle processes
+        K, cK = losschange(landavail, settings, t)
+        Ah, AT = fragchange(landavail, settings, t)
+        
+        # OUTPUT: First thing, to see how community is initialized
         orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
 
-        # Update carring carrying capacity:
-        K = (3.5/100)*(length(find(x -> x == true, landavail))*25) #3.5 tons/ha = 7g/100cm²
-        cK = K/length(find(x -> x == true, landavail))
-        open(string("EDoutputs/",settings["simID"],"/landlog.txt"),"a") do sim
-            writedlm(sim,[K cK])
-        end
-        
+        # LIFE CYCLES
         survive!(orgs,t,cK,settings,orgsref,landavail,T)
 
         allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
@@ -483,8 +498,6 @@ function simulate()
 
         seedsi = release!(orgs,t,settings,orgsref)
 
-        Ah = length(find( x -> x ==true, landavail))*25*0.0001
-        AT = sort(reshape(connects,prod(size(connects))), rev = true) |> (y -> length(y) > 1 ? prod(y[1:2]) : (length(y) == 2 ? sum(connects)^2 : Ah)) 
         disperse!(landavail,seedsi,orgs,t,settings,orgsref,connects,AT,Ah)
 
         establish!(mylandscape,orgs,t,settings,orgsref,T)
