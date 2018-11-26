@@ -417,34 +417,6 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 # get phylogenetic constraint: variance of the distribution
                 sp = orgs[o].sp
                 conspp = [rand(filter(x -> x.sp == sp && x.stage == "a", orgs))]
-
-                e_mudist = Array{Float64}(1,length(conspp)) 
-                b0gdist = Array{Float64}(1,length(conspp))
-                b0emdist = Array{Float64}(1,length(conspp))
-                b0amdist = Array{Float64}(1,length(conspp))
-                b0jgdist = Array{Float64}(1,length(conspp))
-                b0agdist = Array{Float64}(1,length(conspp))
-                florondist = Array{Int}(1,length(conspp))
-                floroffdist = Array{Int}(1,length(conspp))
-                seedondist = Array{Int}(1,length(conspp))
-                seedoffdist = Array{Int}(1,length(conspp))
-                first_flowerdist = Array{Float64}(1,length(conspp))
-                max_spandist = Array{Int64}(1,length(conspp))
-
-                for i in eachindex(conspp)
-                    e_mudist[i] = conspp[i].e_mu 
-                    b0gdist[i] = conspp[i].b0g
-                    b0emdist[i] = conspp[i].b0em
-                    b0amdist[i] = conspp[i].b0am
-                    b0jgdist[i] = conspp[i].b0jg
-                    b0agdist[i] = conspp[i].b0ag
-                    florondist[i] = conspp[i].floron
-                    floroffdist[i] = conspp[i].floroff
-                    seedondist[i] = conspp[i].seedon
-                    seedoffdist[i] = conspp[i].seedoff
-                    first_flowerdist[i] = conspp[i].first_flower
-                    max_spandist[i] = conspp[i].max_span
-                end
                 
                 for n in 1:offs
                     
@@ -452,22 +424,22 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
                     embryo = deepcopy(orgs[o])
 
-                    newvalue = rand(Distributions.Normal(0,abs(embryo.e_mu-mean(e_mudist) + 0.00000001)))
-                    embryo.e_mu + newvalue >= orgsref.e_mu[embryo.sp] ? # if seed biomass or minimal biomass would smaller than zero, it does not chenge
-                    embryo.e_mu += newvalue : embryo.e_mu += 0
-                    embryo.b0g += rand(Distributions.Normal(0,abs(embryo.b0g-mean(b0gdist) + 0.00000001)/embryo.b0g))
-                    embryo.b0em += rand(Distributions.Normal(0,abs(embryo.b0em-mean(b0emdist) + 0.00000001)/embryo.b0em))
-                    embryo.b0am += rand(Distributions.Normal(0,abs(embryo.b0am-mean(b0amdist) + 0.00000001)/embryo.b0am))
-                    embryo.b0jg += rand(Distributions.Normal(0,abs(embryo.b0jg-mean(b0jgdist) + 0.00000001)/embryo.b0jg))
-                    embryo.b0ag += rand(Distributions.Normal(0,abs(embryo.b0ag-mean(b0agdist) + 0.00000001)/embryo.b0ag))
-                    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-mean(florondist) + 0.00000001)/embryo.floron)),RoundUp))
-                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-mean(floroffdist) + 0.00000001)/embryo.floroff)),RoundUp))
-                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-mean(seedondist) + 0.00000001)/embryo.seedon)),RoundUp))
-                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-mean(seedoffdist) + 0.00000001)/embryo.seedoff)),RoundUp))
-                    newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.first_flower-mean(first_flowerdist) + 0.00000001)/embryo.first_flower)), RoundUp))
+                    #newvalue = rand(Distributions.Normal(0,abs(embryo.e_mu-conspp.e_mu)/embryo.e_mu))
+                    #embryo.e_mu + newvalue >= orgsref.e_mu[embryo.sp] ? # if seed biomass or minimal biomass would smaller than zero, it does not chenge
+                    #embryo.e_mu += newvalue : embryo.e_mu += 0
+                    embryo.b0g += rand(Distributions.Normal(0,abs(embryo.b0g-conspp.b0g)/embryo.b0g))
+                    embryo.b0em += rand(Distributions.Normal(0,abs(embryo.b0em-conspp.b0em)/embryo.b0em))
+                    embryo.b0am += rand(Distributions.Normal(0,abs(embryo.b0am-conspp.b0am)/embryo.b0am))
+                    embryo.b0jg += rand(Distributions.Normal(0,abs(embryo.b0jg-conspp.b0jg)/embryo.b0jg))
+                    embryo.b0ag += rand(Distributions.Normal(0,abs(embryo.b0ag-conspp.b0ag)/embryo.b0ag))
+                    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron)/embryo.floron)),RoundUp))
+                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff)/conspp.floroff)),RoundUp))
+                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon)/embryo.seedon)),RoundUp))
+                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff)/embryo.seedoff)),RoundUp))
+                    newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.first_flower-conspp.first_flower)/embryo.first_flower)), RoundUp))
                     embryo.first_flower + newvalue > 12 ?
                     embryo.first_flower += newvalue : embryo.first_flower += 0
-                    #newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.max_span-mean(max_spandist) + 0.00000001)/embryo.max_span)),RoundUp))
+                    #newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.max_span-conspp.max_span/embryo.max_span)),RoundUp))
                     #embryo.max_span + newvalue > orgsref.max_span[embryo.sp] ?
                     #embryo.max_span += newvalue : embryo.max_span += 0
                     
