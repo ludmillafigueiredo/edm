@@ -381,9 +381,15 @@ function disturb!(landscape::Array{Dict{String,Float64},2}, landavail::Array{Boo
 end
 
 function losschange(landavail::Array{Bool,2}, settings::Dict{String,Array}, t::Int64)
-    if t == 1 || (settings["disturb"] == "loss" && t in [(tdist-1) tdist (tdist-1)]
+    if t == 1 || (settings["disturb"] == "loss" && t in [(tdist-1) tdist (tdist-1)])
         K = (1/100)*(length(find(x -> x == true, landavail))*25) #x tons/ha = x.100g/1m²
         cK = K/length(find(x -> x == true, landavail))
+
+        if t == 1
+            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+                println(sim, "week\tK\tcK")
+            end          
+        end
         
         open(string("EDoutputs/",settings["simID"],"/landlog.txt"),"a") do sim
             writedlm(sim,[t K cK])
