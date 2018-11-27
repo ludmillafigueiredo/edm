@@ -1,24 +1,25 @@
 # Creating a random set of species
 createsppfile <- function(rseed, richp, sd, simID, b0g, b0em, b0am, b0ag, b0jg) {
   set.seed(rseed)
+  options(scipen=999)
   # sprich = plant species richness
   sp_id <- paste(rep("p",richp), 1:richp, sep = "-");
   
-  e_min <- runif(richp, 0.007, 0.07);
-  e_max <- e_min %>% map_dbl(function(x) ifelse(x <= mean(c(0.007, 0.07)), 0.007, 0.07));
+  e_min <- sample(c(0.0001, 0.0003, 0.001), richp, replace = TRUE);
+  e_max <- e_min 
   kernels <-sample(c("a","w","wa"), richp, replace = TRUE);
   kernels_sd <- rep(0.1,richp);
-  b0g_min <- runif(richp, b0g*0.8,b0g*1.2); #param
-  b0g_max <- b0g_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0g*0.8,b0g*1.2)), b0g*0.8,b0g*1.2));
-  b0em_min <- runif(richp,b0em*0.8,b0em*1.2);
-  b0em_max <- b0em_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0em*0.8,b0em*1.2)), b0em*0.8,b0em*1.2));
-  b0am_min <- runif(richp, b0am*0.8, b0am*1.2);
-  b0am_max <- b0am_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0am*0.8, b0am*1.2)), b0am*0.8, b0am*1.2));
-  b0jg_min <- runif(richp, b0jg*0.8, b0jg*1.2); 
-  b0jg_max <- b0jg_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0jg*0.8, b0jg*1.2)), b0jg*0.8, b0jg*1.2));
-  b0ag_min <- runif(richp, b0ag*0.8, b0ag*1.2);
-  b0ag_max <- b0ag_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0ag*0.8, b0ag*1.2)), b0ag*0.8, b0ag*1.2));
-  sestra <- rep(0, richp);
+  b0g_min <- runif(richp, b0g*0.9,b0g*1.1); #param
+  b0g_max <- b0g_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0g*0.9,b0g*1.1)), b0g*0.9,b0g*1.1));
+  b0em_min <- runif(richp,b0em*0.9,b0em*1.1);
+  b0em_max <- b0em_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0em*0.9,b0em*1.1)), b0em*0.9,b0em*1.1));
+  b0am_min <- runif(richp, b0am*0.9, b0am*1.1);
+  b0am_max <- b0am_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0am*0.9, b0am*1.1)), b0am*0.9, b0am*1.1));
+  b0jg_min <- runif(richp, b0jg*0.9, b0jg*1.1); 
+  b0jg_max <- b0jg_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0jg*0.9, b0jg*1.1)), b0jg*0.9, b0jg*1.1));
+  b0ag_min <- runif(richp, b0ag*0.9, b0ag*1.1);
+  b0ag_max <- b0ag_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0ag*0.9, b0ag*1.1)), b0ag*0.9, b0ag*1.1));
+  sestra <- sample(c("true","false"), richp, replace = TRUE);
   dyad <- rep(0, richp);
   floron_min <- rep(12, richp)#runif(richp,12,24);
   floron_max <- floron_min + 1 #%>% map_dbl(function(x) ifelse(x < round(mean(c(12,24)),0), 12,24));
@@ -35,7 +36,7 @@ createsppfile <- function(rseed, richp, sd, simID, b0g, b0em, b0am, b0ag, b0jg) 
   first_flower_max <- as.numeric(floor(1.962*max_span_max + 77.24))
   mass_mu_min <- 0.1*max_mass;
   mass_mu_max <- rep(0.0001, richp);
-  abund <-ceiling(runif(richp,1,20));
+  abund <-ceiling(runif(richp,100,500));
   # Standard deviation valu
   
   spptable <- data.frame(sp_id = sp_id,
@@ -77,29 +78,35 @@ createsppfile <- function(rseed, richp, sd, simID, b0g, b0em, b0am, b0ag, b0jg) 
 }
 
 # Subset species from the Göttingen pool
-goetspp <- function(rseed,richp,mode,simID){
+goetspp <- function(rseed,richp,mode,simID,b0g, b0em, b0am, b0ag, b0jg){
   set.seed(rseed)
-  
+  options(scipen=999)
   EDdir <- file.path("/home/luf74xx/Dokumente/model")
   inputsdir <- file.path(EDdir,"inputs")
   
   # Get *seed size*, *first age of flowering* and *maximum life span* from LEDA
   # fill the ones that are NA for span or first age
   spp <- read.table(file.path(inputsdir,"traitsleda.csv"), header = TRUE, sep = ",")%>%
-    select(sp,seedm,kernels,span,firstflower)%>%
-    mutate(seedm = 0.001*seedm)%>%
+    select(sp,seedn,seedm,kernels,span,firstflower)%>%
+    mutate(seedm = seedm)%>%
     mutate(kernels = case_when(
       kernels == "wind" ~ "w",
       kernels == "ant" ~ "a",
       kernels == "windant" ~ "wa"
     ))%>%
-    filter(!(is.na(span) & is.na(firstflower)))%>% 
+    mutate(seedm = case_when(
+      seedm <= 0.1 ~ 0.0001,
+      seedm > 0.1 & seedm <= 0.3 ~ 0.0003,
+      seedm > 0.3 ~ 0.001
+    ))%>%
+    filter(!(is.na(span) & !is.na(firstflower)))%>% 
     mutate(span = case_when(
       is.na(span) ~ if_else(firstflower < 75.0, as.integer(1), as.integer(ceiling((firstflower - 77.24)/1.962))),
       TRUE ~ span))%>%
     mutate(firstflower = case_when(
       is.na(firstflower) ~ as.integer(floor(1.962*span + 77.24)),
-      TRUE ~ firstflower))
+      TRUE ~ as.integer(ceiling(firstflower))))%>%
+    filter(!is.na(seedn))
   
   if (mode == "frags"){
     # read fragments composition and create species lists
@@ -111,22 +118,23 @@ goetspp <- function(rseed,richp,mode,simID){
   spEDid <- data.frame(sp = traits$sp, id = paste(rep("p",richp), 1:richp, sep = "-"));
   
   # get other traits
-  e_min <- 0.8*traits$seedm
-  e_max <- 1.2*traits$seedm
+  e_min <- traits$seedm
+  e_max <- e_min
   kernels <- traits$kernels
   kernels_sd <- rep(0.1,richp); # doesnt do anything yet
-  b0g_min <- runif(richp, b0g*0.8,b0g*1.2); #param
-  b0g_max <- b0g_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0g*0.8,b0g*1.2)), b0g*0.8, b0g*1.2));
-  b0em_min <- runif(richp,b0em*0.8,b0em*1.2);
-  b0em_max <- b0em_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0em*0.8,b0em*1.2)), b0em*0.8, b0em*1.2));
-  b0am_min <- runif(richp, b0am*0.8, b0am*1.2);
-  b0am_max <- b0am_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0am*0.8, b0am*1.2)), b0am*0.8, b0am*1.2));
-  b0jg_min <- runif(richp, b0jg*0.8, b0jg*1.2); 
-  b0jg_max <- b0jg_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0jg*0.8, b0jg*1.2)), b0jg*0.8, b0jg*1.2));
-  b0ag_min <- runif(richp, b0ag*0.8, b0ag*1.2);
-  b0ag_max <- b0ag_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0ag*0.8, b0ag*1.2)), b0ag*0.8, b0ag*1.2));
-  sestra <- rep(0, richp);
+  b0g_min <- runif(richp, b0g*0.9,b0g*1.1); #param
+  b0g_max <- b0g_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0g*0.9,b0g*1.1)), b0g*0.9, b0g*1.1));
+  b0em_min <- runif(richp,b0em*0.9,b0em*1.1);
+  b0em_max <- b0em_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0em*0.9,b0em*1.1)), b0em*0.9, b0em*1.1));
+  b0am_min <- runif(richp, b0am*0.9, b0am*1.1);
+  b0am_max <- b0am_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0am*0.9, b0am*1.1)), b0am*0.9, b0am*1.1));
+  b0jg_min <- runif(richp, b0jg*0.9, b0jg*1.1); 
+  b0jg_max <- b0jg_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0jg*0.9, b0jg*1.1)), b0jg*0.9, b0jg*1.1));
+  b0ag_min <- runif(richp, b0ag*0.9, b0ag*1.1);
+  b0ag_max <- b0ag_min %>% map_dbl(function(x) ifelse(x <= mean(c(b0ag*0.9, b0ag*1.1)), b0ag*0.9, b0ag*1.1));
+  sestra <- sample(c("true","false"), richp, replace = TRUE);
   dyad <- rep(0, richp);
+  max_seedn <- ceiling(traits$seedn);
   floron_min <- rep(12, richp)#runif(richp,12,24);
   floron_max <- floron_min + 1 #%>% map_dbl(function(x) ifelse(x < round(mean(c(12,24)),0), 12,24));
   floroff_min <- rep(24, richp)#runif(richp,4,12); #duration
@@ -136,10 +144,10 @@ goetspp <- function(rseed,richp,mode,simID){
   seedoff_min <- rep(37, richp)#runif(richp,4,12); #duration
   seedoff_max <-  seedoff_min + 1#%>% map_dbl(function(x) ifelse(x <= mean(c(4,12)), 4,12)); #duration
   max_mass <- rep(0.0,richp) # calculated once the individual has its see size value
-  first_flower_min <- ceiling(0.8*traits$firstflower)
-  first_flower_max <- ceiling(1.2*traits$firstflower)
-  max_span_min <- ceiling(0.8*traits$span)
-  max_span_max <- ceiling(1.2*traits$span)
+  first_flower_min <- ceiling(0.9*traits$firstflower)
+  first_flower_max <- ceiling(1.1*traits$firstflower)
+  max_span_min <- ceiling(0.9*traits$span)
+  max_span_max <- ceiling(1.1*traits$span)
   mass_mu_min <- 0.1*max_mass;
   mass_mu_max <- rep(0.0001, richp);
   abund <-ceiling(runif(richp,10,50))
@@ -161,6 +169,7 @@ goetspp <- function(rseed,richp,mode,simID){
                          b0ag_sd = b0ag_max,
                          sestra = sestra,
                          dyad = dyad,
+                         max_seedn = max_seedn,
                          floron =round(floron_min,0),
                          floron_sd = round(floron_max,0),
                          floroff = round(floroff_min,0),
