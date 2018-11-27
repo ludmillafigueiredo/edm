@@ -98,8 +98,8 @@ equal pollination loss for all species \"equal\"."
 
         "--timemsg"
         help = "Output timing to terminal, as well as simulog."
-        arg_type = String
-        default = true
+        arg_type = Bool
+        default = false
     end
 
     return parse_args(sets) # returning a dictionnary of strings is useful because they can passed as keywords to Julia function
@@ -298,9 +298,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                 orgs[o].first_flower,
                 orgs[o].max_span,
                 orgs[o].age,
-                orgs[o].mated,
-                orgs[o].genotype,
-                orgs[o].radius))
+                orgs[o].mated))
             end
         end
         
@@ -334,9 +332,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                 orgs[o].first_flower,
                 orgs[o].max_span,
                 orgs[o].age,
-                orgs[o].mated,
-                orgs[o].genotype,
-                orgs[o].radius))
+                orgs[o].mated))
             end
         end
         #TODO output orgsref and ladpars
@@ -383,7 +379,7 @@ function disturb!(landscape::Array{Dict{String,Float64},2}, landavail::Array{Boo
             end
         end
     #end
-    #return disturbtbl, tdist
+    return tdist
 end
 
 function losschange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64)
@@ -497,7 +493,7 @@ function simulate()
         
         # DISTURBANCE
         if settings["disturb"] != "none"  
-            disturb!(mylandscape,landavail,orgs,t,settings)
+            tdist = disturb!(mylandscape,landavail,orgs,t,settings)
         end
         # Initialize or update landscape properties that are relevant for life cycle processes
         if t == 1 || (settings["disturb"] in ["loss" "frag"] && t in [(tdist-1) tdist (tdist+1)])
@@ -507,7 +503,7 @@ function simulate()
         # OUTPUT: First thing, to see how community is initialized
         tic()
         orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
-        timing("WRITING ORGSOUTPUT", settings["timemsg"])
+        timing("WRITING ORGSOUTPUT", settings)
         toc()
 
         # LIFE CYCLE
@@ -533,7 +529,7 @@ function simulate()
         establish!(mylandscape,orgs,t,settings,orgsref,T)
         
         shedd!(orgs,orgsref,t)
-        timing("LIFE CYCLE", settings["timemsg"])
+        timing("LIFE CYCLE", settings)
         toc()
     end
 end

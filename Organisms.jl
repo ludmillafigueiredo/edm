@@ -88,12 +88,12 @@ seedoff::Int
 max_mass::Float64
 first_flower::Int64
 max_span::Int64
-topt::Float64
+#topt::Float64
 #### State variables #### #TODO put all state variable together
 age::Int64 # control death when older than max. lifespan
 mated::Bool
 end
-Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span,10,false)
+Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span,26,false)
 
 """
 initorgs(landavail, orgsref,id_counter,tdist)
@@ -416,7 +416,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
                 # get phylogenetic constraint: variance of the distribution
                 sp = orgs[o].sp
-                conspp = [rand(filter(x -> x.sp == sp && x.stage == "a", orgs))]
+                conspp = orgs[rand(find(x -> x.sp == sp && x.stage == "a", orgs))] 
                 
                 for n in 1:offs
                     
@@ -427,16 +427,16 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     #newvalue = rand(Distributions.Normal(0,abs(embryo.e_mu-conspp.e_mu)/embryo.e_mu))
                     #embryo.e_mu + newvalue >= orgsref.e_mu[embryo.sp] ? # if seed biomass or minimal biomass would smaller than zero, it does not chenge
                     #embryo.e_mu += newvalue : embryo.e_mu += 0
-                    embryo.b0g += rand(Distributions.Normal(0,abs(embryo.b0g-conspp.b0g)/embryo.b0g))
-                    embryo.b0em += rand(Distributions.Normal(0,abs(embryo.b0em-conspp.b0em)/embryo.b0em))
-                    embryo.b0am += rand(Distributions.Normal(0,abs(embryo.b0am-conspp.b0am)/embryo.b0am))
-                    embryo.b0jg += rand(Distributions.Normal(0,abs(embryo.b0jg-conspp.b0jg)/embryo.b0jg))
-                    embryo.b0ag += rand(Distributions.Normal(0,abs(embryo.b0ag-conspp.b0ag)/embryo.b0ag))
-                    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron)/embryo.floron)),RoundUp))
-                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff)/conspp.floroff)),RoundUp))
-                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon)/embryo.seedon)),RoundUp))
-                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff)/embryo.seedoff)),RoundUp))
-                    newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.first_flower-conspp.first_flower)/embryo.first_flower)), RoundUp))
+                    embryo.b0g += rand(Distributions.Normal(0,abs(embryo.b0g-conspp.b0g+0.0000001)/embryo.b0g))
+                    embryo.b0em += rand(Distributions.Normal(0,abs(embryo.b0em-conspp.b0em+0.0000001)/embryo.b0em))
+                    embryo.b0am += rand(Distributions.Normal(0,abs(embryo.b0am-conspp.b0am+0.0000001)/embryo.b0am))
+                    embryo.b0jg += rand(Distributions.Normal(0,abs(embryo.b0jg-conspp.b0jg+0.0000001)/embryo.b0jg))
+                    embryo.b0ag += rand(Distributions.Normal(0,abs(embryo.b0ag-conspp.b0ag+0.0000001)/embryo.b0ag))
+                    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron+0.0000001)/embryo.floron)),RoundUp))
+                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff+0.0000001)/conspp.floroff)),RoundUp))
+                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon+0.0000001)/embryo.seedon)),RoundUp))
+                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff+0.0000001)/embryo.seedoff)),RoundUp))
+                    newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.first_flower-conspp.first_flower+0.0000001)/embryo.first_flower)), RoundUp))
                     embryo.first_flower + newvalue > 12 ?
                     embryo.first_flower += newvalue : embryo.first_flower += 0
                     #newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.max_span-conspp.max_span/embryo.max_span)),RoundUp))
