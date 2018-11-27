@@ -36,7 +36,7 @@ indoutput <- function(input,simID,cluster){
   ## Complete and clean table
   outdata <- as_tibble(cbind(select(outraw,-one_of("location")),
                              loc))
-  write.csv(outdata, file.path(outdir,paste(simID, "idout.csv", sep = "")), row.names = FALSE)
+  write.csv(outdata, file.path(outdir, simID,paste(simID, "idout.csv", sep = "")), row.names = FALSE)
   rm(loc)
     return(list(a = outdata, b = outdir, c = indir))
 }
@@ -153,7 +153,7 @@ popstruct <- function(popdata,simID,spp){
     labs(x = "Abundance", 
          y = "Week",
          title = "Population structure")+
-    scale_color_discrete("Stages:", labels = c("Adults", "Seeds", "Juveniles"))+
+    #scale_color_discrete("Stages:", labels = c("Adults", "Seeds", "Juveniles"))+
     facet_wrap(~sp, nrow = length(unique(weekstruct$sp)))+
     theme(legend.position = "none")+
     theme_minimal()
@@ -188,15 +188,16 @@ richness <- function(popdata,simID,disturbance,tdist){
       text <- "90% area lost"
     } 
     
-    my_grob <- grobTree(textGrob(text, x = 0.5, y = 0.9, hjust = 0, 
-                                 gp = gpar(col = "black", fontsize = 10, fontface = "italic")))
+    #my_grob <- grobTree(textGrob(text, x = 0.5, y = 0.9, hjust = 0, 
+    #                             gp = gpar(fontsize = 10, fontface = "italic")))
     
     spprichnessplot <- ggplot(spprichnesstab, aes(x = week, y = richness))+
       geom_line(color = "dodgerblue2", size = 1.25)+
       geom_vline(xintercept = tdist, linetype = 2, color = "red")+
       labs(x = "Time", y = "Spp. richness")+
-      annotation_custom(my_grob)+
       theme_minimal()
+      #annotation_custom(my_grob)+
+     
   }
   return(list(a = spprichnesstab, b = spprichnessplot))
 }
@@ -280,9 +281,9 @@ prod <- production(biomass.tab, structured = TRUE, area = 5)
 
 ## SAVE BUNDLE OF GRAPHS AND TABLES AS RDATA
 save(outdata,
-     indvegmass.plot,indrepmass.plot,biomass,
-     vegmass.plot,repmass.plot,spmass,
-     abund.plot, popdata,
+     indvegmass.plot,indrepmass.plot,
+     vegmass.plot,repmass.plot,biomass.tab,stgmasssummary.tab,
+     abund.plot,abund.tab,
      popstruct.tab,popstruct.plot,
      spprichness.tab, spprichness.plot,
      prod,
