@@ -382,7 +382,7 @@ function disturb!(landscape::Array{Dict{String,Float64},2}, landavail::Array{Boo
     return tdist
 end
 
-function losschange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64)
+function losschange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
     
     if t == 1 || (settings["disturb"] == "loss" && t in [(tdist-1) tdist (tdist-1)])
         if t == 1
@@ -400,7 +400,7 @@ function losschange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int
     
 end
 
-function fragchange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64, connects::Array{Float64,2})
+function fragchange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64, connects::Array{Float64,2}, tdist::Any)
     if t == 1 || (settings["disturb"] == "frag" && t == tdist) 
         global Ah = length(find(x -> x == true, landavail))*25*0.0001
         global AT = sort(reshape(connects,prod(size(connects))), rev = true) |> (y -> length(y) > 1 ? prod(y[1:2]) : (length(y) == 2 ? sum(connects)^2 : Ah))
@@ -497,8 +497,8 @@ function simulate()
         end
         # Initialize or update landscape properties that are relevant for life cycle processes
         if t == 1 || (settings["disturb"] in ["loss" "frag"] && t in [(tdist-1) tdist (tdist+1)])
-            losschange(landavail, settings, t)
-            fragchange(landavail, settings, t, connects)
+            losschange(landavail, settings, t, tdist)
+            fragchange(landavail, settings, t, connects, tdist)
         end
         # OUTPUT: First thing, to see how community is initialized
         tic()
