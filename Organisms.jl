@@ -467,7 +467,7 @@ end
 append!(orgs, offspring)
 
 #unity test
-open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+open(abspath(jointpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
     println(sim, "Total offspring at week $t: " ,length(offspring))
 end
 
@@ -496,31 +496,17 @@ function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organi
     for d in seedsi
         if orgs[d].kernel == "a"
             dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
-            #unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #    println(sim, "$(orgs[d].id) ant dispersal kernel")
-            #end
+            
         elseif orgs[d].kernel == "w"
             dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])
-            #unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #    println(sim, "$(orgs[d].id) wind dispersal kernel")
-            #end
+            
         elseif orgs[d].kernel == "wa"
             µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
             dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
-            #unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #    println(sim, "$(orgs[d].id) $µ dispersal kernel")
-            #end
+            
         else
             error("Check dispersal kernel input for species $(orgs[d].sp).")
         end
-        
-        #unity test
-        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-        #println("$(orgs[d].id) dispersal distance: $dist")
-        #end
 
         # Find patch
         θ = rand([0 0.5π π 1.5π]) # TODO tentar rand(0:2)*pi?
@@ -530,10 +516,7 @@ function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organi
 
         if checkboundaries(landavail, xdest, ydest, fsource) && landavail[xdest, ydest, fsource] == true # intra fragment dispersal
             orgs[d].location = (xdest,ydest,fsource)
-            #unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #println(orgs[d].id," dispersed $dist")
-            #end
+
         else # out of fragment. Try another one
             # check if someone is inside the distance:
             fdest = find(x -> x <= dist && x > 0, connects[:,fsource]) |> (y -> (length(y) > 0 ? fdest = rand(x) : false))
@@ -558,10 +541,6 @@ Seeds have a probability of germinating (`gprob`).
 function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, Any})
     Bg = org.b0g * (org.mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
     gprob = 1 - exp(-Bg)
-    # unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    #    println(sim,"germination rate $Bg and probability $gprob")
-    #end
     
     if gprob < 0
         error("gprob < 0")
@@ -584,24 +563,12 @@ function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organi
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
-    #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-    #    println(sim, "$(length(establishing)) seed trying to establish")
-    #end
-
     lost = Int64[]
 
     for o in establishing
         if orgs[o].seedon <= rem(t,52) #only after release and dispersal a seed can establish
             orgcell = orgs[o].location
             # TODO: take it out, it is obolete, since there is no more biomass projection 
-            #if haskey(landscape[orgcell[1], orgcell[2], orgcell[3]],["p"])
-            #push!(lost,o)
-	    #unity test
-   	    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-            #    println(sim, "$o falling into occupied cell and died")
-    	    #end
-	    #end
 
             if germinate(orgs[o],T,settings)
                 orgs[o].stage = "j"
