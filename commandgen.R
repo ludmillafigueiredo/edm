@@ -1,8 +1,16 @@
-command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturbf,duration,tout,tempf) {
+command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturb,areafile = NULL,duration,tout,tempf,outputat = "EDoutputs", timemsg = "false") {
+  
+  # generate arguments to be parsed in Julia format 
+  parseformat <- function(x){
+    paste('\"',x,'\"', sep = "")
+  }
+  
   if (cluster == "hpc") {
-    EDdir <- file.path("/home/ubuntu/model")
+    # HPC directories
+    EDdir <- file.path("/home/EDresults")
     Juliadir <- file.path("/home/ubuntu/builds/julia-9d11f62bcb/bin/julia")
   } else {
+    # Gaia directories
     EDdir <- file.path("/home/luf74xx/Dokumente/model")
     Juliadir <- file.path("/home/luf74xx/builds/julia-d386e40c17/bin/julia")
   }
@@ -10,40 +18,41 @@ command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturbf,duration,to
     # julia folder and main
     Juliadir,
     "main.jl", 
-    # arg 1
-    "--simID",
     # sim name,
-    paste('\"',simID,'\"', sep = ""),
+    "--simID",
+    parseformat(simID),
+    # rseed
     "--rseed",
-    paste('\"',rseed,'\"', sep = ""),
-    # arg 2
+    parseformat(rseed),
+    # outputat
+    "--outputat",
+    parseformat(outputat),
     "--landconfig",
     # land file
-    paste('\"',file.path(EDdir,"inputs",landf),'\"', sep = ""),
-    # arg 3
+    parseformat(file.path(EDdir,"inputs",landf)),
     "--spinput", 
     # spp file
-    paste('\"',file.path(EDdir,"inputs",sppf),'\"', sep = ""),
-    # arg 4
-    "--insect",
+    parseformat(file.path(EDdir,"inputs",sppf)),
     # insects file
-    paste('\"',file.path(EDdir,"inputs",insectsf),'\"', sep = ""), 
-    # arg 5
+    "--insect",
+    parseformat(file.path(EDdir,"inputs",insectsf)),
+    # type of disturbance
     "--disturb",
-    # disturbance file
-    paste('\"',disturbf,'\"', sep = ""),
-    #arg 6
-    "--timesteps", 
+    parseformat(disturb),
+    ## disturbance file
+    "--areafile",
+    parseformat(areafile), 
     # sim duration
-    paste('\"',duration,'\"', sep = ""),
-    # arg 8
-    "--tout",
+    "--timesteps",
+    parseformat(duration),
     # output frequency
-    paste('\"',tout,'\"', sep = ""),
-    "--temp_ts",
-    # arg 9
+    "--tout",
+    parseformat(tout),
     # temperature file
-    paste('\"',file.path(EDdir,"inputs",tempf),'\"', sep = ""), 
+    "--temp_ts",
+    parseformat(file.path(EDdir,"inputs",tempf)),
+    "--timemsg",
+    parseformat(timemsg), 
     sep = " ")
   if (cluster == "gaia") {
     scriptname <- paste(simID,".sh", sep = "")
@@ -65,3 +74,4 @@ command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturbf,duration,to
     }
 }
 
+#command(simID = "testingcommandgen",rseed = 100,cluste="hpc",landf="whatever",sppf="whatever",insectsf="whatever",disturb="whatever",areafile = NULL,duration=10,tout=10,tempf="whatever",outputat = "EDoutputs", timemsg = "false")
