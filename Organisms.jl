@@ -96,11 +96,11 @@ end
 Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span,26,false)
 
 """
-initorgs(landavail, orgsref,id_counter,tdist)
+initorgs(landavail, orgsref,id_counter)
 
 Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
 """
-function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counter::Int, tdist::String)
+function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counter::Int)
 
     orgs = Organism[]
 

@@ -53,11 +53,6 @@ function parse_commandline()
         help = "Type of competition: \"individual\", based on FON or \"capacity\", based on the landscape carrying capacity"
         arg_type = String
         default = "capacity"
-        
-        "--tdist"
-        help = "Initial trait value distribution"
-        arg_type = String
-        default = "unif"
 
         "--insect"
         help = "How to explicitly model insects:
