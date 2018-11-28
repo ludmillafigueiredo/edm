@@ -30,8 +30,7 @@ function parse_commandline()
 
     @add_arg_table sets begin
         "--simID"
-        help = "Name of the folder (string type)
-where outputs will be stored."
+        help = "Name of the folder where outputs will be stored."
         arg_type = String
         required = true
         
@@ -39,6 +38,11 @@ where outputs will be stored."
 	help = "Seed for RNG"
 	arg_type = Int
 	required = true
+
+        "--outputat"
+        help = "Name of directory where output should be written ."
+        arg_type = String
+        default = abspath(pwd(),"EDouputs")
 	
 	"--spinput"
         help = "Name of file with species list."
@@ -270,12 +274,12 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                       ["veg" "repr"],
                       reshape(string.(fieldnames(Organism)[6:end-2]),1,length(fieldnames(Organism)[6:end-2])),
                       ["chrm1" "chrm2" "radius"])#for non-diploid Orgs? string.(fieldnames(Organism))
-        open(string("EDoutputs/",settings["simID"],"/orgsweekly.txt"), "w") do output
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
                        
         for o in outorgs
-            open(string("EDoutputs/",settings["simID"],"/orgsweekly.txt"), "a") do output
+            open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "a") do output
                 writedlm(output, hcat(t,
                                       orgs[o].id,
                                       orgs[o].stage,
@@ -302,14 +306,14 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
             end
         end
         
-        open(string("EDoutputs/", settings["simID"], "/landscape.csv"), "w") do landoutput
+        open(abspath(joinpath(settings["outputat"], settings["simID"], "landscape.csv")), "w") do landoutput
             println(landoutput, landscape[1,1:end,1])
         end
     end
 
     if rem(t,settings["tout"]) == 0 
         for o in outorgs
-            open(string("EDoutputs/",settings["simID"],"/orgsweekly.txt"), "a") do output
+            open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "a") do output
                 writedlm(output, hcat(t,
                                       orgs[o].id,
                                       orgs[o].stage,
@@ -336,7 +340,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
             end
         end
         #TODO output orgsref and ladpars
-        open(string("EDoutputs/", settings["simID"], "/landscape.csv"), "a") do landoutput
+        open(abspath(joinpath(settings["outputat"], settings["simID"], "landscape.csv")), "a") do landoutput
             println(landoutput,landscape[1,1:end,1])
         end
     end
@@ -386,14 +390,14 @@ function losschange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int
     
     if t == 1 || (settings["disturb"] == "loss" && t in [(tdist-1) tdist (tdist-1)])
         if t == 1
-            open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"w") do sim
+            open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"w") do sim
                 println(sim, "week\tK\tcK")
             end          
         end
         global K = (1/100)*(length(find(x -> x == true, landavail))*25) #x tons/ha = x.100g/1m²
         global cK = K/length(find(x -> x == true, landavail))
         
-        open(string("EDoutputs/",settings["simID"],"/landlog.txt"),"a") do sim
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"landlog.txt")),"a") do sim
             writedlm(sim,[t K cK])
         end
     end
@@ -409,7 +413,7 @@ end
 
 function timing(operation::String, settings::Dict{String,Any})
     timing = string(operation," lasted: ")
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
         println(sim,timing)
     end
     #print to terminal
@@ -461,20 +465,20 @@ function simulate()
     println("Starting simulation")
 
     try
-        mkpath("EDoutputs/$(settings["simID"])")
-        println("Output will be written to 'EDoutputs'")
+        mkpath("$(settings["outputat"])/$(settings["simID"])")
+        println("Output will be written to '$(settings["outputat"])'")
     catch
-        println("Overwriting results to existing 'EDoutputs/$(settings["simID"])' folder")
+        println("Overwriting results to existing '$(settings["outputat"])/$(settings["simID"])' folder")
     end
 
     cd(pwd())
 
     # OUTPUT SIMULATION SETTINGS
-    open(string("EDoutputs/",settings["simID"],"/simID"),"w") do ID
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simID")),"w") do ID
         println(ID, settings)
     end
     # START ID SIMULATION LOG FILE
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"w") do sim
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"w") do sim
         println(sim,string("Simulation: ",settings["simID"],now()))
     end
     
@@ -483,8 +487,8 @@ function simulate()
 
         println("running week $t")
         
-        # unity test
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        # track simulation: header
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
             println(sim, "WEEK $t")
         end
 
