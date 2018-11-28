@@ -467,7 +467,7 @@ end
 append!(orgs, offspring)
 
 #unity test
-open(abspath(jointpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+open(abspath(jointpath(settings["outputat"],settings["simID"],"simulog.txt"))=),"a") do sim
     println(sim, "Total offspring at week $t: " ,length(offspring))
 end
 
