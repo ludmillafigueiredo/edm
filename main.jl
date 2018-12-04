@@ -215,12 +215,6 @@ function read_spinput(settings::Dict{String,Any})
          rows(spinputtbl,:max_mass)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
-         rows(spinputtbl,:first_flower)[i]
-         for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] =>
-         rows(spinputtbl,:first_flower_sd)[i]
-         for i in 1:length(rows(spinputtbl,:sp_id))),
-    Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:max_span)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
@@ -294,7 +288,6 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                 orgs[o].seedon,
                 orgs[o].seedoff,
                 orgs[o].max_mass,
-                orgs[o].first_flower,
                 orgs[o].max_span,
                 orgs[o].age,
                 orgs[o].mated))
@@ -328,7 +321,6 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                 orgs[o].seedon,
                 orgs[o].seedoff,
                 orgs[o].max_mass,
-                orgs[o].first_flower,
                 orgs[o].max_span,
                 orgs[o].age,
                 orgs[o].mated))

@@ -33,6 +33,7 @@ kernel::Dict{String,String}
 kernel_sd::Dict{String,Float64}
 e_mu::Dict{String,Float64}
 e_sd::Dict{String,Float64}
+seedlong::Int64
 b0g::Dict{String,Float64}
 b0g_sd::Dict{String,Float64}
 b0em::Dict{String,Float64}
@@ -55,8 +56,6 @@ seedon_sd::Dict{String,Int}
 seedoff::Dict{String,Int}
 seedoff_sd::Dict{String,Int}
 max_mass::Dict{String,Float64}
-first_flower::Dict{String,Int} #TODO can go. Flowering is mass dependent
-first_flower_sd::Dict{String,Int}
 max_span::Dict{String,Int}
 max_span_sd::Dict{String,Int}
 mass_mu::Dict{String,Float64}
@@ -86,14 +85,13 @@ wseedn::Int
 seedon::Int
 seedoff::Int
 max_mass::Float64
-first_flower::Int64
 max_span::Int64
 #topt::Float64
 #### State variables #### #TODO put all state variable together
 age::Int64 # control death when older than max. lifespan
 mated::Bool
 end
-Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,first_flower,max_span,26,false)
+Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span,26,false)
 
 """
 initorgs(landavail, orgsref,id_counter)
@@ -153,9 +151,6 @@ function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                                                  max(orgsref.seedoff[s], orgsref.seedoff_sd[s])+0.00000001)),
                                                     abs(-(orgsref.seedoff[s],orgsref.seedoff_sd[s])/6))),RoundUp)), #seedoff
                 0.0, #max_mass
-                Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.first_flower[s], orgsref.first_flower_sd[s]),
-                                                                 max(orgsref.first_flower[s], orgsref.first_flower_sd[s])+0.00000001)),
-                                                    abs(-(orgsref.max_span[s], orgsref.first_flower[s])/6))),RoundUp)),
                 Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.max_span[s], orgsref.max_span_sd[s]),
                                                                  max(orgsref.max_span[s], orgsref.max_span_sd[s])+0.00000001)),
                                                     abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
@@ -246,7 +241,6 @@ function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
 
     for j in juvs
         if  orgs[j].mass["veg"] >= 0.5*orgs[j].max_mass
-            # orgs[j].age >= orgs[j].first_flower
             # If an individual grows quite fast, it is more vigorous, and should transfer it to adult fecundity. The only variable capable of transfering this property is the weigh, which, combined with the MTE rate, makes it  generate more offspring
             orgs[j].stage = "a"
         end
@@ -436,9 +430,6 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff+0.0000001)/conspp.floroff)),RoundUp))
                     embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon+0.0000001)/embryo.seedon)),RoundUp))
                     embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff+0.0000001)/embryo.seedoff)),RoundUp))
-                    newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.first_flower-conspp.first_flower+0.0000001)/embryo.first_flower)), RoundUp))
-                    embryo.first_flower + newvalue > 12 ?
-                    embryo.first_flower += newvalue : embryo.first_flower += 0
                     #newvalue = Int(round(rand(Distributions.Normal(0,abs(embryo.max_span-conspp.max_span/embryo.max_span)),RoundUp))
                     #embryo.max_span + newvalue > orgsref.max_span[embryo.sp] ?
                     #embryo.max_span += newvalue : embryo.max_span += 0
