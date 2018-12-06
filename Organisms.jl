@@ -33,7 +33,7 @@ kernel::Dict{String,String}
 kernel_sd::Dict{String,Float64}
 e_mu::Dict{String,Float64}
 e_sd::Dict{String,Float64}
-seedlong::Int64
+seedbank::Dict{String,Int}
 b0g::Dict{String,Float64}
 b0g_sd::Dict{String,Float64}
 b0em::Dict{String,Float64}
@@ -72,6 +72,7 @@ mass::Dict
 #### Evolvable traits ####
 kernel::String
 e_mu::Float64
+seedbank::Int64
 b0g::Float64
 b0em::Float64
 b0am::Float64
@@ -91,7 +92,7 @@ max_span::Int64
 age::Int64 # control death when older than max. lifespan
 mated::Bool
 end
-Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span,26,false)
+Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span,26,false)
 
 """
 initorgs(landavail, orgsref,id_counter)
@@ -121,6 +122,7 @@ function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                        "repr" => 0.0),
                                   orgsref.kernel[s],
                                   orgsref.e_mu[s],
+                                  orgsref.seedbank[s],
                                   rand(Distributions.Normal(mean(Uniform(min(orgsref.b0g[s],orgsref.b0g_sd[s]),
                                                                          max(orgsref.b0g[s],orgsref.b0g_sd[s])+0.00000001)),
                                                             abs(-(orgsref.b0g[s],orgsref.b0g_sd[s])/6))), #b0g
@@ -458,7 +460,7 @@ end
 append!(orgs, offspring)
 
 #unity test
-open(abspath(jointpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
     println(sim, "Total offspring at week $t: " ,length(offspring))
 end
 
@@ -595,7 +597,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
         if sum(values(orgs[o].mass)) <= 0 || orgs[o] in nogrowth #probably unnecessary to verify negative or null weights
             mprob = 1
         elseif o in seeds
-            if rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
+            if orgs[o].age >= orgs[o].seedbank
+                mprob = 1
+            elseif rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
                 Bm = orgs[o].b0em * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
                 #println("Bm: $Bm, b0em = $(orgs[o].b0em), seed mass = $(orgs[o].mass["veg"])")
                 mprob = 1 - exp(-Bm)
