@@ -38,6 +38,8 @@ b0g::Dict{String,Float64}
 b0g_sd::Dict{String,Float64}
 b0em::Dict{String,Float64}
 b0em_sd::Dict{String,Float64}
+b0jm::Dict{String,Float64}
+b0jm_sd::Dict{String,Float64}
 b0am::Dict{String,Float64}
 b0am_sd::Dict{String,Float64}
 b0jg::Dict{String,Float64}
@@ -75,6 +77,7 @@ e_mu::Float64
 seedbank::Int64
 b0g::Float64
 b0em::Float64
+b0jm::Float64
 b0am::Float64
 b0jg::Float64
 b0ag::Float64
@@ -92,7 +95,7 @@ max_span::Int64
 age::Int64 # control death when older than max. lifespan
 mated::Bool
 end
-Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span,26,false)
+Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0jm,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0jm,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span,26,false)
 
 """
 initorgs(landavail, orgsref,id_counter)
@@ -129,6 +132,9 @@ function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                 rand(Distributions.Normal(mean(Uniform(min(orgsref.b0em[s],orgsref.b0em_sd[s]),
                                                        max(orgsref.b0em[s],orgsref.b0em_sd[s])+0.00000001)),
                                           abs(-(orgsref.b0em[s],orgsref.b0em_sd[s])/6))), #b0em
+                rand(Distributions.Normal(mean(Uniform(min(orgsref.b0jm[s],orgsref.b0jm_sd[s]),
+                                                       max(orgsref.b0jm[s],orgsref.b0jm_sd[s])+0.00000001)),
+                                          abs(-(orgsref.b0jm[s],orgsref.b0jm_sd[s])/6))), #b0jm
                 rand(Distributions.Normal(mean(Uniform(min(orgsref.b0am[s],orgsref.b0am_sd[s]),
                                                        max(orgsref.b0am[s],orgsref.b0am_sd[s])+0.00000001)),
                                           abs(-(orgsref.b0am[s],orgsref.b0am_sd[s])/6))), #b0am
@@ -425,6 +431,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     #embryo.e_mu += newvalue : embryo.e_mu += 0
                     embryo.b0g += rand(Distributions.Normal(0,abs(embryo.b0g-conspp.b0g+0.0000001)/embryo.b0g))
                     embryo.b0em += rand(Distributions.Normal(0,abs(embryo.b0em-conspp.b0em+0.0000001)/embryo.b0em))
+                    embryo.b0jm += rand(Distributions.Normal(0,abs(embryo.b0jm-conspp.b0jm+0.0000001)/embryo.b0jm))
                     embryo.b0am += rand(Distributions.Normal(0,abs(embryo.b0am-conspp.b0am+0.0000001)/embryo.b0am))
                     embryo.b0jg += rand(Distributions.Normal(0,abs(embryo.b0jg-conspp.b0jg+0.0000001)/embryo.b0jg))
                     embryo.b0ag += rand(Distributions.Normal(0,abs(embryo.b0ag-conspp.b0ag+0.0000001)/embryo.b0ag))
@@ -609,7 +616,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
         elseif (orgs[o].age/52) >= orgs[o].max_span*52 #oldies die
             mprob = 1
         elseif orgs[o].stage == "j"
-            Bm = orgs[o].b0em * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+            Bm = orgs[o].b0jm * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             mprob = 1 - exp(-Bm)
         else #adults
             Bm = orgs[o].b0am * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
@@ -674,7 +681,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                         Bm = d.b0am * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                         mprob = 1 - exp(-Bm)
                     elseif d.stage == "j"
-                        Bm = d.b0em * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        Bm = d.b0jm * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                         mprob = 1 - exp(-Bm)
                     else
                         Bm = d.b0em * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))

@@ -164,6 +164,12 @@ function read_spinput(settings::Dict{String,Any})
          rows(spinputtbl,:b0em_sd)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0jm)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:b0jm_sd)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:b0am)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
@@ -505,7 +511,7 @@ function simulate()
             nogrowth = Int64[]
         end
 
-        survive!(orgs,t,cK,settings,orgsref,landavail,T,nogrowth)
+        survive!(orgs,t,cK,K,settings,orgsref,landavail,T,nogrowth)
 
         global nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
 
