@@ -42,7 +42,7 @@ function parse_commandline()
         "--outputat"
         help = "Name of directory where output should be written ."
         arg_type = String
-        default = abspath(pwd(),"EDouputs")
+        default = abspath(pwd(),"EDoutputs")
 	
 	"--spinput"
         help = "Name of file with species list."
@@ -56,8 +56,8 @@ function parse_commandline()
 
         "--insect"
         help = "How to explicitly model insects:
-pollination-independent reproduction \"indep\";
-equal pollination loss for all species \"equal\"."
+            pollination-independent reproduction \"indep\";
+            equal pollination loss for all species \"equal\"."
         arg_type = String
         default = abspath(pwd(),"inputs/insects.csv")
         
@@ -142,12 +142,15 @@ function read_spinput(settings::Dict{String,Any})
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:kernel_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:e_mu)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:e_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:e_mu)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:e_sd)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         rows(spinputtbl,:e_long)[i]
+         for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:b0g)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
@@ -181,9 +184,6 @@ function read_spinput(settings::Dict{String,Any})
     Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:sestra)[i] == "true"
          for i in 1:length(rows(spinputtbl,:sp_id))),
-    #Dict(rows(spinputtbl,:sp_id)[i] =>
-    #     rows(spinputtbl,:dyad)[i]
-    #     for i in 1:length(rows(spinputtbl,:sp_id))),
     Dict(rows(spinputtbl,:sp_id)[i] =>
          rows(spinputtbl,:max_seedn)[i]
          for i in 1:length(rows(spinputtbl,:sp_id))),
@@ -261,12 +261,11 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
         header = hcat(["week"],
                       reshape(string.(fieldnames(Organism)[1:4]),1,4),
                       ["veg" "repr"],
-                      reshape(string.(fieldnames(Organism)[6:end-2]),1,length(fieldnames(Organism)[6:end-2])),
-                      ["chrm1" "chrm2" "radius"])#for non-diploid Orgs? string.(fieldnames(Organism))
+                      reshape(string.(fieldnames(Organism)[6:end]),1,length(fieldnames(Organism)[6:end])))#for non-diploid Orgs? string.(fieldnames(Organism))
         open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
-                       
+        
         for o in outorgs
             open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "a") do output
                 writedlm(output, hcat(t,
@@ -278,6 +277,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                                       orgs[o].mass["repr"],
                                       orgs[o].kernel,
                                       orgs[o].e_mu,
+                orgs[o].seedbank,
                 orgs[o].b0g,
                 orgs[o].b0em,
                 orgs[o].b0am,
@@ -311,6 +311,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                                       orgs[o].mass["repr"],
                                       orgs[o].kernel,
                                       orgs[o].e_mu,
+                orgs[o].seedbank,
                 orgs[o].b0g,
                 orgs[o].b0em,
                 orgs[o].b0am,
@@ -339,7 +340,8 @@ disturb!()
 function disturb!(landscape::Array{Dict{String,Float64},2}, landavail::Array{Bool,2}, orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any})
     # read in the disturbance file, if not done so yet
     #if !isdefined(:disturbtbl)
-        # select file according to keyword: loss, frag, temp
+    # select file according to keyword: loss, frag, temp
+    if settings["disturb"] != "none"
         if settings["disturb"] == "loss"
             disturbtbl = loadtable(settings["areafile"])
             tdist = select(disturbtbl,:time)
@@ -357,7 +359,7 @@ function disturb!(landscape::Array{Dict{String,Float64},2}, landavail::Array{Boo
                   \n\"frag\" for habitat fragmentation,
                   \n\"temp\" for temperature change.")
         end
-    #else
+        
         if t in tdist
             if settings["disturb"] == "loss"
                 loss = select(filter(x -> x.time == t,disturbtbl),
@@ -369,8 +371,8 @@ function disturb!(landscape::Array{Dict{String,Float64},2}, landavail::Array{Boo
                 #while fragment is not implemented
             end
         end
-    #end
-    return tdist
+        return tdist
+    end
 end
 
 function losschange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
@@ -445,7 +447,7 @@ function simulate()
     id_counter = 0
     
     # Create initial individuals
-    orgs, id_counter = initorgs(landavail, orgsref, id_counter, settings["tdist"])
+    orgs, id_counter = initorgs(landavail, orgsref, id_counter)
     
     println("Plants initialized: type $(typeof(orgs))")
 
@@ -485,11 +487,11 @@ function simulate()
         # DISTURBANCE
         if settings["disturb"] != "none"  
             tdist = disturb!(mylandscape,landavail,orgs,t,settings)
-        end
-        # Initialize or update landscape properties that are relevant for life cycle processes
-        if t == 1 || (settings["disturb"] in ["loss" "frag"] && t in [(tdist-1) tdist (tdist+1)])
-            losschange(landavail, settings, t, tdist)
-            fragchange(landavail, settings, t, connects, tdist)
+            # Initialize or update landscape properties that are relevant for life cycle processes
+            if t == 1 || (settings["disturb"] in ["loss" "frag"] && t in [(tdist-1) tdist (tdist+1)])
+                losschange(landavail, settings, t, tdist)
+                fragchange(landavail, settings, t, connects, tdist)
+            end
         end
         # OUTPUT: First thing, to see how community is initialized
         tic()
