@@ -581,7 +581,7 @@ end
     Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
     plants in nogrwth are subjected to two probability rates
     """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T, nogrowth::Array{Int64,1})
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T, nogrowth::Array{Int64,1})
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
     #    println(sim,"Running mortality")
     #end
@@ -639,74 +639,78 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     #end
     deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-        println(sim, "Density-independent mortality: ", length(deaths)))
+        println(sim, "Density-independent mortality: ", length(deaths))
     end
     deaths = Int64[] # reset
 
     ## Density-dependent mortality
-    locs = fill!(Array{Tuple{Int64,Int64,Int64}}(reverse(size(orgs))),(0,0,0))
-    #masses = zeros(Float64,size(orgs))
-    map!(x -> x.location,locs,orgs) #probably optimizable
-    l = DataFrame(locs)
-    #println("$l")
-    #map!(x -> x.mass["veg"],masses,orgs)
-    # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
-    fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-    #    println(sim,"# of cell with competition: $(length(fullcells))")
-    #end
-    if length(fullcells) > 0
-        for c in fullcells
-            #find those that are in the same grid
-            samegrid = filter(x -> x.location == locs[c], orgs)
-            # unity test
-            #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-            #    println(sim,"N of inds in same cell: $(length(samegrid))")
-            #end
-            #println("Inds in same cell $(locs[c]) : $samegrid")
-            # sum their weight to see if > than carrying capacity.
-            while sum(map(x -> x.mass["veg"],samegrid)) > cK
-                # any individual can die
-                d = rand(samegrid,1)[1]
-
-                if d.stage == "a"
-                    Bm = d.b0am * (sum(collect(values(d.mass))))^(-1/4)*exp(-aE/(Boltz*T))
-                    mprob = 1 - exp(-Bm)
-                else
-                    Bm = d.b0em * (sum(collect(values(d.mass))))^(-1/4)*exp(-aE/(Boltz*T))
-                    mprob = 1 - exp(-Bm)
-                end
-
-                #unity test: Check mortality rate to probability conversion
-                if mprob < 0
-                    error("mprob < 0")
-                    mprob = 0
-                elseif mprob > 1
-                    mprob = 1
-                    error("mprob > 1")
-                end
-
-                o = find(x -> x.id == d.id, orgs)
-                
-                if 1 == rand(Distributions.Bernoulli(mprob))
-                    #currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
-                    push!(deaths, o)
-                    #println("$(orgs[o].stage) dying INDEP.")
-                else
-                    orgs[o].age += 1
-                end
-                samegrid = filter(x -> x.location == locs[i], orgs)
-                #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
-                #    println("$(orgs[o].stage) dying DEP.")
+    if sum(map(x -> x.mass["veg"],orgs)) > K
+        locs = fill!(Array{Tuple{Int64,Int64,Int64}}(reverse(size(orgs))),(0,0,0))
+        #masses = zeros(Float64,size(orgs))
+        map!(x -> x.location,locs,orgs) #probably optimizable
+        l = DataFrame(locs)
+        #println("$l")
+        #map!(x -> x.mass["veg"],masses,orgs)
+        # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
+        fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
+        #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+        #    println(sim,"# of cell with competition: $(length(fullcells))")
+        #end
+        if length(fullcells) > 0
+            for c in fullcells
+                #find those that are in the same grid
+                samegrid = filter(x -> x.location == locs[c], orgs)
+                # unity test
+                #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+                #    println(sim,"N of inds in same cell: $(length(samegrid))")
                 #end
+                #println("Inds in same cell $(locs[c]) : $samegrid")
+                # sum their weight to see if > than carrying capacity.
+                while sum(map(x -> x.mass["veg"],samegrid)) > cK
+                    # any individual can die
+                    d = rand(samegrid,1)[1]
+
+                    if d.stage == "a"
+                        Bm = d.b0am * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        mprob = 1 - exp(-Bm)
+                    elseif d.stage == "j"
+                        Bm = d.b0em * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        mprob = 1 - exp(-Bm)
+                    else
+                        Bm = d.b0em * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        mprob = 1 - exp(-Bm)
+                    end
+
+                    #unity test: Check mortality rate to probability conversion
+                    if mprob < 0
+                        error("mprob < 0")
+                        mprob = 0
+                    elseif mprob > 1
+                        mprob = 1
+                        error("mprob > 1")
+                    end
+
+                    o = find(x -> x.id == d.id, orgs)
+                    
+                    if 1 == rand(Distributions.Bernoulli(mprob))
+                        #currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
+                        push!(deaths, o)
+                        #println("$(orgs[o].stage) dying INDEP.")
+                    else
+                        orgs[o].age += 1
+                    end
+                    samegrid = filter(x -> x.location == locs[i], orgs)
+                    #open(string("EDoutputs/",settings["simID"],"simulog.txt"), "a") do sim
+                    #    println("$(orgs[o].stage) dying DEP.")
+                    #end
+                end
             end
         end
+        deleteat!(orgs, deaths)
     end
-    deleteat!(orgs, deaths)
-
 open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
     println(sim,"$(length(deaths)) dying (density-dependent).","\n",
-            "Total individuals: ", length(orgs)))
+            "Total individuals: ", length(orgs))
 end
 
 end
