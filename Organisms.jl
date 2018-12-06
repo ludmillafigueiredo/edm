@@ -461,7 +461,7 @@ append!(orgs, offspring)
 
 #unity test
 open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    println(sim, "Total offspring at week $t: " ,length(offspring))
+    println(sim, "Offspring = " ,length(offspring), "and adults = ", length(find(x -> x.stage == "a", orgs)))
 end
 
 return id_counter
@@ -638,6 +638,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
     #    println(sim,"Dying dens-indep orgs: $(length(deaths))")
     #end
     deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        println(sim, "Density-independent mortality: ", length(deaths)))
+    end
     deaths = Int64[] # reset
 
     ## Density-dependent mortality
@@ -700,9 +703,12 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, settin
         end
     end
     deleteat!(orgs, deaths)
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-#    println(sim,"$(length(deaths)) dying.")
-#end
+
+open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+    println(sim,"$(length(deaths)) dying (density-dependent).","\n",
+            "Total individuals: ", length(orgs)))
+end
+
 end
 
 """
