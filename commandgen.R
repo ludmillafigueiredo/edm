@@ -7,12 +7,16 @@ command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturb,areafile = N
   
   if (cluster == "hpc") {
     # HPC directories
-    EDdir <- file.path("/home/EDresults")
+    outputat <- file.path("/home", outputat)
+    EDdir <- file.path("/home/model")
+    inputsdir <- file.path("/home/ubuntu/Gaia/inputs")
     Juliadir <- file.path("/home/ubuntu/builds/julia-9d11f62bcb/bin/julia")
   } else {
     # Gaia directories
     EDdir <- file.path("/home/luf74xx/Dokumente/model")
+    inputsdir <- file.path(EDdir,"inputs")
     Juliadir <- file.path("/home/luf74xx/builds/julia-d386e40c17/bin/julia")
+    outputat <- file.path("EDoutputs")
   }
   command <- paste(
     # julia folder and main
@@ -29,13 +33,13 @@ command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturb,areafile = N
     parseformat(outputat),
     "--landconfig",
     # land file
-    parseformat(file.path(EDdir,"inputs",landf)),
+    parseformat(file.path(inputsdir,landf)),
     "--spinput", 
     # spp file
-    parseformat(file.path(EDdir,"inputs",sppf)),
+    parseformat(file.path(inputsdir,paste(sppf))),
     # insects file
     "--insect",
-    parseformat(file.path(EDdir,"inputs",insectsf)),
+    parseformat(file.path(inputsdir,insectsf)),
     # type of disturbance
     "--disturb",
     parseformat(disturb),
