@@ -82,7 +82,7 @@ createsppfile <- function(rseed, richp, sd, simID, b0g, b0em, b0jm, b0am, b0ag, 
 }
 
 # Subset species from the Göttingen pool
-goetspp <- function(rseed,richp,mode,simID,b0g, b0em, b0jm, b0am, b0ag, b0jg){
+goetspp <- function(rseed,richp,mode, spplist = NULL, simID,b0g, b0em, b0jm, b0am, b0ag, b0jg){
   set.seed(rseed)
   options(scipen=999)
   EDdir <- file.path("/home/luf74xx/Dokumente/model")
@@ -90,7 +90,7 @@ goetspp <- function(rseed,richp,mode,simID,b0g, b0em, b0jm, b0am, b0ag, b0jg){
   
   # Get *seed size*, *first age of flowering* and *maximum life span* from LEDA
   # fill the ones that are NA for span or first age
-  spp <- read.table(file.path(inputsdir,"traitsleda.csv"), header = TRUE, sep = ",")%>%
+  spptraits <- read.table(file.path(inputsdir,"traitsleda.csv"), header = TRUE, sep = ",")%>%
     select(sp,seedn,seedm,kernels,span,seedbank)%>%
     mutate(seedm = seedm)%>%
     mutate(kernels = case_when(
@@ -102,22 +102,18 @@ goetspp <- function(rseed,richp,mode,simID,b0g, b0em, b0jm, b0am, b0ag, b0jg){
       seedm <= 0.1 ~ 0.0001,
       seedm > 0.1 & seedm <= 0.3 ~ 0.0003,
       seedm > 0.3 ~ 0.001
-    ))#%>%
-    #filter(!(is.na(span) & !is.na(firstflower)))%>% 
-    #mutate(span = case_when(
-    #  is.na(span) ~ if_else(firstflower < 75.0, as.integer(1), as.integer(ceiling((firstflower - 77.24)/1.962))),
-    #  TRUE ~ span))%>%
-    #mutate(firstflower = case_when(
-    #  is.na(firstflower) ~ as.integer(floor(1.962*span + 77.24)),
-    #  TRUE ~ as.integer(ceiling(firstflower))))%>%
-    #filter(!is.na(seedn))
+    ))
   
-  if (mode == "frags"){
-    # read fragments composition and create species lists
+  if (mode == "spplist"){
+    # read species lists
+    spps <- read.table(file.path(inputsdir,spplist), header = TRUE, sep = ",")
+    # select traits in traits table
+    traits <- filter(spptraits, sp %in% spps$species)
+    # TODO set up more than one fragment and use map() for more than one
   }else{
     # randomly select species for each fragments
     # TODO set up more than one fragment and use map() for more than one
-    traits <- sample_n(spp, richp, replace = FALSE)
+    traits <- sample_n(spptraits, richp, replace = FALSE)
   }
   spEDid <- data.frame(sp = traits$sp, id = paste(rep("p",richp), 1:richp, sep = "-"));
   
