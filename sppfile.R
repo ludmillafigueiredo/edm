@@ -109,7 +109,7 @@ goetspp <- function(rseed, mode, richp = NULL, spplist = NULL, simID,b0g, b0em, 
     spps <- read.table(file.path(inputsdir,spplist), header = TRUE, sep = ",")
     # select traits in traits table
     traits <- filter(spptraits, sp %in% spps$species)
-    richp <- length(traits)
+    richp <- length(traits$sp)
     # TODO set up more than one fragment and use map() for more than one
   }else{
     # randomly select species for each fragments
