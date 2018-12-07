@@ -82,7 +82,7 @@ createsppfile <- function(rseed, richp, sd, simID, b0g, b0em, b0jm, b0am, b0ag, 
 }
 
 # Subset species from the Göttingen pool
-goetspp <- function(rseed,richp,mode, spplist = NULL, simID,b0g, b0em, b0jm, b0am, b0ag, b0jg){
+goetspp <- function(rseed, mode, richp = NULL, spplist = NULL, simID,b0g, b0em, b0jm, b0am, b0ag, b0jg){
   set.seed(rseed)
   options(scipen=999)
   EDdir <- file.path("/home/luf74xx/Dokumente/model")
@@ -109,6 +109,7 @@ goetspp <- function(rseed,richp,mode, spplist = NULL, simID,b0g, b0em, b0jm, b0a
     spps <- read.table(file.path(inputsdir,spplist), header = TRUE, sep = ",")
     # select traits in traits table
     traits <- filter(spptraits, sp %in% spps$species)
+    richp <- length(traits)
     # TODO set up more than one fragment and use map() for more than one
   }else{
     # randomly select species for each fragments
@@ -189,8 +190,8 @@ goetspp <- function(rseed,richp,mode, spplist = NULL, simID,b0g, b0em, b0jm, b0a
                          mass_sd = mass_mu_max,
                          abund = abund)
   
-  write.csv(spptable, file.path("/home/luf74xx/Dokumente/model/inputs",paste(simID, ".csv", sep = "")), row.names = FALSE)
-  write.csv(spEDid, file.path("/home/luf74xx/Dokumente/model/inputs",paste(simID, "ids.csv", sep = "")), row.names = FALSE)
+  write.csv(spptable, file.path(inputsdir,paste(simID, ".csv", sep = "")), row.names = FALSE)
+  write.csv(spEDid, file.path(EDdir,paste(simID, "ids.csv", sep = "")), row.names = FALSE)
   return(spptable)
 }
 
