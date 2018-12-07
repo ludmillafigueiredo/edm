@@ -330,7 +330,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                 orgs[o].sestra,
                 orgs[o].floron,
                 orgs[o].floroff,
-                orgs[o].wseedn,,
+                orgs[o].wseedn,
                 orgs[o].seedon,
                 orgs[o].seedoff,
                 orgs[o].max_mass,
@@ -534,6 +534,7 @@ function simulate()
         establish!(mylandscape,orgs,t,settings,orgsref,T)
         
         shedd!(orgs,orgsref,t)
+        
         timing("LIFE CYCLE", settings)
         toc()
     end
