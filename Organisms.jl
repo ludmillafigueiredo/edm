@@ -715,7 +715,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
         end
         deleteat!(orgs, deaths)
     end
-open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+open(string(settings["outputat"],settings["simID"],"/simulog.txt"), "a") do sim
     println(sim,"$(length(deaths)) dying (density-dependent).","\n",
             "Total individuals: ", length(orgs))
 end
