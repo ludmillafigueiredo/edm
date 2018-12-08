@@ -357,9 +357,14 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     offspring = Organism[]
 
     # assexually produced offspring
-    clonals = find(x -> x.mated == false && x.sestra == true && x.mass["repr"] > x.e_mu, orgs)
+    clonals = filter(x -> x.mated == false && x.sestra == true && x.mass["repr"] > x.e_mu, orgs)
     
     for c in clonals
+        for sp in unique(getfield.(clonals, :sp))
+
+        ferts = find(x -> x.mated == true && x.sp == sp, clonals)
+        # TODO: this loop happens for each species. Faster simulations could be achieved if checking values such as e_mu and max_seedn are taken at the psecies level, rather than individual. If this happens, however, it will hinder species evolution.
+        spclonescounter = 0
         offs = div(0.5*orgs[c].mass["repr"], orgs[c].e_mu)
 
         if offs <= 0
@@ -367,7 +372,11 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
         else
             # limit offspring production to the maximal number of seeds the species can produce
             offs > orgs[o].wseedn ? offs = orgs[o].wseedn : offs
-            
+
+            # count clonal production  
+            spclonescounter += offs
+
+            # update reproductive mass
             orgs[o].mass["repr"] -= (offs * orgs[c].e_mu)
 
             # unity test
@@ -377,7 +386,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
             # get a copy of the mother, which the clones will look like 
             clonetemplate = deepcopy(orgs[c])
-            clonetemplate.stage = "e"
+            clonetemplate.stage = "j" #clonals are already germinated
             clonetemplate.mass["veg"] = orgs[c].e_mu
             clonetemplate.mass["repr"] = 0.0
             
@@ -389,6 +398,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 push!(offspring, clone)
             end
         end
+            end
     end
     
     # sexually produced offspring
