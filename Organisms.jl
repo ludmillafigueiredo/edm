@@ -356,88 +356,98 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     
     offspring = Organism[]
 
-    # assexually produced offspring
-    clonals = filter(x -> x.mated == false && x.sestra == true && x.mass["repr"] > x.e_mu, orgs)
+    # Asexually produced offspring
+    asexuals = filter(x -> x.mated == false && x.sestra == true && x.mass["repr"] > x.e_mu, orgs) #find which the individuals the can reproduce assexually and then go through them, by species
     
-    for c in clonals
-        for sp in unique(getfield.(clonals, :sp))
+    for sp in unique(getfield.(asexuals, :sp))
+        cloning = find(x.sp == sp, asexuals)
 
-        ferts = find(x -> x.mated == true && x.sp == sp, clonals)
-        # TODO: this loop happens for each species. Faster simulations could be achieved if checking values such as e_mu and max_seedn are taken at the psecies level, rather than individual. If this happens, however, it will hinder species evolution.
+        # start production counting
         spclonescounter = 0
-        offs = div(0.5*orgs[c].mass["repr"], orgs[c].e_mu)
 
-        if offs <= 0
-            continue
-        else
-            # limit offspring production to the maximal number of seeds the species can produce
-            offs > orgs[o].wseedn ? offs = orgs[o].wseedn : offs
-
-            # count clonal production  
-            spclonescounter += offs
-
-            # update reproductive mass
-            orgs[o].mass["repr"] -= (offs * orgs[c].e_mu)
+        for c in cloning
+            offs = div(0.5*asexuals[c].mass["repr"], asexuals[c].e_mu)
 
             # unity test
-            if  orgs[o].mass["repr"] <= 0
+            if  asexuals[o].mass["repr"] <= 0
                 error("Negative reproductive biomass") #because offs is an integer, reproductive biomass should not become negative
             end
-
-            # get a copy of the mother, which the clones will look like 
-            clonetemplate = deepcopy(orgs[c])
-            clonetemplate.stage = "j" #clonals are already germinated
-            clonetemplate.mass["veg"] = orgs[c].e_mu
-            clonetemplate.mass["repr"] = 0.0
             
-            for o in offs
-                clone = deepcopy(clonetemplate)
-                clone.location = (clonetemplate.location[1] + rand(Distributions.Bernoulli())[1],
-                                  clonetemplate.location[2] + rand(Distributions.Bernoulli())[1],
-                                  clonetemplate.location[3]) # clones are spread in one of the neighboring cells - or in the same as the mother
-                push!(offspring, clone)
+            if offs <= 0
+                continue
+            else
+                # limit offspring production to the maximal number of seeds the species can produce
+                offs > asexuals[o].wseedn ? offs = asexuals[o].wseedn : offs
+
+                # count clonal production  
+                spclonescounter += offs
+
+                # update reproductive mass
+                asexuals[o].mass["repr"] -= (offs * asexuals[c].e_mu)
+
+                # get a copy of the mother, which the clones will look like 
+                clonetemplate = deepcopy(asexuals[c])
+                clonetemplate.stage = "j" #clonals are already germinated
+                clonetemplate.mass["veg"] = asexuals[c].e_mu
+                clonetemplate.mass["repr"] = 0.0
+                
+                for o in offs
+
+                    clone = deepcopy(clonetemplate)
+                    
+                    clone.location = (clonetemplate.location[1] + rand(Distributions.Bernoulli())[1],
+                                      clonetemplate.location[2] + rand(Distributions.Bernoulli())[1],
+                                      clonetemplate.location[3]) # clones are spread in one of the neighboring cells - or in the same as the mother
+                    push!(offspring, clone)
+                end
             end
         end
-            end
+
+        # output clones per species (file is initialized in main.jl)
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"seedproduction.csv")),"a") do seedfile
+            writedlm(seedfile, t, sp, "asex", spclonescounter)
+        end
     end
     
-    # sexually produced offspring
-    for sp in unique(getfield.(orgs, :sp))
+    # Sexually produced offspring
+    ferts = filter(x -> x.mated == true && x.sp == sp, orgs)
 
-        ferts = find(x -> x.mated == true && x.sp == sp, orgs)
-        # TODO: this loop happens for each species. Faster simulations could be achieved if checking values such as e_mu and max_seedn are taken at the psecies level, rather than individual. If this happens, however, it will hinder species evolution.
+    for sp in unique(getfield.(ferts, :sp))
+
+        sowing = find(x -> x.sp == sp, ferts)
+        
         spoffspringcounter = 0
         
-        for o in ferts
+        for o in sowing
 
-            emu = orgs[o].e_mu
-            offs = div(0.5*orgs[o].mass["repr"], emu)
+            emu = ferts[o].e_mu
+            offs = div(0.5*ferts[o].mass["repr"], emu)
 
             if offs <= 0
                 continue
             else
                 # limit offspring production to the maximal number of seeds the species can produce
                 offs > orgs[o].wseedn ? offs = orgs[o].wseedn : offs
+
                 # count species offspring for output
                 spoffspringcounter += offs
                 
-                orgs[o].mass["repr"] -= (offs * emu)
+                ferts[o].mass["repr"] -= (offs * emu)
 
                 # unity test
-                if  orgs[o].mass["repr"] <= 0
+                if  ferts[o].mass["repr"] <= 0
                     error("Negative reproductive biomass")
                 end
 
-
-                # get phylogenetic constraint: variance of the distribution
-                sp = orgs[o].sp
+                # get another parent
+                sp = ferts[o].sp
                 conspp = orgs[rand(find(x -> x.sp == sp && x.stage == "a", orgs))] 
                 
                 for n in 1:offs
                     
                     id_counter += 1 # update individual counter
 
-                    embryo = deepcopy(orgs[o])
+                    embryo = deepcopy(ferts[o])
 
                     #newvalue = rand(Distributions.Normal(0,abs(embryo.e_mu-conspp.e_mu)/embryo.e_mu))
                     #embryo.e_mu + newvalue >= orgsref.e_mu[embryo.sp] ? # if seed biomass or minimal biomass would smaller than zero, it does not chenge
@@ -457,8 +467,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     #embryo.max_span += newvalue : embryo.max_span += 0
                     
                     # set embryos own individual non-evolutionary traits
-                    embryo.id = hex(id_counter)
-                    embryo.location = orgs[o].location #stays with mom until release 
+                    embryo.id = hex(id_counter) 
                     embryo.mass = Dict("veg" => embryo.e_mu,
                                        "repr" => 0.0)
                     embryo.stage = "e"
@@ -471,7 +480,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     #println("Pushed new org ", embryo, " into offspring")
                     #end
                 end
-orgs[o].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
+                orgs[o].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
             end 
         end
 
