@@ -482,6 +482,10 @@ function simulate()
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"w") do sim
         println(sim,string("Simulation: ",settings["simID"],now()))
     end
+    # START SEED PRODUCTION FILE
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"seedproduction.csv")),"w") do seedfile
+        writedlm(seedfile, "week", "sp", "mode", "seedprod")
+    end
     
     # MODEL RUN
     for t in 1:settings["timesteps"]

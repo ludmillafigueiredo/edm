@@ -396,6 +396,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
         ferts = find(x -> x.mated == true && x.sp == sp, orgs)
         # TODO: this loop happens for each species. Faster simulations could be achieved if checking values such as e_mu and max_seedn are taken at the psecies level, rather than individual. If this happens, however, it will hinder species evolution.
+        spoffspringcounter = 0
         
         for o in ferts
 
@@ -407,6 +408,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
             else
                 # limit offspring production to the maximal number of seeds the species can produce
                 offs > orgs[o].wseedn ? offs = orgs[o].wseedn : offs
+                # count species offspring for output
+                spoffspringcounter += offs
                 
                 orgs[o].mass["repr"] -= (offs * emu)
 
@@ -459,10 +462,14 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     #end
                 end
 orgs[o].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
-end
-end
+            end 
+        end
 
-end
+        # output seeds per species (file is initialized in main.jl)
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"seedproduction.csv")),"a") do seedfile
+            writedlm(seedfile, t, sp, "sex", spoffspringcounter)
+        end
+    end
 
 append!(orgs, offspring)
 
