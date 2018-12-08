@@ -408,7 +408,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
         # output clones per species (file is initialized in main.jl)
         open(abspath(joinpath(settings["outputat"],settings["simID"],"seedproduction.csv")),"a") do seedfile
-            writedlm(seedfile, t, sp, "asex", spclonescounter)
+            writedlm(seedfile, hcat(t, sp, "asex", spclonescounter))
         end
     end
     
@@ -489,7 +489,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
         # output seeds per species (file is initialized in main.jl)
         open(abspath(joinpath(settings["outputat"],settings["simID"],"seedproduction.csv")),"a") do seedfile
-            writedlm(seedfile, t, sp, "sex", spoffspringcounter)
+            writedlm(seedfile, hcat(t, sp, "sex", spoffspringcounter))
         end
     end
 
