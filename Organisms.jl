@@ -413,7 +413,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     end
     
     # Sexually produced offspring
-    ferts = filter(x -> x.mated == true && x.sp == sp, orgs)
+    ferts = filter(x -> x.mated == true, orgs)
 
     for sp in unique(getfield.(ferts, :sp))
 
