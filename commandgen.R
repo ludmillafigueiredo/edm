@@ -1,8 +1,12 @@
-command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturb,areafile = NULL,duration,tout,tempf,outputat = "EDoutputs", timemsg = "false") {
+command <- function(simID, rseed, cluster, landf, connectsf, sppf, insectsf, disturb, areafile = NULL, duration, tout, tempf, outputat = "EDoutputs", timemsg = "false") {
   
   # generate arguments to be parsed in Julia format 
-  parseformat <- function(x){
-    paste('\"',x,'\"', sep = "")
+  parseformat <- function(x, y){
+    if(missing(y)){
+      paste('\"',ifelse(is.null(x),"",x),'\"', sep = "") #deal with single(not inside folder) or NULL arguments
+    }else{
+      paste('\"',file.path(y,x),'\"', sep = "")
+    }
   }
   
   if (cluster == "hpc") {
@@ -34,6 +38,9 @@ command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturb,areafile = N
     "--landconfig",
     # land file
     parseformat(file.path(inputsdir,landf)),
+    "--connects",
+    # land file
+    parseformat(file.path(inputsdir,connectsf)),
     "--spinput", 
     # spp file
     parseformat(file.path(inputsdir,paste(sppf))),
@@ -54,7 +61,7 @@ command <- function(simID,rseed,cluster,landf,sppf,insectsf,disturb,areafile = N
     parseformat(tout),
     # temperature file
     "--temp_ts",
-    parseformat(file.path(EDdir,"inputs",tempf)),
+    parseformat(file.path(inputsdir,tempf)),
     "--timemsg",
     parseformat(timemsg), 
     sep = " ")
