@@ -11,16 +11,15 @@ command <- function(simID, rseed, cluster, landf, connectsf, sppf, insectsf, dis
   
   if (cluster == "hpc") {
     # HPC directories
-    outputat <- file.path("/home", outputat)
-    EDdir <- file.path("/home/model")
+    EDdir <- file.path("/home/ubuntu/", outputat)
     inputsdir <- file.path("/home/ubuntu/Gaia/inputs")
     Juliadir <- file.path("/home/ubuntu/builds/julia-9d11f62bcb/bin/julia")
   } else {
     # Gaia directories
-    EDdir <- file.path("/home/luf74xx/Dokumente/model")
+    outputat <- file.path("EDoutputs")
+    EDdir <- file.path("/home/luf74xx/Dokumente/model", outputat)
     inputsdir <- file.path(EDdir,"inputs")
     Juliadir <- file.path("/home/luf74xx/builds/julia-d386e40c17/bin/julia")
-    outputat <- file.path("EDoutputs")
   }
   command <- paste(
     # julia folder and main
