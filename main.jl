@@ -475,7 +475,7 @@ function simulate()
     cd(pwd())
 
     # OUTPUT SIMULATION SETTINGS
-    open(abspath(joinpath(settings["outputat"],settings["simID"])),"w") do ID
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simID")),"w") do ID
         println(ID, settings)
     end
     # START ID SIMULATION LOG FILE
