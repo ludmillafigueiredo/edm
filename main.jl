@@ -483,8 +483,8 @@ function simulate()
         println(sim,string("Simulation: ",settings["simID"],now()))
     end
     # START SEED PRODUCTION FILE
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"seedproduction.csv")),"w") do seedfile
-        writedlm(seedfile, hcat(["week" "sp" "mode"], "seedprod"))
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv")),"w") do seedfile
+        writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
     end
     
     # MODEL RUN
