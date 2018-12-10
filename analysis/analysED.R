@@ -174,15 +174,14 @@ popstruct <- function(popdata,simID,spp){
 richness <- function(popdata,simID,disturbance,tdist){
   # extract richness from output
   spprichnesstab <- popdata%>%
-    distinct(week,sp)%>%
-    summarize(richness = n())
+    group_by(week)%>%
+    summarize(richness = length(unique(sp)))
   
   # plot it. Identify disturbance, when it happens
   if (disturbance == "none" && missing(tdist)){
     spprichnessplot <- ggplot(spprichnesstab, aes(x = week, y = richness))+
       geom_line(color = "dodgerblue2", size = 1.25)+
       geom_point()+
-      geom_vline(xintercept = 50, linetype = 2, color = "red")+
       theme_minimal()
   } else {
     
@@ -192,11 +191,16 @@ richness <- function(popdata,simID,disturbance,tdist){
       text <- "50% area lost"
     } else if (disturbance == "arealoss90") {
       text <- "90% area lost"
+      spprichnessplot <- ggplot(spprichnesstab, aes(x = week, y = richness))+
+        geom_line(color = "dodgerblue2", size = 1.25)+
+        geom_point+
+        geom_vline(xintercept = tdist, linetype = 2, color = "red")+
+        labs(x = "Time", y = "Spp. richness")+
+        theme_minimal()
     } 
     
     #my_grob <- grobTree(textGrob(text, x = 0.5, y = 0.9, hjust = 0, 
     #                             gp = gpar(fontsize = 10, fontface = "italic")))
-    
     spprichnessplot <- ggplot(spprichnesstab, aes(x = week, y = richness))+
       geom_line(color = "dodgerblue2", size = 1.25)+
       geom_point+
