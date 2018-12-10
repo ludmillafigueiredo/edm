@@ -48,12 +48,14 @@ adultmass <- function(outdata,plotit){
   if (plotit == TRUE){
     indvegmass.plot <- ggplot(filter(biomass, stage == "a"), aes(x=week, y= veg, color = factor(id)))+
       geom_line() +
+      geom_point()+
       labs(x = "Week", y = "Individual vegetative biomass (g)",
            title = "Adult weekly weight")+
       theme(legend.position = "none")
     
     indrepmass.plot <- ggplot(biomass, aes(x=week, y= repr, color = factor(id)))+
       geom_line() +
+      geom_point()+
       labs(x = "Week", y = "Total reproductive biomass (g)",
            title = "Individual reproductive biomass variation")+
       theme(legend.position = "none")
@@ -108,6 +110,7 @@ popabund <- function(biomass){
   
   abund.plot <- ggplot(spabund, aes(x = week, y = abundance, color = factor(sp)))+
     geom_line() + 
+    geom_point() +
     labs(x = "Week", y = "Abundance (n individuals)",
          title = "Species abundance variation")+
     theme(legend.position = "none")
@@ -150,6 +153,7 @@ popstruct <- function(popdata,simID,spp){
   # graphs
   weekstruct.plot <- ggplot(weekstruct, aes(x = week, y = abundance, color= factor(stage)))+
     geom_line()+
+    geom_point()+
     labs(x = "Abundance", 
          y = "Week",
          title = "Population structure")+
@@ -160,7 +164,8 @@ popstruct <- function(popdata,simID,spp){
   
   propstruct.plot <- ggplot(propstruct.tab,
                             aes(x = week, y =proportion, color = as.factor(stage)))+
-    geom_line()
+    geom_line()+
+    geom_point()
   
   return(list(a = weekstruct, b = weekstruct.plot,
               c = propstruct.tab, d = propstruct.plot))
@@ -176,6 +181,7 @@ richness <- function(popdata,simID,disturbance,tdist){
   if (disturbance == "none" && missing(tdist)){
     spprichnessplot <- ggplot(spprichnesstab, aes(x = week, y = richness))+
       geom_line(color = "dodgerblue2", size = 1.25)+
+      geom_point()+
       geom_vline(xintercept = 50, linetype = 2, color = "red")+
       theme_minimal()
   } else {
@@ -193,6 +199,7 @@ richness <- function(popdata,simID,disturbance,tdist){
     
     spprichnessplot <- ggplot(spprichnesstab, aes(x = week, y = richness))+
       geom_line(color = "dodgerblue2", size = 1.25)+
+      geom_point+
       geom_vline(xintercept = tdist, linetype = 2, color = "red")+
       labs(x = "Time", y = "Spp. richness")+
       theme_minimal()
