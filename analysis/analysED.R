@@ -118,7 +118,10 @@ popabund <- function(biomass){
   return(list(a = popdata, b = abund.plot))
 }
 # Extract and plot populations structure
-popstruct <- function(popdata,simID,spp){
+popstruct <- function(popdata,offspringfile,simID,spp){
+  
+  # merge seed file
+  popdata <- rbind(popdata, select(offspringfile, -mode))
   
   if (missing(spp)){
     # Population strucuture: abundances
@@ -212,6 +215,23 @@ richness <- function(popdata,simID,disturbance,tdist){
   }
   return(list(a = spprichnesstab, b = spprichnessplot))
 }
+# Species rank-abundance
+rankabund <- function(abund.tab){
+  # get relative abundances
+  rel_abund.tab <- abund.tab%>%
+    ungroup%>%
+    filter(week == 448)%>%
+    group_by(sp)%>%
+    summarize(abund = n())%>%
+    ungroup%>%
+    mutate(relabund = abund/sum(abund))
+  
+  rel_abund.plot <- ggplot(rel_abund.tab, aes(x = reorder(sp, -relabund), y = relabund))+
+    geom_bar(stat = "identity")+
+    theme(axis.text.x = element_text(angle = 50, size = 10, vjust = 0.5))
+  
+  return(list(a = rel_abund.tab, b = rel_abund.plot))
+}
 # Biomass production
 production <- function(biomass, structured, area){
   prod <- biomass%>%
@@ -246,6 +266,34 @@ production <- function(biomass, structured, area){
     return(total)
   }
 }
+# Population structure by group size
+group.pop <- function(outdata, singlestages){
+  
+  # create table
+  grouppop.tab <- outdata %>%
+    group_by(week,e_mu,stage)%>%
+    summarize(abund = n())
+  #create plot
+  if (missing(singlestages)){
+    grouppop.plot <- ggplot(data = grouppop.tab,
+                            aes(x = week, y = abund, colour = stage))+
+      geom_line()+
+      geom_point()+
+      facet_wrap(~e_mu, ncol = 1, nrow = 3)+
+      labs(title = "Population structure per group size")+
+      theme_bw()
+  }else{
+    grouppop.plot <- ggplot(data = grouppop.tab %>%
+                              filter(stage %in% singlestages),
+                            aes(x = week, y = abund, colour = stage))+
+      geom_line()+
+      geom_point()+
+      facet_wrap(~e_mu, ncol = 1, nrow = 3)+
+      labs(title = "Population structure per group size")+
+      theme_bw()
+  }
+  return(list(a = grouppop.plot, b = grouppop.tab))
+}
 
 # Set up directory to store analysis
 dir.create(file.path(getwd(),simID))
@@ -276,10 +324,11 @@ abund$a -> abund.tab
 abund$b -> abund.plot
 rm(abund)
 
-# Species structure variation
+# Population structure variation
 pop <- popstruct(abund.tab,simID)
 pop$a -> popstruct.tab
 pop$b -> popstruct.plot
+rm(pop)
 
 # Species richness
 rich <- richness(abund.tab,simID,disturbance)
@@ -287,8 +336,30 @@ rich$a -> spprichness.tab
 rich$b -> spprichness.plot
 rm(rich)
 
+# Species rank-abundance 
+rank <- rankabund(abund.tab)
+rank$a -> rank.tab
+rank$b -> rank.plot
+rm(rank)
+
 # Biomass production/ha
 prod <- production(biomass.tab, structured = TRUE, area = 5)
+
+# Population structure by group size
+group <- group.pop(outdata, singlestages)
+group$a -> grouppop.plot
+group$b -> grouppop.tab
+
+# Weight by group size 
+group.weight <- ggplot(data = outdata %>%
+                         group_by(week,e_mu,stage)%>%
+                         summarize(abund = n()),
+                       aes(x = week, y = abund, colour = stage))+
+  geom_line()+
+  geom_point()+
+  facet_wrap(~e_mu, ncol = 1, nrow = 3, scale = "free_y")+
+  labs(title = "Population structure per group size")+
+  theme_bw()
 
 ## SAVE BUNDLE OF GRAPHS AND TABLES AS RDATA
 save(outdata,
@@ -298,6 +369,11 @@ save(outdata,
      popstruct.tab,popstruct.plot,
      spprichness.tab, spprichness.plot,
      prod,
+     grouppop.plot,
+     gruoppop.tab,
+     group.weight,
+     rank.tab,
+     rank.plot,
      file = file.path(simID,paste(simID,".RData", sep = "")))
 
 # Save graphic outputs 
