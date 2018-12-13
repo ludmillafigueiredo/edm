@@ -527,7 +527,7 @@ function simulate()
 
         develop!(orgs,orgsref)
 
-        mate!(orgs,t,settings,scen,td,regime,1)
+        mate!(orgs,t,settings,scen,td,regime, visited = 1)
 
         id_counter = mkoffspring!(orgs,t,settings,orgsref,id_counter)
 

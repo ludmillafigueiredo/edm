@@ -291,7 +291,7 @@ end
 mate!()
 Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
 """
-function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen, td, regime, pl)
+function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen, td, regime, visited)
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.e_mu, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
     pollinated = []
@@ -307,7 +307,7 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
             if t >= td
                 if regime == "pulse"
                     if t == tp # pollination lost only once
-                        pollinated = sample(ready,n=Int(floor(length(ready)* pl)), replace = false, ordered = true) #* 10^(-3)) 
+                        pollinated = sample(ready,n=Int(floor(length(ready)* visited)), replace = false, ordered = true) #* 10^(-3)) 
                     else
                         pollinated = ready
                     end
@@ -317,13 +317,13 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
                     end
                     
                 elseif regime == "exp"
-                    pollinated = sample(ready,n=Int(floor(length(ready)* exp(-(t-td)*pl))), replace = false, ordered = true) #* 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
+                    pollinated = sample(ready,n=Int(floor(length(ready)* exp(-(t-td)* visited))), replace = false, ordered = true) #* 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
                     # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
                     for p in pollinated
                         orgs[p].mated = true
                     end
                 elseif regime == "const"
-                    pollinated = sample(ready, Int(floor(length(ready)* pl)), replace = false, ordered = true) #* 10^(-3))
+                    pollinated = sample(ready, Int(floor(length(ready)* visited)), replace = false, ordered = true) #* 10^(-3))
                     for p in pollinated
                         orgs[p].mated = true
                     end
@@ -360,7 +360,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     asexuals = filter(x -> x.mated == false && x.sestra == true && x.mass["repr"] > x.e_mu, orgs) #find which the individuals the can reproduce assexually and then go through them, by species
     
     for sp in unique(getfield.(asexuals, :sp))
-        cloning = find(x.sp == sp, asexuals)
+        cloning = find(x -> x.sp == sp, asexuals)
 
         # start production counting
         spclonescounter = 0
