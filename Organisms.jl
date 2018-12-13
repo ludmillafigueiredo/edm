@@ -397,7 +397,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     
                     clone = deepcopy(clonetemplate)
                     # clone's own traits
-                    clone.id = id_counter
+                    clone.id = hex(id_counter)
                     clone.location = (clonetemplate.location[1] + rand(Distributions.Bernoulli())[1],
                                       clonetemplate.location[2] + rand(Distributions.Bernoulli())[1],
                                       clonetemplate.location[3]) # clones are spread in one of the neighboring cells - or in the same as the mother
