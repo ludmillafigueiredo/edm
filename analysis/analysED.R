@@ -120,14 +120,12 @@ popabund <- function(biomass){
 # Extract and plot populations structure
 popstruct <- function(popdata,offspringfile,simID,spp){
   
-  # merge seed file
-  popdata <- rbind(popdata, select(offspringfile, -mode))
-  
   if (missing(spp)){
     # Population strucuture: abundances
     weekstruct <- popdata%>%
       group_by(week, sp, stage)%>%
-      summarize(abundance = n())
+      summarize(abundance = n())%>%
+      bind_rows(.,select(offspringfile,-mode)) #merge offspring file
     # Population strucuture: proportions
     propstruct.tab <- popdata%>%
       group_by(week,stage)%>%
@@ -325,7 +323,7 @@ abund$b -> abund.plot
 rm(abund)
 
 # Population structure variation
-pop <- popstruct(abund.tab,simID)
+pop <- popstruct(abund.tab,offspringfile,simID)
 pop$a -> popstruct.tab
 pop$b -> popstruct.plot
 rm(pop)
