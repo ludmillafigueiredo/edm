@@ -360,16 +360,16 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     asexuals = filter(x -> x.mated == false && x.sestra == true && x.mass["repr"] > x.e_mu, orgs) #find which the individuals the can reproduce assexually and then go through them, by species
     
     for sp in unique(getfield.(asexuals, :sp))
-        cloning = find(x -> x.sp == sp, asexuals)
+        cloning = find(x -> x.sp == sp && x.id in unique(getfield.(asexuals, :id)) , orgs)
 
         # start production counting
         spclonescounter = 0
 
         for c in cloning
-            offs = div(0.5*asexuals[c].mass["repr"], asexuals[c].e_mu)
+            offs = div(0.5*orgs[c].mass["repr"], orgs[c].e_mu)
 
             # unity test
-            if  asexuals[o].mass["repr"] <= 0
+            if  orgs[c].mass["repr"] <= 0
                 error("Negative reproductive biomass") #because offs is an integer, reproductive biomass should not become negative
             end
             
@@ -377,18 +377,18 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 continue
             else
                 # limit offspring production to the maximal number of seeds the species can produce
-                offs > asexuals[o].wseedn ? offs = asexuals[o].wseedn : offs
+                offs > orgs[c].wseedn ? offs = orgs[c].wseedn : offs
 
                 # count clonal production  
                 spclonescounter += offs
 
                 # update reproductive mass
-                asexuals[o].mass["repr"] -= (offs * asexuals[c].e_mu)
+                orgs[c].mass["repr"] -= (offs * orgs[c].e_mu)
 
                 # get a copy of the mother, which the clones will look like 
-                clonetemplate = deepcopy(asexuals[c])
+                clonetemplate = deepcopy(orgs[c])
                 clonetemplate.stage = "j" #clones have already germinated
-                clonetemplate.mass["veg"] = asexuals[c].e_mu
+                clonetemplate.mass["veg"] = orgs[c].e_mu
                 clonetemplate.mass["repr"] = 0.0
                 
                 for o in offs
@@ -417,40 +417,39 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
     for sp in unique(getfield.(ferts, :sp))
 
-        sowing = find(x -> x.sp == sp, ferts)
+        sowing = find(x -> x.sp == sp || x.id in unique(getfield.(ferts, :id)), orgs)
         
         spoffspringcounter = 0
         
-        for o in sowing
+        for s in sowing
 
-            emu = ferts[o].e_mu
-            offs = div(0.5*ferts[o].mass["repr"], emu)
+            emu = orgs[s].e_mu
+            offs = div(0.5*orgs[s].mass["repr"], emu)
 
             if offs <= 0
                 continue
             else
                 # limit offspring production to the maximal number of seeds the species can produce
-                offs > orgs[o].wseedn ? offs = orgs[o].wseedn : offs
+                offs > orgs[s].wseedn ? offs = orgs[s].wseedn : offs
 
                 # count species offspring for output
                 spoffspringcounter += offs
                 
-                ferts[o].mass["repr"] -= (offs * emu)
+                orgs[s].mass["repr"] -= (offs * emu)
 
                 # unity test
-                if  ferts[o].mass["repr"] <= 0
+                if  orgs[s].mass["repr"] <= 0
                     error("Negative reproductive biomass")
                 end
 
                 # get another parent
-                sp = ferts[o].sp
                 conspp = orgs[rand(find(x -> x.sp == sp && x.stage == "a", orgs))] 
                 
                 for n in 1:offs
                     
                     id_counter += 1 # update individual counter
 
-                    embryo = deepcopy(ferts[o])
+                    embryo = deepcopy(orgs[s])
 
                     #newvalue = rand(Distributions.Normal(0,abs(embryo.e_mu-conspp.e_mu)/embryo.e_mu))
                     #embryo.e_mu + newvalue >= orgsref.e_mu[embryo.sp] ? # if seed biomass or minimal biomass would smaller than zero, it does not chenge
@@ -483,7 +482,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     #println("Pushed new org ", embryo, " into offspring")
                     #end
                 end
-                orgs[o].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
+                orgs[s].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
             end 
         end
 
