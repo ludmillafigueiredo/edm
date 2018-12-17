@@ -249,10 +249,11 @@ function implicit_insect(settings::Dict{String,Any})
     
     interaction = select(insectsinput, :interaction)[1]
     scen = select(insectsinput, :scen)[1] # pollination scenario
-    tp = select(insectsinput, :tp)[1] # time of perturbation
+    td = select(insectsinput, :td)[1] # time of perturbation
     regime = select(insectsinput, :regime)[1] # regime of loss
+    visited = select(insectsinput, :visited)[1] # proportion of pollination service loss
     
-    return interaction, scen, tp, regime
+    return interaction, scen, td, regime, visited
 end
 
 """
@@ -448,7 +449,7 @@ function simulate()
     println("Sp info stored in object of type $(typeof(orgsref))")
 
     # Set insects implicit simulation
-    interaction, scen, td, regime = implicit_insect(settings)
+    interaction, scen, td, regime, visited = implicit_insect(settings)
     
     # Create landscape
     mylandscape, landavail = landscape_init(landpars)
@@ -521,23 +522,23 @@ function simulate()
             nogrowth = Int64[]
         end
 
-        survive!(orgs,t,cK,K,settings,orgsref,landavail,T,nogrowth)
+        survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth)
 
-        global nogrowth = allocate!(mylandscape,orgs,t,aE,Boltz,settings,orgsref,T)
+        global nogrowth = allocate!(mylandscape, orgs, t, aE, Boltz, settings, orgsref, T)
 
-        develop!(orgs,orgsref)
+        develop!(orgs, orgsref)
 
-        mate!(orgs,t,settings,scen,td,regime, 1)
+        mate!(orgs, t, settings, scen, regime, td, visited)
 
-        id_counter = mkoffspring!(orgs,t,settings,orgsref,id_counter)
+        id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter)
 
-        seedsi = release!(orgs,t,settings,orgsref)
+        seedsi = release!(orgs, t, settings, orgsref)
 
-        disperse!(landavail,seedsi,orgs,t,settings,orgsref,connects,AT,Ah)
+        disperse!(landavail, seedsi, orgs, t, settings, orgsref, connects, AT, Ah)
 
-        establish!(mylandscape,orgs,t,settings,orgsref,T)
+        establish!(mylandscape, orgs, t, settings, orgsref, T)
         
-        shedd!(orgs,orgsref,t)
+        shedd!(orgs, orgsref, t)
         
         timing("LIFE CYCLE", settings)
         toc()

@@ -279,79 +279,111 @@ function checkboundaries(landavail::Array{Bool,2}, xdest::Int64, ydest::Int64, f
 end
 
 """
-reproduce!(landscape,orgs)
-Assigns proper reproduction mode according to the organism functional group. This controls whether reproduction happens or not, for a given individual: plants depend on pollination, while insects do not. Following, it handles fertilization of new embryos and calculates offspring production. New individuals are included in the community at the end of current timestep.
-    Will probably call mate!()
-    """
-function reproduce!()
-    
-end
-
-"""
 mate!()
 Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
+- visited: reduction in pollination service
 """
-function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen, td, regime, visited)
+function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, regime:: String, td::Int, visited::Int)
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.e_mu, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
     pollinated = []
+    npoll = 0
 
-    # 100% pollination availability
-    if length(ready) > 0 # check if there is anyone flowering         
-        if scen == "indep" # if all spps are pollination-independent
-            for r in ready
-                orgs[r].mated = true
-            end
-            # Disturbance pollination scenario
-        elseif scen == "equal" #all species lose pollination randomly (not species-specific)
-            if t >= td
-                if regime == "pulse"
-                    if t == tp # pollination lost only once
-                        pollinated = sample(ready,n=Int(floor(length(ready)* visited)), replace = false, ordered = true) #* 10^(-3)) 
+    if length(ready) > 0 # check if there is anyone flowering
+        # Scenarios were pollination is not species-specific
+        if scen in ["indep" "equal"]  # calculation of number of pollinated individuals is different, but the actual pollination (non species-specific) is
+
+            # Determine number of individuals that get pollinated (species is not relevant)
+            if scen == "indep"
+                npoll = Int(ceil(rand(Distributions.Uniform(0.5, 1))[1] * length(ready) * 1))
+                 println("Scenario of INDEP pollination loss")
+                
+            elseif scen == "equal" #all species lose pollination randomly (not species-specific)
+                println("Scenario of EQUAL pollination loss")
+                # Check the regime
+                if t >= td 
+                    if regime == "pulse"
+                        if t != td # t is not td more often, therefore it is simpler to avoid checking for the less simpler situation most of the time 
+                            npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * 1))
+                        else
+                            npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * visited))
+                        end
+                        
+                    elseif regime == "exp"
+                        
+                        npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * exp(-0.5*(t-td))))
+                        # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
+                        println("Regime of EXP pollination loss, with $(length(ready)) being ready and $npoll being pollinated")
+                        
+                    elseif regime == "const"
+                        if t <= tdend 
+                            npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * visited))
+                        else
+                            npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * 1)) # pollination goes back to 'normal' after press disturbance
+                        end
                     else
-                        pollinated = ready
+                        error("Please choose a pollination regime \"regime\" in insect.csv:
+                              - \"pulse\":
+                              - \"const\":
+                              - \"exp\"")                    
                     end
-
-                    for p in pollinated
-                        orgs[p].mated = true
-                    end
-                    
-                elseif regime == "exp"
-                    pollinated = sample(ready,n=Int(floor(length(ready)* exp(-(t-td)* visited))), replace = false, ordered = true) #* 10^(-3)) # (kp = 1) rdmly take the nbs of occupied flowers/individuals to be set to reproduce#
-                    # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
-                    for p in pollinated
-                        orgs[p].mated = true
-                    end
-                elseif regime == "const"
-                    pollinated = sample(ready, Int(floor(length(ready)* visited)), replace = false, ordered = true) #* 10^(-3))
-                    for p in pollinated
-                        orgs[p].mated = true
-                    end
-                else
-                    error("Please chose a pollination regime \"regime\" in insect.csv:
-                          - \"pulse\":
-                          - \"const\": or
-                          - \"exp\"")                    
                 end
             end
-        elseif scen == "spec" #not yet tested
-            # find species that are supposed to loose pollination at the current timestep
-            pollinated = ready
-            for p in pollinated
-                orgs[p].mated = true
+
+            # Non species-specific pollination
+            # check if any should actually be pollinated
+            if npoll > 0
+                # who are they
+                pollinated = sample(ready, npoll, replace = false, ordered = true)
+                # pollinate
+                for p in pollinated
+                    orgs[p].mated = true
+                end
+            elseif npoll < 0
+                error("Negative number of plants being pollinated.")
             end
+            
+        elseif scen in ["rdm" "spec"] #not yet tested
+
+            # Determine which species will loose pollination
+            if scen == "rdm"
+                # randomly pick plant species that will loose pollination (n = nspppoll) at a given timestep and find their number
+                # pseudo:
+                # rdmly pick species:
+                # spppoll = unique(getfields(orgs, :sp)) |> sample(, nspppoll)
+            elseif scen == "spec" #not yet tested
+                # from a list of loss pollinators, find the plant species (in the interaction matrix) that will loose pollination at a given timestep
+            end
+            
+            # Species-specific pollination
+            # check if any should be pollinated
+            if npoll == 0
+
+            elseif npoll > 1
+                # who are they
+                pollinated = sample(sppready, npoll, replace = false, ordered = true)
+                # pollinate
+                for p in pollinated
+                    orgs[p].mated = true
+                end
+            else
+                error("Negative number of plants being pollinated.")
+            end
+            
         else
             error("Please chose a pollination scenario \"scen\" in insect.csv:
-                  - \"indep\": pollination independent scenario,
-                  - \"depend\": pollination dependent scenario, with supplementary info for simulating.")
-        end        
+                  - \"indep\": sexual reproduction happens independently of pollination
+                  - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
+                  - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
+        end
+
     end  
 end
 
 """
-    mkoffspring!()
-    After mating happened (marked in `reped`), calculate the amount of offspring
-    """
+mkoffspring!()
+After mating happened (marked in `reped`), calculate the amount of offspring
+"""
 function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int)
     
     offspring = Organism[]
