@@ -327,6 +327,8 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
                               - \"const\":
                               - \"exp\"")                    
                     end
+                else
+                    npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * 1))
                 end
             end
 
@@ -397,7 +399,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
         # start production counting
         spclonescounter = 0
 
-        for c in cloning
+        for c in cloning # mothers cloning
             offs = div(0.5*orgs[c].mass["repr"], orgs[c].e_mu)
 
             # unity test
