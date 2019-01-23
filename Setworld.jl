@@ -86,13 +86,18 @@ end
 destroyarea!()
 Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
 """
+<<<<<<< Updated upstream
 function destroyarea!(landmode::String, landpars::LandPars, landavail::Array{Bool,N} where N, loss::Float64, settings::Dict{String,Any})
+=======
+function destroyarea!(landavail::Array{Bool,3}, landpars::LandPars, settings::Dict{String,Any})
+>>>>>>> Stashed changes
 
-    if landmode == "artif"
+    if settings["landmode"] == "artif"
         # DESTROY HABITAT
         # index of the cells still availble:
         available = find(x -> x == true, landavail)
         # number of cells to be destroyed:
+        loss = landpars.disturbarea/landpars.initialarea # just a proportion, unit doesn't matter
         lostarea = round(Int,loss*length(available), RoundUp) 
 
         # Unity test
@@ -109,22 +114,24 @@ function destroyarea!(landmode::String, landpars::LandPars, landavail::Array{Boo
         open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
             println(sim, "Number of destroyed cells: $lostarea")
         end
-    elseif landmode == "real"
-    # rebuild the landscape according to shape file
-    landscape = Array{Dict{String,Float64}}
-    
-    for frag in collect(1:landpars.nfrags)
+        
+    elseif settings["landmode"] == "real"
+        # rebuild the landscape according to shape file
+        landscape = Array{Dict{String,Float64}}
+        
+        for frag in collect(1:landpars.nfrags)
 
-        fragment = fill(Dict{String,Float64}(), landpars.flength[frag],landpars.flength[frag])
-	
-	if frag == 1
-	    landscape = fragment #when empty, landscape cant cat with frag
-	else
-	    landscape = cat(3,landscape, frag)
-	end
-    end
+            fragment = fill(Dict{String,Float64}(), landpars.flength[frag],landpars.flength[frag])
+	    
+	    if frag == 1
+	        landscape = fragment #when empty, landscape cant cat with frag
+	    else
+	        landscape = cat(3,landscape, frag)
+	    end
+            
+        end
 
-    landavail = fill(true,size(landscape))
+        landavail = fill(true,size(landscape))
         
     end
 end

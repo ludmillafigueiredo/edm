@@ -442,7 +442,7 @@ function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::A
         
         if settings["disturbtype"] == "loss"
             loss = landpars.disturbarea/landpars.initialarea
-            Setworld.destroyarea!(landavail,landpars,loss,settings)
+            Setworld.destroyarea!(landavail,landpars,settings)
             Organisms.destroyorgs!(orgs,landavail,settings)
         elseif settings["disturbtype"] == "frag"
             Setworld.fragment!(landscape,settings,landpars,orgs)
