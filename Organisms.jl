@@ -1,9 +1,9 @@
 
 """
-This module contains the
+    This module contains the
 
-Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
-"""
+    Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
+    """
 module Organisms
 
 using Distributions
@@ -11,7 +11,7 @@ using DataFrames
 using JuliaDB
 using DataValues
 using StatsBase
-using Setworld
+#using Setworld
 using Fileprep
 
 export Organism, OrgsRef, initorgs, projvegmass!, compete, develop!, allocate!, checkboundaries, reproduce!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!, release!
@@ -28,87 +28,87 @@ const λ_ant = 0.2
 
 # Initial organisms parametrization is read from an input file and stored in OrgsRef
 mutable struct OrgsRef
-sp_id::Array{String, 1}
-kernel::Dict{String,String}
-kernel_sd::Dict{String,Float64}
-e_mu::Dict{String,Float64}
-e_sd::Dict{String,Float64}
-seedbank::Dict{String,Int}
-b0g::Dict{String,Float64}
-b0g_sd::Dict{String,Float64}
-b0em::Dict{String,Float64}
-b0em_sd::Dict{String,Float64}
-b0jm::Dict{String,Float64}
-b0jm_sd::Dict{String,Float64}
-b0am::Dict{String,Float64}
-b0am_sd::Dict{String,Float64}
-b0jg::Dict{String,Float64}
-b0jg_sd::Dict{String,Float64}
-b0ag::Dict{String,Float64}
-b0ag_sd::Dict{String,Float64}
-sestra::Dict{String,Bool}
-#dyad::Dict{String,Float64}
-max_seedn::Dict{String,Int}
-floron::Dict{String,Int}
-floron_sd::Dict{String,Int}
-floroff::Dict{String,Int}
-floroff_sd::Dict{String,Int}
-seedon::Dict{String,Int}
-seedon_sd::Dict{String,Int}
-seedoff::Dict{String,Int}
-seedoff_sd::Dict{String,Int}
-max_mass::Dict{String,Float64}
-max_span::Dict{String,Int}
-max_span_sd::Dict{String,Int}
-mass_mu::Dict{String,Float64}
-mass_sd::Dict{String,Float64}
-abund::Dict{String,Int}
+    sp_id::Array{String, 1}
+    kernel::Dict{String,String}
+    kernel_sd::Dict{String,Float64}
+    e_mu::Dict{String,Float64}
+    e_sd::Dict{String,Float64}
+    seedbank::Dict{String,Int}
+    b0g::Dict{String,Float64}
+    b0g_sd::Dict{String,Float64}
+    b0em::Dict{String,Float64}
+    b0em_sd::Dict{String,Float64}
+    b0jm::Dict{String,Float64}
+    b0jm_sd::Dict{String,Float64}
+    b0am::Dict{String,Float64}
+    b0am_sd::Dict{String,Float64}
+    b0jg::Dict{String,Float64}
+    b0jg_sd::Dict{String,Float64}
+    b0ag::Dict{String,Float64}
+    b0ag_sd::Dict{String,Float64}
+    sestra::Dict{String,Bool}
+    #dyad::Dict{String,Float64}
+    max_seedn::Dict{String,Int}
+    floron::Dict{String,Int}
+    floron_sd::Dict{String,Int}
+    floroff::Dict{String,Int}
+    floroff_sd::Dict{String,Int}
+    seedon::Dict{String,Int}
+    seedon_sd::Dict{String,Int}
+    seedoff::Dict{String,Int}
+    seedoff_sd::Dict{String,Int}
+    max_mass::Dict{String,Float64}
+    max_span::Dict{String,Int}
+    max_span_sd::Dict{String,Int}
+    mass_mu::Dict{String,Float64}
+    mass_sd::Dict{String,Float64}
+    abund::Dict{String,Int}
 end
 
 mutable struct Organism
-id::String
-stage::String #e,j,a
-location::Tuple # (x,y,frag)
-sp::String #sp id, easier to read
-mass::Dict
-#### Evolvable traits ####
-kernel::String
-e_mu::Float64
-seedbank::Int64
-b0g::Float64
-b0em::Float64
-b0jm::Float64
-b0am::Float64
-b0jg::Float64
-b0ag::Float64
-sestra::Bool
-#dyad::Float64
-floron::Int
-floroff::Int
-wseedn::Int
-seedon::Int
-seedoff::Int
-max_mass::Float64
-max_span::Int64
-#topt::Float64
-#### State variables #### #TODO put all state variable together
-age::Int64 # control death when older than max. lifespan
-mated::Bool
+    id::String
+    stage::String #e,j,a
+    location::Tuple # (x,y,frag)
+    sp::String #sp id, easier to read
+    mass::Dict
+    #### Evolvable traits ####
+    kernel::String
+    e_mu::Float64
+    seedbank::Int64
+    b0g::Float64
+    b0em::Float64
+    b0jm::Float64
+    b0am::Float64
+    b0jg::Float64
+    b0ag::Float64
+    sestra::Bool
+    #dyad::Float64
+    floron::Int
+    floroff::Int
+    wseedn::Int
+    seedon::Int
+    seedoff::Int
+    max_mass::Float64
+    max_span::Int64
+    #topt::Float64
+    #### State variables #### #TODO put all state variable together
+    age::Int64 # control death when older than max. lifespan
+    mated::Bool
 end
 Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0jm,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0jm,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span,26,false)
 
 """
-initorgs(landavail, orgsref,id_counter)
+    initorgs(landavail, orgsref,id_counter)
 
-Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
-"""
-function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counter::Int)
+    Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
+    """
+function initorgs(landavail::Array{Bool,3},orgsref::Organisms.OrgsRef, id_counter::Int)
 
     orgs = Organism[]
 
     for frag in 1:size(landavail,3)
 
-        for s in orgsref.sp_id
+        for s in orgsref.sp_id # all fragments are populated from the same species pool
 
             XYs = hcat(rand(1:size(landavail,1),orgsref.abund[s]),
                        rand(1:size(landavail,2),orgsref.abund[s]))
@@ -129,39 +129,39 @@ function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                                   rand(Distributions.Normal(mean(Uniform(min(orgsref.b0g[s],orgsref.b0g_sd[s]),
                                                                          max(orgsref.b0g[s],orgsref.b0g_sd[s])+0.00000001)),
                                                             abs(-(orgsref.b0g[s],orgsref.b0g_sd[s])/6))), #b0g
-                rand(Distributions.Normal(mean(Uniform(min(orgsref.b0em[s],orgsref.b0em_sd[s]),
-                                                       max(orgsref.b0em[s],orgsref.b0em_sd[s])+0.00000001)),
-                                          abs(-(orgsref.b0em[s],orgsref.b0em_sd[s])/6))), #b0em
-                rand(Distributions.Normal(mean(Uniform(min(orgsref.b0jm[s],orgsref.b0jm_sd[s]),
-                                                       max(orgsref.b0jm[s],orgsref.b0jm_sd[s])+0.00000001)),
-                                          abs(-(orgsref.b0jm[s],orgsref.b0jm_sd[s])/6))), #b0jm
-                rand(Distributions.Normal(mean(Uniform(min(orgsref.b0am[s],orgsref.b0am_sd[s]),
-                                                       max(orgsref.b0am[s],orgsref.b0am_sd[s])+0.00000001)),
-                                          abs(-(orgsref.b0am[s],orgsref.b0am_sd[s])/6))), #b0am
-                rand(Distributions.Normal(mean(Uniform(min(orgsref.b0jg[s],orgsref.b0jg_sd[s]),
-                                                       max(orgsref.b0jg[s],orgsref.b0jg_sd[s])+0.00000001)),
-                                          abs(-(orgsref.b0jg[s],orgsref.b0jg_sd[s])/6))), #b0jg
-                rand(Distributions.Normal(mean(Uniform(min(orgsref.b0ag[s],orgsref.b0ag_sd[s]),
-                                                       max(orgsref.b0ag[s],orgsref.b0ag_sd[s])+0.00000001)),
-                                          abs(-(orgsref.b0ag[s],orgsref.b0ag_sd[s])/6))), #b0ag
-                orgsref.sestra[s],
-                Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floron[s],orgsref.floron_sd[s]),
-                                                                 max(orgsref.floron[s],orgsref.floron_sd[s])+0.00000001)),
-                                                    abs(-(orgsref.floron[s], orgsref.floron_sd[s])/6))),RoundUp)), #floron
-                Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floroff[s], orgsref.floroff_sd[s]),
-                                                                 max(orgsref.floroff[s], orgsref.floroff_sd[s])+0.00000001)),
-                                                    abs(-(orgsref.floroff[s], orgsref.floroff_sd[s])/6))),RoundUp)), #floroff
-                0,
-                Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedon[s], orgsref.seedon_sd[s]),
-                                                                 max(orgsref.seedon[s], orgsref.seedon_sd[s])+0.00000001)),
-                                                    abs(-(orgsref.seedon[s],orgsref.seedon_sd[s])/6))),RoundUp)), #seedon
-                Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedoff[s], orgsref.seedoff_sd[s]),
-                                                                 max(orgsref.seedoff[s], orgsref.seedoff_sd[s])+0.00000001)),
-                                                    abs(-(orgsref.seedoff[s],orgsref.seedoff_sd[s])/6))),RoundUp)), #seedoff
-                0.0, #max_mass
-                Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.max_span[s], orgsref.max_span_sd[s]),
-                                                                 max(orgsref.max_span[s], orgsref.max_span_sd[s])+0.00000001)),
-                                                    abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
+                                  rand(Distributions.Normal(mean(Uniform(min(orgsref.b0em[s],orgsref.b0em_sd[s]),
+                                                                         max(orgsref.b0em[s],orgsref.b0em_sd[s])+0.00000001)),
+                                                            abs(-(orgsref.b0em[s],orgsref.b0em_sd[s])/6))), #b0em
+                                  rand(Distributions.Normal(mean(Uniform(min(orgsref.b0jm[s],orgsref.b0jm_sd[s]),
+                                                                         max(orgsref.b0jm[s],orgsref.b0jm_sd[s])+0.00000001)),
+                                                            abs(-(orgsref.b0jm[s],orgsref.b0jm_sd[s])/6))), #b0jm
+                                  rand(Distributions.Normal(mean(Uniform(min(orgsref.b0am[s],orgsref.b0am_sd[s]),
+                                                                         max(orgsref.b0am[s],orgsref.b0am_sd[s])+0.00000001)),
+                                                            abs(-(orgsref.b0am[s],orgsref.b0am_sd[s])/6))), #b0am
+                                  rand(Distributions.Normal(mean(Uniform(min(orgsref.b0jg[s],orgsref.b0jg_sd[s]),
+                                                                         max(orgsref.b0jg[s],orgsref.b0jg_sd[s])+0.00000001)),
+                                                            abs(-(orgsref.b0jg[s],orgsref.b0jg_sd[s])/6))), #b0jg
+                                  rand(Distributions.Normal(mean(Uniform(min(orgsref.b0ag[s],orgsref.b0ag_sd[s]),
+                                                                         max(orgsref.b0ag[s],orgsref.b0ag_sd[s])+0.00000001)),
+                                                            abs(-(orgsref.b0ag[s],orgsref.b0ag_sd[s])/6))), #b0ag
+                                  orgsref.sestra[s],
+                                  Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floron[s],orgsref.floron_sd[s]),
+                                                                                   max(orgsref.floron[s],orgsref.floron_sd[s])+0.00000001)),
+                                                                      abs(-(orgsref.floron[s], orgsref.floron_sd[s])/6))),RoundUp)), #floron
+                                  Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.floroff[s], orgsref.floroff_sd[s]),
+                                                                                   max(orgsref.floroff[s], orgsref.floroff_sd[s])+0.00000001)),
+                                                                      abs(-(orgsref.floroff[s], orgsref.floroff_sd[s])/6))),RoundUp)), #floroff
+                                  0,
+                                  Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedon[s], orgsref.seedon_sd[s]),
+                                                                                   max(orgsref.seedon[s], orgsref.seedon_sd[s])+0.00000001)),
+                                                                      abs(-(orgsref.seedon[s],orgsref.seedon_sd[s])/6))),RoundUp)), #seedon
+                                  Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.seedoff[s], orgsref.seedoff_sd[s]),
+                                                                                   max(orgsref.seedoff[s], orgsref.seedoff_sd[s])+0.00000001)),
+                                                                      abs(-(orgsref.seedoff[s],orgsref.seedoff_sd[s])/6))),RoundUp)), #seedoff
+                                  0.0, #max_mass
+                                  Int(round(rand(Distributions.Normal(mean(Uniform(min(orgsref.max_span[s], orgsref.max_span_sd[s]),
+                                                                                   max(orgsref.max_span[s], orgsref.max_span_sd[s])+0.00000001)),
+                                                                      abs(-(orgsref.max_span[s], orgsref.max_span_sd[s])/6))),RoundUp)))#max_span
 
                 # adult max biomass
                 if neworg.e_mu == 0.0001
@@ -174,18 +174,18 @@ function initorgs(landavail::Array{Bool,2},orgsref::Organisms.OrgsRef, id_counte
                     error("Check seed sizes in input")
                 end
 
-                # weekly number of seeds
-                neworg.wseedn = Int(round(orgsref.max_seedn[s]/(neworg.floroff-neworg.floron+1)))
-                
-                # initial biomass
-                if neworg.stage in ["e","j"]
-                    neworg.mass["veg"] = neworg.e_mu
-                else
-                    neworg.mass["veg"] = neworg.max_mass * 0.5
-                end
-                push!(orgs, neworg)
+# weekly number of seeds
+neworg.wseedn = Int(round(orgsref.max_seedn[s]/(neworg.floroff-neworg.floron+1)))
 
-            end
+# initial biomass
+if neworg.stage in ["e","j"]
+    neworg.mass["veg"] = neworg.e_mu
+else
+    neworg.mass["veg"] = neworg.max_mass * 0.5
+end
+push!(orgs, neworg)
+
+end
 end
 end
 
@@ -194,10 +194,10 @@ return orgs, id_counter
 end
 
 """
-allocate!(landscape, orgs, t, aE, Boltz, setting, orgsref, T)
-Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
-"""
-function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef,T::Float64)
+    allocate!(landscape, orgs, t, aE, Boltz, setting, orgsref, T)
+    Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
+    """
+function allocate!(landscape::Array{Dict{String, Float64},3}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef,T::Float64)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
     
@@ -241,9 +241,9 @@ function allocate!(landscape::Array{Dict{String, Float64},2}, orgs::Array{Organi
     return nogrowth
 end
 """
-develop!()
-Controls individual juvenile maturation.
-"""
+    develop!()
+    Controls individual juvenile maturation.
+    """
 function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
     juvs = find(x->x.stage == "j",orgs)
 
@@ -256,10 +256,10 @@ function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
 end
 
 """
-checkboundaries(sourcefrag,xdest, ydest, fdest)
-`source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
-"""
-function checkboundaries(landavail::Array{Bool,2}, xdest::Int64, ydest::Int64, fdest::Int64) #TODO is this function necessary?
+    checkboundaries(sourcefrag,xdest, ydest, fdest)
+    `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
+    """
+function checkboundaries(landavail::Array{Bool,3}, xdest::Int64, ydest::Int64, fdest::Int64) #TODO is this function necessary?
     #check inside frag
     if checkbounds(Bool, landavail[:,:,fdest], xdest, ydest)
         inbound = true
@@ -279,10 +279,10 @@ function checkboundaries(landavail::Array{Bool,2}, xdest::Int64, ydest::Int64, f
 end
 
 """
-mate!()
-Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
-- visited: reduction in pollination service
-"""
+    mate!()
+    Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
+    - visited: reduction in pollination service
+    """
 function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, regime:: String, td::Int, visited::Int)
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.e_mu, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
@@ -296,7 +296,7 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
             # Determine number of individuals that get pollinated (species is not relevant)
             if scen == "indep"
                 npoll = Int(ceil(rand(Distributions.Uniform(0.5, 1))[1] * length(ready) * 1))
-                 println("Scenario of INDEP pollination loss")
+                println("Scenario of INDEP pollination loss")
                 
             elseif scen == "equal" #all species lose pollination randomly (not species-specific)
                 println("Scenario of EQUAL pollination loss")
@@ -316,16 +316,16 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
                         println("Regime of EXP pollination loss, with $(length(ready)) being ready and $npoll being pollinated")
                         
                     elseif regime == "const"
-                        if t <= tdend 
-                            npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * visited))
-                        else
-                            npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * 1)) # pollination goes back to 'normal' after press disturbance
-                        end
+                        #if t <= tdend 
+                        #    npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * visited))
+                        #else
+                        npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * 1)) # pollination goes back to 'normal' after press disturbance
+                        #end
                     else
                         error("Please choose a pollination regime \"regime\" in insect.csv:
-                              - \"pulse\":
-                              - \"const\":
-                              - \"exp\"")                    
+                                  - \"pulse\":
+                                  - \"const\":
+                                  - \"exp\"")                    
                     end
                 else
                     npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * 1))
@@ -363,7 +363,7 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
 
             elseif npoll > 1
                 # who are they
-                pollinated = sample(sppready, npoll, replace = false, ordered = true)
+                pollinated = sample(ready, npoll, replace = false, ordered = true)
                 # pollinate
                 for p in pollinated
                     orgs[p].mated = true
@@ -374,18 +374,18 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
             
         else
             error("Please chose a pollination scenario \"scen\" in insect.csv:
-                  - \"indep\": sexual reproduction happens independently of pollination
-                  - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
-                  - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
+                      - \"indep\": sexual reproduction happens independently of pollination
+                      - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
+                      - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
         end
 
     end  
 end
 
 """
-mkoffspring!()
-After mating happened (marked in `reped`), calculate the amount of offspring
-"""
+    mkoffspring!()
+    After mating happened (marked in `reped`), calculate the amount of offspring
+    """
 function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int)
     
     offspring = Organism[]
@@ -538,9 +538,9 @@ return id_counter
 end
 
 """
-release!()
-Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
-"""
+    release!()
+    Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
+    """
 function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
     # Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
     seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, orgs) # using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it does do contain, it throws an error.
@@ -548,20 +548,18 @@ function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{Stri
 end
 
 """
-disperse!(landscape, orgs, t, seetings, orgsref,)
-Seeds are dispersed.
-"""
-function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, connects::Array{Float64,2}, AT::Float64, Ah::Float64)
+    disperse!(landscape, orgs, t, seetings, orgsref,)
+    Seeds are dispersed.
+    """
+function disperse!(landavail::Array{Bool,3},seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landpars::Any)#Setworld.LandPars)
 
     lost = Int64[]
 
     for d in seedsi
         if orgs[d].kernel == "a"
             dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
-            
         elseif orgs[d].kernel == "w"
-            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])
-            
+            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])g           
         elseif orgs[d].kernel == "wa"
             µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
             dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
@@ -579,13 +577,30 @@ function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organi
         if checkboundaries(landavail, xdest, ydest, fsource) && landavail[xdest, ydest, fsource] == true # intra fragment dispersal
             orgs[d].location = (xdest,ydest,fsource)
 
-        else # out of fragment. Try another one
-            # check if someone is inside the distance:
-            fdest = find(x -> x <= dist && x > 0, connects[:,fsource]) |> (y -> (length(y) > 0 ? fdest = rand(x) : false))
+        else # check if there are other fragments that can be reached
+            if landpars.initialconnect != nothing || landpars.disturbconnect != nothing
+                # check if    
+                if t in tdist
+                    Ah = landpars.disturbarea
+                    connects = landpars.disturbconnect
+                else
+                    Ah = landpars.initialarea
+                    connects = landpars.initialconnect
+                end
+
+                AT = landpars.bufferarea
+                
+                # check if the fragment is reached
+                fdest = find(x -> (x <= dist && x > 0), connects[:,fsource]) |> (y -> (length(y) > 0 ? fdest = rand(x) : false))
+            else
+                fdest = false
+            end
+            
+            #reset location or kill individual
             if fdest == false
                 push!(lost,d)
             else
-                rand(Distributions.Bernoullli(1,AT/Ah))[1] == 1 ? orgs[d].location = (xdest,ydest,fdest) : push!(lost,d)
+                rand(Distributions.Bernoullli(1,-AT/Ah))[1] == 1 ? orgs[d].location = (xdest,ydest,fdest) : push!(lost,d)
             end
         end
     end
@@ -597,9 +612,9 @@ function disperse!(landavail::Array{Bool,2},seedsi, orgs::Array{Organisms.Organi
 end
 
 """
-germinate(org)
-Seeds have a probability of germinating (`gprob`).
-"""
+    germinate(org)
+    Seeds have a probability of germinating (`gprob`).
+    """
 function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, Any})
     Bg = org.b0g * (org.mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
     gprob = 1 - exp(-Bg)
@@ -618,10 +633,10 @@ function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, A
 end
 
 """
-establish!
-Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
-    """
-function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T::Float64)
+    establish!
+    Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
+        """
+function establish!(landscape::Array{Dict{String,Float64},3}, orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T::Float64)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
@@ -646,11 +661,11 @@ function establish!(landscape::Array{Dict{String,Float64},2}, orgs::Array{Organi
 end
 
 """
-    survive!(orgs, nogrowth,landscape)
-    Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
-    plants in nogrwth are subjected to two probability rates
-    """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,2},T, nogrowth::Array{Int64,1})
+        survive!(orgs, nogrowth,landscape)
+        Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
+        plants in nogrwth are subjected to two probability rates
+        """
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,3},T, nogrowth::Array{Int64,1})
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
     #    println(sim,"Running mortality")
     #end
@@ -785,9 +800,9 @@ end
 end
 
 """
-shedd!()
-Plants loose their reproductive biomasses at the end of the reproductive season.
-"""
+    shedd!()
+    Plants loose their reproductive biomasses at the end of the reproductive season.
+    """
 function shedd!(orgs::Array{Organisms.Organism,1}, orgsref::Organisms.OrgsRef, t::Int)
     
     flowering = find(x -> (x.mass["repr"] > 0), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char (''). 
@@ -800,10 +815,10 @@ function shedd!(orgs::Array{Organisms.Organism,1}, orgsref::Organisms.OrgsRef, t
 end
 
 """
-destroyorgs!(orgs)
-Kill organisms that where in the lost habitats.
-"""
-function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,2}, settings::Dict{String,Any})
+    destroyorgs!(orgs)
+    Kill organisms that where in the lost habitats.
+    """
+function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,3}, settings::Dict{String,Any})
     #KILL ORGANISMS in the destroyed
     kills = []
     for o in 1:length(orgs)
@@ -822,9 +837,9 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,2
 end
 
 """
-occupied()
-Finds indexes of occupied cells in the landscape.
-"""
+    occupied()
+    Finds indexes of occupied cells in the landscape.
+    """
 function occupied(orgs)
     locs = fill!(Array{Tuple{Int64,Int64,Int64}}(reverse(size(orgs))),(0,0,0))
     #masses = zeros(Float64,size(orgs))
@@ -839,9 +854,9 @@ function occupied(orgs)
     #end
 end
 """
-pollination!()
-Simulates plant-insect encounters and effective pollen transfer.
-"""
+    pollination!()
+    Simulates plant-insect encounters and effective pollen transfer.
+    """
 #TODO find a not too cumbersome way of modelling pollen transfer: draw from Poisot's probability
 
 # """

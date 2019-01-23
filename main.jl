@@ -12,8 +12,9 @@ using Distributions
 using JuliaDB #for in/outputs
 using DataValues
 using Fileprep
-using Setworld
 using Organisms
+using Setworld
+using RCall
 
 #const Boltz = 1.38064852e-23 # Alternatively:
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
@@ -21,8 +22,6 @@ const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 const aE = 0.63
 global K = 0.0
 global cK = 0.0
-global Ah = 0.0
-global AT = 0.0
 global nogrowth = Int64[]
 
 function parse_commandline()
@@ -60,26 +59,36 @@ function parse_commandline()
             equal pollination loss for all species \"equal\"."
         arg_type = String
         default = abspath(pwd(),"inputs/insects.csv")
-        
-        "--landconfig"
+
+        "--initialland"
         help = "Name of file with landscape size values: areas of fragments, mean (and s.d.) temperature."
         arg_type = String
-        default = abspath(pwd(),"inputs/landpars.csv")
+        default = abspath(pwd(),"inputs/initialland.jl") #"inputs/initialland.shp"
 
-        "--connects"
-        help = "Connectivity matrix of distances between fragments."
-        arg_type = String
-        default = abspath(pwd(),"inputs/connects")
-        
-        "--disturb"
+        "--disturbtype"
         help = "Type of environmental disturbance to be implemented: habitat area loss \"loss\", habitat fragmentation \"frag\" or temperature change \"temp\""
         arg_type = String
         default = "none"
         
-        "--areafile"
+        "--landmode"
+        help = "Choose between using shape files to simulate the landscape and its change (\"real\") or providing the dimensions of the landscape to be simualted (total area, habitat area, number of habitat patches and distances between patches - \"artificial\")."
         arg_type = String
-        default = abspath(pwd(),"inputs/arealoss.csv")
+        default = "artif"
+        
+        "--landbuffer"
+        help = "Buffer shape file or file containing its area"
+        arg_type = String
+        default = abspath(pwd(),"inputs/landbuffer.jl") # "inputs/landbuffer.shp"
+        
+        "--disturbland"
+        help = "Either a shape file (if \`landmode\`)"
+        arg_type = String
+        default = nothing #abspath(pwd(),"inputs/disturbland.jl") #abspath(pwd(),"inputs/disturbland.shp")
 
+        "--tdist"
+        help = "Timestep(s) where habitat loss or fragmentation is implemented."
+        arg_type = String # path file to a vector of disturbance times
+        
         "--timesteps"
         help = "Duration of simulation in weeks."
         arg_type = Int
@@ -108,21 +117,63 @@ end
 """
 read_landin(settings)
 Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
+Two methods because "real" landscapes do not need 
 """
-function read_landpars(settings::Dict{String,Any})
 
-    #landinputtbl = loadtable(abspath(pwd(),"inputs/landpars.csv"))
-    landinputtbl = loadtable(settings["landconfig"])
+function read_landpars(settings::Dict{String,Any}, disturblandspecs::Any)
+    # Read in temperature time series, which is used in both modes
     temp_tsinput = loadtable(settings["temp_ts"])
+    
+    # Landscape is built differently, depending on the mode of simulation (which requires different types of files)
 
-    landpars = Setworld.LandPars(Fileprep.areatocell(select(landinputtbl,:areas_m2)),
-                                 Fileprep.areatocell(select(landinputtbl,:areas_m2)),
-                                 select(temp_tsinput,:meantemp_ts),
-                                 select(temp_tsinput,:sdtemp_ts),
-                                 select(temp_tsinput,:meanprec_ts),
-                                 select(temp_tsinput,:sdprec_ts),
-    length(select(landinputtbl, :id)))
+    if settings["landmode"] == "real"
+        
+        # send file names to R
+        initialland = settings["initialland"]
+        @rput initialland
+        disturbland = settings["disturbland"]
+        @rput disturbland
+        landbuffer = settings["landbuffer"]
+        @rput landbuffer
+        
+        # get patches/fragments areas and distances from shapefiles
+        landconfig = rcopy(Array{Any}, R"landconfig.R")
+
+    # store them in landpars
+    # no need to check for disturbance type because in the absence of disturbance-related files, R returns Nullable values
+        landpars = Setworld.LandPars(landconfig[[1]],
+                                     Fileprep.areatocell(landconfig[[2]]),
+                                     landconfig[[3]],
+                                     landconfig[[4]],
+                                     landconfig[[5]],
+                                     Fileprep.areatocell(landconfig[[6]]),
+                                     landconfig[[7]],
+                                     landconfig[[8]],
+                                     select(temp_tsinput,:meantemp))
+
+    elseif settings["landmode"] == "artif"
+
+        # read in artificial landscape parameters
+        include(settings["initialland"]) #initialland.jl
+        include(settings["landbuffer"]) #landbuffer.jl
+        
+        landpars = Setworld.LandPars(length(patchesid),
+                                     Fileprep.areatocell(pareas),
+                                     sum(pareas),
+                                     initialconnect == nothing ? nothing : readdlm(initialconnect),
+                                     disturblandspecs == nothing ? nothing : length(disturblandspecs[1]),
+                                     disturblandspecs == nothing ? nothing : Fileprep.areatocell(disturblandspecs[2]),
+                                     sum(disturblandspecs[2]),
+                                     disturblandspecs == nothing ? nothing : readdlm(disturblandspecs[3]),
+                                     bufferarea,
+                                     select(temp_tsinput,:meantemp))
+    
+    else
+        error("Please choose a mode of landscape simulation.")
+    end
+    
     return landpars
+
 end
 
 """
@@ -260,7 +311,7 @@ end
 outputorgs(orgs,t,settingsfrgou)
 Saves a long format table with the organisms field informations.
 """
-function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs::Array{Organisms.Organism,1},landscape::Array{Dict{String,Float64},2}, t::Int64, settings::Dict{String,Any})
+function orgstable(orgsref::Organisms.OrgsRef, orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any})
 
     outorgs = find(x -> x.stage != "e", orgs)
     
@@ -304,9 +355,7 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
             end
         end
         
-        open(abspath(joinpath(settings["outputat"], settings["simID"], "landscape.csv")), "w") do landoutput
-            println(landoutput, landscape[1,1:end,1])
-        end
+        # TODO: output landscape 
     end
 
     if rem(t,settings["tout"]) == 0 
@@ -340,62 +389,83 @@ function orgstable(orgsref::Organisms.OrgsRef, landpars::Setworld.LandPars, orgs
                 orgs[o].mated))
             end
         end
-        #TODO output orgsref and ladpars
-        open(abspath(joinpath(settings["outputat"], settings["simID"], "landscape.csv")), "a") do landoutput
-            println(landoutput,landscape[1,1:end,1])
+        
+        #TODO output landscape
+    end
+end
+
+"""
+loaddisturbance()
+Store parameters necessary to implement disturbance.
+"""
+function loaddisturbance(settings)
+# read in the disturbance file, if not done so yet
+
+    # select file according to keyword: loss, frag, temp
+    if settings["disturbtype"] != "none"
+        if settings["disturbtype"] in ["loss" "frag"]
+                        
+            if settings["landmode"] == "real"
+                tdist = select(loadtable(settings["tdist"]), :tdist)
+                disturblandspecs = nothing
+            elseif settings["landmode"] == "artif"
+                # this mode also requires a file specifing the paths to the connectivity matrices
+                    tdist = select(loadtable(settings["tdist"]), :tdist)
+                    include(settings["disturbland"])
+                    disturblandspecs = [fragsid, fareas, disturbconnect]
+            end
+
+            return tdist, disturblandspecs
+            
+        elseif settings["disturbtype"] == "temp"
+            println("Temperature change is simulated with the temperature file provided.")
+        elseif settings["disturbtype"] == "poll"
+            println("Pollination loss is simulated according to parameters in the \'insects\' file.")
+        else
+            error("Please specify one of the disturbance scenarios with `--disturb`:
+                  \n\'none\' if no disturbance should be simulated,
+                  \n\'loss\' for habitat area loss,
+                  \n\'frag\' for habitat fragmentation,
+                  \n\'temp\' for temperature change,
+                  \n\'poll\' for pollination loss.")
         end
     end
 end
+
 """
 disturb!()
 
 """
-function disturb!(landscape::Array{Dict{String,Float64},2}, landavail::Array{Bool,2}, orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any})
-    # read in the disturbance file, if not done so yet
-    #if !isdefined(:disturbtbl)
-    # select file according to keyword: loss, frag, temp
-    if settings["disturb"] != "none"
-        if settings["disturb"] == "loss"
-            disturbtbl = loadtable(settings["areafile"])
-            tdist = select(disturbtbl,:time)
-        elseif settings["disturb"] == "frag"
-            disturbtbl = loadtable(abspath(pwd(),"inputs/fragmentation.csv"))
-            tdist = select(disturbtbl,:time)
-        elseif settings["disturb"] == "temp"
-            #continue
-            println("Temperature change is simulated with
-                    the provided temperature file.")
-        else
-            error("Please specify one of the disturbance scenarios with `--disturb`:
-                  \n\"none\" if no disturbance should be simulated,
-                  \n\"loss\" for habitat area loss,
-                  \n\"frag\" for habitat fragmentation,
-                  \n\"temp\" for temperature change.")
-        end
+function disturb!(landscape::Array{Dict{String,Float64},3}, landavail::Array{Bool,3}, orgs::Array{Organisms.Organism,1}, t::Int64, tdist::Array{Int64,1}, settings::Dict{String,Any}, landpars::LandPars)
+    
+    if t in tdist
         
-        if t in tdist
-            if settings["disturb"] == "loss"
-                loss = select(filter(x -> x.time == t,disturbtbl),
-                              :proportion)[1] # select returns an array
-                Setworld.destroyarea!(landavail,loss,settings)
-                Organisms.destroyorgs!(orgs,landavail,settings)
-            elseif settings["disturb"] == "frag"
-                # fragment!(mylandscape,orgs)
-                #while fragment is not implemented
-            end
-        end
-        return tdist
+        if settings["disturbtype"] == "loss"
+            loss = landpars.disturbarea/landpars.initialarea
+            Setworld.destroyarea!(landavail,landpars,loss,settings)
+            Organisms.destroyorgs!(orgs,landavail,settings)
+        elseif settings["disturbtype"] == "frag"
+            Setworld.fragment!(landscape,settings,landpars,orgs)
+        end                
+        
     end
 end
 
-function losschange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
+"""
+updateK!()
+Updates the carrying capacity of the landscape (`K`) and of each gridcell (`cK`). 
+"""
+
+function updateK!(landavail::Array{Bool,3}, settings::Dict{String,Any}, t::Int64, tdist::Any)
     
-    if t == 1 || (settings["disturb"] == "loss" && t in [(tdist-1) tdist (tdist-1)])
+    if t == 1 || (settings["disturbtype"] == "loss" && t in [(tdist-1) tdist (tdist-1)])
+        # output message
         if t == 1
             open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"w") do sim
                 println(sim, "week\tK\tcK")
             end          
         end
+         
         global K = (1/100)*(length(find(x -> x == true, landavail))*25) #x tons/ha = x.100g/1m²
         global cK = K/length(find(x -> x == true, landavail))
         
@@ -406,21 +476,14 @@ function losschange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int
     
 end
 
-function fragchange(landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64, connects::Array{Float64,2}, tdist::Any)
-    if t == 1 || (settings["disturb"] == "frag" && t == tdist) 
-        global Ah = length(find(x -> x == true, landavail))*25*0.0001
-        global AT = sort(reshape(connects,prod(size(connects))), rev = true) |> (y -> length(y) > 1 ? prod(y[1:2]) : (length(y) == 2 ? sum(connects)^2 : Ah))
-    end
-end
-
 function timing(operation::String, settings::Dict{String,Any})
-    timing = string(operation," lasted: ")
+    timing_stamp = string(operation," lasted: ")
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-        println(sim,timing)
+        println(sim,timing_stamp)
     end
     #print to terminal
     if settings["timemsg"]
-        println(timing)
+        println(timing_stamp)
     end
 end
 
@@ -437,9 +500,16 @@ function simulate()
     # unity test
     println(keys(settings))
 
+    # Load disturbance parameters, if necessary
+    if settings["disturbtype"] != "none"
+        tdist, disturblandspecs = loaddisturbance(settings)
+    else
+        disturblandspecs = nothing
+    end            
+    
     # Store landscape configuration
-    landpars = read_landpars(settings)
-    connects = readdlm(settings["connects"])
+    landpars = read_landpars(settings, disturblandspecs)
+    
     # unity test
     println("Land init stored in object of type $(typeof(landpars))")
 
@@ -455,7 +525,7 @@ function simulate()
     mylandscape, landavail = landscape_init(landpars)
     # unity test
     println("Landscape initialized: type $(typeof(mylandscape))")
-
+  
     # Initialize individual tagger: It tags all individuals ever created. It does not change if individuals die, so there is no risk of re-use of a tag.
     id_counter = 0
     
@@ -475,20 +545,26 @@ function simulate()
 
     cd(pwd())
 
-    # OUTPUT SIMULATION SETTINGS
+    ##############################
+    # OUTPUT SIMULATION SETTINGS #
+    ##############################
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simID")),"w") do ID
         println(ID, settings)
     end
+    
     # START ID SIMULATION LOG FILE
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"w") do sim
         println(sim,string("Simulation: ",settings["simID"],now()))
     end
+
     # START SEED PRODUCTION FILE
     open(abspath(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv")),"w") do seedfile
         writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
     end
-    
-    # MODEL RUN
+
+    #############
+    # MODEL RUN #
+    #############
     for t in 1:settings["timesteps"]
 
         println("running week $t")
@@ -499,20 +575,22 @@ function simulate()
         end
 
         # UPDATE LANDSCAPE: weekly temperature and precipitation
-        T = updateenv!(mylandscape, t, landpars)
+        T = updateenv!(t, landpars)
         
         # DISTURBANCE
-        if settings["disturb"] != "none"  
-            tdist = disturb!(mylandscape,landavail,orgs,t,settings)
+        if settings["disturbtype"] != "none"  
+            disturb!(mylandscape,landavail,orgs,t,tdist,settings,landpars)
             # Initialize or update landscape properties that are relevant for life cycle processes
-            if t == 1 || (settings["disturb"] in ["loss" "frag"] && t in [(tdist-1) tdist (tdist+1)])
-                losschange(landavail, settings, t, tdist)
-                fragchange(landavail, settings, t, connects, tdist)
+            if t == 1 || (settings["disturbtype"] in ["loss" "frag"] && t in [(tdist-1) tdist (tdist+1)])
+                if settings["disturbtype"] != "none"
+                    updateK!(landavail, settings, t, tdist)
+                end
             end
         end
+        
         # OUTPUT: First thing, to see how community is initialized
         tic()
-        orgstable(orgsref,landpars,orgs,mylandscape,t,settings)
+        orgstable(orgsref,orgs,t,settings)
         timing("WRITING ORGSOUTPUT", settings)
         toc()
 
@@ -534,7 +612,7 @@ function simulate()
 
         seedsi = release!(orgs, t, settings, orgsref)
 
-        disperse!(landavail, seedsi, orgs, t, settings, orgsref, connects, AT, Ah)
+        disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars)
 
         establish!(mylandscape, orgs, t, settings, orgsref, T)
         
