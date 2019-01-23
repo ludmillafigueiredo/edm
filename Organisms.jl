@@ -102,7 +102,7 @@ Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0jm,b0am,b0jg,
 
     Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
     """
-function initorgs(landavail::Array{Bool,3},orgsref::Organisms.OrgsRef, id_counter::Int)
+function initorgs(landavail::Array{Bool,N} where N, orgsref::Organisms.OrgsRef, id_counter::Int)
 
     orgs = Organism[]
 
@@ -197,7 +197,7 @@ end
     allocate!(landscape, orgs, t, aE, Boltz, setting, orgsref, T)
     Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
     """
-function allocate!(landscape::Array{Dict{String, Float64},3}, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef,T::Float64)
+function allocate!(landscape::Array{Dict{String, Float64},N} where N, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef,T::Float64)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
     
@@ -259,7 +259,7 @@ end
     checkboundaries(sourcefrag,xdest, ydest, fdest)
     `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
     """
-function checkboundaries(landavail::Array{Bool,3}, xdest::Int64, ydest::Int64, fdest::Int64) #TODO is this function necessary?
+function checkboundaries(landavail::Array{Bool,N} where N, xdest::Int64, ydest::Int64, fdest::Int64) #TODO is this function necessary?
     #check inside frag
     if checkbounds(Bool, landavail[:,:,fdest], xdest, ydest)
         inbound = true
@@ -551,7 +551,7 @@ end
     disperse!(landscape, orgs, t, seetings, orgsref,)
     Seeds are dispersed.
     """
-function disperse!(landavail::Array{Bool,3},seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landpars::Any)#Setworld.LandPars)
+function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landpars::Any)#Setworld.LandPars)
 
     lost = Int64[]
 
@@ -636,7 +636,7 @@ end
     establish!
     Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
         """
-function establish!(landscape::Array{Dict{String,Float64},3}, orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T::Float64)
+function establish!(landscape::Array{Dict{String,Float64},N} where N, orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T::Float64)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
@@ -665,7 +665,7 @@ end
         Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
         plants in nogrwth are subjected to two probability rates
         """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,3},T, nogrowth::Array{Int64,1})
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,N} where N,T, nogrowth::Array{Int64,1})
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
     #    println(sim,"Running mortality")
     #end
@@ -818,7 +818,7 @@ end
     destroyorgs!(orgs)
     Kill organisms that where in the lost habitats.
     """
-function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,3}, settings::Dict{String,Any})
+function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,N} where N, settings::Dict{String,Any})
     #KILL ORGANISMS in the destroyed
     kills = []
     for o in 1:length(orgs)

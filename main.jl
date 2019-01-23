@@ -161,10 +161,10 @@ function read_landpars(settings::Dict{String,Any}, disturblandspecs::Any)
                                      Fileprep.areatocell(pareas),
                                      sum(pareas),
                                      initialconnect == nothing ? nothing : readdlm(initialconnect),
-                                     disturblandspecs == nothing ? nothing : length(disturblandspecs[1]),
-                                     disturblandspecs == nothing ? nothing : Fileprep.areatocell(disturblandspecs[2]),
+                                     disturblandspecs[1] == nothing ? nothing : length(disturblandspecs[1]),
+                                     disturblandspecs[2] == nothing ? nothing : Fileprep.areatocell(disturblandspecs[2]),
                                      sum(disturblandspecs[2]),
-                                     disturblandspecs == nothing ? nothing : readdlm(disturblandspecs[3]),
+                                     disturblandspecs[3] == nothing ? nothing : readdlm(disturblandspecs[3]),
                                      bufferarea,
                                      select(temp_tsinput,:meantemp))
     
@@ -436,7 +436,7 @@ end
 disturb!()
 
 """
-function disturb!(landscape::Array{Dict{String,Float64},3}, landavail::Array{Bool,3}, orgs::Array{Organisms.Organism,1}, t::Int64, tdist::Array{Int64,1}, settings::Dict{String,Any}, landpars::LandPars)
+function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::Array{Bool,N} where N, orgs::Array{Organisms.Organism,1}, t::Int64, tdist::Array{Int64,1}, settings::Dict{String,Any}, landpars::LandPars)
     
     if t in tdist
         
@@ -456,7 +456,7 @@ updateK!()
 Updates the carrying capacity of the landscape (`K`) and of each gridcell (`cK`). 
 """
 
-function updateK!(landavail::Array{Bool,3}, settings::Dict{String,Any}, t::Int64, tdist::Any)
+function updateK!(landavail::Array{Bool,N} where N, settings::Dict{String,Any}, t::Int64, tdist::Any)
     
     if t == 1 || (settings["disturbtype"] == "loss" && t in [(tdist-1) tdist (tdist-1)])
         # output message

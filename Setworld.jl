@@ -86,7 +86,7 @@ end
 destroyarea!()
 Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
 """
-function destroyarea!(landmode::String, landpars::LandPars, landavail::Array{Bool,3}, loss::Float64, settings::Dict{String,Any})
+function destroyarea!(landmode::String, landpars::LandPars, landavail::Array{Bool,N} where N, loss::Float64, settings::Dict{String,Any})
 
     if landmode == "artif"
         # DESTROY HABITAT
@@ -133,7 +133,7 @@ end
     fragment!()
 This function is only called for simulating the fragmentation of an originally single landscape. 
 """
-function fragment!(landscape::Array{Dict{String,Float64},3}, settings::Dict{String,Any}, landpars::LandPars, orgs::Array{Organisms.Organism,1})
+function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::Dict{String,Any}, landpars::LandPars, orgs::Array{Organisms.Organism,1})
 
     # Built fragmented landscape
     for frag in collect(1:landpars.nfrags)
