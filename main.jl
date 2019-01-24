@@ -504,7 +504,7 @@ function simulate()
     if settings["disturbtype"] != "none"
         tdist, disturblandspecs = loaddisturbance(settings)
     else
-        disturblandspecs = nothing
+        tdist, disturblandspecs = nothing
     end            
     
     # Store landscape configuration
@@ -612,7 +612,7 @@ function simulate()
 
         seedsi = release!(orgs, t, settings, orgsref)
 
-        disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars)
+        disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
 
         establish!(mylandscape, orgs, t, settings, orgsref, T)
         

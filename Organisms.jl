@@ -552,7 +552,7 @@ end
 disperse!(landscape, orgs, t, seetings, orgsref,)
 Seeds are dispersed.
 """
-function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landpars::Any)#Setworld.LandPars)
+function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landpars::Any, tdist::Any)#Setworld.LandPars)
 
 lost = Int64[]
 
@@ -581,12 +581,17 @@ orgs[d].location = (xdest,ydest,fsource)
 else # check if there are other fragments that can be reached
 if landpars.initialconnect != nothing || landpars.disturbconnect != nothing
 # check if    
+if settings["disturbtype"] in ["none" "temp" "poll"]
+Ah = landpars.initialarea
+connects = landpars.initialconnect
+else
 if t in tdist
 Ah = landpars.disturbarea
 connects = landpars.disturbconnect
 else
 Ah = landpars.initialarea
 connects = landpars.initialconnect
+end
 end
 
 AT = landpars.bufferarea
@@ -601,7 +606,7 @@ end
 if fdest == false
 push!(lost,d)
 else
-rand(Distributions.Bernoullli(1,-AT/Ah))[1] == 1 ? orgs[d].location = (xdest,ydest,fdest) : push!(lost,d)
+rand(Distributions.Bernoullli(1,Ah/AT))[1] == 1 ? orgs[d].location = (xdest,ydest,fdest) : push!(lost,d)
 end
 end
 end
