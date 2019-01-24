@@ -161,10 +161,10 @@ function read_landpars(settings::Dict{String,Any}, disturblandspecs::Any)
                                      Fileprep.areatocell(pareas),
                                      sum(pareas),
                                      initialconnect == nothing ? nothing : readdlm(initialconnect),
-                                     disturblandspecs[1] == nothing ? nothing : length(disturblandspecs[1]),
-                                     disturblandspecs[2] == nothing ? nothing : Fileprep.areatocell(disturblandspecs[2]),
-                                     sum(disturblandspecs[2]),
-                                     disturblandspecs[3] == nothing ? nothing : readdlm(disturblandspecs[3]),
+                                     (disturblandspecs == nothing || disturblandspecs[1] == nothing) ? nothing : length(disturblandspecs[1]),
+                                     (disturblandspecs == nothing || disturblandspecs[2] == nothing) ? nothing : Fileprep.areatocell(disturblandspecs[2]),
+                                     (disturblandspecs == nothing || disturblandspecs[2] == nothing) ? nothing : sum(disturblandspecs[2]),
+                                     (disturblandspecs == nothing || disturblandspecs[3] == nothing) ? nothing : readdlm(disturblandspecs[3]),
                                      bufferarea,
                                      select(temp_tsinput,:meantemp))
     
