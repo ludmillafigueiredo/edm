@@ -86,11 +86,7 @@ end
 destroyarea!()
 Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
 """
-<<<<<<< Updated upstream
-function destroyarea!(landmode::String, landpars::LandPars, landavail::Array{Bool,N} where N, loss::Float64, settings::Dict{String,Any})
-=======
-function destroyarea!(landavail::Array{Bool,3}, landpars::LandPars, settings::Dict{String,Any})
->>>>>>> Stashed changes
+function destroyarea!(landpars::LandPars, landavail::Array{Bool,N} where N, settings::Dict{String,Any})
 
     if settings["landmode"] == "artif"
         # DESTROY HABITAT
