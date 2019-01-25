@@ -60,7 +60,7 @@ function landscape_init(landpars::LandPars)
 	if p == 1
 	    landscape = patch #when empty, landscape cant cat with frag
 	else
-	    landscape = cat(3,landscape, patch)
+	    landscape = cat(landscape, patch; dims = 3)
 	end
     end
 
@@ -122,7 +122,7 @@ function destroyarea!(landpars::LandPars, landavail::Array{Bool,N} where N, sett
 	    if frag == 1
 	        landscape = fragment #when empty, landscape cant cat with frag
 	    else
-	        landscape = cat(3,landscape, frag)
+	        landscape = cat(landscape, frag; dims = 3)
 	    end
             
         end
@@ -146,7 +146,7 @@ function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::D
 	if frag == 1
 	    newlandscape = fragment #when empty, landscape cant cat with frag
 	else
-	    newlandscape = cat(3,landscape, frag)
+	    newlandscape = cat(landscape, frag; dims = 3)
 	end
     end
 
