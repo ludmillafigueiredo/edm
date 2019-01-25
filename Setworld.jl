@@ -138,6 +138,8 @@ This function is only called for simulating the fragmentation of an originally s
 """
 function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::Dict{String,Any}, landpars::LandPars, orgs::Array{Organisms.Organism,1})
 
+    newlandscape = []
+
     # Built fragmented landscape
     for frag in collect(1:landpars.nfrags)
 
@@ -146,25 +148,25 @@ function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::D
 	if frag == 1
 	    newlandscape = fragment #when empty, landscape cant cat with frag
 	else
-	    newlandscape = cat(3,landscape, frag)
+	    newlandscape = cat(3, newlandscape, fragment)
 	end
     end
 
     # Resettle the individuals in the new landscape:
     # list all indexes of old landscape
-    landscapeidx = collect(collect.indices(landscape)) # first collect returns a tuple
-    # create array to store landscape cells that were not destroyed
-    remaincells = fill(Array{Int64}, size(newlandscape)) # the size 
-    # sample old cells to fill the new landscape
-    sample!(landscapeidx, remaincells; replace = false)
+    arrayidx = hcat(collect(ind2sub(landscape, find(x -> x == x, landscape)))...)
+    landscapeidx = [Tuple(arrayidx[x,:]) for x in 1:size(arrayidx, 1)]
+    # create array to store the idx of the landscape cells that were not destroyed and sample old cells indexes to fill the new landscape
+    remaincells = sample(landscapeidx, length(newlandscape); replace = false) # the size 
+    # reshap the cells in the same dimensions and sizes as the newlandscape, so the new indexes are correct
+    idxholder = reshape(remaincells, size(newlandscape))
     # kill the organisms that have not remained in the new landscape configuration
-    filter!(x -> x.location in remaincells, orgs)
+    filter!(x -> x.location in idxholder, orgs)
     # update their .location field
     newloc = []
     for o in orgs
-        newloc <- [ind2sub(remaincells,
-                           find(x->x == collect(orgs[o].location), remaincells))]
-        orgs[o].location = Tuple(newloc)
+        newloc <- idxholder[find(x->x == collect(orgs[o].location), idxholder)]
+        orgs[o].location = newloc
     end
         
     landscape = newlandscape
