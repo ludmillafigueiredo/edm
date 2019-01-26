@@ -107,7 +107,7 @@ function destroyarea!(landpars::LandPars, landavail::Array{Bool,N} where N, sett
         end
 
         #unity test
-        open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
             println(sim, "Number of destroyed cells: $lostarea")
         end
         
