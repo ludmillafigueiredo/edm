@@ -1,9 +1,9 @@
 
 """
-        This module contains the
+            This module contains the
 
-        Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
-        """
+            Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
+            """
 module Organisms
 
 using Distributions
@@ -98,11 +98,11 @@ end
 Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0jm,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span) = Organism(id,stage,location,sp,mass,kernel,e_mu,seedbank,b0g,b0em,b0jm,b0am,b0jg,b0ag,sestra,floron,floroff,wseedn,seedon,seedoff,max_mass,max_span,26,false)
 
 """
-            initorgs(landavail, orgsref,id_counter)
+                initorgs(landavail, orgsref,id_counter)
 
-        Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
+            Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
 
-        """
+            """
 function initorgs(landavail::Array{Bool,N} where N, orgsref::Organisms.OrgsRef, id_counter::Int)
 
     orgs = Organism[]
@@ -195,9 +195,9 @@ return orgs, id_counter
 end
 
 """
-        allocate!(landscape, orgs, t, aE, Boltz, setting, orgsref, T)
-        Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
-        """
+            allocate!(landscape, orgs, t, aE, Boltz, setting, orgsref, T)
+            Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
+            """
 function allocate!(landscape::Array{Dict{String, Float64},N} where N, orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef,T::Float64)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
@@ -242,9 +242,9 @@ function allocate!(landscape::Array{Dict{String, Float64},N} where N, orgs::Arra
     return nogrowth
 end
 """
-        develop!()
-        Controls individual juvenile maturation.
-        """
+            develop!()
+            Controls individual juvenile maturation.
+            """
 function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
     juvs = find(x->x.stage == "j",orgs)
 
@@ -257,9 +257,9 @@ function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
 end
 
 """
-        checkboundaries(sourcefrag,xdest, ydest, fdest)
-        `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
-        """
+            checkboundaries(sourcefrag,xdest, ydest, fdest)
+            `source` and `dest` contain the location indexes of the source (mother plant) and the pollen/seed. `checkboundaires()` verifies whether the new polen/seed location `(x,y)` is inside a habitat fragment (same as the source -`frag`- or another one insed the patch). Return a boolean that controls whether the process (reproduction or emergency/germination) proceeds or not.
+            """
 function checkboundaries(landavail::Array{Bool,N} where N, xdest::Int64, ydest::Int64, fdest::Int64) #TODO is this function necessary?
     #check inside frag
     if checkbounds(Bool, landavail[:,:,fdest], xdest, ydest)
@@ -280,10 +280,10 @@ function checkboundaries(landavail::Array{Bool,N} where N, xdest::Int64, ydest::
 end
 
 """
-        mate!()
-        Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
-        - visited: reduction in pollination service
-        """
+            mate!()
+            Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
+            - visited: reduction in pollination service
+            """
 function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, regime:: String, td::Int, visited::Int)
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.e_mu, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
@@ -324,9 +324,9 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
                         #end
                     else
                         error("Please choose a pollination regime \"regime\" in insect.csv:
-        - \"pulse\":
-        - \"const\":
-        - \"exp\"")                    
+            - \"pulse\":
+            - \"const\":
+            - \"exp\"")                    
                     end
                 else
                     npoll = Int(ceil(rand(Distributions.Uniform(0.5,1))[1] * length(ready) * 1))
@@ -375,18 +375,18 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
 
         else
             error("Please chose a pollination scenario \"scen\" in insect.csv:
-        - \"indep\": sexual reproduction happens independently of pollination
-        - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
-        - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
+            - \"indep\": sexual reproduction happens independently of pollination
+            - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
+            - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
         end
 
     end  
 end
 
 """
-        mkoffspring!()
-        After mating happened (marked in `reped`), calculate the amount of offspring
-        """
+            mkoffspring!()
+            After mating happened (marked in `reped`), calculate the amount of offspring
+            """
 function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int)
 
     offspring = Organism[]
@@ -539,9 +539,9 @@ return id_counter
 end
 
 """
-        release!()
-        Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
-        """
+            release!()
+            Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
+            """
 function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
     # Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
     seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, orgs) # using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it does do contain, it throws an error.
@@ -549,9 +549,9 @@ function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{Stri
 end
 
 """
-        disperse!(landscape, orgs, t, seetings, orgsref,)
-        Seeds are dispersed.
-        """
+            disperse!(landscape, orgs, t, seetings, orgsref,)
+            Seeds are dispersed.
+            """
 function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landpars::Any, tdist::Any)#Setworld.LandPars)}
 
     lost = Int64[]
@@ -616,9 +616,9 @@ function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organism
 end
 
 """
-        germinate(org)
-        Seeds have a probability of germinating (`gprob`).
-        """
+            germinate(org)
+            Seeds have a probability of germinating (`gprob`).
+            """
 function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, Any})
     Bg = org.b0g * (org.mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
     gprob = 1 - exp(-Bg)
@@ -637,9 +637,9 @@ function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, A
 end
 
 """
-        establish!
-        Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
-        """
+            establish!
+            Seeds only have a chance of establishing in patches not already occupied by the same funcitonal group, in. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
+            """
 function establish!(landscape::Array{Dict{String,Float64},N} where N, orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T::Float64)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
@@ -665,10 +665,10 @@ function establish!(landscape::Array{Dict{String,Float64},N} where N, orgs::Arra
 end
 
 """
-        survive!(orgs, nogrowth,landscape)
-        Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
-        plants in nogrwth are subjected to two probability rates
-        """
+            survive!(orgs, nogrowth,landscape)
+            Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
+            plants in nogrwth are subjected to two probability rates
+            """
 function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::Array{Bool,N} where N,T, nogrowth::Array{Int64,1})
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
     #    println(sim,"Running mortality")
@@ -733,7 +733,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
     ## Density-dependent mortality
 
-if sum(map(x -> x.mass["veg"], orgs)) > K
+    if sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
         
         locs = map(x -> x.location,orgs) #probably optimizable
         l = DataFrame(locs)
@@ -749,12 +749,12 @@ if sum(map(x -> x.mass["veg"], orgs)) > K
                 samegrid = filter(x -> x.location == locs[c], orgs)
                 # unity test
                 #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-                    println("N of inds in same cell: $(length(samegrid))")
+                println("N of inds in same cell: $(length(samegrid))")
                 #end
                 #println("Inds in same cell $(locs[c]) : $samegrid")
                 # sum their weight to see if > than carrying capacity.
-println("Same grid mass", sum(map(x -> x.mass["veg"], samegrid)))
-while sum(vcat(map(x -> x.mass["veg"],samegrid),0.00001)) > cK #vcat is necessary for avoid that sum throws an error when empty
+                println("Same grid mass", sum(map(x -> x.mass["veg"], samegrid)))
+                while sum(vcat(map(x -> x.mass["veg"],samegrid),0.00001)) > cK #vcat is necessary for avoid that sum throws an error when empty
                     # any individual can die
                     d = rand(samegrid,1)[1]
 
@@ -804,9 +804,9 @@ end
 end
 
 """
-        shedd!()
-        Plants loose their reproductive biomasses at the end of the reproductive season.
-        """
+            shedd!()
+            Plants loose their reproductive biomasses at the end of the reproductive season.
+            """
 function shedd!(orgs::Array{Organisms.Organism,1}, orgsref::Organisms.OrgsRef, t::Int)
 
     flowering = find(x -> (x.mass["repr"] > 0), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char (''). 
@@ -819,9 +819,9 @@ function shedd!(orgs::Array{Organisms.Organism,1}, orgsref::Organisms.OrgsRef, t
 end
 
 """
-        destroyorgs!(orgs)
-        Kill organisms that where in the lost habitats.
-        """
+            destroyorgs!(orgs)
+            Kill organisms that where in the lost habitats.
+            """
 function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,N} where N, settings::Dict{String,Any})
     #KILL ORGANISMS in the destroyed
     kills = []
@@ -841,9 +841,9 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,N
 end
 
 """
-        occupied()
-        Finds indexes of occupied cells in the landscape.
-        """
+            occupied()
+            Finds indexes of occupied cells in the landscape.
+            """
 function occupied(orgs)
     locs = fill!(Array{Tuple{Int64,Int64,Int64}}(reverse(size(orgs))),(0,0,0))
     #masses = zeros(Float64,size(orgs))
@@ -858,9 +858,9 @@ function occupied(orgs)
     #end
 end
 """
-        pollination!()
-        Simulates plant-insect encounters and effective pollen transfer.
-        """
+            pollination!()
+            Simulates plant-insect encounters and effective pollen transfer.
+            """
 #TODO find a not too cumbersome way of modelling pollen transfer: draw from Poisot's probability
 
 # """
