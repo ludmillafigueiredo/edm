@@ -552,7 +552,7 @@ end
         disperse!(landscape, orgs, t, seetings, orgsref,)
         Seeds are dispersed.
         """
-function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landpars::Any, tdist::Any)#Setworld.LandPars)
+function disperse!(landavail::Array{Bool,N} where N,seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landpars::Any, tdist::Any)#Setworld.LandPars)}
 
     lost = Int64[]
 
@@ -732,13 +732,12 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
     deaths = Int64[] # reset
 
     ## Density-dependent mortality
-    if sum(map(x -> x.mass["veg"],orgs)) > K
-        locs = fill!(Array{Tuple{Int64,Int64,Int64}}(reverse(size(orgs))),(0,0,0))
-        #masses = zeros(Float64,size(orgs))
-        map!(x -> x.location,locs,orgs) #probably optimizable
+
+if sum(map(x -> x.mass["veg"], orgs)) > K
+        
+        locs = map(x -> x.location,orgs) #probably optimizable
         l = DataFrame(locs)
-        #println("$l")
-        #map!(x -> x.mass["veg"],masses,orgs)
+        
         # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
         fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
         #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
@@ -750,11 +749,12 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                 samegrid = filter(x -> x.location == locs[c], orgs)
                 # unity test
                 #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-                #    println(sim,"N of inds in same cell: $(length(samegrid))")
+                    println("N of inds in same cell: $(length(samegrid))")
                 #end
                 #println("Inds in same cell $(locs[c]) : $samegrid")
                 # sum their weight to see if > than carrying capacity.
-                while sum(map(x -> x.mass["veg"],samegrid)) > cK
+println("Same grid mass", sum(map(x -> x.mass["veg"], samegrid)))
+while sum(vcat(map(x -> x.mass["veg"],samegrid),0.00001)) > cK #vcat is necessary for avoid that sum throws an error when empty
                     # any individual can die
                     d = rand(samegrid,1)[1]
 
