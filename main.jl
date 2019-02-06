@@ -504,7 +504,7 @@ function simulate()
     if settings["disturbtype"] != "none"
         tdist, disturblandspecs = loaddisturbance(settings)
     else
-        tdist, disturblandspecs = nothing
+        tdist, disturblandspecs = [nothing nothing]
     end            
     
     # Store landscape configuration
@@ -608,7 +608,7 @@ function simulate()
 
         mate!(orgs, t, settings, scen, regime, td, visited)
 
-        id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter)
+        id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail)
 
         seedsi = release!(orgs, t, settings, orgsref)
 
