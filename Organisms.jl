@@ -1,4 +1,3 @@
-
 """
             This module contains the
 
@@ -387,7 +386,7 @@ end
             mkoffspring!()
             After mating happened (marked in `reped`), calculate the amount of offspring
             """
-function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int)
+function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int, landavail::Array{Bool,N} where N)
 
     offspring = Organism[]
 
@@ -428,15 +427,19 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
                 for o in offs
 
-                    id_counter += 1
-
-                    clone = deepcopy(clonetemplate)
-                    # clone's own traits
-                    clone.id = hex(id_counter)
-                    clone.location = (clonetemplate.location[1] + rand(Distributions.Bernoulli())[1],
+clone = deepcopy(clonetemplate)
+# check if the new location is actually available before creating the clone
+clone.location = (clonetemplate.location[1] + rand(Distributions.Bernoulli())[1],
                                       clonetemplate.location[2] + rand(Distributions.Bernoulli())[1],
                                       clonetemplate.location[3]) # clones are spread in one of the neighboring cells - or in the same as the mother
-                    push!(offspring, clone)
+
+if checkbounds(Bool, landavail, clonetemplate.location[1], clonetemplate.location[2], clonetemplate.location[3])
+# actually start the new individual
+                    id_counter += 1
+                    clone.id = hex(id_counter)                  
+                    
+		    push!(offspring, clone)
+		    end
                 end
             end
         end
@@ -826,8 +829,8 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::Array{Bool,N
     #KILL ORGANISMS in the destroyed
     kills = []
     for o in 1:length(orgs)
-        x,y,f = orgs[o].location[1],orgs[o].location[2],orgs[o].location[3]
-        if landavail[x,y,f] == false
+        
+        if landavail[orgs[o].location...] == false 
             push!(kills,o)
         end        
     end
@@ -857,6 +860,7 @@ function occupied(orgs)
     #    println(sim,"# of cell with competition: $(length(fullcells))")
     #end
 end
+
 """
             pollination!()
             Simulates plant-insect encounters and effective pollen transfer.
