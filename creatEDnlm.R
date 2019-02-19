@@ -22,13 +22,13 @@ frag75 <- nlm_randomcluster(ncol = 3536, nrow = 3536,
 
                                         # write files
 writeRaster(frag25,
-            "/home/luf74xx/Dokumente/model/inputs/frag25.grd",
+            "/home/ubuntu/model/inputs/frag25.grd",
             format = "raster")
 
 writeRaster(frag50,
-            "/home/luf74xx/Dokumente/model/inputs/fra50.grd",
+            "/home/ubuntu/model/inputs/frag50.grd",
             format = "raster")
 
 writeRaster(frag75,
-            "/home/luf74xx/Dokumente/model/inputs/frag75.grd",
+            "/home/ubuntu/model/inputs/frag75.grd",
             format = "raster")
