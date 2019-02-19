@@ -162,8 +162,8 @@ function read_landpars(settings::Dict{String,Any})
         # get patches/fragments areas and distances from raster files
         landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
         
-        landpars = Setworld.NeutralLandPars(landconfig[[1]],
-                                           landconfig[[2]],
+        landpars = Setworld.NeutralLandPars(trunc.(landconfig[1][1]),
+                                           ifelse(typeof(landconfig[1][2]) == Nullable{Union{}}, nothing, trunc.(landconfig[1][2])),
                                            select(temp_tsinput,:meantemp))
         
     else
