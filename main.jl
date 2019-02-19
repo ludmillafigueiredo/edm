@@ -589,7 +589,7 @@ function simulate()
         
         # OUTPUT: First thing, to see how community is initialized
         tic()
-        orgstable(orgsref,orgs,t,settings)
+        orgstable(orgs,t,settings)
         timing("WRITING ORGSOUTPUT", settings)
         toc()
 
@@ -610,7 +610,7 @@ function simulate()
 
         disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
 
-        establish!(mylandscape, orgs, t, settings, orgsref, T)
+        establish!(orgs, t, settings, orgsref, T)
         
         shedd!(orgs, orgsref, t)
         
