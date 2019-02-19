@@ -41,7 +41,7 @@ function areatocell(area::Float64)
   return side
 end
 
-function areatocell(area::Array{T,1}) where {T<:Number}
+function areatocell(area::Array{T,1} where {T<:Number})
   side = round.(Int64,(sqrt.(area*10000))/5, RoundNearestTiesAway)
   return side
 end

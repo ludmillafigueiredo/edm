@@ -21,7 +21,7 @@ module Setworld
 using Distributions
 using Organisms
 
-export LandPars, landscape_init, updateenv!, destroyarea!, fragment!
+export LandPars, NeutralLandPars, landscape_init, updateenv!, destroyarea!, fragment!, disturbland!
 
 const tK = 273.15 # °C to K converter
 
@@ -42,6 +42,11 @@ mutable struct LandPars
     meantempts::Array{Float64,1} # all fragments get the same temperature
 end
 
+mutable struct NeutralLandPars
+    initialland::Array{Int64,2}
+    disturbland::Any
+    meantemps::Array{Float64,1}
+end
 #############
 # Functions #
 #############
@@ -51,7 +56,7 @@ Create the initial landscape structure.
 """
 function landscape_init(landpars::LandPars)
 
-    landscape = Array{Dict{String,Float64}} #if created only inside the loop, remains a local variable
+    landscape = Array{Dict{String,Float64},2} #if created only inside the loop, remains a local variable
     
     for p in collect(1:landpars.npatches)
 
@@ -69,6 +74,19 @@ function landscape_init(landpars::LandPars)
     return landscape, landavail
 end
 
+function landscape_init(landpars::NeutralLandPars)
+
+    # convert matrix to BitArray (smaller than Bool)
+    landavail = Bool.(landpars.initialland)
+
+    # create landscape with same dimensions
+    landscape = fill(Dict{String, Float64}(),
+                     size(landavail))
+
+    return landscape, landavail
+                     
+end
+
 """
 updateenv!(landscape,t)
 Update temperature and precipitation values according to the weekly input data (weekly means and ).
@@ -82,11 +100,20 @@ function updateenv!(t::Int64, landpars::LandPars)
     return T
 end
 
+function updateenv!(t::Int64, landpars::NeutralLandPars)
+
+    T = landpars.meantempts[t] + tK
+    #unity test
+    println("Temperature for week $t: $T")
+    
+    return T
+end
+
 """
 destroyarea!()
 Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
 """
-function destroyarea!(landpars::LandPars, landavail::Array{Bool,N} where N, settings::Dict{String,Any})
+function destroyarea!(landpars::LandPars, landavail::BitArray{2}, settings::Dict{String,Any})
 
     if settings["landmode"] == "artif"
         # DESTROY HABITAT
@@ -113,7 +140,7 @@ function destroyarea!(landpars::LandPars, landavail::Array{Bool,N} where N, sett
         
     elseif settings["landmode"] == "real"
         # rebuild the landscape according to shape file
-        landscape = Array{Dict{String,Float64}}
+        landscape = Array{Dict{String,Float64}, 2}
         
         for frag in collect(1:landpars.nfrags)
 
@@ -174,6 +201,16 @@ function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::D
     
     return landscape, landavail
     
+end
+
+# method for 'continuous' landscape structure (not 3D)
+function disturbland!(landscape::Array{Dict{String, Float64}, N} where N, landavail::BitArray{2}, landpars::NeutralLandPars)
+    # convert matrix to BitArray (smaller than Bool)
+    landavail = Bool.(landpars.disturbland)
+    # create landscape with same dimensions
+    landscape = fill(Dict{String, Float64}(),
+                     size(landavail))
+
 end
 
 """
