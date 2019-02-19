@@ -45,7 +45,7 @@ end
 mutable struct NeutralLandPars
     initialland::Array{Int64,2}
     disturbland::Any
-    meantemps::Array{Float64,1}
+    meantempts::Array{Float64,1}
 end
 #############
 # Functions #
