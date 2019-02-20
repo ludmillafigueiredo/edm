@@ -1,34 +1,23 @@
-library(NLMR)
-library(landscapemetrics)
-library(landscapetools)
-library(raster)
 #library(tidyverse)
 #library(rasterVis)
 #library(grid)
 #library(gtable)
 
-# 25% area loss
-frag25 <- nlm_randomcluster(ncol = 3536, nrow = 3536,
-                                     p = 0.1,
-                            ai = c(0.25, 0.75))
-# 75% area loss
-frag50 <- nlm_randomcluster(ncol = 3536, nrow = 3536,
-                                     p = 0.1,
-                            ai = c(0.5, 0.5))
-# 75% area loss
-frag75 <- nlm_randomcluster(ncol = 3536, nrow = 3536,
-                                     p = 0.1,
-                            ai = c(0.75, 0.25))
+creatEDnlm <- function(loss, size, dir){
 
-                                        # write files
-writeRaster(frag25,
-            "/home/ubuntu/model/inputs/frag25.grd",
-            format = "raster")
+    # required packages
+    require(NLMR)
+    require(landscapemetrics)
+    require(landscapetools)
+    require(raster)
 
-writeRaster(frag50,
-            "/home/ubuntu/model/inputs/frag50.grd",
-            format = "raster")
+    # create random cluster nlm
+    fragmented <- nlm_randomcluster(ncol = size, nrow = size,
+                                    p = 0.1,
+                                    ai = c(loss, 1-loss))
 
-writeRaster(frag75,
-            "/home/ubuntu/model/inputs/frag75.grd",
-            format = "raster")
+    # write files
+    writeRaster(fragmented,
+                paste(file.path(dir,"frag_"),loss, "_", size,".grd", sep = ""),
+                format = "raster")
+    }
