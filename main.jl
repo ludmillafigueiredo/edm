@@ -160,10 +160,10 @@ function read_landpars(settings::Dict{String,Any})
         @rput disturbland
         
         # get patches/fragments areas and distances from raster files
-        landconfig = rcopy(Array{Any}, R"landnlmconfig.R")
+        landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
         
-        landpars = Setworld.NeutraLandPars(landconfig[[1]],
-                                           landconfig[[2]],
+        landpars = Setworld.NeutralLandPars(trunc.(landconfig[1][1]),
+                                           ifelse(typeof(landconfig[1][2]) == Nullable{Union{}}, nothing, trunc.(landconfig[1][2])),
                                            select(temp_tsinput,:meantemp))
         
     else
@@ -589,7 +589,7 @@ function simulate()
         
         # OUTPUT: First thing, to see how community is initialized
         tic()
-        orgstable(orgsref,orgs,t,settings)
+        orgstable(orgs,t,settings)
         timing("WRITING ORGSOUTPUT", settings)
         toc()
 
@@ -610,7 +610,7 @@ function simulate()
 
         disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
 
-        establish!(mylandscape, orgs, t, settings, orgsref, T)
+        establish!(orgs, t, settings, orgsref, T)
         
         shedd!(orgs, orgsref, t)
         

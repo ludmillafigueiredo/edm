@@ -195,7 +195,7 @@ end
 allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
 Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
                 """
-function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref::Organisms.OrgsRggef,T::Float64)
+function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef,T::Float64)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
 
@@ -430,10 +430,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     clone = deepcopy(clonetemplate)
                     # check if the new location is actually available before creating the clone
                     clone.location = (clonetemplate.location[1] + rand(Distributions.Bernoulli())[1],
-                                      clonetemplate.location[2] + rand(Distributions.Bernoulli())[1],
-                                      clonetemplate.location[3]) # clones are spread in one of the neighboring cells - or in the same as the mother
+                                      clonetemplate.location[2] + rand(Distributions.Bernoulli())[1]) # clones are spread in one of the neighboring cells - or in the same as the mother
 
-                    if checkbounds(Bool, landavail, clonetemplate.location[1], clonetemplate.location[2], clonetemplate.location[3])
+                    if checkbounds(Bool, landavail, clone.location[1], clone.location[2])
                         # actually start the new individual
                         id_counter += 1
                         clone.id = hex(id_counter)                  
