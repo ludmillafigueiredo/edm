@@ -1,3 +1,47 @@
+# !Run it from the model's directory!
+# This is an R script intended at faster analysis. Details on the RNotebook file of same name
+
+# Load packages
+library(tidyverse);
+library(viridis);
+library(grid);
+library(gridExtra);
+
+# Get outputs
+indoutput <- function(input,simID,cluster,outdir){
+  
+  inid <- file.path(paste(input,".csv", sep = ""))
+  outid <- file.path(simID); #simID
+  
+  # cluster refers to where the analusis is happening, not where the simulation ran
+  if (cluster == "gaia") { 
+    home = file.path("/home/luf74xx/Dokumente/model")
+  } else if (cluster == "hpc") {
+    home <- indir <- file.path("/home/ubuntu/model");
+  } else {
+    home <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model");
+  }
+  
+  indir <- file.path(home,"inputs");
+  outdir <- file.path(home, outdir);
+  
+  # Outputs:
+  #outdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/EDoutputs") #Thinkpad
+  outraw <- as_tibble(read.table(file.path(outdir, outid, "orgsweekly.txt"), header = TRUE, sep = "\t"));
+  # Clean raw data
+  ## Take parentheses out of location column ("()")
+  loc <- gsub("[\\(|\\)]", "", outraw$location)
+  ## split location in 3 columns
+  loc <- as.data.frame(matrix(unlist(str_split(loc, ",")),ncol =3,byrow = T))
+  names(loc) = c("xloc", "yloc", "floc")
+  ## Complete and clean table
+  outdata <- as_tibble(cbind(select(outraw,-one_of("location")),
+                             loc))
+  write.csv(outdata, file.path(outdir, simID, paste(simID, "idout.csv", sep = "")), row.names = FALSE)
+  rm(loc)
+  return(list(a = outdata, b = outdir, c = indir))
+}
+# Extract and plot species-specific biomasses mean and variation for each stage
 adultmass <- function(outdata,plotit){
   biomass <- outdata%>%
     select(week,id,stage,sp,veg,repr)
@@ -74,11 +118,11 @@ popabund <- function(biomass){
   
   return(list(a = popdata, b = abund.plot))
 }
-abund_rep <- function(sim, simwrong){
+abund_rep <- function(simID){
   
   orgs <- numeric(0)
   
-  for(simID in c(sim, paste(simwrong, seq(1,25), sep = "_"))) {
+  for(simID in c(paste(simID, seq(1,reps), sep = "_"))) {
     load(file.path(simID,paste(simID,".RData", sep = "")))
     #include a replication column, to identify replicates
     outdatasim <- mutate(outdata, repli = as.factor(rep(simID, nrow(outdata))))
@@ -204,11 +248,11 @@ richness <- function(popdata,simID,disturbance,tdist){
   }
   return(list(a = spprichnesstab, b = spprichnessplot))
 }
-richness_reps <- function(popdata,sim, simwrong,disturbance,tdist){
+richness_reps <- function(popdata,simID,disturbance,tdist){
   
   # get reps
   orgs <- numeric(0)
-  for(simID in c(sim, paste(simwrong, seq(1,25), sep = "_"))) {
+  for(simID in c(paste(simID, seq(1,25), sep = "_"))) {
     load(file.path(simID,paste(simID,".RData", sep = "")))
     #include a replication column, to identify replicates
     outdatasim <- mutate(outdata, repli = as.factor(rep(simID, nrow(outdata))))
@@ -376,9 +420,9 @@ group.pop <- function(outdata, offspringfile, singlestages){
 }
 
 # Set up directory to store analysis
-dir.create(file.path(getwd(),paste(sim,"all",sep = "_")))
+dir.create(file.path(getwd(),paste(simID,"all", reps,sep = "_")))
 
-outputs <- indoutput(input,simID,cluster, outdir)
+outputs <- indoutput(input,simID,cluster,outdir)
 outputs$a -> outdata  
 outputs$b -> indir
 rm(outputs)
