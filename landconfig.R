@@ -28,7 +28,7 @@ landconfig <-list (
     area(initialshape), # their areas
     sum(area(initialshape)),
     pointDistance(initialshape, lonlat = FALSE), # distances between their middle points
-    ifelse(is,null(disturbshape), NULL, length(disturbshape)), # number of fragments
+    ifelse(is.null(disturbshape), NULL, length(disturbshape)), # number of fragments
     ifelse(is.null(disturbshape), NULL, area(disturbshape)), # their areas
     ifelse(is.null(disturbshape), NULL, sum(area(disturbshape))),
     ifelse(is.null(disturbshape), NULL, pointDistance(disturbshape, lonlat = FALSE)), # distances between them
