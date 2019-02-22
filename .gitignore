@@ -11,3 +11,4 @@ singlesimulations
 EDoutputs/*
 analysis/*
 .Rproj.user
+inputs/*
