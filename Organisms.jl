@@ -283,7 +283,7 @@ end
                 Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
                 - visited: reduction in pollination service
                 """
-function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, regime:: String, td::Int, visited::Int)
+function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, regime:: String, td::Int64, visited::Float64)
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.e_mu, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
     pollinated = []

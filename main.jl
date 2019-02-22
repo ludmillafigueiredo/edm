@@ -153,6 +153,9 @@ function read_landpars(settings::Dict{String,Any})
 
     elseif settings["landmode"] == "artif"
 
+# deal with simulations where disturbance raster is needed
+if settings["disturbtype"] in ["frag" "loss"]
+
         # send file names to R
         initialland = settings["initialland"]
         @rput initialland
@@ -161,11 +164,27 @@ function read_landpars(settings::Dict{String,Any})
         
         # get patches/fragments areas and distances from raster files
         landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
+        @rget initialmatrix
+	@rget disturbmatrix
+
+        landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
+        ifelse(disturbmatrix == "none", nothing, Int.(disturbmatrix)),
+	select(temp_tsinput,:meantemp))
+else
+# send file names to R
+        initialland = settings["initialland"]
+        @rput initialland
+        disturbland = settings["disturbland"]
+        @rput disturbland
         
-        landpars = Setworld.NeutralLandPars(trunc.(landconfig[1][1]),
-                                           ifelse(typeof(landconfig[1][2]) == Nullable{Union{}}, nothing, trunc.(landconfig[1][2])),
-                                           select(temp_tsinput,:meantemp))
-        
+        # get patches/fragments areas and distances from raster files
+        landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
+        @rget initialmatrix
+
+        landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
+        nothing,
+	select(temp_tsinput,:meantemp))
+end
     else
         error("Please choose a mode of landscape simulation.")
     end
@@ -414,11 +433,14 @@ function loaddisturbance(settings)
             end
 
             return tdist #, disturblandspecs
+
+elseif settings["disturbtype"] == "poll"
+	    tdist = select(loadtable(settings["insect"]), :td)
+            println("Pollination loss is simulated according to parameters in the \'insects\' file.")
+	    return tdist
             
         elseif settings["disturbtype"] == "temp"
             println("Temperature change is simulated with the temperature file provided.")
-        elseif settings["disturbtype"] == "poll"
-            println("Pollination loss is simulated according to parameters in the \'insects\' file.")
         else
             error("Please specify one of the disturbance scenarios with `--disturb`:
                           \n\'none\' if no disturbance should be simulated,
