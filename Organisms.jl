@@ -583,7 +583,7 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
         ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway) 
 
         # Check if individual can have a chance of establishing there
-        if landavail[xdest, ydest] == true && checkbounds(Bool, landavail, xdest, ydest)
+        if checkbounds(Bool, landavail, xdest, ydest) && landavail[xdest, ydest] == true # checking the suitability first would make more sense but cant be done if cell is out of bounds 
 
             orgs[d].location = (xdest,ydest) 
 
