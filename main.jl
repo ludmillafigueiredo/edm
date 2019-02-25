@@ -317,9 +317,9 @@ function implicit_insect(settings::Dict{String,Any})
     
     interaction = select(insectsinput, :interaction)[1]
     scen = select(insectsinput, :scen)[1] # pollination scenario
-    td = select(insectsinput, :td)[1] # time of perturbation
+    td = select(insectsinput, :td) # time of perturbation
     regime = select(insectsinput, :regime)[1] # regime of loss
-    remaining = select(insectsinput, :remaining)[1] # proportion of pollination service loss
+    remaining = select(insectsinput, :remaining) # proportion of pollination service loss
     
     return interaction, scen, td, regime, remaining
 end
