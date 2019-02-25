@@ -487,7 +487,7 @@ function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, 
             end          
         end
         
-        global K = (3/100)*(length(find(x -> x == true, landavail))*400) # xtons/ha = x.10-²g/1m²
+        global K = (1.5/100)*(length(find(x -> x == true, landavail))*625) # xtons/ha = x.10-²g/1m²
         global cK = K/length(find(x -> x == true, landavail))
         
         open(abspath(joinpath(settings["outputat"],settings["simID"],"landlog.txt")),"a") do sim
