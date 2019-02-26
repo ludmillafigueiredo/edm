@@ -17,7 +17,7 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
       EDdir <- file.path("/home/ubuntu/model")
     }
     if (missing(Juliadir)){
-      Juliadir <- file.path("/home/ubuntu/builds/julia-9d11f62bcb/bin/julia")
+      Juliadir <- file.path("/home/ubuntu/build/julia-9d11f62bcb/bin/julia")
     }
   } else {
     # Gaia directories
@@ -110,7 +110,7 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
                  command),
                bashscript)
   }else{
-    scriptname <- paste(simID,"hpc.txt", sep = "")
+    scriptname <- paste(simID,"hpc.sh", sep = "")
     file.create(file.path(scriptsdir,scriptname)) # I create the scripts on Gaia, not in the HPC
     hpcscript <- file(file.path(file.path(scriptsdir,scriptname)))
     if (reps){
@@ -118,12 +118,13 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
                    paste("reps=($(seq 1 ", nreps, "))", sep = ""),
                    paste("for i in `seq 1 ", nreps, "`; do", sep = ""),
                    paste("simID=\"", simID, "_$i\"", sep = ""),
-                   paste("randomseed=\"$i\""),
-                   "",
+                   paste("randomseed=\"$i\/n""),
                    command),
                  hpcscript)
     }else{
-      writeLines(command,hpcscript)
+        writeLines(c("#!/bin/bash/n",
+                     command),
+                   hpcscript)
     }
   }
   
