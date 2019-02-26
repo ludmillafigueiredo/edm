@@ -311,9 +311,8 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
                         npoll = Int(ceil(defaultnpoll * exp(-0.5*(t-td))))
                         # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
                         println("Regime of EXP pollination loss, with $(length(ready)) being ready and $npoll being pollinated")
-
                     elseif regime == "press"
-                        npoll = Int(ceil(defaultnpoll * remaining))
+                        npoll = Int(ceil(defaultnpoll * remaining[find(td.==t)]))
                     else
                         error("Please choose a pollination regime \"regime\" in insect.csv:
                 - \"pulse\":
