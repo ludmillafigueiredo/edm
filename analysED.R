@@ -1,502 +1,459 @@
 # !Run it from the model's directory!
 # This is an R script intended at faster analysis. Details on the RNotebook file of same name
 
+# Set up directory and environement to store analysis
+analysEDdir <- file.path(outdir, parentsimID, paste(parentsimID, "analysED", sep = "_"))
+dir.create(analysEDdir)
+
 # Load packages
 library(tidyverse);
 library(viridis);
 library(grid);
 library(gridExtra);
 
-# Get outputs
-indoutput <- function(input,simID,cluster,outdir){
+#' Organize individual-based output
+#' 
+#' @param parentsimID The simulation ID
+#' @param nreps Number of replicates
+#' @param outdir The path to the outputs folder, if not default
+#' @param EDdir The path to EDM, if not default
+getoutput <- function(parentsimID, nreps, outdir = file.path("~/model/EDoutputs"), EDdir = file.path("~/model")){
   
-  inid <- file.path(paste(input,".csv", sep = ""))
-  outid <- file.path(simID); #simID
-  
-  # cluster refers to where the analusis is happening, not where the simulation ran
-  if (cluster == "gaia") { 
-    home = file.path("/home/luf74xx/Dokumente/model")
-  } else if (cluster == "hpc") {
-    home <- indir <- file.path("/home/ubuntu/model");
-  } else {
-    home <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model");
-  }
-  
-  indir <- file.path(home,"inputs");
-  outdir <- file.path(home, outdir);
-  
-  # Outputs:
-  #outdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/EDoutputs") #Thinkpad
-  outraw <- as_tibble(read.table(file.path(outdir, outid, "orgsweekly.txt"), header = TRUE, sep = "\t"));
-  # Clean raw data
-  ## Take parentheses out of location column ("()")
-  loc <- gsub("[\\(|\\)]", "", outraw$location)
-  ## split location in 3 columns
-  loc <- as.data.frame(matrix(unlist(str_split(loc, ",")),ncol =3,byrow = T))
-  names(loc) = c("xloc", "yloc", "floc")
-  ## Complete and clean table
-  outdata <- as_tibble(cbind(select(outraw,-one_of("location")),
-                             loc))
-  write.csv(outdata, file.path(outdir, simID, paste(simID, "idout.csv", sep = "")), row.names = FALSE)
-  rm(loc)
-  return(list(a = outdata, b = outdir, c = indir))
-}
-# Extract and plot species-specific biomasses mean and variation for each stage
-adultmass <- function(outdata,plotit){
-  biomass <- outdata%>%
-    select(week,id,stage,sp,veg,repr)
-  # Filter all adult individuals and use colours to distinguish the lines representing each individual
-  if (plotit == TRUE){
-    indvegmass.plot <- ggplot(filter(biomass, stage == "a"), aes(x=week, y= veg, color = factor(id)))+
-      geom_line() +
-      geom_point()+
-      labs(x = "Week", y = "Individual vegetative biomass (g)",
-           title = "Adult weekly weight")+
-      theme(legend.position = "none")
+  # initiliaze list to contain outputs 
+  #outdatalist <- list()
+  for(rep in nreps){
+    repfolder <- file.path(outdir, parentsimID, paste(parentsimID, rep, sep = "_")); #parentsimID
     
-    indrepmass.plot <- ggplot(biomass, aes(x=week, y= repr, color = factor(id)))+
-      geom_line() +
-      geom_point()+
-      labs(x = "Week", y = "Total reproductive biomass (g)",
-           title = "Individual reproductive biomass variation")+
-      theme(legend.position = "none")
+    # get raw outputs
+    outraw <- as_tibble(read.table(file.path(repfolder, "orgsweekly.txt"), header = TRUE, sep = "\t"));
+    # clean it
+    ## take parentheses out of location column ("()")
+    loc <- gsub("[\\(|\\)]", "", outraw$location)
+    ## split location in 3 columns
+    loc <- as.data.frame(matrix(unlist(str_split(loc, ",")), ncol = 2, byrow = T))
+    names(loc) = c("xloc", "yloc")
+    ## complete and clean table
+    outdata <- as_tibble(cbind(select(outraw, -one_of("location")), loc))
+    rm(loc)
+    # write single files in its folders
+    write.csv(outdata, file.path(repfolder, paste(parentsimID, "indout.csv", sep = "")), row.names = FALSE)
+    # append to replicates list
+    #outdatalist <- c(outdatalist, 
+    #outdata)
   }
-  return(list(a = indvegmass.plot, b = indrepmass.plot, c = biomass))
+  return(outdata)
 }
-# Extract and plot species-specific biomasses mean and variation for each stage
-sppstagemass <- function(biomass, spp){
+
+#' Assemble output files of replicates and identify them
+#' Output on juvenile and adult individuals are kept separate because they offspring contains weekly abundances of each species, whereas the juv/adult output is individual-based.
+#' @param parentsimID simulation ID
+#' @param nreps number of replicates, which identify the folders containing results
+organizereplicates <- function(parentsimID, nreps){
   
-  if (missing(spp)){
-    spmass <- biomass%>%
-      group_by(week,sp,stage)%>%
-      summarise(veg.mean = mean(veg), veg.sd = sd(veg), repr.mean = mean(repr), repr.sd = sd(repr))
-  }else{
-    spps <- paste("p",spp,sep="-")
-    spmass <- biomass%>%
-      group_by(week,sp,stage)%>%
-      filter(sp %in% spps)%>%
-      summarise(veg.mean = mean(veg), veg.sd = sd(veg), repr.mean = mean(repr), repr.sd = sd(repr))
-  }
+  output_replicates <- numeric(0)
+  offspring_replicates <- numeric(0)
   
-  pd <- position_dodge(0.1)
-  
-  vegmass.plot <- ggplot(spmass, aes(x=week, y= veg.mean, color = factor(stage)))+
-    geom_errorbar(aes(ymin=veg.mean-veg.sd, ymax=veg.mean+veg.sd), colour = "black", width=.01, position=pd)+
-    geom_line(position=pd)+
-    geom_point(position=pd)+
-    labs(x = "Week", y = "Mean vegetative biomass (g)",
-         title = "Annual biomass variation",
-         subtitle = "Mean vegetative biomass (+-sd) per species")+
-    facet_wrap(~sp,nrow=5)+
-    theme(legend.position = "bottom")
-  
-  repmass.plot <- ggplot(spmass, aes(x=week, y= repr.mean,  colour = factor(sp)))+
-    geom_errorbar(aes(ymin=repr.mean-repr.sd, ymax=repr.mean+repr.sd), 
-                  colour = "black", width=.01,position=pd)+
-    geom_line()+
-    labs(x = "Week", y = "Mean reproductive biomass (g)",
-         title = "Annual reproductive biomass variation",
-         subtitle = "Mean reproductive biomass (+-sd) per species")+
-    theme(legend.position = "bottom")
-  
-  return(list(a = vegmass.plot, b = repmass.plot, c = spmass))
-}
-# Extract and plot population abundances
-popabund <- function(biomass){
-  popdata <- biomass%>%
-    select(week,sp,stage) #separated for outputting
-  spabund <- popdata%>%
-    group_by(week,sp)%>%
-    summarize(abundance = n())
-  
-  abund.plot <- ggplot(spabund, aes(x = week, y = abundance, color = factor(sp)))+
-    geom_line() + 
-    geom_point() +
-    labs(x = "Week", y = "abundanceance (n individuals)",
-         title = "Species abundance variation")+
-    theme(legend.position = "none")
-  
-  return(list(a = popdata, b = abund.plot))
-}
-abund_rep <- function(simID){
-  
-  orgs <- numeric(0)
-  
-  for(simID in c(paste(simID, seq(1,reps), sep = "_"))) {
-    load(file.path(simID,paste(simID,".RData", sep = "")))
-    #include a replication column, to identify replicates
-    outdatasim <- mutate(outdata, repli = as.factor(rep(simID, nrow(outdata))))
-    if(length(orgs) == 0){
-      orgs <- outdatasim
+  for(sim in c(paste(parentsimID, seq(1, nreps), sep = "_"))) {
+    repfolder <- file.path(outdir, parentsimID, sim); # replicate folder
+    # read outputs of juv/adults and of offspring
+    outdatasim <- read.csv(file.path(repfolder, paste(parentsimID, "indout.csv", sep = "")), header = TRUE)%>%
+      mutate(repli = as.factor(rep(sim, nrow(.)))) #include a replication column, to identify replicates
+    offspringsim <- read.table(file.path(repfolder, "offspringproduction.csv"), header = TRUE, sep = "\t")%>%
+      mutate(repli = as.factor(rep(sim, nrow(.))))
+    
+    # fill in cleanoutput object (necessary step because of bind_rows)
+    if(length(output_replicates) == 0){
+      output_replicates <- outdatasim
+      offspring_replicates <- offspringsim
     }else{
-      orgs <- bind_rows(orgs, outdatasim, .id = "repli")
+      # identify the lines corresponding to it with its replicate ID
+      output_replicates <- bind_rows(output_replicates, outdatasim, .id = "repli")
+      offspring_replicates <- bind_rows(offspringsim, offspringsim, .id = "repli")
     } 
   }
-  orgs <- orgs[,-1]
-  # Abundance
-  popdata <- orgs%>%
-    select(week,sp,stage,repli)
+  return(list(a = output_replicates, b = offspring_replicates))
+}
+
+#' Extract and plot species-specific mean and sd biomass compartiments (these are means of each simulation' means   
+#' @param outdatalist
+#' @param plotit Boolean specifying whether graph shouuld be plotted or not
+stagemass <- function(output_replicates, stages = factor(c("a", "j", "s"))){
   
-  spabund <- popdata%>%
+  # get biomasses
+  biomass_tab <- output_replicates%>%
+    select(week, id, stage, sp, veg, repr, repli)%>%
+    group_by(week, stage, sp, repli)%>%
+    summarize(repli_mean_reprmass = mean(repr),
+              repli_mean_vegmass = mean(veg))%>%
+    ungroup()%>%
+    group_by(week, stage, sp)%>%
+    summarize(mean_reprmass = mean(repli_mean_reprmass),
+              mean_vegmass = mean(repli_mean_vegmass),
+              sd_reprmass = sd(repli_mean_reprmass),
+              sd_vegmass = sd(repli_mean_vegmass))%>%
+    ungroup()
+  
+  # Filter all adult individuals and use colours to distinguish the lines representing each individual
+  vegmass_plottED <- ggplot(filter(biomass_tab, stage %in% stages),
+                            aes(x=week, y= mean_vegmass, group = factor(stage), color = factor(stage)))+
+    geom_line(position = position_dodge(0.1)) +
+    geom_point(position = position_dodge(0.1))+
+    geom_errorbar(aes(min = mean_vegmass - sd_vegmass,
+                      max = mean_vegmass + sd_vegmass),
+                  stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
+    facet_grid(factor(sp) ~ factor(stage))+
+    labs(x = "Week", y = "Compartiment biomass (g)",
+         title = "Weekly vegetative biomass")+
+    theme(legend.position = "none")
+  
+  repmass_plottED <- ggplot(filter(biomass_tab, stage %in% stages),
+                            aes(x=week, y= mean_reprmass, group = factor(stage), color = factor(stage)))+
+    geom_line(position = position_dodge(0.1)) +
+    geom_point(position = position_dodge(0.1))+
+    geom_errorbar(aes(min = mean_reprmass - sd_reprmass,
+                      max = mean_reprmass + sd_reprmass),
+                  stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
+    labs(x = "Week", y = "Compartiment biomass (g)",
+         title = "Weekly reproductive biomass")+
+    facet_grid(factor(sp) ~ factor(stage))+
+    theme(legend.position = "none")
+  
+  return(list(a = vegmass_plottED, b = repmass_plottED, c = biomass_tab))
+}
+
+#' Extract and plot population abundances
+popabund <- function(output_replicates){
+  
+  # extract relevant variables
+  pop_tab <- output_replicates%>%
+    select(week,sp,stage,repli)%>%
+    ungroup()
+  
+  # summarize abundaces/species/week
+  spabund_tab <- pop_tab%>%
     group_by(week,sp,repli)%>%
     summarize(abundance = n())%>%
     ungroup()%>%
     group_by(week,sp)%>%
-    summarize(abundance.mean = mean(abundance), abundance.sd = sd(abundance, na.rm = TRUE))
+    summarize(mean_abundance = mean(abundance), sd_abundance = sd(abundance))%>%
+    ungroup()
   
-  pd <- position_dodge(0.1)
-  abundplot <- ggplot(spabund, aes(x = week/52, y = abundance.mean, group = sp, color = factor(sp)))+
-    geom_errorbar(aes(ymin = abundance.mean-abundance.sd, ymax= abundance.mean+abundance.sd), 
-                  stat = "identity", colour = "black", width=.01, position=pd)+
-    geom_line(position=pd)+
-    geom_point(position=pd)+
+  abund_plottED <- ggplot(spabund_tab, aes(x = week, y = mean_abundance, group = sp, color = factor(sp)))+
+    geom_errorbar(aes(ymin = mean_abundance - sd_abundance, ymax= mean_abundance + sd_abundance), 
+                  stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
+    geom_line(position=position_dodge(0.1))+
+    geom_point(position=position_dodge(0.1))+
     labs(x = "Year", y = "Abundance (mean +- sd)",
          title = "Species abundance variation")+
-    theme(legend.position = "none")
-  
-  return(list(a = as.data.frame(popdata), b = abundplot))
-}
-# Extract and plot populations structure
-popstruct <- function(popdata,offspringfile,simID,spp){
-  
-  if (missing(spp)){
-    # Population strucuture: abundances
-    weekstruct <- popdata%>%
-      group_by(week, sp, stage)%>%
-      summarize(abundance = n())%>%
-      bind_rows(.,select(offspringfile,-mode)) #merge offspring file
-    # Population strucuture: proportions
-    propstruct.tab <- popdata%>%
-      group_by(week,stage)%>%
-      summarize(abundance = n())%>%
-      complete(week,stage,fill = list(abundance = 0))%>%
-      group_by(week)%>%
-      mutate(proportion = 100*abundance/sum(abundance))%>%
-      complete(week,stage,fill = list(proportion = 0))
-  }else{
-    spps <- paste("p",spp,sep="-")
-    # Population strucuture: abundances
-    weekstruct <- popdata%>%
-      filter(sp %in% spps)%>%
-      group_by(week, sp, stage)%>%
-      summarize(abundance = n())
-    # Population strucuture: proportions
-    propstruct.tab <- popdata%>%
-      filter(sp %in% spps)%>%
-      group_by(week,stage)%>%
-      summarize(abundance = n())%>%
-      complete(week,stage,fill = list(abundance = 0))%>%
-      group_by(week)%>%
-      mutate(proportion = 100*abundance/sum(abundance))%>%
-      complete(week,stage,fill = list(proportion = 0))
-  }
-  # graphs
-  weekstruct.plot <- ggplot(weekstruct, aes(x = week, y = abundance, color= factor(stage)))+
-    geom_line()+
-    geom_point()+
-    labs(x = "Abundance", 
-         y = "Week",
-         title = "Population structure")+
-    #scale_color_discrete("Stages:", labels = c("Adults", "Seeds", "Juveniles"))+
-    facet_wrap(~sp, nrow = length(unique(weekstruct$sp)))+
     theme(legend.position = "none")+
     theme_minimal()
   
-  propstruct.plot <- ggplot(propstruct.tab,
-                            aes(x = week, y =proportion, color = as.factor(stage)))+
+  return(list(a = pop_tab, b = spabund_tab, c = abund_plottED))
+}
+
+#' Extract and plot populations structure
+popstruct <- function(pop_tab, offspring_replicates, parentsimID, spp){
+  
+  if (missing(spp)){
+    # Population strucuture: abundances
+    weekstruct_tab <- pop_tab%>%
+      group_by(week, sp, stage, repli)%>%
+      summarize(abundance = n())%>%
+      bind_rows(., select(offspring_replicates, -mode))%>% #merge offspring file
+      ungroup()%>%
+      group_by(week, sp, stage)%>%
+      summarize(mean_abundance = mean(abundance),
+                sd_abundance = sd(abundance))
+    
+    # Population strucuture: proportions
+    relativestruct_tab <- weekstruct_tab%>%
+      complete(week, stage, fill = list(abundance = 0))%>%
+      group_by(week, sp)%>%
+      mutate(proportion = 100*mean_abundance/sum(mean_abundance))%>%
+      complete(week, stage, fill = list(proportion = 0))%>%
+      ungroup()
+  }else{
+    spps <- paste("p",spp,sep="-")
+    # Population strucuture: abundances
+    weekstruct_tab <- pop_tab%>%
+      filter(sp %in% spp)%>%
+      group_by(week, sp, stage, repli)%>%
+      summarize(abundance = n())%>%
+      bind_rows(., select(offspring_replicates, -mode))%>% #merge offspring file
+      ungroup()%>%
+      group_by(week, sp, stage)%>%
+      summarize(mean_abundance = mean(abundance),
+                sd_abundance = sd(abundance))
+    # Population strucuture: proportions
+    relativestruct_tab <- weekstruct_tab%>%
+      filter(sp %in% spps)%>%
+      complete(week, stage, fill = list(abundance = 0))%>%
+      group_by(week, sp)%>%
+      mutate(proportion = mean_abundance/sum(mean_abundance))%>%
+      complete(week, stage, fill = list(proportion = 0))%>%
+      ungroup()
+  }
+  # graphs
+  weekstruct_plottED <- ggplot(weekstruct_tab,
+                               aes(x = week, y = mean_abundance, color = factor(stage)))+
+    geom_errorbar(aes(ymin = mean_abundance - sd_abundance,
+                      ymax = mean_abundance + sd_abundance),
+                  stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
     geom_line()+
-    geom_point()
+    geom_point()+
+    labs(x = "Week", y = "Abundance",
+         title = "Population structure")+
+    #scale_color_discrete("Stages:", labels = c("Adults", "Seeds", "Juveniles"))+
+    facet_wrap(~sp, nrow = length(unique(weekstruct_tab$sp)))+
+    theme(legend.position = "none")+
+    theme_minimal()
   
-  return(list(a = weekstruct, b = weekstruct.plot,
-              c = propstruct.tab, d = propstruct.plot))
+  relativestruct_plottED <- ggplot(relativestruct_tab,
+                                   aes(x = week, y = proportion, color = as.factor(stage)))+
+    geom_line()+
+    geom_point()+
+    labs(x = "Week", y = "Relative abundace",
+         title = "Population structure")+
+    facet_wrap(~sp, nrow = length(unique(weekstruct_tab$sp)))+
+    theme(legend.position = "none")+
+    theme_minimal()
+  
+  return(list(a = weekstruct_tab, b = weekstruct_plottED,
+              c = relativestruct_tab, d = relativestruct_plottED))
 }
-# Species richness
-richness <- function(popdata,simID,disturbance,tdist){
-  # extract richness from output
-  spprichnesstab <- popdata%>%
-    group_by(week)%>%
-    summarize(richness = length(unique(sp)))
-  
-  # plot it. Identify disturbance, when it happens
-  if (disturbance == "none" && missing(tdist)){
-    spprichnessplot <- ggplot(spprichnesstab, aes(x = week, y = richness))+
-      geom_line(color = "dodgerblue2", size = 1.25)+
-      geom_point()+
-      theme_minimal()
-  } else {
-    
-    if (disturbance == "arealoss10"){
-      text <- "10% area lost"
-    } else if (disturbance == "arealoss50"){
-      text <- "50% area lost"
-    } else if (disturbance == "arealoss90") {
-      text <- "90% area lost"
-    } else {
-      text <- "Disturbance"
-    }
-    
-    #my_grob <- grobTree(textGrob(text, x = 0.5, y = 0.9, hjust = 0, 
-    #                             gp = gpar(fontsize = 10, fontface = "italic")))
-    spprichnessplot <- ggplot(spprichnesstab, aes(x = week, y = richness))+
-      geom_line(color = "dodgerblue2", size = 1.25)+
-      geom_point()+
-      geom_vline(xintercept = tdist, linetype = 2, color = "red")+
-      labs(x = "Time", y = "Spp. richness")+
-      theme_minimal()
-    #annotation_custom(my_grob)+
-    
-  }
-  return(list(a = spprichnesstab, b = spprichnessplot))
-}
-richness_reps <- function(popdata,simID,disturbance,tdist){
-  
-  # get reps
-  orgs <- numeric(0)
-  for(simID in c(paste(simID, seq(1,25), sep = "_"))) {
-    load(file.path(simID,paste(simID,".RData", sep = "")))
-    #include a replication column, to identify replicates
-    outdatasim <- mutate(outdata, repli = as.factor(rep(simID, nrow(outdata))))
-    if(length(orgs) == 0){
-      orgs <- outdatasim
-    }else{
-      orgs <- bind_rows(orgs, outdatasim, .id = "repli")
-    } 
-  }
-  orgs <- orgs[,-1]
-  popdata <- orgs%>%
-    select(week,sp,stage,repli)
+
+#' Calculate mean species richness from replicates
+richness <- function(pop_tab,parentsimID,disturbance,tdist){
   
   # extract richness from output
-  spprichnesstab <- popdata%>%
+  spprichness_tab <- pop_tab%>%
     group_by(week, repli)%>%
     summarize(richness = length(unique(sp)))%>%
     ungroup()%>%
     group_by(week)%>%
-    summarize(richness.mean = mean(richness), richness.sd = sd(richness))
+    summarize(mean_richness = mean(richness),
+              sd_richness = sd(richness))%>%
+    ungroup()
   
-  # plot it. Identify disturbance, when it happens
-  pd <- position_dodge(0.1)
+  # create plots
+  ## identify when disturbance happens, if it does
   if (disturbance == "none" && missing(tdist)){
-    spprichnessplot <- ggplot(spprichnesstab, aes(x = week/52, y = richness.mean))+
-      geom_errorbar(aes(ymin = richness.mean-richness.sd, ymax = richness.mean+richness.sd),
-                    color = "black", width=.01, position=pd)+
-      geom_line(color = "dodgerblue2", size = 1.25, position = pd)+
-      labs(x = "Year", y = "Spp. richness")+
-      geom_point(position = pd)+
-      #ylim(0,10)+
+    spprichness_plottED <- ggplot(spprichness_tab,
+                                  aes(x = week, y = mean_richness))+
+      geom_errorbar(aes(ymin = mean_richness - sd_richness,
+                        ymax = mean_richness + sd_richness),
+                    stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
+      geom_line(color = "dodgerblue2", size = 1.25)+
+      geom_point()+
       theme_minimal()
   } else {
     
-    ## Anotate the graph with disturbance type
-    # if (disturbance == "arealoss10"){
-    #   text <- "10% area lost"
-    # } else if (disturbance == "arealoss50"){
-    #   text <- "50% area lost"
-    # } else if (disturbance == "arealoss90") {
-    #   text <- "90% area lost"
-    # } else {
-    #   text <- "Disturbance"
-    # }
+    if (disturbance == "loss"){
+      text <- "Area loss"
+    } else if (disturbance == "frag"){
+      text <- "Fragmentation"
+    } else if (disturbance == "poll"){
+      text <- "Pollination loss"
+    }
+    # TODO: annotate it
     #my_grob <- grobTree(textGrob(text, x = 0.5, y = 0.9, hjust = 0, 
     #                             gp = gpar(fontsize = 10, fontface = "italic")))
-    
-    spprichnessplot <- ggplot(spprichnesstab, aes(x = week/52, y = richness.mean))+
-      geom_line(color = "dodgerblue2", size = 1.25, position = pd)+
-      geom_point(position = pd)+
+    spprichness_plottED <- ggplot(spprichness_tab, aes(x = week, y = mean_richness))+
+      geom_errorbar(aes(yim = mean_richness - sd_richness,
+                        ymax = mean_richness + sd_richness),
+                    stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
+      geom_line(color = "dodgerblue2", size = 1.25)+
+      geom_point()+
       geom_vline(xintercept = tdist, linetype = 2, color = "red")+
       labs(x = "Time", y = "Spp. richness")+
-      ylim(0,10)+
       theme_minimal()
     #annotation_custom(my_grob)+
-    
   }
-  return(list(a = spprichnesstab, b = spprichnessplot))
+  
+  return(list(a = spprichness_tab, b = spprichness_plottED))
+  
 }
-# Species rank-abundance
-rankabund <- function(abund.tab){
+
+#' Calculate species relative abundance and plot species rank-abundance at a given time-step
+rankabund <- function(pop_tab, timestep){
+  
+  if(!(timestep %in% pop_tab$week)){stop("\'timestep\' for calculating the rank abundance is not available in the outpout")}
   # get relative abundances
-  rel_abund.tab <- abund.tab%>%
-    ungroup%>%
-    filter(week == 448)%>%
-    group_by(sp)%>%
-    summarize(abundance = n())%>%
-    ungroup%>%
-    mutate(relabund = abundance/sum(abundance))
-  
-  rel_abund.plot <- ggplot(rel_abund.tab, aes(x = reorder(sp, -relabund), y = relabund))+
-    geom_bar(stat = "identity")+
-    theme(axis.text.x = element_text(angle = 50, size = 10, vjust = 0.5))
-  
-  return(list(a = rel_abund.tab, b = rel_abund.plot))
-}
-rankabund_reps <- function(abund.tab,t){
-  
-  # summarized sps abundances 
-  
-  # get relative abundances
-  rel_abund.tab <- abund.tab%>%
-    ungroup%>%
-    filter(week == t)%>%
+  relabund_tab <- pop_tab%>%
+    filter(week == timestep)%>%
     group_by(sp, repli)%>%
-    summarize(abundancer = n())%>%
+    summarize(abundance = n())%>%
     ungroup()%>%
     group_by(sp)%>%
-    summarize(abundance = mean(abundancer))%>%
-    ungroup%>%
-    mutate(relabund = abundance/sum(abundance))
-  
-  rel_abund.plot <- ggplot(rel_abund.tab, aes(x = reorder(sp, -relabund), y = relabund))+
+    summarize(mean_abundance = mean(abundance))%>%
+    ungroup()%>%
+    mutate(relabund = mean_abundance/sum(mean_abundance))
+  # plot it    
+  rankabund_plottED <- ggplot(relabund_tab,
+                              aes(x = reorder(sp, -relabund), y = relabund))+
     geom_bar(stat = "identity")+
+    theme_minimal()+
     theme(axis.text.x = element_text(angle = 50, size = 10, vjust = 0.5))
   
-  return(list(a = rel_abund.tab, b = rel_abund.plot))
+  return(list(a = relabund_tab, b = rankabund_plottED))
 }
-# Biomass production
-production <- function(biomass, structured, area){
-  prod <- biomass%>%
-    select(week,veg,repr)%>%
-    group_by(week)%>%
-    summarize(prod.ha = sum(veg,repr)/1000000/area) #g to T and /1ha conversions
+
+#' Population structure by group size
+groupdyn <- function(output_replicates, singlestages){
   
-  total <- ggplot(prod, aes(x= week, y = prod.ha))+
+  # create table
+  grouppop_tab <- output_replicates%>%
+    group_by(week, sp, e_mu, stage, repli)%>%
+    summarize(abundance = n())%>%
+    ungroup()%>%
+    bind_rows(., select(offspring_replicates, -mode))%>% # merge seed info
+    group_by(sp)%>% # necessary to fill in seed size according to species
+    fill(e_mu)%>%
+    ungroup()%>%
+    group_by(week, e_mu, stage)%>% 
+    summarize(mean_abundance = mean(abundance),
+              sd_abundance = sd(abundance))%>%
+    ungroup()
+  
+  # create plots 
+  ## filter data, if necessary
+  if (missing(singlestages)){
+    popdata_to_plot <- grouppop_tab
+    weightdata_to_plot <- output_replicates
+  }else{
+    popdata_to_plot <- grouppop_tab %>%
+      filter(stage %in% singlestages)
+    weightdata_to_plot <- output_replicates%>%
+      filter(stage %in% singlestages)
+  }
+  ## plot it
+  grouppop_plottED <- ggplot(data = popdata_to_plot,
+                             aes(x = week, y = mean_abundance, colour = stage))+
+    geom_errorbar(aes(ymin = mean_abundance - sd_abundance,
+                      ymax = mean_abundance + sd_abundance),
+                  stat = "identity", position = position_dodge(0.1), colour = "gray50", width = 0.01)+
+    geom_line()+
+    geom_point()+
+    facet_wrap(~e_mu, ncol = 1, nrow = 3)+
+    labs(title = "Population structure per group size")+
+    theme_minimal()
+  
+  # plot weigh variation
+  groupweight_plottED <- ggplot(data = weightdata_to_plot%>%
+                                  group_by(week, e_mu, stage, repli)%>%
+                                  summarize(repli_mean_weight = mean(veg))%>%
+                                  ungroup()%>%
+                                  group_by(week, e_mu, stage)%>%
+                                  summarize(mean_weight = mean(repli_mean_weight), 
+                                            sd_weight = sd(repli_mean_weight)),
+                                aes(x = week, y = mean_weight, colour = stage))+
+    geom_errorbar(aes(ymin = mean_weight-sd_weight, ymax = mean_weight + sd_weight), 
+                  colour = "black", width=.01, position = position_dodge(0.1))+
+    geom_line(position = position_dodge(0.1))+
+    geom_point(position = position_dodge(0.1))+
+    facet_wrap(~e_mu, ncol = 1, nrow = 3)+
+    theme_bw()
+  
+  return(list(a = grouppop_tab, b = grouppop_plottED, c = groupweight_plottED))
+  
+}
+
+#' Calculate biomass production
+production <- function(output_replicates){
+  
+  production_tab <- output_replicates%>%
+    select(week,veg,repr,repli)%>%
+    group_by(week, repli)%>%
+    summarize(production = sum(veg,repr)/(10^3))%>%
+    ungroup()%>%
+    group_by(week)%>%
+    summarize(mean_prod = mean(production),
+              sd_prod = sd(production))%>%
+    ungroup()
+  
+  production_plottED<- ggplot(production_tab, aes(x= week, y = mean_prod))+
+    geom_errorbar(aes(ymin = mean_prod - sd_prod,
+                      ymax = mean_prod + sd_prod),
+                  stat = "identity", position = position_dodge(0.01), colour = "gray50", width = 0.01)+
     geom_point()+
     geom_line()+
     labs(x = "Week",
-         y = "Tones/ha")+
+         y = "Biomass production (kg)")+
     theme_minimal()
   
-  if (structured != TRUE){
-    require(gridExtra)
-    structprod <- biomass%>%
-      select(week,stage,veg,repr)%>%
-      group_by(week,stage)%>%
-      summarize(prod.ha = sum(veg,repr)/1000000/area)
-    
-    stagesprod <- ggplot(structprod, aes(x= week, y = prod.ha, color = factor(stage)))+
-      geom_point()+
-      geom_line()+
-      labs(x = "Week",
-           y = "Tones/ha")+
-      theme_minimal()
-    
-    return(list(a = total, b = stagesprod))
-    
-  }else{
-    return(total)
-  }
-}
-# Population structure by group size
-group.pop <- function(outdata, offspringfile, singlestages){
-  
-  # create table
-  grouppop.tab <- outdata %>%
-    group_by(week, sp,e_mu,stage)%>%
-    summarize(abundance = n())%>%
-    ungroup()%>%
-    bind_rows(.,select(offspringfile,-mode))%>% # merge seed info
-    group_by(sp)%>% # necessary to fill in seed size according to species
-    fill(e_mu) 
-  
-  #create plot
-  if (missing(singlestages)){
-    grouppop.plot <- ggplot(data = grouppop.tab,
-                            aes(x = week, y = abundance, colour = stage))+
-      geom_line()+
-      geom_point()+
-      facet_wrap(~e_mu, ncol = 1, nrow = 3)+
-      labs(title = "Population structure per group size")+
-      theme_bw()
-  }else{
-    grouppop.plot <- ggplot(data = grouppop.tab %>%
-                              filter(stage %in% singlestages),
-                            aes(x = week, y = abundance, colour = stage))+
-      geom_line()+
-      geom_point()+
-      facet_wrap(~e_mu, ncol = 1, nrow = 3)+
-      labs(title = "Population structure per group size")+
-      theme_bw()
-  }
-  return(list(a = grouppop.plot, b = grouppop.tab))
+  return(production_plottED)
 }
 
-# Set up directory to store analysis
-dir.create(file.path(getwd(),paste(simID,"all", reps,sep = "_")))
+# Analysis
+cleanoutput <- getoutput(parentsimID, nreps, outdir = outdir, EDdir = EDdir)  
 
-outputs <- indoutput(input,simID,cluster,outdir)
-outputs$a -> outdata  
-outputs$b -> indir
-rm(outputs)
+## Identify replicates
+replicates <- organizereplicates(parentsimID,nreps)
+replicates$a -> output_replicates
+replicates$b -> offspring_replicates
+rm(replicates)
 
-# Individual vegetative and reproductive biomasses
-mass <- adultmass(outdata,TRUE)
-mass$a -> indvegmass.plot 
-mass$b -> indrepmass.plot 
-mass$c -> biomass.tab
+## Individual vegetative and reproductive biomasses of juveniles and adults (NOT seeds)
+mass <- stagemass(output_replicates,TRUE) # spp is an optional argument and stage is set to default
+mass$a -> vegmass_plottED 
+mass$b -> repmass_plottED 
+mass$c -> biomass_tab
 rm(mass)
 
-# Stage biomass variation, summarized per stage, for each species
-stgmass <- sppstagemass(biomass.tab)
-stgmass$a -> vegmass.plot
-stgmass$b -> repmass.plot
-stgmass$c -> stgmasssummary.tab
-rm(stgmass)
-
-# Species abundance variation
-abund <- popabund(biomass.tab)
-abund$a -> abund.tab
-abund$b -> abund.plot
+## Species abundance variation
+abund <- popabund(output_replicates)
+abund$a -> pop_tab
+abund$b -> spabund_tab
+abund$c -> abund_plottED
 rm(abund)
 
-# Population structure variation
-pop <- popstruct(abund.tab,offspringfile,simID)
-pop$a -> popstruct.tab
-pop$b -> popstruct.plot
+## Population structure variation
+pop <- popstruct(pop_tab, offspring_replicates, parentsimID) #specifying species is optional
+pop$a -> weekstruct_tab
+pop$b -> weekstruct_plottED
+pop$c -> relativestruct_tab
+pop$d -> relativestruct_plottED
 rm(pop)
 
-# Species richness
-rich <- richness(abund.tab,simID,disturbance)
-rich$a -> spprichness.tab 
-rich$b -> spprichness.plot
+## Species richness
+rich <- richness(pop_tab, parentsimID, disturbance) # tdist is optional
+rich$a -> spprichness_tab 
+rich$b -> spprichness_plottED
 rm(rich)
 
-# Species rank-abundance 
-rank <- rankabund(abund.tab)
-rank$a -> rank.tab
-rank$b -> rank.plot
+## Species rank-abundance 
+rank <- rankabund(pop_tab, timestep = 13)
+rank$a -> relabund_tab
+rank$b -> rankabund_plottED
 rm(rank)
 
-# Biomass production/ha
-prod <- production(biomass.tab, structured = TRUE, area = 5)
+## Population structure by group size
+groups <- groupdyn(output_replicates) #specifying singlestages is optional
+groups$a -> grouppop_tab
+groups$b -> grouppop_plottED
+groups$c -> groupweight_plottED
+rm(groups)
 
-# Population structure by group size
-group <- group.pop(outdata, offspringfile)
-group$a -> grouppop.plot
-group$b -> grouppop.tab
-rm(group)
+## Biomass production
+production_plottED <- production(output_replicates)
 
-# Weight by group size 
-group.weight <- ggplot(data = outdata %>%
-                         group_by(week,e_mu,stage)%>%
-                         summarize(weight = mean(veg), weight.sd = sd(veg)),
-                       aes(x = week, y = weight, colour = stage))+
-  geom_errorbar(aes(ymin = weight-weight.sd, ymax = weight + weight.sd), 
-                colour = "black", width=.01, position = position_dodge(0.1))+
-  geom_line(position = position_dodge(0.1))+
-  geom_point(position = position_dodge(0.1))+
-  facet_wrap(~e_mu, ncol = 1, nrow = 3)+
-  theme_bw()
+# Save bundle of tabs and plots as RData
+save(cleanoutput,
+     output_replicates,offspring_replicates,
+     vegmass_plottED,repmass_plottED,biomass_tab,
+     pop_tab, abund_plottED,
+     weekstruct_tab, weekstruct_plottED, relativestruct_tab, relativestruct_plottED, 
+     spprichness_tab, spprichness_plottED,
+     relabund_tab, rankabund_plottED,
+     grouppop_plottED, grouppop_tab, groupweight_plottED,
+     file = file.path(analysEDdir, 
+                      paste(parentsimID, ".RData", sep = "")))
 
-## SAVE BUNDLE OF GRAPHS AND TABLES AS RDATA
-save(outdata,
-     indvegmass.plot,indrepmass.plot,
-     vegmass.plot,repmass.plot,biomass.tab,stgmasssummary.tab,
-     abund.plot,abund.tab,
-     popstruct.tab,popstruct.plot,
-     spprichness.tab, spprichness.plot,
-     prod,
-     grouppop.plot,
-     grouppop.tab,
-     group.weight,
-     rank.tab,
-     rank.plot,
-     file = file.path(simID,paste(simID,".RData", sep = "")))
+# Plot all graphs
+if(plotall){
+  EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plottED$")
+  for(p in seq(1, length(EDplots))){
+    ggsave(filename = file.path(analysEDdir, paste(p, ".jpeg", sep = "")) , 
+           plot = mget(EDplots)[[p]], #get the actual object (p has the variable name)
+           device = "jpeg")}
+}
