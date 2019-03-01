@@ -416,6 +416,8 @@ end
         Store parameters necessary to implement disturbance.
         """
 function loaddisturbance(settings)
+
+tdist = 0
     # read in the disturbance file, if not done so yet
 
     # select file according to keyword: loss, frag, temp
@@ -432,12 +434,10 @@ function loaddisturbance(settings)
                 #disturblandspecs = [fragsid, fareas, disturbconnect]
             end
 
-            return tdist #, disturblandspecs
 
 elseif settings["disturbtype"] == "poll"
 	    tdist = select(loadtable(settings["insect"]), :td)
             println("Pollination loss is simulated according to parameters in the \'insects\' file.")
-	    return tdist
             
         elseif settings["disturbtype"] == "temp"
             println("Temperature change is simulated with the temperature file provided.")
@@ -450,6 +450,8 @@ elseif settings["disturbtype"] == "poll"
                           \n\'poll\' for pollination loss.")
         end
     end
+
+return tdist
 end
 
 """
@@ -478,20 +480,32 @@ end
         """
 
 function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
+
+    # check on which timesteps to write land dims (ifelse() does not work)
+    if tdist == nothing
+       criticalts = [1]
+    else
+	criticalts = [1 (tdist-1) tdist (tdist-1)]
+    end
     
-    if t in [1 (tdist-1) tdist (tdist-1)]
+    if t in criticalts
         # output message
         if t == 1
-            open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"w") do sim
-                println(sim, "week\tK\tcK")
+            open(abspath(joinpath(settings["outputat"],settings["simID"],"landlog.txt")),"w") do sim
+                println(sim, "week\tK\tcK\thabitatarea\ttotalarea")
             end          
         end
-        
-        global K = (1.5/100)*(length(find(x -> x == true, landavail))*625) # xtons/ha = x.10-²g/1m²
+
+        # habitat area
+        habitatarea = length(find(x -> x == true, landavail))*625 # cells area 25x25cm
+	totalarea = prod(size(landavail))
+	
+        # K and grid-cell K
+        global K = (1.5/100)*habitatarea # xtons/ha = x.10-²g/1m²
         global cK = K/length(find(x -> x == true, landavail))
-        
+
         open(abspath(joinpath(settings["outputat"],settings["simID"],"landlog.txt")),"a") do sim
-            writedlm(sim,[t K cK])
+            writedlm(sim,[t K cK habitatarea totalarea])
         end
     end
     
@@ -569,8 +583,14 @@ function simulate()
     ##############################
     # OUTPUT SIMULATION SETTINGS #
     ##############################
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simID")),"w") do ID
-        println(ID, settings)
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simsettings.jl")),"w") do ID
+        println(ID, "tdist = ", tdist)
+	println(ID, "interaction = ", interaction)
+	println(ID, "scen = ", scen)
+	println(ID, "td = ", td)
+	println(ID, "regime = ", regime)
+	println(ID, "remaining = ", remaining)
+	println(ID, "commandsettings = ", settings)
     end
     
     # START ID SIMULATION LOG FILE
@@ -595,18 +615,13 @@ function simulate()
             println(sim, "WEEK $t")
         end
 
-        # UPDATE LANDSCAPE: weekly temperature and precipitation
+        # UPDATE LANDSCAPE & CARRYING CAPACITY: weekly temperature and precipitation
         T = updateenv!(t, landpars)
-        
-        # DISTURBANCE
+        updateK!(landavail, settings, t, tdist)
+	
+        # LOAD DISTURBANCE
         if settings["disturbtype"] != "none"  
             disturb!(mylandscape,landavail,orgs,t,tdist,settings,landpars)
-            # Initialize or update landscape properties that are relevant for life cycle processes
-            if t == 1 || (settings["disturbtype"] in ["loss" "frag"] && t in [(tdist-1) tdist (tdist+1)])
-                
-                updateK!(landavail, settings, t, tdist)
-                
-            end
         end
         
         # OUTPUT: First thing, to see how community is initialized
