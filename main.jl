@@ -479,7 +479,7 @@ end
 
 function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
     
-    if t == 1 || (settings["disturbtype"] == "loss" && t in [(tdist-1) tdist (tdist-1)])
+    if t in [1 (tdist-1) tdist (tdist-1)]
         # output message
         if t == 1
             open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"w") do sim
