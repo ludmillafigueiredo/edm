@@ -211,6 +211,7 @@ function disturbland!(landscape::Array{Dict{String, Float64}, N} where N, landav
     landscape = fill(Dict{String, Float64}(),
                      size(landavail))
 
+    return landscape, landavail
 end
 
 """

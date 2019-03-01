@@ -163,7 +163,7 @@ if settings["disturbtype"] in ["frag" "loss"]
         @rput disturbland
         
         # get patches/fragments areas and distances from raster files
-        landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
+        R"source(\"landnlmconfig.R\")"
         @rget initialmatrix
 	@rget disturbmatrix
 
@@ -460,20 +460,19 @@ end
         """
 function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{N} where N, orgs::Array{Organisms.Organism,1}, t::Int64, tdist::Array{Int64,1}, settings::Dict{String,Any}, landpars::NeutralLandPars)
     
-    if t in tdist
-        
         if settings["disturbtype"] == "loss"
             loss = prod(size(landpars.disturbland))/prod(landpars.initialarea)
-            Setworld.destroyarea!(landpars, landavail, settings)
+            landavail = Setworld.destroyarea!(landpars, landavail, settings)
             Organisms.destroyorgs!(orgs, landavail, settings)
         elseif settings["disturbtype"] == "frag"
-            Setworld.disturbland!(landscape, landavail, landpars)
+            landscape, landavail = Setworld.disturbland!(landscape, landavail, landpars)
             Organisms.destroyorgs!(orgs, landavail, settings)
         end                
-        
-    end
-end
 
+return landscape,landavail
+
+end
+	
 """
         updateK!()
         Updates the carrying capacity of the landscape (`K`) and of each gridcell (`cK`). 
@@ -481,11 +480,12 @@ end
 
 function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
 
+    criticalts = Array{Int64,N} where N
     # check on which timesteps to write land dims (ifelse() does not work)
     if tdist == nothing
        criticalts = [1]
     else
-	criticalts = [1 (tdist-1) tdist (tdist-1)]
+       criticalts = vcat(1, (tdist-1), tdist, (tdist+1))
     end
     
     if t in criticalts
@@ -585,6 +585,7 @@ function simulate()
     ##############################
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simsettings.jl")),"w") do ID
         println(ID, "tdist = ", tdist)
+	println(ID, "landpars = ", typeof(landpars), "\ninitial = ", typeof(landpars.initialland), "\ndisturb = ", typeof(landpars.disturbland))  
 	println(ID, "interaction = ", interaction)
 	println(ID, "scen = ", scen)
 	println(ID, "td = ", td)
@@ -615,15 +616,15 @@ function simulate()
             println(sim, "WEEK $t")
         end
 
-        # UPDATE LANDSCAPE & CARRYING CAPACITY: weekly temperature and precipitation
+        # UPDATE temperature: weekly temperature and precipitation
         T = updateenv!(t, landpars)
+	
+        # IMPLEMENT LANDSCAPE DISTURBANCE
+        if settings["disturbtype"] in ["frag" "loss"] && t in tdist  
+            landscape, landavail = disturb!(mylandscape,landavail,orgs,t,tdist,settings,landpars)
+        end
         updateK!(landavail, settings, t, tdist)
 	
-        # LOAD DISTURBANCE
-        if settings["disturbtype"] != "none"  
-            disturb!(mylandscape,landavail,orgs,t,tdist,settings,landpars)
-        end
-        
         # OUTPUT: First thing, to see how community is initialized
         tic()
         orgstable(orgs,t,settings)
