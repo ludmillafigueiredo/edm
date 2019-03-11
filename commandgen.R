@@ -22,7 +22,7 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
   } else {
     # Gaia directories
     if (missing(EDdir)){
-      EDdir <- file.path("/home/luf74xx/Dokumente/model")
+      EDdir <- file.path("/home/luf74xx/model")
     }
     
     Juliadir <- file.path("/home/luf74xx/builds/julia-d386e40c17/bin/julia")
@@ -36,7 +36,7 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
   }
   ## all scripts are written in Gaia, independently of where they are executed
   if (missing(scriptsdir)){
-    scriptsdir <- file.path("/home/luf74xx/Dokumente/model/commandscripts")
+    scriptsdir <- file.path(EDdir, "commandscripts")
   }
   
   # Create command
@@ -99,8 +99,8 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
   # Write command in script for safe-keeping 
   if (cluster == "gaia") {
     scriptname <- paste(simID,".sh", sep = "")
-    file.create(file.path(scripts,scriptname))
-    bashscript <- file(file.path(scripts,scriptname))
+    file.create(file.path(scriptsdir,scriptname))
+    bashscript <- file(file.path(scriptsdir,scriptname))
     writeLines(c("#!/bin/bash",
                  "#SBATCH -n 12 #number of cores",
                  "#SBATCH --mem-per-cpu=8G",
@@ -118,7 +118,7 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
                    paste("reps=($(seq 1 ", nreps, "))", sep = ""),
                    paste("for i in `seq 1 ", nreps, "`; do", sep = ""),
                    paste("simID=\"", simID, "_$i\"", sep = ""),
-                   paste("randomseed=\"$i\/n""),
+                   paste("randomseed=\"$i\n"),
                    command),
                  hpcscript)
     }else{

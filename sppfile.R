@@ -188,6 +188,6 @@ createsppfile <- function(rseed, richp, sd, simID, b0g, b0em, b0jm, b0am, b0ag, 
                            mass_sd = mass_mu_max,
                            abund = abund)
     
-    write.csv(spptable, file.path("/home/luf74xx/Dokumente/model/inputs",paste(simID, ".csv", sep = "")), row.names = FALSE)
+    write.csv(spptable, file.path("/home/luf74xx/model/inputs",paste(simID, ".csv", sep = "")), row.names = FALSE)
     return(spptable)
 }
