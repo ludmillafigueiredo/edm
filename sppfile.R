@@ -1,5 +1,5 @@
                                         # Subset species from the Göttingen pool
-goetspp <- function(simID, rseed, mode, richp = NULL, spplist = NULL){
+goetspp <- function(inputID, rseed, mode, richp = NULL, spplist = NULL){
 
     library(tidyverse)
     options(scipen=999)
@@ -75,7 +75,7 @@ goetspp <- function(simID, rseed, mode, richp = NULL, spplist = NULL){
 
     ## output species id used in EDM
     spEDMid <- data.frame(sp = traits$species, id = paste(rep("p",richp), 1:richp, sep = "-"));
-    write.csv(spEDMid, file.path(inputsdir,paste(simID, "ids.csv", sep = "")), row.names = FALSE)
+    write.csv(spEDMid, file.path(inputsdir,paste(inputID, "ids.csv", sep = "")), row.names = FALSE)
 
 ### Write file
     spptable <- data.frame(sp_id = spEDMid$id,
@@ -104,7 +104,7 @@ goetspp <- function(simID, rseed, mode, richp = NULL, spplist = NULL){
                            maxseedn_sd = maxseedn_sd,
                            maxmass = maxmass)
     
-    write.csv(spptable, file.path(inputsdir,paste(simID, ".csv", sep = "")), row.names = FALSE)
+    write.csv(spptable, file.path(inputsdir,paste(inputID, "_sppinput.csv", sep = "")), row.names = FALSE)
 
     return(spptable)
 }
