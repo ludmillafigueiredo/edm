@@ -36,7 +36,7 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
   }
   ## all scripts are written in Gaia, independently of where they are executed
   if (missing(scriptsdir)){
-    scriptsdir <- file.path(EDdir, "commandscripts")
+    scriptsdir <- file.path("/home/luf74xx/model/commandscripts")
   }
   
   # Create command
@@ -119,7 +119,8 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
                    paste("for i in `seq 1 ", nreps, "`; do", sep = ""),
                    paste("simID=\"", simID, "_$i\"", sep = ""),
                    paste("randomseed=\"$i\n"),
-                   command),
+                   command,
+                   "done"),
                  hpcscript)
     }else{
         writeLines(c("#!/bin/bash/n",
