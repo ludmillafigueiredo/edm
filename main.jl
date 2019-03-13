@@ -10,6 +10,8 @@ push!(LOAD_PATH,EDDir)
 using ArgParse
 using Distributions
 using JuliaDB #for in/outputs
+using CSV #TODO replace JuliaDB with it?
+using DataFrames
 using DataValues
 using Fileprep
 using Organisms
@@ -55,8 +57,8 @@ function parse_commandline()
 
         "--insect"
         help = "How to explicitly model insects:
-                    pollination-independent reproduction \"indep\";
-                    equal pollination loss for all species \"equal\"."
+                                    pollination-independent reproduction \"indep\";
+                                    equal pollination loss for all species \"equal\"."
         arg_type = String
         default = abspath(pwd(),"inputs/insects.csv")
 
@@ -84,10 +86,6 @@ function parse_commandline()
         help = "Either a shape file (if \`landmode\`)"
         arg_type = Any
         default = nothing #abspath(pwd(),"inputs/disturbland.jl") #abspath(pwd(),"inputs/disturbland.shp")
-
-        "--tdist"
-        help = "Timestep(s) where habitat loss or fragmentation is implemented."
-        arg_type = String # path file to a vector of disturbance times
         
         "--timesteps"
         help = "Duration of simulation in weeks."
@@ -115,10 +113,10 @@ end
 
 
 """
-        read_landin(settings)
-        Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
-        Two methods because "real" landscapes do not need 
-        """
+                        read_landin(settings)
+                        Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
+                        Two methods because "real" landscapes do not need 
+                        """
 
 function read_landpars(settings::Dict{String,Any})
     # Read in temperature time series, which is used in both modes
@@ -131,7 +129,7 @@ function read_landpars(settings::Dict{String,Any})
         # send file names to R
         initialland = settings["initialland"]
         @rput initialland
-        disturbland = settings["disturbland"]
+        disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "disturbland" => Any))[:disturbland]
         @rput disturbland
         landbuffer = settings["landbuffer"]
         @rput landbuffer
@@ -153,38 +151,39 @@ function read_landpars(settings::Dict{String,Any})
 
     elseif settings["landmode"] == "artif"
 
-# deal with simulations where disturbance raster is needed
-if settings["disturbtype"] in ["frag" "loss"]
+        # deal with simulations where disturbance raster is needed
+        if settings["disturbtype"] in ["frag" "loss"]
 
-        # send file names to R
-        initialland = settings["initialland"]
-        @rput initialland
-        disturbland = settings["disturbland"]
-        @rput disturbland
-        
-        # get patches/fragments areas and distances from raster files
-        R"source(\"landnlmconfig.R\")"
-        @rget initialmatrix
-	@rget disturbmatrix
+            # send file names to R
+            initialland = settings["initialland"]
+            @rput initialland
+            disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "disturbland" => Any))
+            @rput disturbland
+            
+            # get 0-1 habitat suitability matrices
+            landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
+            @rget initialmatrix
+	    @rget disturbmatrix
 
-        landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
-        ifelse(disturbmatrix == "none", nothing, Int.(disturbmatrix)),
-	select(temp_tsinput,:meantemp))
-else
-# send file names to R
-        initialland = settings["initialland"]
-        @rput initialland
-        disturbland = settings["disturbland"]
-        @rput disturbland
-        
-        # get patches/fragments areas and distances from raster files
-        landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
-        @rget initialmatrix
+            # if fragmentation is simulated, the file names are assgined to dist field, if area loss, the proportion holding columns, if none, default value nothing 
+            landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
+                                                ifelse(disturbmatrix == "none", disturbland, Int.(disturbmatrix)),
+	                                        select(temp_tsinput,:meantemp))
+        else
+            # send file names to R
+            initialland = settings["initialland"]
+            @rput initialland
+            disturbland = settings["disturbland"]
+            @rput disturbland
+            
+            # get patches/fragments areas and distances from raster files
+            landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
+            @rget initialmatrix
 
-        landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
-        nothing,
-	select(temp_tsinput,:meantemp))
-end
+            landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
+                                                nothing,
+	                                        select(temp_tsinput,:meantemp))
+        end
     else
         error("Please choose a mode of landscape simulation.")
     end
@@ -194,9 +193,9 @@ end
 end
 
 """
-        read_spinput(settings)
-        Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
-        """
+                        read_spinput(settings)
+                        Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
+                        """
 
 function read_spinput(settings::Dict{String,Any})
 
@@ -205,112 +204,89 @@ function read_spinput(settings::Dict{String,Any})
 
     orgsref = OrgsRef(Array(rows(spinputtbl,:sp_id)),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:abund)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:kernel)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:kernel_sd)[i]
+                           rows(spinputtbl,:clonal)[i] == "true" #translates R'S true into Julias TRUEs
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:e_mu)[i]
+                           rows(spinputtbl,:emass)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:e_sd)[i]
+                           rows(spinputtbl,:elong_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:e_long)[i]
+                           rows(spinputtbl,:elong_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0g)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0g_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0em)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0em_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0jm)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0jm_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0am)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0am_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0jg)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0jg_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0ag)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0ag_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:sestra)[i] == "true"
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:max_seedn)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:floron)[i]
+                           rows(spinputtbl,:floron_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:floron_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:floroff)[i]
+                           rows(spinputtbl,:floroff_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:floroff_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:seedon)[i]
+                           rows(spinputtbl,:seedon_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:seedon_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:seedoff)[i]
+                           rows(spinputtbl,:seedoff_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:seedoff_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:max_mass)[i]
+                           rows(spinputtbl,:span_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:max_span)[i]
+                           rows(spinputtbl,:span_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:max_span_sd)[i]
+                           rows(spinputtbl,:b0grow_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:mass_mu)[i]
+                           rows(spinputtbl,:b0grow_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:mass_sd)[i]
+                           rows(spinputtbl,:b0m_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:abund)[i]
+                           rows(spinputtbl,:b0m_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0germ_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0germ_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:maxseedn_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:maxseedn_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:maxmass)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id)))
                       )
-return orgsref
+    return orgsref
+
 end
 
 """
-        implicit_insect(settings)
-        Reads how insects are going to be implicitly simulated.
-        """
+                        implicit_insect(settings)
+                        Reads how insects are going to be implicitly simulated.
+                        """
 function implicit_insect(settings::Dict{String,Any})
 
     insectsinput = loadtable(settings["insect"])
@@ -325,57 +301,27 @@ function implicit_insect(settings::Dict{String,Any})
 end
 
 """
-        outputorgs(orgs,t,settings)
-        Saves a long format table with the organisms field informations.
-        """
+                        outputorgs(orgs,t,settings)
+                        Saves a long format table with the organisms field informations.
+                        """
 function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any})
 
     outorgs = find(x -> x.stage != "e", orgs)
-    
+
+    # output header
     if t == 1
         header = hcat(["week"],
-                      reshape(string.(fieldnames(Organism)[1:4]),1,4),
+                      reshape(string.(fieldnames(Organism)[1:19]),1,19),
                       ["veg" "repr"],
-                      reshape(string.(fieldnames(Organism)[6:end]),1,length(fieldnames(Organism)[6:end])))#for non-diploid Orgs? string.(fieldnames(Organism))
+                      reshape(string.(fieldnames(Organism)[21:end]),1,length(fieldnames(Organism)[6:end])))
         open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
-        
-        for o in outorgs
-            open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "a") do output
-                writedlm(output, hcat(t,
-                                      orgs[o].id,
-                                      orgs[o].stage,
-                                      orgs[o].location,
-                                      orgs[o].sp,
-                                      orgs[o].mass["veg"],
-                                      orgs[o].mass["repr"],
-                                      orgs[o].kernel,
-                                      orgs[o].e_mu,
-                                      orgs[o].seedbank,
-                                      orgs[o].b0g,
-                                      orgs[o].b0em,
-                                      orgs[o].b0jm,
-                                      orgs[o].b0am,
-                                      orgs[o].b0jg,
-                                      orgs[o].b0ag,
-                                      orgs[o].sestra,
-                                      orgs[o].floron,
-                                      orgs[o].floroff,
-                                      orgs[o].wseedn,
-                                      orgs[o].seedon,
-                                      orgs[o].seedoff,
-                                      orgs[o].max_mass,
-                                      orgs[o].max_span,
-                                      orgs[o].age,
-                                      orgs[o].mated))
-            end
-        end
-        
-        # TODO: output landscape 
     end
 
-    if rem(t,settings["tout"]) == 0 
+    # output orgs info
+    if t == 1 || rem(t,settings["tout"]) == 0 
+        
         for o in outorgs
             open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "a") do output
                 writedlm(output, hcat(t,
@@ -383,38 +329,33 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
                                       orgs[o].stage,
                                       orgs[o].location,
                                       orgs[o].sp,
-                                      orgs[o].mass["veg"],
-                                      orgs[o].mass["repr"],
                                       orgs[o].kernel,
-                                      orgs[o].e_mu,
-                                      orgs[o].seedbank,
-                                      orgs[o].b0g,
-                                      orgs[o].b0em,
-                                      orgs[o].b0jm,
-                                      orgs[o].b0am,
-                                      orgs[o].b0jg,
-                                      orgs[o].b0ag,
-                                      orgs[o].sestra,
+                                      orgs[o].clonal,
+                                      orgs[o].emass,
+                                      orgs[o].elong,
                                       orgs[o].floron,
                                       orgs[o].floroff,
-                                      orgs[o].wseedn,
                                       orgs[o].seedon,
                                       orgs[o].seedoff,
-                                      orgs[o].max_mass,
-                                      orgs[o].max_span,
+                                      orgs[o].span,
+                                      orgs[o].b0grow,
+                                      orgs[o].b0m,
+                                      orgs[o].b0germ,
+                                      orgs[o].wseedn,
+                                      orgs[o].maxmass,
                                       orgs[o].age,
+                                      orgs[o].mass["veg"],
+                                      orgs[o].mass["repr"],
                                       orgs[o].mated))
             end
-        end
-        
-        #TODO output landscape
+        end 
     end
 end
 
 """
-        loaddisturbance()
-        Store parameters necessary to implement disturbance.
-        """
+                        loaddisturbance()
+                        Store parameters necessary to implement disturbance.
+                        """
 function loaddisturbance(settings)
 
 tdist = 0
@@ -424,6 +365,7 @@ tdist = 0
     if settings["disturbtype"] != "none"
         if settings["disturbtype"] in ["loss" "frag"]
             
+<<<<<<< HEAD
             if settings["landmode"] == "real"
                 tdist = select(loadtable(settings["tdist"]), :tdist)
                 #disturblandspecs = nothing
@@ -434,8 +376,13 @@ tdist = 0
                 #disturblandspecs = [fragsid, fareas, disturbconnect]
             end
 
+=======
+            tdist = CSV.read(settings["disturbland"])[:td]
+            
+            return tdist
+>>>>>>> traitnamesvalues
 
-elseif settings["disturbtype"] == "poll"
+        elseif settings["disturbtype"] == "poll"
 	    tdist = select(loadtable(settings["insect"]), :td)
             println("Pollination loss is simulated according to parameters in the \'insects\' file.")
             
@@ -443,11 +390,11 @@ elseif settings["disturbtype"] == "poll"
             println("Temperature change is simulated with the temperature file provided.")
         else
             error("Please specify one of the disturbance scenarios with `--disturb`:
-                          \n\'none\' if no disturbance should be simulated,
-                          \n\'loss\' for habitat area loss,
-                          \n\'frag\' for habitat fragmentation,
-                          \n\'temp\' for temperature change,
-                          \n\'poll\' for pollination loss.")
+                                          \n\'none\' if no disturbance should be simulated,
+                                          \n\'loss\' for habitat area loss,
+                                          \n\'frag\' for habitat fragmentation,
+                                          \n\'temp\' for temperature change,
+                                          \n\'poll\' for pollination loss.")
         end
     end
 
@@ -455,12 +402,13 @@ return tdist
 end
 
 """
-        disturb!()
+                        disturb!()
 
-        """
+                        """
 function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{N} where N, orgs::Array{Organisms.Organism,1}, t::Int64, tdist::Array{Int64,1}, settings::Dict{String,Any}, landpars::NeutralLandPars)
     
         if settings["disturbtype"] == "loss"
+<<<<<<< HEAD
             loss = prod(size(landpars.disturbland))/prod(landpars.initialarea)
             landavail = Setworld.destroyarea!(landpars, landavail, settings)
             Organisms.destroyorgs!(orgs, landavail, settings)
@@ -468,15 +416,26 @@ function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::B
             landscape, landavail = Setworld.disturbland!(landscape, landavail, landpars)
             Organisms.destroyorgs!(orgs, landavail, settings)
         end                
+=======
+            Setworld.destroyarea!(landpars, landavail, settings, t)
+        elseif settings["disturbtype"] == "frag"
+            Setworld.fragment!(landscape, landavail, landpars, t)
+        end
+
+        Organisms.destroyorgs!(orgs, landavail, settings)
+        
+    end
+end
+>>>>>>> traitnamesvalues
 
 return landscape,landavail
 
 end
 	
 """
-        updateK!()
-        Updates the carrying capacity of the landscape (`K`) and of each gridcell (`cK`). 
-        """
+                        updateK!()
+                        Updates the carrying capacity of the landscape (`K`) and of each gridcell (`cK`). 
+                        """
 
 function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
 
@@ -523,8 +482,8 @@ function timing(operation::String, settings::Dict{String,Any})
 end
 
 """
-        simulate!()
-        """
+                        simulate!()
+                        """
 function simulate()
     # INITIALIZATION
     # Read in command line arguments
