@@ -113,7 +113,7 @@ end
 destroyarea!()
 Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
 """
-function destroyarea!(landpars::LandPars, landavail::BitArray{2}, settings::Dict{String,Any})
+function destroyarea!(landpars::LandPars, landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
 
     if settings["landmode"] == "artif"
         # DESTROY HABITAT
@@ -156,6 +156,37 @@ function destroyarea!(landpars::LandPars, landavail::BitArray{2}, settings::Dict
 
         landavail = fill(true,size(landscape))
         
+    end
+end
+
+function destroyarea!(landpars::NeutralLandPars, landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
+
+    if settings["landmode"] == "artif"
+        # DESTROY HABITAT
+        # index of the cells still availble:
+        available = find(x -> x == true, landavail)
+        # number of cells to be destroyed:
+        loss = landpars.disturbland[:disturbland][find(landpars.disturbland[:td]==t)[1]]
+        lostarea = round(Int,loss*length(available), RoundUp) 
+
+        # Unity test
+        if lostarea > length(available)
+            error("Destroying more than the available area.")
+        end
+
+        # go through landscape indexes of the first n cells from the still available
+        for cell in available[1:lostarea] 
+            landavail[cell] = false # and destroy them
+        end
+
+        #unity test
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+            println(sim, "Number of destroyed cells: $lostarea")
+        end
+        
+    elseif settings["landmode"] == "real"
+        # rebuild the landscape according to shape file
+        landscape = landpars.disturbland
     end
 end
 
@@ -204,9 +235,9 @@ function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::D
 end
 
 # method for 'continuous' landscape structure (not 3D)
-function disturbland!(landscape::Array{Dict{String, Float64}, N} where N, landavail::BitArray{2}, landpars::NeutralLandPars)
+function fragment!(landscape::Array{Dict{String, Float64}, N} where N, landavail::BitArray{2}, landpars::NeutralLandPars, t::Int64)
     # convert matrix to BitArray (smaller than Bool)
-    landavail = Bool.(landpars.disturbland)
+    landavail = Bool.(landpars.disturbland[:disturbland][find(landpars.disturbland[:td] == t)[1]])
     # create landscape with same dimensions
     landscape = fill(Dict{String, Float64}(),
                      size(landavail))
