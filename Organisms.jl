@@ -586,12 +586,8 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
         elseif orgs[o].age >= orgs[o].span #oldies die
             mprob = 1
 
-        elseif orgs[o].stage == "j"
-            Bm = orgs[o].b0jm * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-            mprob = 1 - exp(-Bm)
-
-        else #adults
-            Bm = orgs[o].b0am * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+        else
+            Bm = orgs[o].b0m * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             mprob = 1 - exp(-Bm)                         
         end
 
