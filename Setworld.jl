@@ -188,6 +188,8 @@ function destroyarea!(landpars::NeutralLandPars, landavail::BitArray{2}, setting
         # rebuild the landscape according to shape file
         landscape = landpars.disturbland
     end
+
+    return landscape, landavail
 end
 
 """
