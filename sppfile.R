@@ -79,6 +79,7 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, spplist = NULL){
 
 ### Write file
     spptable <- data.frame(sp_id = spEDMid$id,
+                           abund = abund,
                            kernel = kernel, # R has a function named kernel. Therefore, only the column can take that name
                            clonal = clonal,
                            emass = emass,
