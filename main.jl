@@ -210,7 +210,7 @@ function read_spinput(settings::Dict{String,Any})
                            rows(spinputtbl,:kernel)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:clonal)[i] == "true" #translates R'S true into Julias TRUEs
+                           rows(spinputtbl,:clonal)[i] == "true" #translates R's true into Julia's TRUE
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:emass)[i]
