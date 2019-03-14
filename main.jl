@@ -365,22 +365,9 @@ tdist = 0
     if settings["disturbtype"] != "none"
         if settings["disturbtype"] in ["loss" "frag"]
             
-<<<<<<< HEAD
-            if settings["landmode"] == "real"
-                tdist = select(loadtable(settings["tdist"]), :tdist)
-                #disturblandspecs = nothing
-            elseif settings["landmode"] == "artif"
-                # this mode also requires a file specifing the paths to the connectivity matrices
-                tdist = select(loadtable(settings["tdist"]), :tdist)
-                #include(settings["disturbland"]) # unnecessary for continuous landscapes because it will be a file path to the raster file, which is read in read_landpars()
-                #disturblandspecs = [fragsid, fareas, disturbconnect]
-            end
-
-=======
             tdist = CSV.read(settings["disturbland"])[:td]
             
             return tdist
->>>>>>> traitnamesvalues
 
         elseif settings["disturbtype"] == "poll"
 	    tdist = select(loadtable(settings["insect"]), :td)
@@ -399,6 +386,7 @@ tdist = 0
     end
 
 return tdist
+
 end
 
 """
@@ -408,25 +396,12 @@ end
 function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{N} where N, orgs::Array{Organisms.Organism,1}, t::Int64, tdist::Array{Int64,1}, settings::Dict{String,Any}, landpars::NeutralLandPars)
     
         if settings["disturbtype"] == "loss"
-<<<<<<< HEAD
-            loss = prod(size(landpars.disturbland))/prod(landpars.initialarea)
-            landavail = Setworld.destroyarea!(landpars, landavail, settings)
-            Organisms.destroyorgs!(orgs, landavail, settings)
+            landscape, landavail = Setworld.destroyarea!(landpars, landavail, settings, t)
         elseif settings["disturbtype"] == "frag"
-            landscape, landavail = Setworld.disturbland!(landscape, landavail, landpars)
-            Organisms.destroyorgs!(orgs, landavail, settings)
-        end                
-=======
-            Setworld.destroyarea!(landpars, landavail, settings, t)
-        elseif settings["disturbtype"] == "frag"
-            Setworld.fragment!(landscape, landavail, landpars, t)
+            landscape, landavail = Setworld.fragment!(landscape, landavail, landpars, t)
         end
 
         Organisms.destroyorgs!(orgs, landavail, settings)
-        
-    end
-end
->>>>>>> traitnamesvalues
 
 return landscape,landavail
 
