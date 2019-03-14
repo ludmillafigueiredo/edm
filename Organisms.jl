@@ -75,7 +75,7 @@ mutable struct Organism
     maxmass::Float64
     #### State variables #### 
     age::Int64 # control death when older than max. lifespan
-    mass::Dict
+    mass::Dict{String, Float64}
     mated::Bool
 end
 
@@ -117,7 +117,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
                               Int(round(rand(Distributions.Normal(orgsref.b0m_mean[s],orgsref.b0m_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s]+non0sd),1)[1])),
                               0, #wseedn
-                              0.0, #maxmass
+                              orgsref.maxmass[s], #maxmass
                               0, #age
                               Dict("veg" => 0.0, "repr" => 0.0), #mass
                               false) #mated
@@ -141,6 +141,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
             push!(orgs, neworg)
 
         end
+
     end
 
     return orgs, id_counter
@@ -155,14 +156,14 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
 
-    growing = find(x->(x.stage == "a" || x.stage == "j"),orgs)
+    growing = find(x->(x.stage in ["a" "j"]),orgs)
     for o in growing
 
         b0 = orgs[o].b0grow
         
         #only vegetative biomass helps growth
         grown_mass = b0*(orgs[o].mass["veg"])^(3/4)*exp(-aE/(Boltz*T))
-
+        
         if isapprox(grown_mass,0) # if it is not growing, there is no need to allocate
             push!(nogrowth,o)
         elseif orgs[o].stage == "j"
