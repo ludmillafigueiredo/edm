@@ -98,6 +98,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
         for i in 1:orgsref.abund[s]
 
             id_counter += 1 # update individual counter
+	    non0sd = 1e-7 #avoid error due to sd = 0
 
             neworg = Organism(hex(id_counter),
                               rand(["a" "j" "e"]),
@@ -106,15 +107,15 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
                               orgsref.kernel[s],
                               orgsref.clonal[s],
                               orgsref.emass[s],
-                              Int(round(rand(Distributions.Normal(orgsref.elong_mean[s],orgsref.elong_sd[s])))),
-                              Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s])))),
-                              Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s])))),
-                              Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s])))),
-                              Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s])))),
-                              Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s])))),
-                              Int(round(rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s])))),
-                              Int(round(rand(Distributions.Normal(orgsref.b0m_mean[s],orgsref.b0m_sd[s])))),
-                              Int(round(rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s])))),
+                              Int(round(rand(Distributions.Normal(orgsref.elong_mean[s],orgsref.elong_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.b0m_mean[s],orgsref.b0m_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s]+non0sd),1)[1])),
                               0, #wseedn
                               0.0, #maxmass
                               0, #age
@@ -123,7 +124,8 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
 
             ## Set conditional traits and variables
             # weekly number of seeds
-            neworg.wseedn = Int(round(orgsref.maxseedn[s]/(neworg.floroff-neworg.floron+1)))
+	    maxseedn = Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1]))
+            neworg.wseedn = Int(round(maxseedn/(neworg.floroff-neworg.floron+1)))
 
             # initial biomass
             if neworg.stage == "e"                  
