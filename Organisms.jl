@@ -29,19 +29,19 @@ mutable struct OrgsRef
     abund::Dict{String,Int}
     kernel::Dict{String,String}
     clonal::Dict{String,Bool}
-    emass_mean::Dict{String,Float64}
+    emass::Dict{String,Float64}
     elong_mean::Dict{String,Int}
-    elong_sd::Dict{String,Int}
+    elong_sd::Dict{String,Float64}
     floron_mean::Dict{String,Int}
-    floron_sd::Dict{String,Int}
+    floron_sd::Dict{String,Float64}
     floroff_mean::Dict{String,Int}
-    floroff_sd::Dict{String,Int}
+    floroff_sd::Dict{String,Float64}
     seedon_mean::Dict{String,Int}
-    seedon_sd::Dict{String,Int}
+    seedon_sd::Dict{String,Float64}
     seedoff_mean::Dict{String,Int}
-    seedoff_sd::Dict{String,Int}
+    seedoff_sd::Dict{String,Float64}
     span_mean::Dict{String,Int}
-    span_sd::Dict{String,Int}
+    span_sd::Dict{String,Float64}
     b0grow_mean::Dict{String,Float64}
     b0grow_sd::Dict{String,Float64}
     b0m_mean::Dict{String,Float64}
@@ -49,8 +49,8 @@ mutable struct OrgsRef
     b0germ_mean::Dict{String,Float64}
     b0germ_sd::Dict{String,Float64}
     maxseedn_mean::Dict{String,Int}
-    maxseedn_sd::Dict{String,Int}
-    maxmass::Dict{String,Float64}
+    maxseedn_sd::Dict{String,Float64}
+    maxmass::Dict{String,Int}
 end
 
 mutable struct Organism
