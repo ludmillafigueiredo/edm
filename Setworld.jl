@@ -113,7 +113,7 @@ end
 destroyarea!()
 Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
 """
-function destroyarea!(landpars::LandPars, landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
+function destroyarea!(landpars::LandPars, landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64)
 
     if settings["landmode"] == "artif"
         # DESTROY HABITAT
@@ -166,7 +166,7 @@ function destroyarea!(landpars::NeutralLandPars, landavail::BitArray{2}, setting
         # index of the cells still availble:
         available = find(x -> x == true, landavail)
         # number of cells to be destroyed:
-        loss = landpars.disturbland[:disturbland][find(landpars.disturbland[:td]==t)[1]]
+        loss = landpars.disturbland[:proportion][find(landpars.disturbland[:td]==[t])[1]]
         lostarea = round(Int,loss*length(available), RoundUp) 
 
         # Unity test
@@ -185,9 +185,11 @@ function destroyarea!(landpars::NeutralLandPars, landavail::BitArray{2}, setting
         end
         
     elseif settings["landmode"] == "real"
-        # rebuild the landscape according to shape file
-        landscape = landpars.disturbland
+        #TODO probably unnecessary
     end
+
+    landscape = fill(Dict{String, Float64}(),
+                     size(landavail))
 
     return landscape, landavail
 end
@@ -237,9 +239,9 @@ function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::D
 end
 
 # method for 'continuous' landscape structure (not 3D)
-function fragment!(landscape::Array{Dict{String, Float64}, N} where N, landavail::BitArray{2}, landpars::NeutralLandPars, t::Int64)
+function fragment!(landscape::Array{Dict{String, Float64}, N} where N, landavail::BitArray{2}, landpars::NeutralLandPars, t::Int64, tdist::Any)
     # convert matrix to BitArray (smaller than Bool)
-    landavail = Bool.(landpars.disturbland[:disturbland][find(landpars.disturbland[:td] == t)[1]])
+    landavail = Bool.(landpars.disturbland[find(tdist == [t])[1]])
     # create landscape with same dimensions
     landscape = fill(Dict{String, Float64}(),
                      size(landavail))

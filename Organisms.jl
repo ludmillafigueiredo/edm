@@ -208,7 +208,7 @@ end
             Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
             - visited: reduction in pollination service
             """
-function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, regime:: String, td::Array{Int64,1}, remaining)
+function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, regime:: String, tdist::Any, remaining)
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.emass, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
     pollinated = []
@@ -229,15 +229,15 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
             elseif scen == "equal" #all species lose pollination randomly (not species-specific)
                 println("Scenario of EQUAL pollination loss")
                 # Check the regime
-                if t in td 
+                if t in tdist 
                     if regime == "pulse"
-                        npoll = Int(ceil(defaultnpoll * remaining))
+                        npoll = Int(ceil(defaultnpoll * remaining[find(tdist == [t])[1]]))
                     elseif regime == "exp"
-                        npoll = Int(ceil(defaultnpoll * exp(-0.5*(t-td))))
+                        npoll = Int(ceil(defaultnpoll * exp(-0.5*(t-tdist[1]))))
                         # exp(tp - t) makes the pollination loss decrease from 1 (tp = t) to 0
                         println("Regime of EXP pollination loss, with $(length(ready)) being ready and $npoll being pollinated")
                     elseif regime == "press"
-                        npoll = Int(ceil(defaultnpoll * remaining[find(td.==t)]))
+                        npoll = Int(ceil(defaultnpoll * remaining[find(tdist ==[t])[1]]))
                     else
                         error("Please choose a pollination regime \"regime\" in insect.csv:
                                 - \"pulse\":

@@ -157,7 +157,13 @@ function read_landpars(settings::Dict{String,Any})
             # send file names to R
             initialland = settings["initialland"]
             @rput initialland
-            disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "disturbland" => Any))
+	    # assigning type Any to disturbland is not possible
+	    disturbland = settings["disturbland"] #object has to be initialized
+	    if settings["disturbtype"] == "loss" 
+	       disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "proportion" => Float64))
+	    elseif settings["disturbtype"] == "frag"
+               disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("disturbland" => String))
+            end
             @rput disturbland
             
             # get 0-1 habitat suitability matrices
@@ -165,20 +171,28 @@ function read_landpars(settings::Dict{String,Any})
             @rget initialmatrix
 	    @rget disturbmatrix
 
-            # if fragmentation is simulated, the file names are assgined to dist field, if area loss, the proportion holding columns, if none, default value nothing 
-            landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
-                                                ifelse(disturbmatrix == "none", disturbland, Int.(disturbmatrix)),
+            # if fragmentation is simulated, the file names are assgined to dist field, if area loss, the proportion holding columns, if none, default value nothing
+	    if disturbmatrix == "notfrag"
+	       landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
+                                                disturbland,
 	                                        select(temp_tsinput,:meantemp))
+	    else
+	       landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
+                                                Int.(disturbmatrix),
+	                                        select(temp_tsinput,:meantemp))
+            end
+	#TODO block above can handle pollination
         else
             # send file names to R
             initialland = settings["initialland"]
             @rput initialland
-            disturbland = settings["disturbland"]
+	    disturbland = settings["disturbland"]
             @rput disturbland
             
-            # get patches/fragments areas and distances from raster files
+            # get suitability matrices from R
             landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
             @rget initialmatrix
+	    @rget disturbmatrix
 
             landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
                                                 nothing,
@@ -293,11 +307,10 @@ function implicit_insect(settings::Dict{String,Any})
     
     interaction = select(insectsinput, :interaction)[1]
     scen = select(insectsinput, :scen)[1] # pollination scenario
-    td = select(insectsinput, :td) # time of perturbation
     regime = select(insectsinput, :regime)[1] # regime of loss
     remaining = select(insectsinput, :remaining) # proportion of pollination service loss
     
-    return interaction, scen, td, regime, remaining
+    return interaction, scen, regime, remaining
 end
 
 """
@@ -358,23 +371,25 @@ end
                         """
 function loaddisturbance(settings)
 
-tdist = 0
+tdist = nothing
     # read in the disturbance file, if not done so yet
 
     # select file according to keyword: loss, frag, temp
     if settings["disturbtype"] != "none"
         if settings["disturbtype"] in ["loss" "frag"]
             
-            tdist = CSV.read(settings["disturbland"])[:td]
+            tdist = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64))[:td]
             
             return tdist
 
         elseif settings["disturbtype"] == "poll"
 	    tdist = select(loadtable(settings["insect"]), :td)
             println("Pollination loss is simulated according to parameters in the \'insects\' file.")
-            
+            return tdist
+	    
         elseif settings["disturbtype"] == "temp"
             println("Temperature change is simulated with the temperature file provided.")
+
         else
             error("Please specify one of the disturbance scenarios with `--disturb`:
                                           \n\'none\' if no disturbance should be simulated,
@@ -384,21 +399,18 @@ tdist = 0
                                           \n\'poll\' for pollination loss.")
         end
     end
-
-return tdist
-
 end
 
 """
                         disturb!()
 
                         """
-function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{N} where N, orgs::Array{Organisms.Organism,1}, t::Int64, tdist::Array{Int64,1}, settings::Dict{String,Any}, landpars::NeutralLandPars)
+function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{2}, orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any}, landpars::NeutralLandPars, tdist::Any)
     
         if settings["disturbtype"] == "loss"
             landscape, landavail = Setworld.destroyarea!(landpars, landavail, settings, t)
         elseif settings["disturbtype"] == "frag"
-            landscape, landavail = Setworld.fragment!(landscape, landavail, landpars, t)
+            landscape, landavail = Setworld.fragment!(landscape, landavail, landpars, t, tdist)
         end
 
         Organisms.destroyorgs!(orgs, landavail, settings)
@@ -470,11 +482,11 @@ function simulate()
     println(keys(settings))
 
     # Load disturbance parameters, if necessary
+    tdist = nothing
     if settings["disturbtype"] != "none"
         tdist = loaddisturbance(settings)
-    else
-        tdist = nothing 
-    end            
+    end           
+    println(tdist)
     
     # Store landscape configuration
     landpars = read_landpars(settings)
@@ -488,7 +500,7 @@ function simulate()
     println("Sp info stored in object of type $(typeof(orgsref))")
 
     # Set insects implicit simulation
-    interaction, scen, td, regime, remaining = implicit_insect(settings)
+    interaction, scen, regime, remaining = implicit_insect(settings)
     
     # Create landscape
     mylandscape, landavail = Setworld.landscape_init(landpars)
@@ -522,7 +534,6 @@ function simulate()
 	println(ID, "landpars = ", typeof(landpars), "\ninitial = ", typeof(landpars.initialland), "\ndisturb = ", typeof(landpars.disturbland))  
 	println(ID, "interaction = ", interaction)
 	println(ID, "scen = ", scen)
-	println(ID, "td = ", td)
 	println(ID, "regime = ", regime)
 	println(ID, "remaining = ", remaining)
 	println(ID, "commandsettings = ", settings)
@@ -555,7 +566,7 @@ function simulate()
 	
         # IMPLEMENT LANDSCAPE DISTURBANCE
         if settings["disturbtype"] in ["frag" "loss"] && t in tdist  
-            landscape, landavail = disturb!(mylandscape,landavail,orgs,t,tdist,settings,landpars)
+            landscape, landavail = disturb!(mylandscape,landavail,orgs,t,settings,landpars,tdist)
         end
         updateK!(landavail, settings, t, tdist)
 	
@@ -574,7 +585,7 @@ function simulate()
 
         develop!(orgs, orgsref)
 
-        mate!(orgs, t, settings, scen, regime, td, remaining)
+        mate!(orgs, t, settings, scen, regime, tdist, remaining)
 
         id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail)
 
