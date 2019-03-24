@@ -306,7 +306,89 @@ end
 function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int, landavail::BitArray{2})
 
     offspring = Organism[]
+    non0sd = 1e-7
+    
+    # Sexually produced offspring
+    ferts = filter(x -> x.mated == true, orgs)
 
+    for sp in unique(getfield.(ferts, :sp))
+
+        sowing = find(x -> x.sp == sp || x.id in unique(getfield.(ferts, :id)), orgs)
+
+        spoffspringcounter = 0
+
+        for s in sowing
+
+            emass = orgs[s].emass
+            offs = div(0.5*orgs[s].mass["repr"], emass)
+
+            if offs <= 0
+                continue
+            else
+                # limit offspring production to the maximal number of seeds the species can produce
+                offs > orgs[s].wseedn ? offs = orgs[s].wseedn : offs
+
+                # update available biomass for reproduction
+                orgs[s].mass["repr"] -= (offs * emass)
+
+                # unity test
+                if  orgs[s].mass["repr"] <= 0
+                    error("Negative reproductive biomass")
+                end
+
+                # count species offspring for output
+                spoffspringcounter += offs
+
+                # get another parent
+                conspp = orgs[rand(find(x -> x.sp == sp && x.stage == "a", orgs))] 
+
+                # account for seed mortality before computing new individuals. IMPORTANT: the number of seeds produced remains the same, but in order to avoid wasting computational power (and time) with individuals that will die, we calculate how many they will be even before creating them. The mortality probability is calculated according to the mean values of seed size and mortality constant predicted for the offspring. Actual vales of each new individuals are caulated separately
+                meanb0m = orgs[s].b0m + mean(rand(Distributions.Normal(0,abs(orgs[s].b0m-conspp.b0m+non0sd)/orgs[s].b0m), offs))
+                meanemass = orgs[s].emass + mean(rand(Distributions.Normal(0,abs(orgs[s].emass-conspp.emass+non0sd)/orgs[s].emass), offs))
+                meanBm = meanb0m * (meanemass^(-1/4))*exp(-aE/(Boltz*T)) #the mortality probability is calculated accrding to the 
+                mprob = 1 - exp(-meanBm) 
+                computoffs = offs - rand(Distributions.Binomial(offs, mprob))
+
+                for n in 1:computoffs
+
+                    id_counter += 1 # update individual counter
+
+                    embryo = deepcopy(orgs[s])
+
+                    newvalue_emass = rand(Distributions.Normal(0,abs(embryo.emass-conspp.emass)/embryo.emass))
+                    embryo.emass + newvalue_emass >= 0.5*orgsref.emass[embryo.sp] ? embryo.emass += newvalue_emass : embryo.emass += 0 #seed mass cannot decrese to half the species initial mean size
+                    embryo.b0grow += rand(Distributions.Normal(0,abs(embryo.b0grow-conspp.b0grow+non0sd)/embryo.b0grow))
+                    embryo.b0m += rand(Distributions.Normal(0,abs(embryo.b0m-conspp.b0m+non0sd)/embryo.b0m))
+                    embryo.b0germ += rand(Distributions.Normal(0,abs(embryo.b0germ-conspp.b0germ+non0sd)/embryo.b0germ))
+                    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron+non0sd)/embryo.floron)),RoundUp))
+                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff+non0sd)/conspp.floroff)),RoundUp))
+                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon+non0sd)/embryo.seedon)),RoundUp))
+                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff+non0sd)/embryo.seedoff)),RoundUp))
+                    
+                    # set embryos state variables
+                    embryo.id = hex(id_counter) 
+                    embryo.mass = Dict("veg" => embryo.emass,
+                                       "repr" => 0.0)
+                    embryo.stage = "e"
+                    embryo.age = 0
+                    embryo.mated = false
+
+                    push!(offspring, embryo)
+                    #unity test
+                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
+                    #println("Pushed new org ", embryo, " into offspring")
+                    #end
+                end
+                orgs[s].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
+            end 
+        end
+
+        # output seeds per species (file is initialized in main.jl)
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv")),"a") do seedfile
+            writedlm(seedfile, hcat(t, sp, "s", "sex", spoffspringcounter))
+        end
+    end
+    
     # Asexually produced offspring
     asexuals = filter(x -> x.mated == false && x.clonal == true && x.mass["repr"] > x.emass, orgs) #find which the individuals the can reproduce assexually and then go through them, by species
 
@@ -363,80 +445,6 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
         # output clones per species (file is initialized in main.jl)
         open(abspath(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv")),"a") do seedfile
             writedlm(seedfile, hcat(t, sp, "j", "asex", spclonescounter))
-        end
-    end
-
-    # Sexually produced offspring
-    ferts = filter(x -> x.mated == true, orgs)
-
-    for sp in unique(getfield.(ferts, :sp))
-
-        sowing = find(x -> x.sp == sp || x.id in unique(getfield.(ferts, :id)), orgs)
-
-        spoffspringcounter = 0
-
-        for s in sowing
-
-            emu = orgs[s].emass
-            offs = div(0.5*orgs[s].mass["repr"], emu)
-
-            if offs <= 0
-                continue
-            else
-                # limit offspring production to the maximal number of seeds the species can produce
-                offs > orgs[s].wseedn ? offs = orgs[s].wseedn : offs
-
-                # count species offspring for output
-                spoffspringcounter += offs
-
-                orgs[s].mass["repr"] -= (offs * emu)
-
-                # unity test
-                if  orgs[s].mass["repr"] <= 0
-                    error("Negative reproductive biomass")
-                end
-
-                # get another parent
-                conspp = orgs[rand(find(x -> x.sp == sp && x.stage == "a", orgs))] 
-
-                for n in 1:offs
-
-                    id_counter += 1 # update individual counter
-
-                    embryo = deepcopy(orgs[s])
-
-                    #newvalue = rand(Distributions.Normal(0,abs(embryo.emass-conspp.emass)/embryo.emass))
-                    #embryo.emass + newvalue >= orgsref.emass[embryo.sp] ? # if seed biomass or minimal biomass would smaller than zero, it does not chenge
-                    #embryo.emass += newvalue : embryo.emass += 0
-                    embryo.b0grow += rand(Distributions.Normal(0,abs(embryo.b0grow-conspp.b0grow+0.0000001)/embryo.b0grow))
-                    embryo.b0m += rand(Distributions.Normal(0,abs(embryo.b0m-conspp.b0m+0.0000001)/embryo.b0m))
-                    embryo.b0germ += rand(Distributions.Normal(0,abs(embryo.b0germ-conspp.b0germ+0.0000001)/embryo.b0germ))
-                    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron+0.0000001)/embryo.floron)),RoundUp))
-                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff+0.0000001)/conspp.floroff)),RoundUp))
-                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon+0.0000001)/embryo.seedon)),RoundUp))
-                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff+0.0000001)/embryo.seedoff)),RoundUp))
-                    
-                    # set embryos own individual non-evolvable traits
-                    embryo.id = hex(id_counter) 
-                    embryo.mass = Dict("veg" => embryo.emass,
-                                       "repr" => 0.0)
-                    embryo.stage = "e"
-                    embryo.age = 0
-                    embryo.mated = false
-
-                    push!(offspring, embryo)
-                    #unity test
-                    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
-                    #println("Pushed new org ", embryo, " into offspring")
-                    #end
-                end
-                orgs[s].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
-            end 
-        end
-
-        # output seeds per species (file is initialized in main.jl)
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv")),"a") do seedfile
-            writedlm(seedfile, hcat(t, sp, "s", "sex", spoffspringcounter))
         end
     end
 
@@ -586,7 +594,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
         elseif orgs[o].age >= orgs[o].span #oldies die
             mprob = 1
-
+            
         else
             Bm = orgs[o].b0m * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             mprob = 1 - exp(-Bm)                         
