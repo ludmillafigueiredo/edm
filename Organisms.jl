@@ -435,8 +435,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
                     clone = deepcopy(clonetemplate)
                     # check if the new location is actually available before creating the clone
-                    clone.location = (clonetemplate.location[1] + rand(Distributions.Bernoulli())[1],
-                                      clonetemplate.location[2] + rand(Distributions.Bernoulli())[1]) # clones are spread in one of the neighboring cells - or in the same as the mother
+                    clone.location = (clonetemplate.location[1] + Int(round(rand(Distributions.Uniform(-1,1))[1])),
+                                      clonetemplate.location[2] + Int(round(rand(Distributions.Uniform(-1,1))[1]))) # clones are spread in one of the neighboring cells - or in the same as the mother
 
                     if checkbounds(Bool, landavail, clone.location[1], clone.location[2])
                         # actually start the new individual
@@ -504,7 +504,7 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
         end
 
         # Find the cell to which it is dispersing
-        θ = rand([0 0.5π π 1.5π]) # TODO tentar rand(0:2)*pi?
+        θ = rand(Distributions.Uniform(0,2),1)[1]*pi
         xdest = orgs[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
         ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway) 
 
