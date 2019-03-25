@@ -50,18 +50,18 @@ getoutput <- function(parentsimID, nreps, outdir = file.path("~/model/EDoutputs"
 #' @param nreps number of replicates, which identify the folders containing results
 organizereplicates <- function(parentsimID, nreps){
     
-    output_replicates <- numeric(0)
-    offspring_replicates <- numeric(0)
+    output_replicates <- data.frame()
+    offspring_replicates <- data.frame()
     
     for(sim in c(paste(parentsimID, seq(1, nreps), sep = "_"))) {
         repfolder <- file.path(outdir, parentsimID, sim); # replicate folder
-                                        # read outputs of juv/adults and of offspring
+        # read outputs of juv/adults and of offspring
         outdatasim <- read.csv(file.path(repfolder, paste(parentsimID, "indout.csv", sep = "")), header = TRUE)%>%
             mutate(repli = as.factor(rep(sim, nrow(.)))) #include a replication column, to identify replicates
         offspringsim <- read.table(file.path(repfolder, "offspringproduction.csv"), header = TRUE, sep = "\t")%>%
             mutate(repli = as.factor(rep(sim, nrow(.))))
         
-                                        # fill in cleanoutput object (necessary step because of bind_rows)
+        # fill in cleanoutput object (necessary step because of bind_rows)
         if(length(output_replicates) == 0){
             output_replicates <- outdatasim
             offspring_replicates <- offspringsim
@@ -69,6 +69,7 @@ organizereplicates <- function(parentsimID, nreps){
                                         # identify the lines corresponding to it with its replicate ID
             output_replicates <- bind_rows(output_replicates, outdatasim, .id = "repli")
             offspring_replicates <- bind_rows(offspringsim, offspringsim, .id = "repli")
+            offspring_replicates$week = factor(offspring_replicates$week)
         } 
     }
     return(list(a = output_replicates, b = offspring_replicates))
@@ -93,7 +94,7 @@ stagemass <- function(output_replicates, stages = factor(c("a", "j", "s"))){
                   sd_vegmass = sd(repli_mean_vegmass))%>%
         ungroup()
     
-                                        # Filter all adult individuals and use colours to distinguish the lines representing each individual
+    # Filter all adult individuals and use colours to distinguish the lines representing each individual
     vegmass_plottED <- ggplot(filter(biomass_tab, stage %in% stages),
                               aes(x=week, y= mean_vegmass, group = factor(stage), color = factor(stage)))+
         geom_line(position = position_dodge(0.1)) +
@@ -159,6 +160,7 @@ popstruct <- function(pop_tab, offspring_replicates, parentsimID, spp){
         weekstruct_tab <- pop_tab%>%
             group_by(week, sp, stage, repli)%>%
             summarize(abundance = n())%>%
+            ungroup()%>%
             bind_rows(., select(offspring_replicates, -mode))%>% #merge offspring file
             ungroup()%>%
             group_by(week, sp, stage)%>%
@@ -179,6 +181,7 @@ popstruct <- function(pop_tab, offspring_replicates, parentsimID, spp){
             filter(sp %in% spp)%>%
             group_by(week, sp, stage, repli)%>%
             summarize(abundance = n())%>%
+            ungroup()%>%
             bind_rows(., select(offspring_replicates, -mode))%>% #merge offspring file
             ungroup()%>%
             group_by(week, sp, stage)%>%
@@ -224,8 +227,8 @@ popstruct <- function(pop_tab, offspring_replicates, parentsimID, spp){
 
 #' Calculate mean species richness from replicates
 richness <- function(pop_tab,parentsimID,disturbance,tdist){
-    
-                                        # extract richness from output
+
+    # extract richness from output
     spprichness_tab <- pop_tab%>%
         group_by(week, repli)%>%
         summarize(richness = length(unique(sp)))%>%
@@ -259,7 +262,7 @@ richness <- function(pop_tab,parentsimID,disturbance,tdist){
                                         #my_grob <- grobTree(textGrob(text, x = 0.5, y = 0.9, hjust = 0, 
                                         #                             gp = gpar(fontsize = 10, fontface = "italic")))
         spprichness_plottED <- ggplot(spprichness_tab, aes(x = week, y = mean_richness))+
-            geom_errorbar(aes(yim = mean_richness - sd_richness,
+            geom_errorbar(aes(ymin = mean_richness - sd_richness,
                               ymax = mean_richness + sd_richness),
                           stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
             geom_line(color = "dodgerblue2", size = 1.25)+
@@ -280,13 +283,13 @@ rankabund <- function(pop_tab, timestep){
     relabund_tabs = list()
     rankabund_plots = list()
     
-    if(!(timestep %in% pop_tab$week)){
-        stop("\'timestep\' for calculating the rank abundance is not available in the output")
-    }else{
-        i <- 1
-        for(trank in timestep){
+    i <- 1
+    for(trank in timestep){
 
-            # get relative abundances
+        if(!(trank %in% pop_tab$week)){
+            stop("\'timestep\' for calculating the rank abundance is not available in the output")
+        }else{
+                                        # get relative abundances
             relabund_tab <- pop_tab%>%
                 filter(week == trank)%>%
                 group_by(sp, repli)%>%
@@ -458,7 +461,7 @@ save(cleanoutput,
      output_replicates,offspring_replicates,
      vegmass_plot,repmass_plot,biomass_tab,
      pop_tab, abund_plot,
-     weekstruct_tab, weekstruct_plot, relativestruct_tab, relativestruct_plot, 
+     # weekstruct_tab, weekstruct_plot, relativestruct_tab, relativestruct_plot, 
      spprichness_tab, spprichness_plot,
      relabund_tabs, rankabund_plots,
      grouppop_plot, grouppop_tab, groupweight_plot,
