@@ -219,7 +219,8 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
         if scen in ["indep" "equal"]  # calculation of number of pollinated individuals is different, but the actual pollination (non species-specific) is
 
             # Base number of pollinated flowes
-            defaultnpoll = rand(Distributions.Binomial(Int(ceil(length(ready) * 0.01)),0.5))[1] 
+	    occupiedflwrs = rand(Distributions.Uniform(1e-4, 1e-2),1)[1]
+            defaultnpoll = rand(Distributions.Binomial(Int(ceil(length(ready) * occupiedflwrs)),0.5))[1] 
             
             # Determine number of individuals that get pollinated (species is not relevant)
             if scen == "indep"
