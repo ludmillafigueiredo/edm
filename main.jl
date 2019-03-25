@@ -587,7 +587,7 @@ function simulate()
 
         mate!(orgs, t, settings, scen, regime, tdist, remaining)
 
-        id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail)
+        id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail, T)
 
         seedsi = release!(orgs, t, settings, orgsref) # only recently released seeds need to disperse. The others only need to survive
 

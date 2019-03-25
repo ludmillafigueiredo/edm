@@ -303,7 +303,7 @@ end
                                 mkoffspring!()
                                 After mating happened (marked in `reped`), calculate the amount of offspring
                                 """
-function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int, landavail::BitArray{2})
+function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int, landavail::BitArray{2}, T::Float64)
 
     offspring = Organism[]
     non0sd = 1e-7
@@ -343,11 +343,17 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 conspp = orgs[rand(find(x -> x.sp == sp && x.stage == "a", orgs))] 
 
                 # account for seed mortality before computing new individuals. IMPORTANT: the number of seeds produced remains the same, but in order to avoid wasting computational power (and time) with individuals that will die, we calculate how many they will be even before creating them. The mortality probability is calculated according to the mean values of seed size and mortality constant predicted for the offspring. Actual vales of each new individuals are caulated separately
-                meanb0m = orgs[s].b0m + mean(rand(Distributions.Normal(0,abs(orgs[s].b0m-conspp.b0m+non0sd)/orgs[s].b0m), offs))
-                meanemass = orgs[s].emass + mean(rand(Distributions.Normal(0,abs(orgs[s].emass-conspp.emass+non0sd)/orgs[s].emass), offs))
+                meanb0m = orgs[s].b0m + mean(rand(Distributions.Normal(0,abs(orgs[s].b0m-conspp.b0m+non0sd)/orgs[s].b0m), Int64(ceil(offs)))) #conversion to Int64 should not be necessary but offs Float64 occasionally (when offs = 1.0 or 2.0? unclear why, since wseedn is Int64)
+                #println("meanb0m = ", meanb0m)
+		# calculate mean seed mass from crossing, but values that are too high or too low
+                meanvalue = orgs[s].emass + mean(rand(Distributions.Normal(0,abs(orgs[s].emass-conspp.emass+non0sd)/orgs[s].emass), Int64(ceil(offs))))
+		1.5*orgsref.emass[orgs[s].sp] >= meanvalue >= 0.5*orgsref.emass[orgs[s].sp] ?
+		meanemass = meanvalue : meanemass = orgs[s].emass
+                # println("meanemass = ", meanemass)
                 meanBm = meanb0m * (meanemass^(-1/4))*exp(-aE/(Boltz*T)) #the mortality probability is calculated accrding to the 
                 mprob = 1 - exp(-meanBm) 
                 computoffs = offs - rand(Distributions.Binomial(offs, mprob))
+                #println("offs = ", offs, "computoffs = ", computoffs)
 
                 for n in 1:computoffs
 
@@ -355,8 +361,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
                     embryo = deepcopy(orgs[s])
 
-                    newvalue_emass = rand(Distributions.Normal(0,abs(embryo.emass-conspp.emass)/embryo.emass))
-                    embryo.emass + newvalue_emass >= 0.5*orgsref.emass[embryo.sp] ? embryo.emass += newvalue_emass : embryo.emass += 0 #seed mass cannot decrese to half the species initial mean size
+                    newvalue_emass = rand(Distributions.Normal(0,abs(embryo.emass-conspp.emass+non0sd)/embryo.emass))
+                    0.5*orgsref.emass[embryo.sp] >= embryo.emass + newvalue_emass >= 0.5*orgsref.emass[embryo.sp] ? embryo.emass += newvalue_emass : embryo.emass += 0 #seed mass cannot decrese to half the species initial mean size
                     embryo.b0grow += rand(Distributions.Normal(0,abs(embryo.b0grow-conspp.b0grow+non0sd)/embryo.b0grow))
                     embryo.b0m += rand(Distributions.Normal(0,abs(embryo.b0m-conspp.b0m+non0sd)/embryo.b0m))
                     embryo.b0germ += rand(Distributions.Normal(0,abs(embryo.b0germ-conspp.b0germ+non0sd)/embryo.b0germ))
