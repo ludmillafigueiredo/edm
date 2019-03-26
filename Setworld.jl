@@ -240,8 +240,9 @@ end
 
 # method for 'continuous' landscape structure (not 3D)
 function fragment!(landscape::Array{Dict{String, Float64}, N} where N, landavail::BitArray{2}, landpars::NeutralLandPars, t::Int64, tdist::Any)
+
     # convert matrix to BitArray (smaller than Bool)
-    landavail = Bool.(landpars.disturbland[find(tdist == [t])[1]])
+    landavail = Bool.(landpars.disturbland)
     # create landscape with same dimensions
     landscape = fill(Dict{String, Float64}(),
                      size(landavail))
