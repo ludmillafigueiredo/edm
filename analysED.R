@@ -10,6 +10,9 @@ library(tidyverse);
 library(viridis);
 library(grid);
 library(gridExtra);
+library(FactoMineR);
+library(factorextra);
+library(corrplot);
 
 #' Organize individual-based output
 #' 
@@ -402,16 +405,17 @@ production <- function(output_repli){
     return(production_plot)
 }
 
-#' Analysis of trait change
+#' Analysis of change in trait values distribution
 
-traitchange  <- function(output_repli){
+traitdistchange  <- function(output_repli){
 
     # take the mean values for each individual (they are replicated in each experiment) and then plot the violin plots
     trait_values  <- output_repli%>%
         select(-c(kernel, clonal, age, xloc, yloc, veg, repr, mated, repli))%>%
         group_by(week, id, stage, sp)%>%
         summarize_all(funs(mean = mean,
-                           sd = sd))
+                           sd = sd))%>%
+        ungroup()
     
     traitchange_plot <- ggplot(gather(trait_values%>%select(-tidyselect::ends_with("_sd")),
                                       key = trait,
@@ -425,6 +429,32 @@ traitchange  <- function(output_repli){
     facet_wrap(~trait,
                nrow = length(select(trait_values, ends_with("_mean"))),
                scales = "free_y")
+
+    return(trait_values, traitchange_plot)
+}
+
+#' Analysis of change in trait space
+
+traitspacechange  <- function(trait _values, timesteps){
+                                        # PCA
+    if(missing(timesteps)){
+        timestep == c(min(trait_values$week), max(trait_values$week))
+    }
+    
+    pcatable <- trait_values%>%
+                select(-sp, -stage, -ends_with("_sd"))%>%
+                filter(week %in% timesteps)
+    
+    traitpca <- PCA(pcatable%>%
+                    select(-week, -id),
+                    scale.unit = TRUE, ncp = 5, graph = TRUE)
+
+    #fviz_pca_ind(traitpca, geom.ind = "point", col.ind = pcatable$week,
+    #                   palette = c("#00AFBB", "#E7B800"),
+    #                   addEllipses = TRUE, ellipse.type = "confidence",
+    #             legend.title = "Initial and final trait spaces")
+
+    return(traitpca)
 }
 
 ############################################################################
