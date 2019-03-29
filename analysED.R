@@ -16,6 +16,10 @@ library(corrplot);
 library(gganimate); #sudo apt-get install cargo install.packages("gifski")
 library(cowplot);
 
+# Default values for analysis
+if(missing(timesteps)){timesteps == c(min(pop_tab$week), max(pop_tab$week))}
+timesteps = factor(timesteps) #provided or not, must be converted
+    
 #' Organize individual-based output
 #' 
 #' @param parentsimID The simulation ID
@@ -283,48 +287,37 @@ richness <- function(pop_tab,parentsimID,disturbance,tdist){
 }
 
 #' Calculate species relative abundance and plot species rank-abundance at a given time-step
-rankabund <- function(pop_tab, timestep){
+rankabund <- function(pop_tab, timesteps){
 
-    relabund_tabs = list()
-    rankabund_plots = list()
-    
-    i <- 1
-    for(trank in timestep){
-
-        if(!(trank %in% pop_tab$week)){
-            stop("\'timestep\' for calculating the rank abundance is not available in the output")
-        }else{
-                                        # get relative abundances
-            relabund_tab <- pop_tab%>%
-                filter(week == trank)%>%
+    relabund_tab <- pop_tab%>%
+                filter(week %in% timesteps)%>%
                 group_by(sp, repli)%>%
                 summarize(abundance = n())%>%
                 ungroup()%>%
-                group_by(sp)%>%
+                group_by(sp, week)%>%
                 summarize(mean_abundance = mean(abundance))%>%
                 ungroup()%>%
+		grou_by(week)%>%
                 mutate(relabund = mean_abundance/sum(mean_abundance))
-                                        # plot it    
-            rankabund_plot <- ggplot(relabund_tab,
-                                     aes(x = reorder(sp, -relabund), y = relabund))+
+
+    plot_rankabund <- function(timestep){
+    	ggplot(filter(relabund_tab, week %in% timestep),
+		aes(x = reorder(sp, -relabund), y = relabund))+
                 geom_bar(stat = "identity")+
                 theme_minimal()+
                 theme(axis.text.x = element_text(angle = 50, size = 10, vjust = 0.5))
-
-            relabund_tabs[[i]] <- relabund_tab
-            rankabund_plots[[i]] <- rankabund_plot
-
-            i <- i+1
-        }
     }
-    
-    return(list(a = relabund_tabs, b = rankabund_plots))
+
+    rankabunds_plot <- timesteps%>%
+    	map(. %>% plot_rankabund)
+      
+    return(list(a = relabund_tab, b = rankabunds_plot))
 }
 
 #' Population structure by group size
 groupdyn <- function(output_repli, singlestages){
     
-                                        # create table
+    # create table
     grouppop_tab <- output_repli%>%
         group_by(week, sp, emass, stage, repli)%>%
         summarize(abundance = n())%>%
@@ -338,7 +331,7 @@ groupdyn <- function(output_repli, singlestages){
                   sd_abundance = sd(abundance))%>%
         ungroup()
     
-                                        # create plots 
+    # create plots 
     ## filter data, if necessary
     if (missing(singlestages)){
         popdata_to_plot <- grouppop_tab
@@ -422,10 +415,7 @@ traitchange  <- function(output_repli, species, timesteps){
     if(missing(species)){
         species = unique(traitvalues_tab$sp)
     }
-    
-    if(missing(timesteps)){
-        timestep == c(min(traitvalues_tab$week), max(traitvalues_tab$week))
-    }
+    species = factor(species)
     
     # internal function for different species and the same time step (map() goes through each spp, for the same timesteps). Internal function because maps needs single function and because column selection inside gather() does not work otherwise, probably piped objects get mixed (mapped spp vector and piped trait table). 
     plottrait <- function(spp){
@@ -466,10 +456,6 @@ traitchange  <- function(output_repli, species, timesteps){
 
 traitspacechange  <- function(traitvalues_tab, timesteps){
                                         # PCA
-    if(missing(timesteps)){
-        timestep == c(min(traitvalues_tab$week), max(traitvalues_tab$week))
-    }
-
     traitPCA <- function(timestep){
 
         pcatable <- traitvalues_tab%>%
@@ -539,9 +525,9 @@ rich$b -> spprichness_plot
 rm(rich)
 
 ## Species rank-abundance 
-rank <- rankabund(pop_tab, timestep = timestep)
-rank$a -> relabund_tabs
-rank$b -> rankabund_plots
+rank <- rankabund(pop_tab, timesteps)
+rank$a -> relabund_tab
+rank$b -> rankabunds_plot
 
 rm(rank)
 
@@ -571,7 +557,7 @@ save(cleanoutput,
      pop_tab, abund_plot,
      # weekstruct_tab, weekstruct_plot, relativestruct_tab, relativestruct_plot, 
      spprichness_tab, spprichness_plot,
-     relabund_tabs, rankabund_plots,
+     relabund_tab, rankabunds_plot,
      grouppop_plot, grouppop_tab, groupweight_plot,
      traitvalues_tab, traitvalues_plot,
      traitspca,
