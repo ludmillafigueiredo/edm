@@ -548,7 +548,7 @@ traitschange$a -> traitvalues_tab
 traitschange$b -> traitvalues_plot # no 's' so it can be detected by `plotall`
 rm(traitschange)
 ### trait space
-traitspca <- traitspacechange(trait _values, timesteps)
+traitspca <- traitspacechange(traitvalues_tab, timesteps)
 
 # Save bundle of tabs and plots as RData
 save(cleanoutput,
