@@ -13,6 +13,8 @@ library(gridExtra);
 library(FactoMineR);
 library(factorextra);
 library(corrplot);
+library(gganimate); #sudo apt-get install cargo install.packages("gifski")
+library(cowplot);
 
 #' Organize individual-based output
 #' 
@@ -407,55 +409,94 @@ production <- function(output_repli){
 
 #' Analysis of change in trait values distribution
 
-traitdistchange  <- function(output_repli){
+traitchange  <- function(output_repli, species, timesteps){
 
     # take the mean values for each individual (they are replicated in each experiment) and then plot the violin plots
-    trait_values  <- output_repli%>%
+    traitvalues_tab  <- output_repli%>%
         select(-c(kernel, clonal, age, xloc, yloc, veg, repr, mated, repli))%>%
         group_by(week, id, stage, sp)%>%
         summarize_all(funs(mean = mean,
                            sd = sd))%>%
         ungroup()
-    
-    traitchange_plot <- ggplot(gather(trait_values%>%select(-tidyselect::ends_with("_sd")),
-                                      key = trait,
-                                      value = value,
-                                      emass_mean:maxmass_mean,
-                                      factor_key = TRUE),
-                               aes(x = sp, y = value))+
-    geom_violin()+
-    #geom_dotplot(color = "grey31", fill = "white", alpha = 0.8)+
-    geom_boxplot(width = 0.2)+
-    facet_wrap(~trait,
-               nrow = length(select(trait_values, ends_with("_mean"))),
-               scales = "free_y")
 
-    return(trait_values, traitchange_plot)
+    if(missing(species)){
+        species = unique(traitvalues_tab$sp)
+    }
+    
+    if(missing(timesteps)){
+        timestep == c(min(traitvalues_tab$week), max(traitvalues_tab$week))
+    }
+    
+    # internal function for different species and the same time step (map() goes through each spp, for the same timesteps). Internal function because maps needs single function and because column selection inside gather() does not work otherwise, probably piped objects get mixed (mapped spp vector and piped trait table). 
+    plottrait <- function(spp){
+        ggplot(gather(traitvalues_tab%>%
+                      select(-tidyselect::ends_with("_sd"))%>%
+                      filter(sp %in% spp & week %in% timesteps),
+                      key = trait,
+                      value = value,
+                      emass_mean:maxmass_mean,
+                      factor_key = TRUE),
+               aes(x = sp, y = value))+
+            geom_violin()+
+            #geom_dotplot(color = "grey31", fill = "white", alpha = 0.8)+
+            geom_boxplot(width = 0.2)+
+            facet_wrap(c("week", "trait"), #facet_grid cannot free y axis
+                       nrow = length(unique(timesteps)),
+                       ncol = length(select(traitvalues_tab, tidyselect::ends_with("_mean"))),
+                       scales = "free_y")+
+            background_grid(major = "xy", minor = "none")
+}
+
+    traitvalues_plots <- species%>%
+        map(. %>% plottrait) 
+
+    #gganimation
+    #animate(traitchange_plot +
+    #        transition_states(week, transition_length = 2, state_length= 3)+
+    #        ease_aes('cubic-in-out'),
+    #        width = 800, height = 2000, nframes = 100,
+    #        device = "png",
+    #        resolution = 300,
+    #        renderer = file_renderer(analysEDdir, prefix = paste("animtrait", species, sep = "_"), overwrite = TRUE))
+        
+    return(list(a = traitvalues_tab, b = traitvalues_plots))
 }
 
 #' Analysis of change in trait space
 
-traitspacechange  <- function(trait _values, timesteps){
+traitspacechange  <- function(traitvalues_tab, timesteps){
                                         # PCA
     if(missing(timesteps)){
-        timestep == c(min(trait_values$week), max(trait_values$week))
+        timestep == c(min(traitvalues_tab$week), max(traitvalues_tab$week))
     }
-    
-    pcatable <- trait_values%>%
-                select(-sp, -stage, -ends_with("_sd"))%>%
-                filter(week %in% timesteps)
-    
-    traitpca <- PCA(pcatable%>%
-                    select(-week, -id),
-                    scale.unit = TRUE, ncp = 5, graph = TRUE)
 
+    traitPCA <- function(timestep){
+
+        pcatable <- traitvalues_tab%>%
+            select(-sp, -stage, -ends_with("_sd"))%>%
+            filter(week %in% timestep)
+
+        traitpca <- PCA(pcatable%>%
+                    select(-week, -id),
+                    scale.unit = TRUE,
+                    ncp = 5,
+                    graph = FALSE)
+    }
+
+    traitpcas <- timesteps%>%
+        map(., traitPCA)
+    
+    # trait space over time, identifying species
     #fviz_pca_ind(traitpca, geom.ind = "point", col.ind = pcatable$week,
     #                   palette = c("#00AFBB", "#E7B800"),
     #                   addEllipses = TRUE, ellipse.type = "confidence",
     #             legend.title = "Initial and final trait spaces")
 
-    return(traitpca)
+    # 
+    
+    return(traitpcas)
 }
+
 
 ############################################################################
 #                          Organize analysis output                        #
@@ -514,7 +555,16 @@ rm(groups)
 ## Biomass production
 production_plot <- production(output_repli)
 
-                                        # Save bundle of tabs and plots as RData
+## Trait change
+### trait values
+traitschange <- traitchange(output_repli, species, timesteps)
+traitschange$a -> traitvalues_tab
+traitschange$b -> traitvalues_plot # no 's' so it can be detected by `plotall`
+rm(traitschange)
+### trait space
+traitspca <- traitspacechange(trait _values, timesteps)
+
+# Save bundle of tabs and plots as RData
 save(cleanoutput,
      output_repli,offspring_repli,
      vegmass_plot,repmass_plot,biomass_tab,
@@ -523,10 +573,13 @@ save(cleanoutput,
      spprichness_tab, spprichness_plot,
      relabund_tabs, rankabund_plots,
      grouppop_plot, grouppop_tab, groupweight_plot,
+     traitvalues_tab, traitvalues_plot,
+     traitspca,
      file = file.path(analysEDdir, 
                       paste(parentsimID, ".RData", sep = "")))
 
-                                        # Plot all graphs
+# Plot all graphs
+if(missing(plotall)){plotall = FALSE}
 if(plotall){
     EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
     for(p in seq(1, length(EDplots))){
