@@ -11,14 +11,12 @@ library(viridis);
 library(grid);
 library(gridExtra);
 library(FactoMineR);
-library(factorextra);
-library(corrplot);
-library(gganimate); #sudo apt-get install cargo install.packages("gifski")
+#library(factorextra);
+#library(corrplot);
+#library(gganimate); #sudo apt-get install cargo install.packages("gifski")
 library(cowplot);
 
 # Default values for analysis
-if(missing(timesteps)){timesteps == c(min(pop_tab$week), max(pop_tab$week))}
-timesteps = factor(timesteps) #provided or not, must be converted
     
 #' Organize individual-based output
 #' 
@@ -291,13 +289,13 @@ rankabund <- function(pop_tab, timesteps){
 
     relabund_tab <- pop_tab%>%
                 filter(week %in% timesteps)%>%
-                group_by(sp, repli)%>%
+                group_by(week, sp, repli)%>%
                 summarize(abundance = n())%>%
                 ungroup()%>%
                 group_by(sp, week)%>%
                 summarize(mean_abundance = mean(abundance))%>%
                 ungroup()%>%
-		grou_by(week)%>%
+		group_by(week)%>%
                 mutate(relabund = mean_abundance/sum(mean_abundance))
 
     plot_rankabund <- function(timestep){
@@ -402,7 +400,7 @@ production <- function(output_repli){
 
 #' Analysis of change in trait values distribution
 
-traitchange  <- function(output_repli, species, timesteps){
+traitchange  <- function(output_repli, timesteps, species){
 
     # take the mean values for each individual (they are replicated in each experiment) and then plot the violin plots
     traitvalues_tab  <- output_repli%>%
@@ -413,19 +411,22 @@ traitchange  <- function(output_repli, species, timesteps){
         ungroup()
 
     if(missing(species)){
-        species = unique(traitvalues_tab$sp)
+        species <- unique(traitvalues_tab$sp)
     }
-    species = factor(species)
+    species <- factor(species)
     
-    # internal function for different species and the same time step (map() goes through each spp, for the same timesteps). Internal function because maps needs single function and because column selection inside gather() does not work otherwise, probably piped objects get mixed (mapped spp vector and piped trait table). 
-    plottrait <- function(spp){
-        ggplot(gather(traitvalues_tab%>%
+    # internal function for different species and the same time step (map() goes through each spp, for the same timesteps). Internal function because maps needs single function and because column selection inside gather() does not work otherwise, probably piped objects get mixed (mapped spp vector and piped trait table).
+
+    traittab4plot <- gather(traitvalues_tab%>%
                       select(-tidyselect::ends_with("_sd"))%>%
-                      filter(sp %in% spp & week %in% timesteps),
+                      filter(week %in% timesteps),
                       key = trait,
                       value = value,
                       emass_mean:maxmass_mean,
-                      factor_key = TRUE),
+                      factor_key = TRUE)
+		      
+    plottrait <- function(spp){
+        ggplot(traittab4plot%>%filter(sp %in% spp),
                aes(x = sp, y = value))+
             geom_violin()+
             #geom_dotplot(color = "grey31", fill = "white", alpha = 0.8)+
@@ -455,7 +456,8 @@ traitchange  <- function(output_repli, species, timesteps){
 #' Analysis of change in trait space
 
 traitspacechange  <- function(traitvalues_tab, timesteps){
-                                        # PCA
+
+    # PCA (internal function because it needs to passed to map)
     traitPCA <- function(timestep){
 
         pcatable <- traitvalues_tab%>%
@@ -467,6 +469,8 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
                     scale.unit = TRUE,
                     ncp = 5,
                     graph = FALSE)
+
+        return(traitpca)
     }
 
     traitpcas <- timesteps%>%
@@ -491,7 +495,7 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
 cleanoutput <- getoutput(parentsimID, nreps, outdir = outdir, EDdir = EDdir)  
 
 ## Identify replicates
-replicates <- orgplicates(parentsimID,nreps)
+replicates <- orgreplicates(parentsimID,nreps)
 replicates$a -> output_repli
 replicates$b -> offspring_repli
 rm(replicates)
@@ -524,6 +528,10 @@ rich$a -> spprichness_tab
 rich$b -> spprichness_plot
 rm(rich)
 
+## Set up time-steps for which to output derived analysis
+#if(!("timesteps" %in% ls())){timesteps <- c(min(pop_tab$week), max(pop_tab$week))}
+timesteps <- factor(c(min(pop_tab$week), max(pop_tab$week))) #provided or not, must be converted
+
 ## Species rank-abundance 
 rank <- rankabund(pop_tab, timesteps)
 rank$a -> relabund_tab
@@ -543,7 +551,7 @@ production_plot <- production(output_repli)
 
 ## Trait change
 ### trait values
-traitschange <- traitchange(output_repli, species, timesteps)
+traitschange <- traitchange(output_repli, timesteps)
 traitschange$a -> traitvalues_tab
 traitschange$b -> traitvalues_plot # no 's' so it can be detected by `plotall`
 rm(traitschange)
