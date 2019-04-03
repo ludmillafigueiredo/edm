@@ -470,7 +470,7 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
                     ncp = 5,
                     graph = FALSE)
 
-        return(traitpca)
+        return(list(a=pcatable, b=traitpca))
     }
 
     traitpcas <- timesteps%>%
@@ -484,7 +484,7 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
 
     # 
     
-    return(list(a=pcatable, b=traitpcas))
+    return(list(a=traitpcas$a, b=traitpcas$b))
 }
 
 
@@ -570,7 +570,7 @@ save(cleanoutput,
      relabund_tab, rankabunds_plot,
      grouppop_plot, grouppop_tab, groupweight_plot,
      traitvalues_tab, traitvalues_plot,
-     traitspca,
+     pcatable, traitspca,
      file = file.path(analysEDdir, 
                       paste(parentsimID, ".RData", sep = "")))
 
