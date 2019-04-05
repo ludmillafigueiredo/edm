@@ -460,17 +460,15 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
     # PCA (internal function because it needs to passed to map)
     traitPCA <- function(timestep){
 
-        pcatable <- traitvalues_tab%>%
-            select(-sp, -stage, -ends_with("_sd"))%>%
-            filter(week %in% timestep)
-
-        traitpca <- PCA(pcatable%>%
-                    select(-week, -id),
+        traitpca <- PCA(traitvalues_tab%>%
+			select(-sp, -stage, -ends_with("_sd"))%>%
+            		filter(week %in% timestep)%>%
+			select(-week, -id),
                     scale.unit = TRUE,
                     ncp = 5,
                     graph = FALSE)
 
-        return(list(a=pcatable, b=traitpca))
+        return(traitpca)
     }
 
     #separate PCAs for t0 and tend
@@ -490,7 +488,8 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
                           repel = TRUE,
                                        legend.title = list(fill = "Time-step", color = "Traits"))
     
-    return(list(a=traitpcas$a, b=traitpcas$b, c = timepca, d = timepca_plot))
+    return(list(a = traitpcas, b = timepca, c = timepca_plot))
+
 }
 
 
@@ -562,11 +561,10 @@ traitschange$a -> traitvalues_tab
 traitschange$b -> traitvalues_plot # no 's' so it can be detected by `plotall`
 rm(traitschange)
 ### trait space
-traitspca <- traitspacechange(traitvalues_tab, timesteps)
-traitspca$a -> pcatable
-traitspca$b -> traitspca
-traitspca$c -> timepca
-traitspca$d -> timepca <- plot
+traitspace <- traitspacechange(traitvalues_tab, timesteps)
+traitspace$a -> traitpcas
+traitspace$b -> timepca
+traitspace$c -> timepca_plot
 
 # Save bundle of tabs and plots as RData
 save(cleanoutput,
@@ -578,7 +576,7 @@ save(cleanoutput,
      relabund_tab, rankabunds_plot,
      grouppop_plot, grouppop_tab, groupweight_plot,
      traitvalues_tab, traitvalues_plot,
-     pcatable, traitspca,
+     traitpcas, timepca, timepca_plot
      file = file.path(analysEDdir, 
                       paste(parentsimID, ".RData", sep = "")))
 
