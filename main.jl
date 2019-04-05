@@ -17,6 +17,7 @@ using Fileprep
 using Organisms
 using Setworld
 using RCall
+using Outputs
 
 #const Boltz = 1.38064852e-23 # Alternatively:
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
@@ -34,6 +35,12 @@ function parse_commandline()
         help = "Name of the folder where outputs will be stored."
         arg_type = String
         required = true
+
+        "--nreps"
+        help = "Name of the folder where outputs will be stored."
+        arg_type = Int64
+        required = true
+        default = 1
         
 	"--rseed"
 	help = "Seed for RNG"
@@ -601,4 +608,8 @@ function simulate()
         toc()
     end
 end
+# run simulation
 simulate()
+
+# analyse results
+analsyED(settings)

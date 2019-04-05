@@ -11,9 +11,9 @@ library(viridis);
 library(grid);
 library(gridExtra);
 library(FactoMineR);
-#library(factorextra);
-#library(corrplot);
-#library(gganimate); #sudo apt-get install cargo install.packages("gifski")
+library(factorextra);
+library(corrplot);
+library(gganimate); #sudo apt-get install cargo install.packages("gifski")
 library(cowplot);
 
 # Default values for analysis
@@ -473,18 +473,24 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
         return(list(a=pcatable, b=traitpca))
     }
 
+    #separate PCAs for t0 and tend
     traitpcas <- timesteps%>%
         map(., traitPCA)
-    
-    # trait space over time, identifying species
-    #fviz_pca_ind(traitpca, geom.ind = "point", col.ind = pcatable$week,
-    #                   palette = c("#00AFBB", "#E7B800"),
-    #                   addEllipses = TRUE, ellipse.type = "confidence",
-    #             legend.title = "Initial and final trait spaces")
 
-    # 
+    # PCA comparing t0 and end
+    timepca <- traitPCA(timesteps)
+    timepca_plot <- fviz_pca_biplot(timepca,
+                          geom.ind = "point", # show points only (but not "text")
+                          pointshape = 21,
+                          pointsize = 2.5,
+                          fill.ind = factor(select(filter(traitvalues_tab, week %in% timesteps), week)), # color by time
+                          col.ind = "black",
+                                        #addEllipses = TRUE, # Concentration ellipse,
+                          col.var = factor(c("size", "reprd", "reprd", "reprd", "reprd", "reprd", "span", "metab", "metab", "metab","reprd", "size")),
+                          repel = TRUE,
+                                       legend.title = list(fill = "Time-step", color = "Traits"))
     
-    return(list(a=traitpcas$a, b=traitpcas$b))
+    return(list(a=traitpcas$a, b=traitpcas$b, c = timepca, d = timepca_plot))
 }
 
 
@@ -559,6 +565,8 @@ rm(traitschange)
 traitspca <- traitspacechange(traitvalues_tab, timesteps)
 traitspca$a -> pcatable
 traitspca$b -> traitspca
+traitspca$c -> timepca
+traitspca$d -> timepca <- plot
 
 # Save bundle of tabs and plots as RData
 save(cleanoutput,
@@ -575,11 +583,6 @@ save(cleanoutput,
                       paste(parentsimID, ".RData", sep = "")))
 
 # Plot all graphs
-if(missing(plotall)){plotall = FALSE}
-if(plotall){
-    EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
-    for(p in seq(1, length(EDplots))){
-        ggsave(filename = file.path(analysEDdir, paste(p, ".jpeg", sep = "")) , 
-               plot = mget(EDplots)[[p]], #get the actual object (p has the variable name)
-               device = "jpeg")}
-}
+EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
+map(EDplots,
+    ~ ggsave(file.path(analysEDdir, paste(.x, ".png", sep ="")), get(.x)))
