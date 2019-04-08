@@ -582,6 +582,8 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
     mprob = 0
     Bm = 0
 
+    # upload stage-specific mortality rates
+    include("metabolicrates.jl")
     # Density-independent mortality
     for o in 1:length(orgs)
 
@@ -592,7 +594,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
             if orgs[o].age >= orgs[o].elong
                 mprob = 1
             elseif rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
-                Bm = orgs[o].b0m * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+                Bm = orgs[o].b0m * seedm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
                 #println("Bm: $Bm, b0m = $(orgs[o].b0m), seed mass = $(orgs[o].mass["veg"])")
                 mprob = 1 - exp(-Bm)
             else
@@ -602,17 +604,22 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
         elseif orgs[o].age >= orgs[o].span #oldies die
             mprob = 1
             
-        else
-            Bm = orgs[o].b0m * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-            mprob = 1 - exp(-Bm)                         
+        else #calculate mortality for juveniles or adults
+            if orgs[o].stage == "j"
+                Bm = orgs[o].b0m * juvm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+            else
+                Bm = orgs[o].b0m * adultm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+            end
+
+            mprob = 1 - exp(-Bm)
+                
         end
 
         # Check mortality rate to probability conversion
         if mprob < 0
             error("mprob < 0")
             #mprob = 0
-        elseif mprob > 1
-            #mprob = 1
+        elseif mprob > 1            #mprob = 1
             error("mprob > 1")
         end
 
@@ -665,12 +672,12 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                     # any individual can die
                     d = rand(samegrid,1)[1]
 
-                    if d.stage == "a"
-                        Bm = d.b0m * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                    if d.stage == "s"
+                        Bm = d.b0m * seedm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                     elseif d.stage == "j"
-                        Bm = d.b0m * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        Bm = d.b0m * juvm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                     else
-                        Bm = d.b0m * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        Bm = d.b0m * adultm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T)) 
                     end
                     # calculate probability
                     mprob = 1 - exp(-Bm)

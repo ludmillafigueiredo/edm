@@ -1,4 +1,4 @@
-                                        # Subset species from the Göttingen pool
+# Subset species from the Göttingen pool
 goetspp <- function(inputID, rseed, mode, richp = NULL, spplist = NULL){
 
     library(tidyverse)
