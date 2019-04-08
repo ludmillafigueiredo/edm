@@ -11,12 +11,12 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, spplist = NULL){
 
                                         # get mean values
     ## table with species traits from leda and Weiss classification
-    spptraits <- read.table(file.path(inputsdir, "goettingenEDMtraits.csv"), header = TRUE, sep = ",")
+    spptraits <- read.table(file.path(docsdir, "functional_types/goettingenEDMtraits.csv"), header = TRUE, sep = ",")
     traits = c()
     
     if (mode == "spplist"){
                                         # read species lists
-        spps <- read.table(file.path(inputsdir,spplist), header = TRUE, sep = ",")
+        spps <- read.table(file.path(spplist), header = TRUE, sep = ",")
                                         # select spp from the list that have known trait values
         traits <- spptraits %>% filter(species %in% spps$species)
         richp <- length(traits$species)
@@ -72,10 +72,10 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, spplist = NULL){
 
     maxmass <- traits$maxmass
 
-
     ## output species id used in EDM
-    spEDMid <- data.frame(sp = traits$species, id = paste(rep("p",richp), 1:richp, sep = "-"));
-    write.csv(spEDMid, file.path(inputsdir,paste(inputID, "ids.csv", sep = "")), row.names = FALSE)
+    spEDMid <- data.frame(sp = traits$sp,
+                          id = paste(rep("p", richp), 1:richp, sep = "-"));
+    write.csv(spEDMid, file.path(inputsdir, "spp_input", paste(inputID, "ids.csv", sep = "")), row.names = FALSE)
 
 ### Write file
     spptable <- data.frame(sp_id = spEDMid$id,
