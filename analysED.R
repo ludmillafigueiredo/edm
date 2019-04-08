@@ -11,7 +11,7 @@ library(viridis);
 library(grid);
 library(gridExtra);
 library(FactoMineR);
-library(factorextra);
+library(factoextra);
 library(corrplot);
 library(gganimate); #sudo apt-get install cargo install.packages("gifski")
 library(cowplot);
@@ -576,7 +576,7 @@ save(cleanoutput,
      relabund_tab, rankabunds_plot,
      grouppop_plot, grouppop_tab, groupweight_plot,
      traitvalues_tab, traitvalues_plot,
-     traitpcas, timepca, timepca_plot
+     traitpcas, timepca, timepca_plot,
      file = file.path(analysEDdir, 
                       paste(parentsimID, ".RData", sep = "")))
 
