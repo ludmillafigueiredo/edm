@@ -19,6 +19,9 @@ using Setworld
 using RCall
 using Outputs
 
+# upload stage-specific mortality rates
+include("metabolicrates.jl")
+
 #const Boltz = 1.38064852e-23 # Alternatively:
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 #const aE = 1e-19
@@ -39,7 +42,6 @@ function parse_commandline()
         "--nreps"
         help = "Name of the folder where outputs will be stored."
         arg_type = Int64
-        required = true
         default = 1
         
 	"--rseed"
@@ -586,7 +588,7 @@ function simulate()
         # LIFE CYCLE
         tic()
 
-        survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth)
+        survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, seedm_factor, juvm_factor, adultm_factor)
 
         global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T)
 
