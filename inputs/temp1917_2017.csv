@@ -1,4 +1,4 @@
-"week","meantemp_ts","sdtemp_ts","meanprec_ts","sdprec_ts"
+"week","meantemp","sdtemp_ts","meanprec_ts","sdprec_ts"
 1,-2.3,0.00001,0,0.00001
 2,-2.3,0.00001,0,0.00001
 3,-2.3,0.00001,0,0.00001

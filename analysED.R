@@ -11,7 +11,7 @@ library(viridis);
 library(grid);
 library(gridExtra);
 library(FactoMineR);
-library(factoextra);
+library(factoextra); #might require mvtnorm 1.0-6, which does not require R 3.5: devtools::install_version("mvtnorm", version = "1.0-6", repos = "http://cran.us.r-project.org")
 library(corrplot);
 library(gganimate); #sudo apt-get install cargo install.packages("gifski")
 library(cowplot);
