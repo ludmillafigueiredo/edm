@@ -531,7 +531,7 @@ function simulate()
 
         srand(settings["rseed"])
 
-        if settings["nreps"] = 1
+        if settings["nreps"] == 1
             simresults_folder = joinpath(settings["outputat"], settings["simID"])
             results_folder = simresults_folder
         else
@@ -566,7 +566,7 @@ function simulate()
         end
 
         # START SEED PRODUCTION FILE
-        open(abspath(simresults_folder, "offspringproduction.csv")),"w") do seedfile
+        open(abspath(simresults_folder, "offspringproduction.csv"),"w") do seedfile
             writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
         end
 
