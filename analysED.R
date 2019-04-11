@@ -16,6 +16,10 @@ library(corrplot);
 library(gganimate); #sudo apt-get install cargo install.packages("gifski")
 library(cowplot);
 
+# Set theme and colours
+theme_set(theme_minimal())
+# scale_color_viridis(discrete = TRUE, option = "magma)
+
 # Default values for analysis
     
 #' Organize individual-based output
@@ -112,6 +116,7 @@ stagemass <- function(output_repli, stages = factor(c("a", "j", "s"))){
         facet_grid(factor(sp) ~ factor(stage))+
         labs(x = "Week", y = "Compartiment biomass (g)",
              title = "Weekly vegetative biomass")+
+        scale_color_viridis(discrete = TRUE, option = "magma")+
         theme(legend.position = "none")
     
     repmass_plottED <- ggplot(filter(biomass_tab, stage %in% stages),
@@ -124,6 +129,7 @@ stagemass <- function(output_repli, stages = factor(c("a", "j", "s"))){
         labs(x = "Week", y = "Compartiment biomass (g)",
              title = "Weekly reproductive biomass")+
         facet_grid(factor(sp) ~ factor(stage))+
+        scale_color_viridis(discrete = TRUE, option = "magma")+
         theme(legend.position = "none")
     
     return(list(a = vegmass_plottED, b = repmass_plottED, c = biomass_tab))
@@ -153,8 +159,8 @@ popabund <- function(output_repli){
         geom_point(position=position_dodge(0.1))+
         labs(x = "Year", y = "Abundance (mean +- sd)",
              title = "Species abundance variation")+
-        theme(legend.position = "none")+
-        theme_minimal()
+        scale_color_brewer(palette = "Dark2")+ #scale_color_viridis(discrete = TRUE, option = "magma")+
+        theme(legend.position = "none")
     
     return(list(a = pop_tab, b = spabund_tab, c = abund_plottED))
 }
@@ -215,8 +221,8 @@ popstruct <- function(pop_tab, offspring_repli, parentsimID, spp){
              title = "Population structure")+
                                         #scale_color_discrete("Stages:", labels = c("Adults", "Seeds", "Juveniles"))+
         facet_wrap(~sp, nrow = length(unique(weekstruct_tab$sp)))+
-        theme(legend.position = "none")+
-        theme_minimal()
+        scale_color_viridis(discrete = TRUE, option = "magma")+
+        theme(legend.position = "none")
     
     relativestruct_plottED <- ggplot(relativestruct_tab,
                                      aes(x = week, y = proportion, color = as.factor(stage)))+
@@ -225,8 +231,8 @@ popstruct <- function(pop_tab, offspring_repli, parentsimID, spp){
         labs(x = "Week", y = "Relative abundace",
              title = "Population structure")+
         facet_wrap(~sp, nrow = length(unique(weekstruct_tab$sp)))+
-        theme(legend.position = "none")+
-        theme_minimal()
+        scale_color_viridis(discrete = TRUE, option = "magma")+
+        theme(legend.position = "none")
     
     return(list(a = weekstruct_tab, b = weekstruct_plottED,
                 c = relativestruct_tab, d = relativestruct_plottED))
@@ -255,7 +261,8 @@ richness <- function(pop_tab,parentsimID,disturbance,tdist){
                           stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
             geom_line(color = "dodgerblue2", size = 1.25)+
             geom_point()+
-            theme_minimal()
+            scale_color_viridis(discrete = TRUE, option = "magma")
+        
     } else {
         
         if (disturbance == "loss"){
@@ -272,11 +279,11 @@ richness <- function(pop_tab,parentsimID,disturbance,tdist){
             geom_errorbar(aes(ymin = mean_richness - sd_richness,
                               ymax = mean_richness + sd_richness),
                           stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
-            geom_line(color = "dodgerblue2", size = 1.25)+
+            geom_line(size = 1.25)+
             geom_point()+
             geom_vline(xintercept = tdist, linetype = 2, color = "red")+
             labs(x = "Time", y = "Spp. richness")+
-            theme_minimal()
+            scale_color_viridis(discrete = TRUE, option = "magma")
                                         #annotation_custom(my_grob)+
     }
     
@@ -302,7 +309,7 @@ rankabund <- function(pop_tab, timesteps){
     	ggplot(filter(relabund_tab, week %in% timestep),
 		aes(x = reorder(sp, -relabund), y = relabund))+
                 geom_bar(stat = "identity")+
-                theme_minimal()+
+                scale_color_viridis(discrete = TRUE, option = "magma")+
                 theme(axis.text.x = element_text(angle = 50, size = 10, vjust = 0.5))
     }
 
@@ -350,7 +357,7 @@ groupdyn <- function(output_repli, singlestages){
         geom_point()+
         facet_wrap(~emass, ncol = 1, nrow = 3)+
         labs(title = "Population structure per group size")+
-        theme_minimal()
+        scale_color_viridis(discrete = TRUE, option = "magma")
     
                                         # plot weigh variation
     groupweight_plot <- ggplot(data = weightdata_to_plot%>%
@@ -365,8 +372,8 @@ groupdyn <- function(output_repli, singlestages){
                       colour = "black", width=.01, position = position_dodge(0.1))+
         geom_line(position = position_dodge(0.1))+
         geom_point(position = position_dodge(0.1))+
-        facet_wrap(~emass, ncol = 1, nrow = 3)+
-        theme_bw()
+        scale_color_viridis(discrete = TRUE, option = "magma")+
+        facet_wrap(~emass, ncol = 1, nrow = 3)
     
     return(list(a = grouppop_tab, b = grouppop_plot, c = groupweight_plot))
     
@@ -393,7 +400,7 @@ production <- function(output_repli){
         geom_line()+
         labs(x = "Week",
              y = "Biomass production (kg)")+
-        theme_minimal()
+        scale_color_viridis(discrete = TRUE, option = "magma")
     
     return(production_plot)
 }
@@ -435,7 +442,8 @@ traitchange  <- function(output_repli, timesteps, species){
                        nrow = length(unique(timesteps)),
                        ncol = length(select(traitvalues_tab, tidyselect::ends_with("_mean"))),
                        scales = "free_y")+
-            background_grid(major = "xy", minor = "none")
+            background_grid(major = "xy", minor = "none")+
+            scale_color_viridis(discrete = TRUE, option = "magma")
 }
 
     traitvalues_plots <- species%>%
