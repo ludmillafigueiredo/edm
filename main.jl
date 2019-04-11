@@ -66,8 +66,8 @@ function parse_commandline()
 
         "--insect"
         help = "How to explicitly model insects:
-                                    pollination-independent reproduction \"indep\";
-                                    equal pollination loss for all species \"equal\"."
+                                        pollination-independent reproduction \"indep\";
+                                        equal pollination loss for all species \"equal\"."
         arg_type = String
         default = abspath(pwd(),"inputs/insects.csv")
 
@@ -122,10 +122,10 @@ end
 
 
 """
-                        read_landin(settings)
-                        Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
-                        Two methods because "real" landscapes do not need 
-                        """
+                            read_landin(settings)
+                            Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
+                            Two methods because "real" landscapes do not need 
+                            """
 
 function read_landpars(settings::Dict{String,Any})
     # Read in temperature time series, which is used in both modes
@@ -169,9 +169,9 @@ function read_landpars(settings::Dict{String,Any})
 	    # assigning type Any to disturbland is not possible
 	    disturbland = settings["disturbland"] #object has to be initialized
 	    if settings["disturbtype"] == "loss" 
-	       disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "proportion" => Float64))
+	        disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "proportion" => Float64))
 	    elseif settings["disturbtype"] == "frag"
-               disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("disturbland" => String))
+                disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("disturbland" => String))
             end
             @rput disturbland
             
@@ -182,15 +182,15 @@ function read_landpars(settings::Dict{String,Any})
 
             # if fragmentation is simulated, the file names are assgined to dist field, if area loss, the proportion holding columns, if none, default value nothing
 	    if disturbmatrix == "notfrag"
-	       landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
-                                                disturbland,
-	                                        select(temp_tsinput,:meantemp))
+	        landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
+                                                    disturbland,
+	                                            select(temp_tsinput,:meantemp))
 	    else
-	       landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
-                                                Int.(disturbmatrix),
-	                                        select(temp_tsinput,:meantemp))
+	        landpars = Setworld.NeutralLandPars(Int.(initialmatrix),
+                                                    Int.(disturbmatrix),
+	                                            select(temp_tsinput,:meantemp))
             end
-	#TODO block above can handle pollination
+	    #TODO block above can handle pollination
         else
             # send file names to R
             initialland = settings["initialland"]
@@ -216,9 +216,9 @@ function read_landpars(settings::Dict{String,Any})
 end
 
 """
-                        read_spinput(settings)
-                        Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
-                        """
+                            read_spinput(settings)
+                            Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
+                            """
 
 function read_spinput(settings::Dict{String,Any})
 
@@ -307,9 +307,9 @@ function read_spinput(settings::Dict{String,Any})
 end
 
 """
-                        implicit_insect(settings)
-                        Reads how insects are going to be implicitly simulated.
-                        """
+                            implicit_insect(settings)
+                            Reads how insects are going to be implicitly simulated.
+                            """
 function implicit_insect(settings::Dict{String,Any})
 
     insectsinput = loadtable(settings["insect"])
@@ -323,9 +323,9 @@ function implicit_insect(settings::Dict{String,Any})
 end
 
 """
-                        outputorgs(orgs,t,settings)
-                        Saves a long format table with the organisms field informations.
-                        """
+                            outputorgs(orgs,t,settings)
+                            Saves a long format table with the organisms field informations.
+                            """
 function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any})
 
     outorgs = find(x -> x.stage != "e", orgs)
@@ -375,12 +375,12 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
 end
 
 """
-                        loaddisturbance()
-                        Store parameters necessary to implement disturbance.
-                        """
+                            loaddisturbance()
+                            Store parameters necessary to implement disturbance.
+                            """
 function loaddisturbance(settings)
 
-tdist = nothing
+    tdist = nothing
     # read in the disturbance file, if not done so yet
 
     # select file according to keyword: loss, frag, temp
@@ -401,46 +401,46 @@ tdist = nothing
 
         else
             error("Please specify one of the disturbance scenarios with `--disturb`:
-                                          \n\'none\' if no disturbance should be simulated,
-                                          \n\'loss\' for habitat area loss,
-                                          \n\'frag\' for habitat fragmentation,
-                                          \n\'temp\' for temperature change,
-                                          \n\'poll\' for pollination loss.")
+                                              \n\'none\' if no disturbance should be simulated,
+                                              \n\'loss\' for habitat area loss,
+                                              \n\'frag\' for habitat fragmentation,
+                                              \n\'temp\' for temperature change,
+                                              \n\'poll\' for pollination loss.")
         end
     end
 end
 
 """
-                        disturb!()
+                            disturb!()
 
-                        """
+                            """
 function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{2}, orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any}, landpars::NeutralLandPars, tdist::Any)
     
-        if settings["disturbtype"] == "loss"
-            landscape, landavail = Setworld.destroyarea!(landpars, landavail, settings, t)
-        elseif settings["disturbtype"] == "frag"
-            landscape, landavail = Setworld.fragment!(landscape, landavail, landpars, t, tdist)
-        end
+    if settings["disturbtype"] == "loss"
+        landscape, landavail = Setworld.destroyarea!(landpars, landavail, settings, t)
+    elseif settings["disturbtype"] == "frag"
+        landscape, landavail = Setworld.fragment!(landscape, landavail, landpars, t, tdist)
+    end
 
-        Organisms.destroyorgs!(orgs, landavail, settings)
+    Organisms.destroyorgs!(orgs, landavail, settings)
 
-return landscape,landavail
+    return landscape,landavail
 
 end
-	
+
 """
-                        updateK!()
-                        Updates the carrying capacity of the landscape (`K`) and of each gridcell (`cK`). 
-                        """
+                            updateK!()
+                            Updates the carrying capacity of the landscape (`K`) and of each gridcell (`cK`). 
+                            """
 
 function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
 
     criticalts = Array{Int64,N} where N
     # check on which timesteps to write land dims (ifelse() does not work)
     if tdist == nothing
-       criticalts = [1]
+        criticalts = [1]
     else
-       criticalts = vcat(1, (tdist-1), tdist, (tdist+1))
+        criticalts = vcat(1, (tdist-1), tdist, (tdist+1))
     end
     
     if t in criticalts
@@ -478,14 +478,12 @@ function timing(operation::String, settings::Dict{String,Any})
 end
 
 """
-                        simulate!()
-                        """
+                            simulate!()
+                            """
 function simulate()
     # INITIALIZATION
     # Read in command line arguments
     settings = parse_commandline()
-
-    srand(settings["rseed"])
 
     # unity test
     println(keys(settings))
@@ -524,94 +522,112 @@ function simulate()
     
     println("Plants initialized: type $(typeof(orgs))")
 
+    cd(pwd())
+    
     println("Starting simulation")
 
-    try
-        mkpath("$(settings["outputat"])/$(settings["simID"])")
-        println("Output will be written to '$(settings["outputat"])'")
-    catch
-        println("Overwriting results to existing '$(settings["outputat"])/$(settings["simID"])' folder")
-    end
+    # Organize output folders
+    for rep in 1:settings["nreps"]
 
-    cd(pwd())
+        srand(settings["rseed"])
 
-    ##############################
-    # OUTPUT SIMULATION SETTINGS #
-    ##############################
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simsettings.jl")),"w") do ID
-        println(ID, "tdist = ", tdist)
-	println(ID, "landpars = ", typeof(landpars), "\ninitial = ", typeof(landpars.initialland), "\ndisturb = ", typeof(landpars.disturbland))  
-	println(ID, "interaction = ", interaction)
-	println(ID, "scen = ", scen)
-	println(ID, "regime = ", regime)
-	println(ID, "remaining = ", remaining)
-	println(ID, "commandsettings = ", settings)
-    end
-    
-    # START ID SIMULATION LOG FILE
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"w") do sim
-        println(sim,string("Simulation: ",settings["simID"],now()))
-    end
-
-    # START SEED PRODUCTION FILE
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv")),"w") do seedfile
-        writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
-    end
-
-    #############
-    # MODEL RUN #
-    #############
-    for t in 1:settings["timesteps"]
-
-        println("running week $t")
+        if settings["nreps"] = 1
+            simresults_folder = joinpath(settings["outputat"], settings["simID"])
+            results_folder = simresults_folder
+        else
+            simresults_folder = joinpath(settings["outputat"], string(settings["simID"], "_", rep))
+            results_folder = joinpath(settings["outputat"], settings["simID"])
+        end
         
-        # track simulation: header
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-            println(sim, "WEEK $t")
+        try
+            mkpath("$(simresults_folder)")
+            println("Output will be written to '$(simresults_folder)'")
+        catch
+            println("Overwriting results to existing '$(simresults_folder)' folder")
         end
 
-        # UPDATE temperature: weekly temperature and precipitation
-        T = updateenv!(t, landpars)
-	
-        # IMPLEMENT LANDSCAPE DISTURBANCE
-        if settings["disturbtype"] in ["frag" "loss"] && t in tdist  
-            landscape, landavail = disturb!(mylandscape,landavail,orgs,t,settings,landpars,tdist)
+        
+        ##############################
+        # OUTPUT SIMULATION SETTINGS #
+        ##############################
+        open(abspath(joinpath(simresults_folder, "simsettings.jl")),"w") do ID
+            println(ID, "tdist = ", tdist)
+	    println(ID, "landpars = ", typeof(landpars), "\ninitial = ", typeof(landpars.initialland), "\ndisturb = ", typeof(landpars.disturbland))  
+	    println(ID, "interaction = ", interaction)
+	    println(ID, "scen = ", scen)
+	    println(ID, "regime = ", regime)
+	    println(ID, "remaining = ", remaining)
+	    println(ID, "commandsettings = ", settings)
         end
-        updateK!(landavail, settings, t, tdist)
-	
-        # OUTPUT: First thing, to see how community is initialized
-        tic()
-        orgstable(orgs,t,settings)
-        timing("WRITING ORGSOUTPUT", settings)
-        toc()
-
-        # LIFE CYCLE
-        tic()
-
-        survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, seedm_factor, juvm_factor, adultm_factor)
-
-        global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T)
-
-        develop!(orgs, orgsref)
-
-        mate!(orgs, t, settings, scen, regime, tdist, remaining)
-
-        id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail, T)
-
-        seedsi = release!(orgs, t, settings, orgsref) # only recently released seeds need to disperse. The others only need to survive
-
-        disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
-
-        establish!(orgs, t, settings, orgsref, T)
         
-        shedd!(orgs, orgsref, t)
-        
-        timing("LIFE CYCLE", settings)
-        toc()
+        # START ID SIMULATION 1LOG FILE
+        open(abspath(joinpath(simresults_folder, "simulog.txt")),"w") do sim
+            println(sim,string("Simulation: ",settings["simID"],now()))
+        end
+
+        # START SEED PRODUCTION FILE
+        open(abspath(simresults_folder, "offspringproduction.csv")),"w") do seedfile
+            writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
+        end
+
+        #############
+        # MODEL RUN #
+        #############
+        for t in 1:settings["timesteps"]
+
+            println("running week $t")
+            
+            # track simulation: header
+            open(abspath(joinpath(results_folder, "simulog.txt")),"a") do sim
+                println(sim, "WEEK $t")
+            end
+
+            # UPDATE temperature: weekly temperature and precipitation
+            T = updateenv!(t, landpars)
+	    
+            # IMPLEMENT LANDSCAPE DISTURBANCE
+            if settings["disturbtype"] in ["frag" "loss"] && t in tdist  
+                landscape, landavail = disturb!(mylandscape,landavail,orgs,t,settings,landpars,tdist)
+            end
+            updateK!(landavail, settings, t, tdist)
+	    
+            # OUTPUT: First thing, to see how community is initialized
+            tic()
+            orgstable(orgs,t,settings)
+            timing("WRITING ORGSOUTPUT", settings)
+            toc()
+
+            # LIFE CYCLE
+            tic()
+
+            survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, seedm_factor, juvm_factor, adultm_factor)
+
+            global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T)
+
+            develop!(orgs, orgsref)
+
+            mate!(orgs, t, settings, scen, regime, tdist, remaining)
+
+            id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail, T)
+
+            seedsi = release!(orgs, t, settings, orgsref) # only recently released seeds need to disperse. The others only need to survive
+
+            disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
+
+            establish!(orgs, t, settings, orgsref, T)
+            
+            shedd!(orgs, orgsref, t)
+            
+            timing("LIFE CYCLE", settings)
+            toc()
+        end
     end
+
+    return results_folder
 end
+
 # run simulation
-simulate()
+results_folder = simulate()
 
 # analyse results
-analsyED(settings)
+Outputs.analsyED(settings, results_folder)

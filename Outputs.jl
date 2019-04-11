@@ -11,9 +11,10 @@ export analysED
     analsyED()
 Run R script of analysis after the model finishes the simulation
 """
-function analysED(settings)
-    outdir = settings["outputsat"]
-    @rput outdir
+function analysED(settings, results_folder)
+
+    parentsimID = settings["simID"]
+    @rput parentsimID
     EDdir = pwd()
     @rput EDdir
     nreps = settings["nreps"]
@@ -21,6 +22,9 @@ function analysED(settings)
     disturbance = settings["disturbtype"]
     @rput disturbance
 
+    outdir = results_folder
+    @rput outdir
+    
     # run analysis
     R"analysED.R"
     
