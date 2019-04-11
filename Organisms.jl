@@ -343,20 +343,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 # get another parent
                 conspp = orgs[rand(find(x -> x.sp == sp && x.stage == "a", orgs))] 
 
-                # account for seed mortality before computing new individuals. IMPORTANT: the number of seeds produced remains the same, but in order to avoid wasting computational power (and time) with individuals that will die, we calculate how many they will be even before creating them. The mortality probability is calculated according to the mean values of seed size and mortality constant predicted for the offspring. Actual vales of each new individuals are caulated separately
-                meanb0m = orgs[s].b0m + mean(rand(Distributions.Normal(0,abs(orgs[s].b0m-conspp.b0m+non0sd)/orgs[s].b0m), Int64(ceil(offs)))) #conversion to Int64 should not be necessary but offs Float64 occasionally (when offs = 1.0 or 2.0? unclear why, since wseedn is Int64)
-                #println("meanb0m = ", meanb0m)
-		# calculate mean seed mass from crossing, but values that are too high or too low
-                meanvalue = orgs[s].emass + mean(rand(Distributions.Normal(0,abs(orgs[s].emass-conspp.emass+non0sd)/orgs[s].emass), Int64(ceil(offs))))
-		1.5*orgsref.emass[orgs[s].sp] >= meanvalue >= 0.5*orgsref.emass[orgs[s].sp] ?
-		meanemass = meanvalue : meanemass = orgs[s].emass
-                # println("meanemass = ", meanemass)
-                meanBm = meanb0m * (meanemass^(-1/4))*exp(-aE/(Boltz*T)) #the mortality probability is calculated accrding to the 
-                mprob = 1 - exp(-meanBm) 
-                computoffs = offs - rand(Distributions.Binomial(offs, mprob))
-                #println("offs = ", offs, "computoffs = ", computoffs)
-
-                for n in 1:computoffs
+                for n in 1:offs
 
                     id_counter += 1 # update individual counter
 
