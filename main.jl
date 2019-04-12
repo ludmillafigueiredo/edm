@@ -624,11 +624,12 @@ function simulate()
         end
     end
 
-    return results_folder
+    return settings, results_folder
 end
 
 # run simulation
-results_folder = simulate()
+settings, results_folder = simulate()
 
 # analyse results
-Outputs.analsyED(settings, results_folder)
+analysED(settings, results_folder)
+

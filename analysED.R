@@ -2,8 +2,14 @@
                                         # This is an R script intended at faster analysis. Details on the RNotebook file of same name
 
                                         # Set up directory and environement to store analysis
-analysEDdir <- file.path(outdir, parentsimID, paste(parentsimID, "analysED", sep = "_"))
+analysEDdir <- file.path(outdir, paste(parentsimID, "analysED", sep = "_"))
 dir.create(analysEDdir)
+
+if(nreps > 1){
+	repfolder <- paste(file.path(outdir, parentsimID), 1:nreps, sep = "_"); #parentsimID
+}else{
+	repfolder <- outdir
+}
 
 # Load packages 
 library(tidyverse);
@@ -28,15 +34,14 @@ theme_set(theme_minimal())
 #' @param nreps Number of replicates
 #' @param outdir The path to the outputs folder, if not default
 #' @param EDdir The path to EDM, if not default
-getoutput <- function(parentsimID, nreps, outdir = file.path("~/model/EDoutputs"), EDdir = file.path("~/model")){
+getoutput <- function(parentsimID, repfolder, nreps, outdir, EDdir = file.path("~/model")){
     
                                         # initiliaze list to contain outputs 
                                         #outdatalist <- list()
-    for(rep in nreps){
-        repfolder <- file.path(outdir, parentsimID, paste(parentsimID, rep, sep = "_")); #parentsimID
+    for(repli in repfolder){
         
                                         # get raw outputs
-        outraw <- as_tibble(read.table(file.path(repfolder, "orgsweekly.txt"), header = TRUE, sep = "\t"));
+        outraw <- as_tibble(read.table(file.path(repli, "orgsweekly.txt"), header = TRUE, sep = "\t"));
                                         # clean it
         ## take parentheses out of location column ("()")
         loc <- gsub("[\\(|\\)]", "", outraw$location)
@@ -47,7 +52,7 @@ getoutput <- function(parentsimID, nreps, outdir = file.path("~/model/EDoutputs"
         outdata <- as_tibble(cbind(select(outraw, -one_of("location")), loc))
         rm(loc)
                                         # write single files in its folders
-        write.csv(outdata, file.path(repfolder, paste(parentsimID, "indout.csv", sep = "")), row.names = FALSE)
+        write.csv(outdata, file.path(repli, paste(parentsimID, "indout.csv", sep = "")), row.names = FALSE)
                                         # append to replicates list
                                         #outdatalist <- c(outdatalist, 
                                         #outdata)
@@ -59,17 +64,18 @@ getoutput <- function(parentsimID, nreps, outdir = file.path("~/model/EDoutputs"
 #' Output on juvenile and adult individuals are kept separate because they offspring contains weekly abundances of each species, whereas the juv/adult output is individual-based.
 #' @param parentsimID simulation ID
 #' @param nreps number of replicates, which identify the folders containing results
-orgreplicates <- function(parentsimID, nreps){
+orgreplicates <- function(parentsimID, repfolder, nreps){
     
     output_repli <- data.frame()
     offspring_repli <- data.frame()
     
-    for(sim in c(paste(parentsimID, seq(1, nreps), sep = "_"))) {
-        repfolder <- file.path(outdir, parentsimID, sim); # replicate folder
+    for(i in 1:nreps) {
+        sim <- paste(parentsimID, i, sep = "_")
+        folder <- repfolder[i]
         # read outputs of juv/adults and of offspring
-        outdatasim <- read.csv(file.path(repfolder, paste(parentsimID, "indout.csv", sep = "")), header = TRUE)%>%
+        outdatasim <- read.csv(file.path(folder, paste(parentsimID, "indout.csv", sep = "")), header = TRUE)%>%
             mutate(repli = as.factor(rep(sim, nrow(.)))) #include a replication column, to identify replicates
-        offspringsim <- read.table(file.path(repfolder, "offspringproduction.csv"), header = TRUE, sep = "\t")%>%
+        offspringsim <- read.table(file.path(folder, "offspringproduction.csv"), header = TRUE, sep = "\t")%>%
             mutate(repli = as.factor(rep(sim, nrow(.))))
         
         # fill in cleanoutput object (necessary step because of bind_rows)
@@ -159,7 +165,7 @@ popabund <- function(output_repli){
         geom_point(position=position_dodge(0.1))+
         labs(x = "Year", y = "Abundance (mean +- sd)",
              title = "Species abundance variation")+
-        scale_color_brewer(palette = "Dark2")+ #scale_color_viridis(discrete = TRUE, option = "magma")+
+        scale_color_viridis(discrete = TRUE, option = "magma")+
         theme(legend.position = "none")
     
     return(list(a = pop_tab, b = spabund_tab, c = abund_plottED))
@@ -505,10 +511,10 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
 #                          Organize analysis output                        #
 ############################################################################
 
-cleanoutput <- getoutput(parentsimID, nreps, outdir = outdir, EDdir = EDdir)  
+cleanoutput <- getoutput(parentsimID, repfolder, nreps, outdir = outdir, EDdir = EDdir)  
 
 ## Identify replicates
-replicates <- orgreplicates(parentsimID,nreps)
+replicates <- orgreplicates(parentsimID, repfolder, nreps)
 replicates$a -> output_repli
 replicates$b -> offspring_repli
 rm(replicates)
@@ -569,10 +575,11 @@ traitschange$a -> traitvalues_tab
 traitschange$b -> traitvalues_plot # no 's' so it can be detected by `plotall`
 rm(traitschange)
 ### trait space
-traitspace <- traitspacechange(traitvalues_tab, timesteps)
-traitspace$a -> traitpcas
-traitspace$b -> timepca
-traitspace$c -> timepca_plot
+#traitspace <- traitspacechange(traitvalues_tab, timesteps)
+#traitspace$a -> traitpcas
+#traitspace$b -> timepca
+#traitspace$c -> timepca_plot
+#rm(traitspace)
 
 # Save bundle of tabs and plots as RData
 save(cleanoutput,
@@ -584,7 +591,7 @@ save(cleanoutput,
      relabund_tab, rankabunds_plot,
      grouppop_plot, grouppop_tab, groupweight_plot,
      traitvalues_tab, traitvalues_plot,
-     traitpcas, timepca, timepca_plot,
+     #traitpcas, timepca, timepca_plot,
      file = file.path(analysEDdir, 
                       paste(parentsimID, ".RData", sep = "")))
 
