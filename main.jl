@@ -527,6 +527,7 @@ function simulate()
     println("Starting simulation")
 
     # Organize output folders
+    results_folder = string()
     for rep in 1:settings["nreps"]
 
         srand(settings["rseed"])
