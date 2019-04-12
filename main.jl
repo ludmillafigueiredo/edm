@@ -316,10 +316,9 @@ function implicit_insect(settings::Dict{String,Any})
     
     interaction = select(insectsinput, :interaction)[1]
     scen = select(insectsinput, :scen)[1] # pollination scenario
-    regime = select(insectsinput, :regime)[1] # regime of loss
     remaining = select(insectsinput, :remaining) # proportion of pollination service loss
     
-    return interaction, scen, regime, remaining
+    return interaction, scen, remaining
 end
 
 """
@@ -507,7 +506,7 @@ function simulate()
     println("Sp info stored in object of type $(typeof(orgsref))")
 
     # Set insects implicit simulation
-    interaction, scen, regime, remaining = implicit_insect(settings)
+    interaction, scen, remaining = implicit_insect(settings)
     
     # Create landscape
     mylandscape, landavail = Setworld.landscape_init(landpars)
@@ -556,7 +555,6 @@ function simulate()
 	    println(ID, "landpars = ", typeof(landpars), "\ninitial = ", typeof(landpars.initialland), "\ndisturb = ", typeof(landpars.disturbland))  
 	    println(ID, "interaction = ", interaction)
 	    println(ID, "scen = ", scen)
-	    println(ID, "regime = ", regime)
 	    println(ID, "remaining = ", remaining)
 	    println(ID, "commandsettings = ", settings)
         end
@@ -607,7 +605,7 @@ function simulate()
 
             develop!(orgs, orgsref)
 
-            mate!(orgs, t, settings, scen, regime, tdist, remaining)
+            mate!(orgs, t, settings, scen, tdist, remaining)
 
             id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail, T)
 
