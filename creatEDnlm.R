@@ -3,7 +3,7 @@
 #library(grid)
 #library(gtable)
 
-creatEDnlm <- function(loss, area, dir, createcontrol = TRUE){
+creatEDnlm <- function(loss, area, inputsdir){
 
     # required packages
     require(NLMR)
@@ -18,17 +18,19 @@ creatEDnlm <- function(loss, area, dir, createcontrol = TRUE){
                                     ai = c(loss, 1-loss))
 
 				    
-    # write files
+    # write files: name has format frag/control_percentageloss_initialarea.grd
     writeRaster(fragmented,
-                paste(file.path(dir,"frag_"),loss*100, "_", area,".grd", sep = ""),
+                paste(file.path(dir,"frag_"),loss*100, "_", area,"ha.grd", sep = ""),
                 format = "raster")
 
-    if (createcontrol){
+    # create control file, if there isn't one yet
+    controlfilename = paste("control_", area,"ha.grd", sep = "")
+    if (!(controlfilename %in% list.files(inputsdir))){
         control = fragmented
-        values(control) = 1
+        values(control) = 1 #size is the same but values differ
         # write control file
         writeRaster(control,
-                    paste(file.path(dir,"control_"),loss*100, "_", area,".grd", sep = ""),
+                    file.paht(inputsdir,controlfilename),
                     format = "raster")
     }
 
