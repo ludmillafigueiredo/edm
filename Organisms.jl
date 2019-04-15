@@ -231,7 +231,7 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
                 println("Scenario of EQUAL pollination loss")
                 # calculate the amount of loss for the specified times
                 if t in tdist
-                    npoll = Int(ceil(defaultnpoll * remaining[find(tdist == [t])[1]])
+                    npoll = Int(ceil(defaultnpoll * remaining[find(tdist == [t])[1]]))
                 else
                     npoll = defaultnpoll
                 end
