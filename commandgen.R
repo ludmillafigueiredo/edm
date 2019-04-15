@@ -1,4 +1,4 @@
-command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rseed, outputsdir, spinput, insectsf, initiallandf, disturbtype, landmode, disturbland, tdist, timesteps, tout, tempf, timemsg = "false",  reps = FALSE, nreps = NULL) {
+command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rseed, outputsdir, spinput, insectsf, initiallandf, disturbtype, landmode, disturbland, tdist, timesteps, tout, tempf, timemsg = "false", nreps = NULL) {
   
   # Generate arguments in Julia parse-format 
   parseformat <- function(x, y){
@@ -95,7 +95,13 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
                      parseformat(file.path(inputsdir, tdist)),
                      sep = " ")
   }
-  
+  if(nreps > 1){
+    command <- paste(command,
+                     "--nreps",
+                     parseformat(nreps),
+                     sep = " ")
+  }
+
   # Write command in script for safe-keeping 
   if (cluster == "gaia") {
     scriptname <- paste(simID,".sh", sep = "")
@@ -113,20 +119,10 @@ command <- function(cluster, EDdir, inputsdir, Juliadir, scriptsdir, simID, rsee
     scriptname <- paste(simID,"hpc.sh", sep = "")
     file.create(file.path(scriptsdir,scriptname)) # I create the scripts on Gaia, not in the HPC
     hpcscript <- file(file.path(file.path(scriptsdir,scriptname)))
-    if (reps){
-      writeLines(c("!/bin/bash",
-                   paste("reps=($(seq 1 ", nreps, "))", sep = ""),
-                   paste("for i in `seq 1 ", nreps, "`; do", sep = ""),
-                   paste("simID=\"", simID, "_$i\"", sep = ""),
-                   paste("randomseed=\"$i\n"),
+    writeLines(c("#!/bin/bash",
                    command,
                    "done"),
                  hpcscript)
-    }else{
-        writeLines(c("#!/bin/bash/n",
-                     command),
-                   hpcscript)
-    }
   }
   
   
