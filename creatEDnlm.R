@@ -20,7 +20,7 @@ creatEDnlm <- function(loss, area, inputsdir){
 				    
     # write files: name has format frag/control_percentageloss_initialarea.grd
     writeRaster(fragmented,
-                paste(file.path(dir,"frag_"),loss*100, "_", area,"ha.grd", sep = ""),
+                file.path(inputsdir, paste("frag_",loss*100, "_", area,"ha.grd", sep = "")),
                 format = "raster")
 
     # create control file, if there isn't one yet
@@ -30,7 +30,7 @@ creatEDnlm <- function(loss, area, inputsdir){
         values(control) = 1 #size is the same but values differ
         # write control file
         writeRaster(control,
-                    file.paht(inputsdir,controlfilename),
+                    file.path(inputsdir, controlfilename),
                     format = "raster")
     }
 
