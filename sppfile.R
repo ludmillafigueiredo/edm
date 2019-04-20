@@ -34,7 +34,7 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, spplist = NULL){
     kernel <- traits$kernel
 
     ## clonality trait
-    clonal <- sample(c("true","false"), richp, replace = TRUE);
+    clonal <- traits$clonal
 
     ## get trait mean values and sd of LEDA/Weiss traits
     emass <- traits$emass
