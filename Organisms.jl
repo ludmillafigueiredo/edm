@@ -18,10 +18,12 @@ export Organism, OrgsRef, initorgs, develop!, allocate!, mate!, mkoffspring!, di
 # Set up model constants
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 const aE = 0.63 #0.65 - eV Brown & Sibly MTE book chap 2
-const µ_wind = 0.1
-const λ_wind = 3
-const µ_ant = 1
-const λ_ant = 0.2
+const µ_short = 1
+const λ_short = 0.2
+const µ_medium = 0.2
+const λ_medium = 3
+const µ_long = 1000
+const λ_long = 100
 
 # Initial organisms parametrization is read from an input file and stored in OrgsRef
 mutable struct OrgsRef
@@ -465,17 +467,30 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
 
     # Only seeds that have been released can disperse 
     for d in seedsi
-        if orgs[d].kernel == "a"
-            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
-        elseif orgs[d].kernel == "w"
-            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])           
-        elseif orgs[d].kernel == "wa"
-            µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
-            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
-
-        else
+        if orgs[d].kernel == "short"
+            µ, λ = [µ_short λ_short]
+        elseif orgs[d].kernel == "medium"
+            µ, λ = [µ_medium λ_medium]           
+        elseif orgs[d].kernel == "long"
+            µ, λ = [µ_long λ_long]           
+        elseif orgs[d].kernel in ["medium-short", "short-medium"]
+            µ, λ = rand([[µ_short λ_short],
+		   	 [µ_medium λ_medium]]
+        elseif orgs[d].kernel in ["medium-long", "long-medium"]
+            µ, λ = rand([[µ_long λ_long],
+		   	 [µ_medium λ_medium]]    
+        elseif orgs[d].kernel in ["long-short", "short-long"]
+            µ, λ = rand([[µ_short λ_short],
+		   	 [µ_long λ_long]]                
+        elseif orgs[d].kernel == "any"
+            µ,λ = rand([[µ_short λ_short],
+	    	        [µ_medium λ_medium],
+	    		[µ_long λ_long]])
+                    else
             error("Check dispersal kernel input for species $(orgs[d].sp).")
         end
+
+	dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
 
         # Find the cell to which it is dispersing
         θ = rand(Distributions.Uniform(0,2),1)[1]*pi
