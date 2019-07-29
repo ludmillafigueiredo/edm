@@ -22,6 +22,7 @@ const µ_wind = 0.1
 const λ_wind = 3
 const µ_ant = 1
 const λ_ant = 0.2
+const Q = 5
 
 # Initial organisms parametrization is read from an input file and stored in OrgsRef
 mutable struct OrgsRef
@@ -162,26 +163,28 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
         b0 = orgs[o].b0grow
         
         #only vegetative biomass helps growth
-        grown_mass = b0*(orgs[o].mass["veg"])^(3/4)*exp(-aE/(Boltz*T))
+        B_grow = b0*(orgs[o].mass["veg"])^(-1/4)*exp(-aE/(Boltz*T))
+        # Growth happens according to the Richards model
+        new_mass = orgs[o].seedmass + orgs[o].maxmass/((1 + Q*exp(-B_grow*(t-orgs[o].firstflower)))^(1/Q))
         
-        if isapprox(grown_mass,0) # if it is not growing, there is no need to allocate
+        if isapprox(new_mass,0) # if it is not growing, there is no need to allocate
             push!(nogrowth,o)
         elseif orgs[o].stage == "j"
             # juveniles grow vegetative biomass only
-            orgs[o].mass["veg"] += grown_mass 
+            orgs[o].mass["veg"] = new_mass 
         elseif orgs[o].stage == "a" &&
             (orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
             (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass))
             # adults in their reproductive season and with enough weight, invest in reproduction
-            #sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + grown_mass)^0.95)
+            #sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + new_mass)^0.95)
             if haskey(orgs[o].mass,"repr")
-                orgs[o].mass["repr"] += grown_mass #sowingmass 
+                orgs[o].mass["repr"] += new_mass #sowingmass 
             else
-                orgs[o].mass["repr"] = grown_mass #sowingmass
+                orgs[o].mass["repr"] = new_mass #sowingmass
             end
         elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].maxmass
             # adults that have not yet reached maximum size can still grow vegetative biomass, independently of the season
-            orgs[o].mass["veg"] += grown_mass 
+            orgs[o].mass["veg"] += new_mass 
         end            
     end
     return nogrowth
@@ -655,7 +658,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                     mprob = 1 - exp(-Bm)
                     
                     #unity test: Check mortality rate to probability conversion
-                    if mprob < 0
+                   if mprob < 0
                         error("mprob < 0")
                         mprob = 0
                     elseif mprob > 1
