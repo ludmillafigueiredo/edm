@@ -2,7 +2,7 @@
 
 goetspp <- function(inputID, rseed, mode, richp = NULL, spplist = NULL){
 
-    library(tidyverse)
+    require(tidyverse)
     options(scipen=999)
 
     set.seed(rseed)
@@ -12,6 +12,9 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, spplist = NULL){
       EDdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/")
       EDdocsdir <- file.path(EDdir, "models_docs/")
       traitsdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis","functional_types")
+    }else if (Sys.info()["user"] == "ubuntu") {
+      EDdir <- file.path("/home/ubuntu/model")
+      traitsdir <- file.path(EDdir, "inputs")
     }else{
       EDdir <- file.path("/home/luf74xx/model")
       EDdocsdir <- file.path("/home/luf74xx/Dokumente/model_docs")
@@ -23,11 +26,13 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, spplist = NULL){
     ## table with species traits from leda and Weiss classification
     spptraits <- read_csv(file.path(traitsdir, "goetspp_EDMtraits.csv"),
                           col_names = TRUE)
+    spptraits$species <- str_replace(spptraits$species, " ", "_")
+    
     traits = c()
     
     if (mode == "spplist"){
                                         # read species lists
-        spps <- read_table(file.path(spplist), header = TRUE, sep = ",")
+        spps <- read_csv(file.path(spplist), col_names = TRUE)
                                         # select spp from the list that have known trait values
         traits <- spptraits %>% filter(species %in% spps$species)
         richp <- length(traits$species)
@@ -39,19 +44,18 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, spplist = NULL){
     }
 
     ## initial abundances
-    abund <-ceiling(runif(richp,20,100))
+    sppinput <- traits%>%
+                add_column(abund = ceiling(runif(richp,20,100)),
+                           sp_id = paste(rep("p", richp), 1:richp, sep = "-"))%>%
+                dplyr::select(sp_id, abund, species:seedoff_sd)
 
-    ## output species id used in EDM
-    spEDMid <- data.frame(sp = traits$sp,
-                          id = paste(rep("p", richp), 1:richp, sep = "-"));
-    write.csv(spEDMid, file.path(inputsdir, "spp_input", paste(inputID, "ids.csv", sep = "")), row.names = FALSE)
+    ## output species id used in EDM            
+    write.csv(dplyr::select(sppinput, species, sp_id),
+              file.path(inputsdir, paste(inputID, "ids.csv", sep = "")), row.names = FALSE)
 
 ### Write file
-    spptable <- data.frame(sp_id = spEDMid$id,
-                           abund = abund,
-                           select(traits, -sp))
-    
-    write.csv(spptable, file.path(inputsdir,paste(inputID, "_sppinput.csv", sep = "")), row.names = FALSE)
+    write.csv(dplyr::select(sppinput, -species),
+              file.path(inputsdir,paste(inputID, "_sppinput.csv", sep = "")), row.names = FALSE)
 
-    return(spptable)
+    return(sppinput)
 }
