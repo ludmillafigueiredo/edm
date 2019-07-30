@@ -564,7 +564,7 @@ end
                                 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
                                 plants in nogrwth are subjected to two probability rates
                                 """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, seedm_factor, juvm_factor, adultm_factor)
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::BitArray{2},T, nogrowth::Array{Int64,1})
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
     #    println(sim,"Running mortality")
     #end
@@ -584,7 +584,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
             if orgs[o].age >= orgs[o].bankduration
                 mprob = 1
             elseif rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
-                Bm = orgs[o].b0mort * seedm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+                Bm = orgs[o].b0mort * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
                 #println("Bm: $Bm, b0mort = $(orgs[o].b0mort), seed mass = $(orgs[o].mass["veg"])")
                 mprob = 1 - exp(-Bm)
             else
@@ -596,9 +596,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
             
         else #calculate mortality for juveniles or adults
             if orgs[o].stage == "j"
-                Bm = orgs[o].b0mort * juvm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+                Bm = orgs[o].b0mort * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             else
-                Bm = orgs[o].b0mort * adultm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+                Bm = orgs[o].b0mort *  (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             end
 
             mprob = 1 - exp(-Bm)
@@ -663,11 +663,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                     d = rand(samegrid,1)[1]
 
                     if d.stage == "s"
-                        Bm = d.b0mort * seedm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        Bm = d.b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                     elseif d.stage == "j"
-                        Bm = d.b0mort * juvm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        Bm = d.b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                     else
-                        Bm = d.b0mort * adultm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T)) 
+                        Bm = d.b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T)) 
                     end
                     # calculate probability
                     mprob = 1 - exp(-Bm)
