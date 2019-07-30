@@ -576,8 +576,8 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                 mprob = 0
             end 
 
-        elseif orgs[o].age >= orgs[o].span #oldies die
-            mprob = 1
+        #elseif orgs[o].age >= orgs[o].span #oldies die
+        #    mprob = 1
             
         else #calculate mortality for juveniles or adults
             if orgs[o].stage == "j"
