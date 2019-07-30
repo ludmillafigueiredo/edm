@@ -18,10 +18,12 @@ export Organism, OrgsRef, initorgs, develop!, allocate!, mate!, mkoffspring!, di
 # Set up model constants
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 const aE = 0.63 #0.65 - eV Brown & Sibly MTE book chap 2
-const µ_wind = 0.1
-const λ_wind = 3
-const µ_ant = 1
-const λ_ant = 0.2
+const µ_short = 1
+const λ_short = 0.2
+const µ_medium = 0.2
+const λ_medium = 3
+const µ_long = 1000
+const λ_long = 100
 const Q = 5
 
 # Initial organisms parametrization is read from an input file and stored in OrgsRef
@@ -31,8 +33,21 @@ mutable struct OrgsRef
     kernel::Dict{String,String}
     clonality::Dict{String,Bool}
     seedmass::Dict{String,Float64}
-    bankduration_mean::Dict{String,Int}
+    maxmass::Dict{String,Int}
+    span_mean::Dict{String,Float64}
+    span_sd::Dict{String,Float64}
+    firstflower_mean::Dict{String,Float64}
+    firstflower_sd::Dict{String,Float64} 
+    bankduration_mean::Dict{String,Float64}
     bankduration_sd::Dict{String,Float64}
+    seednumber_mean::Dict{String,Float64}
+    seednumber_sd::Dict{String,Float64}
+    b0grow_mean::Dict{String,Float64}
+    b0grow_sd::Dict{String,Float64}
+    b0germ_mean::Dict{String,Float64}
+    b0germ_sd::Dict{String,Float64}
+    b0mort_mean::Dict{String,Float64}
+    b0mort_sd::Dict{String,Float64}
     floron_mean::Dict{String,Int}
     floron_sd::Dict{String,Float64}
     floroff_mean::Dict{String,Int}
@@ -41,17 +56,6 @@ mutable struct OrgsRef
     seedon_sd::Dict{String,Float64}
     seedoff_mean::Dict{String,Int}
     seedoff_sd::Dict{String,Float64}
-    span_mean::Dict{String,Int}
-    span_sd::Dict{String,Float64}
-    b0grow_mean::Dict{String,Float64}
-    b0grow_sd::Dict{String,Float64}
-    b0mort_mean::Dict{String,Float64}
-    b0mort_sd::Dict{String,Float64}
-    b0germ_mean::Dict{String,Float64}
-    b0germ_sd::Dict{String,Float64}
-    seednumber_mean::Dict{String,Int}
-    seednumber_sd::Dict{String,Float64}
-    maxmass::Dict{String,Int}
 end
 
 mutable struct Organism
@@ -60,20 +64,21 @@ mutable struct Organism
     location::Tuple # (x,y)
     sp::String #sp id, easier to read
     kernel::String
-    clonal::Bool
+    clonality::Bool
     #### Evolvable traits ####
     seedmass::Float64
-    bankduration::Int64
+    maxmass::Float64
+    span::Int
+    firstflower::Int
+    bankduration::Int
+    seednumber::Int
+    b0grow::Float64
+    b0germ::Float64
+    b0mort::Float64
     floron::Int
     floroff::Int
     seedon::Int
     seedoff::Int
-    span::Int64
-    b0grow::Float64
-    b0mort::Float64
-    b0germ::Float64
-    wseedn::Int64 # maximum number of seeds produced/week
-    maxmass::Float64
     #### State variables #### 
     age::Int64 # control death when older than max. lifespan
     mass::Dict{String, Float64}
@@ -106,27 +111,28 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
                               (XYs[i,1],XYs[i,2]),
                               s,
                               orgsref.kernel[s],
-                              orgsref.clonal[s],
+                              orgsref.clonality[s],
                               orgsref.seedmass[s],
+			      orgsref.maxmass[s], #maxmass
+			      Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s]+non0sd),1)[1])),
+			      Int(round(rand(Distributions.Normal(orgsref.firstflower_mean[s], orgsref.firstflower_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.bankduration_mean[s],orgsref.bankduration_sd[s]+non0sd),1)[1])),
+			      0, #seed number
+			      rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s]+non0sd),1)[1],
+			      rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s]+non0sd),1)[1],
+			      rand(Distributions.Normal(orgsref.b0mort_mean[s],orgsref.b0mort_sd[s]+non0sd),1)[1],
                               Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.b0mort_mean[s],orgsref.b0mort_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s]+non0sd),1)[1])),
-                              0, #wseedn
-                              orgsref.maxmass[s], #maxmass
                               0, #age
                               Dict("veg" => 0.0, "repr" => 0.0), #mass
                               false) #mated
 
             ## Set conditional traits and variables
             # weekly number of seeds
-	    seednumber = Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1]))
-            neworg.wseedn = Int(round(seednumber/(neworg.floroff-neworg.floron+1)))
+	    nseeds = rand(Distributions.Normal(orgsref.seednumber_mean[s],orgsref.seednumber_sd[s]+non0sd),1)[1]
+            neworg.seednumber = Int(round(nseeds/(neworg.floroff-neworg.floron+1)))
 
             # initial biomass
             if neworg.stage == "e"                  
@@ -317,7 +323,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 continue
             else
                 # limit offspring production to the maximal number of seeds the species can produce
-                offs > orgs[s].wseedn ? offs = orgs[s].wseedn : offs
+                offs > orgs[s].seednumber ? offs = orgs[s].seednumber : offs
 
                 # update available biomass for reproduction
                 orgs[s].mass["repr"] -= (offs * seedmass)
@@ -374,7 +380,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     end
     
     # Asexually produced offspring
-    asexuals = filter(x -> x.mated == false && x.clonal == true && x.mass["repr"] > x.seedmass, orgs) #find which the individuals the can reproduce assexually and then go through them, by species
+    asexuals = filter(x -> x.mated == false && x.clonality == true && x.mass["repr"] > x.seedmass, orgs) #find which the individuals the can reproduce assexually and then go through them, by species
 
     for sp in unique(getfield.(asexuals, :sp))
         cloning = find(x -> x.sp == sp && x.id in unique(getfield.(asexuals, :id)) , orgs)
@@ -394,7 +400,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 continue
             else
                 # limit offspring production to the maximal number of seeds the species can produce
-                offs > orgs[c].wseedn ? offs = orgs[c].wseedn : offs
+                offs > orgs[c].seednumber ? offs = orgs[c].seednumber : offs
 
                 # count clonal production  
                 spclonescounter += offs
@@ -468,17 +474,30 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
 
     # Only seeds that have been released can disperse 
     for d in seedsi
-        if orgs[d].kernel == "a"
-            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_ant,λ_ant),1)[1])
-        elseif orgs[d].kernel == "w"
-            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ_wind,λ_wind),1)[1])           
-        elseif orgs[d].kernel == "wa"
-            µ,λ = rand([[µ_wind λ_wind],[µ_ant λ_ant]])
-            dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
-
-        else
+        if orgs[d].kernel == "short"
+            µ, λ = [µ_short λ_short]
+        elseif orgs[d].kernel == "medium"
+            µ, λ = [µ_medium λ_medium]           
+        elseif orgs[d].kernel == "long"
+            µ, λ = [µ_long λ_long]           
+        elseif orgs[d].kernel in ["medium-short", "short-medium"]
+            µ, λ = rand([[µ_short λ_short],
+		   	 [µ_medium λ_medium]])
+        elseif orgs[d].kernel in ["medium-long", "long-medium"]
+            µ, λ = rand([[µ_long λ_long],
+		   	 [µ_medium λ_medium]])    
+        elseif orgs[d].kernel in ["long-short", "short-long"]
+            µ, λ = rand([[µ_short λ_short],
+		   	 [µ_long λ_long]])                
+        elseif orgs[d].kernel == "any"
+            µ,λ = rand([[µ_short λ_short],
+	    	        [µ_medium λ_medium],
+	    		[µ_long λ_long]])
+                    else
             error("Check dispersal kernel input for species $(orgs[d].sp).")
         end
+
+	dist = Fileprep.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
 
         # Find the cell to which it is dispersing
         θ = rand(Distributions.Uniform(0,2),1)[1]*pi
@@ -549,7 +568,7 @@ end
                                 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
                                 plants in nogrwth are subjected to two probability rates
                                 """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, seedm_factor, juvm_factor, adultm_factor)
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::BitArray{2},T, nogrowth::Array{Int64,1})
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
     #    println(sim,"Running mortality")
     #end
@@ -569,7 +588,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
             if orgs[o].age >= orgs[o].bankduration
                 mprob = 1
             elseif rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
-                Bm = orgs[o].b0mort * seedm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+                Bm = orgs[o].b0mort * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
                 #println("Bm: $Bm, b0mort = $(orgs[o].b0mort), seed mass = $(orgs[o].mass["veg"])")
                 mprob = 1 - exp(-Bm)
             else
@@ -581,9 +600,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
             
         else #calculate mortality for juveniles or adults
             if orgs[o].stage == "j"
-                Bm = orgs[o].b0mort * juvm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+                Bm = orgs[o].b0mort * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             else
-                Bm = orgs[o].b0mort * adultm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+                Bm = orgs[o].b0mort *  (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             end
 
             mprob = 1 - exp(-Bm)
@@ -648,11 +667,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                     d = rand(samegrid,1)[1]
 
                     if d.stage == "s"
-                        Bm = d.b0mort * seedm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        Bm = d.b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                     elseif d.stage == "j"
-                        Bm = d.b0mort * juvm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        Bm = d.b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                     else
-                        Bm = d.b0mort * adultm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T)) 
+                        Bm = d.b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T)) 
                     end
                     # calculate probability
                     mprob = 1 - exp(-Bm)

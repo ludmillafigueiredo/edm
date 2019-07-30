@@ -20,7 +20,7 @@ using RCall
 using Outputs
 
 # upload stage-specific mortality rates
-include("metabolicrates.jl")
+#include("metabolicrates.jl")
 
 #const Boltz = 1.38064852e-23 # Alternatively:
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
@@ -226,6 +226,7 @@ function read_spinput(settings::Dict{String,Any})
     spinputtbl = loadtable(settings["spinput"])
 
     orgsref = OrgsRef(Array(rows(spinputtbl,:sp_id)),
+    
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:abund)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
@@ -233,18 +234,58 @@ function read_spinput(settings::Dict{String,Any})
                            rows(spinputtbl,:kernel)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:clonal)[i] == "true" #translates R's true into Julia's TRUE
+                           rows(spinputtbl,:clonality)[i] == "true" #translates R's true into Julia's TRUE
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:emass)[i]
+                           rows(spinputtbl,:seedmass)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:elong_mean)[i]
+                           rows(spinputtbl,:maxmass)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id)))
+,
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:span_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:elong_sd)[i]
+                           rows(spinputtbl,:span_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+	              Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:firstflower_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:firstflower_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:bankduration_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:bankduration_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seednumber_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seednumber_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0grow_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0grow_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0germ_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0germ_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0mort_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0mort_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+			   Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:floron_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
@@ -267,39 +308,6 @@ function read_spinput(settings::Dict{String,Any})
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:seedoff_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:span_mean)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:span_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0grow_mean)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0grow_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0m_mean)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0m_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0germ_mean)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:b0germ_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:maxseedn_mean)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:maxseedn_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:maxmass)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id)))
                       )
     return orgsref
@@ -351,18 +359,18 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
                                       orgs[o].location,
                                       orgs[o].sp,
                                       orgs[o].kernel,
-                                      orgs[o].clonal,
-                                      orgs[o].emass,
-                                      orgs[o].elong,
+                                      orgs[o].clonality,
+                                      orgs[o].seedmass,
+                                      orgs[o].bankduration,
                                       orgs[o].floron,
                                       orgs[o].floroff,
                                       orgs[o].seedon,
                                       orgs[o].seedoff,
                                       orgs[o].span,
                                       orgs[o].b0grow,
-                                      orgs[o].b0m,
+                                      orgs[o].b0mort,
                                       orgs[o].b0germ,
-                                      orgs[o].wseedn,
+                                      orgs[o].seednumber,
                                       orgs[o].maxmass,
                                       orgs[o].age,
                                       orgs[o].mass["veg"],
@@ -599,7 +607,7 @@ function simulate()
             # LIFE CYCLE
             tic()
 
-            survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, seedm_factor, juvm_factor, adultm_factor)
+            survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth)
 
             global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T)
 
