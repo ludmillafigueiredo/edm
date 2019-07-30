@@ -24,16 +24,17 @@ const µ_medium = 0.2
 const λ_medium = 3
 const µ_long = 1000
 const λ_long = 100
+const Q = 5
 
 # Initial organisms parametrization is read from an input file and stored in OrgsRef
 mutable struct OrgsRef
     sp_id::Array{String, 1}
     abund::Dict{String,Int}
     kernel::Dict{String,String}
-    clonal::Dict{String,Bool}
-    emass::Dict{String,Float64}
-    elong_mean::Dict{String,Int}
-    elong_sd::Dict{String,Float64}
+    clonality::Dict{String,Bool}
+    seedmass::Dict{String,Float64}
+    bankduration_mean::Dict{String,Int}
+    bankduration_sd::Dict{String,Float64}
     floron_mean::Dict{String,Int}
     floron_sd::Dict{String,Float64}
     floroff_mean::Dict{String,Int}
@@ -46,12 +47,12 @@ mutable struct OrgsRef
     span_sd::Dict{String,Float64}
     b0grow_mean::Dict{String,Float64}
     b0grow_sd::Dict{String,Float64}
-    b0m_mean::Dict{String,Float64}
-    b0m_sd::Dict{String,Float64}
+    b0mort_mean::Dict{String,Float64}
+    b0mort_sd::Dict{String,Float64}
     b0germ_mean::Dict{String,Float64}
     b0germ_sd::Dict{String,Float64}
-    maxseedn_mean::Dict{String,Int}
-    maxseedn_sd::Dict{String,Float64}
+    seednumber_mean::Dict{String,Int}
+    seednumber_sd::Dict{String,Float64}
     maxmass::Dict{String,Int}
 end
 
@@ -63,15 +64,15 @@ mutable struct Organism
     kernel::String
     clonal::Bool
     #### Evolvable traits ####
-    emass::Float64
-    elong::Int64
+    seedmass::Float64
+    bankduration::Int64
     floron::Int
     floroff::Int
     seedon::Int
     seedoff::Int
     span::Int64
     b0grow::Float64
-    b0m::Float64
+    b0mort::Float64
     b0germ::Float64
     wseedn::Int64 # maximum number of seeds produced/week
     maxmass::Float64
@@ -108,15 +109,15 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
                               s,
                               orgsref.kernel[s],
                               orgsref.clonal[s],
-                              orgsref.emass[s],
-                              Int(round(rand(Distributions.Normal(orgsref.elong_mean[s],orgsref.elong_sd[s]+non0sd),1)[1])),
+                              orgsref.seedmass[s],
+                              Int(round(rand(Distributions.Normal(orgsref.bankduration_mean[s],orgsref.bankduration_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.b0m_mean[s],orgsref.b0m_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.b0mort_mean[s],orgsref.b0mort_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s]+non0sd),1)[1])),
                               0, #wseedn
                               orgsref.maxmass[s], #maxmass
@@ -126,12 +127,12 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
 
             ## Set conditional traits and variables
             # weekly number of seeds
-	    maxseedn = Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1]))
-            neworg.wseedn = Int(round(maxseedn/(neworg.floroff-neworg.floron+1)))
+	    seednumber = Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1]))
+            neworg.wseedn = Int(round(seednumber/(neworg.floroff-neworg.floron+1)))
 
             # initial biomass
             if neworg.stage == "e"                  
-                neworg.mass["veg"] = neworg.emass
+                neworg.mass["veg"] = neworg.seedmass
                 neworg.age = 1
             elseif neworg.stage in ["j" "a"]
                 neworg.mass["veg"] = neworg.maxmass * 0.5
@@ -164,26 +165,28 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
         b0 = orgs[o].b0grow
         
         #only vegetative biomass helps growth
-        grown_mass = b0*(orgs[o].mass["veg"])^(3/4)*exp(-aE/(Boltz*T))
+        B_grow = b0*(orgs[o].mass["veg"])^(-1/4)*exp(-aE/(Boltz*T))
+        # Growth happens according to the Richards model
+        new_mass = orgs[o].seedmass + orgs[o].maxmass/((1 + Q*exp(-B_grow*(t-orgs[o].firstflower)))^(1/Q))
         
-        if isapprox(grown_mass,0) # if it is not growing, there is no need to allocate
+        if isapprox(new_mass,0) # if it is not growing, there is no need to allocate
             push!(nogrowth,o)
         elseif orgs[o].stage == "j"
             # juveniles grow vegetative biomass only
-            orgs[o].mass["veg"] += grown_mass 
+            orgs[o].mass["veg"] = new_mass 
         elseif orgs[o].stage == "a" &&
             (orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
             (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass))
             # adults in their reproductive season and with enough weight, invest in reproduction
-            #sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + grown_mass)^0.95)
+            #sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + new_mass)^0.95)
             if haskey(orgs[o].mass,"repr")
-                orgs[o].mass["repr"] += grown_mass #sowingmass 
+                orgs[o].mass["repr"] += new_mass #sowingmass 
             else
-                orgs[o].mass["repr"] = grown_mass #sowingmass
+                orgs[o].mass["repr"] = new_mass #sowingmass
             end
         elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].maxmass
             # adults that have not yet reached maximum size can still grow vegetative biomass, independently of the season
-            orgs[o].mass["veg"] += grown_mass 
+            orgs[o].mass["veg"] += new_mass 
         end            
     end
     return nogrowth
@@ -212,7 +215,7 @@ end
             """
 function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
 
-    ready = find(x-> x.stage == "a" && x.mass["repr"] > x.emass, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
+    ready = find(x-> x.stage == "a" && x.mass["repr"] > x.seedmass, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
     pollinated = []
     npoll = 0
 
@@ -309,8 +312,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
         for s in sowing
 
-            emass = orgs[s].emass
-            offs = div(0.5*orgs[s].mass["repr"], emass)
+            seedmass = orgs[s].seedmass
+            offs = div(0.5*orgs[s].mass["repr"], seedmass)
 
             if offs <= 0
                 continue
@@ -319,7 +322,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 offs > orgs[s].wseedn ? offs = orgs[s].wseedn : offs
 
                 # update available biomass for reproduction
-                orgs[s].mass["repr"] -= (offs * emass)
+                orgs[s].mass["repr"] -= (offs * seedmass)
 
                 # unity test
                 if  orgs[s].mass["repr"] <= 0
@@ -338,10 +341,10 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
                     embryo = deepcopy(orgs[s])
 
-                    newvalue_emass = rand(Distributions.Normal(0,abs(embryo.emass-conspp.emass+non0sd)/embryo.emass))
-                    0.5*orgsref.emass[embryo.sp] >= embryo.emass + newvalue_emass >= 0.5*orgsref.emass[embryo.sp] ? embryo.emass += newvalue_emass : embryo.emass += 0 #seed mass cannot decrese to half the species initial mean size
+                    newvalue_seedmass = rand(Distributions.Normal(0,abs(embryo.seedmass-conspp.seedmass+non0sd)/embryo.seedmass))
+                    0.5*orgsref.seedmass[embryo.sp] >= embryo.seedmass + newvalue_seedmass >= 0.5*orgsref.seedmass[embryo.sp] ? embryo.seedmass += newvalue_seedmass : embryo.seedmass += 0 #seed mass cannot decrese to half the species initial mean size
                     embryo.b0grow += rand(Distributions.Normal(0,abs(embryo.b0grow-conspp.b0grow+non0sd)/embryo.b0grow))
-                    embryo.b0m += rand(Distributions.Normal(0,abs(embryo.b0m-conspp.b0m+non0sd)/embryo.b0m))
+                    embryo.b0mort += rand(Distributions.Normal(0,abs(embryo.b0mort-conspp.b0mort+non0sd)/embryo.b0mort))
                     embryo.b0germ += rand(Distributions.Normal(0,abs(embryo.b0germ-conspp.b0germ+non0sd)/embryo.b0germ))
                     embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron+non0sd)/embryo.floron)),RoundUp))
                     embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff+non0sd)/conspp.floroff)),RoundUp))
@@ -350,7 +353,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     
                     # set embryos state variables
                     embryo.id = hex(id_counter) 
-                    embryo.mass = Dict("veg" => embryo.emass,
+                    embryo.mass = Dict("veg" => embryo.seedmass,
                                        "repr" => 0.0)
                     embryo.stage = "e"
                     embryo.age = 0
@@ -373,7 +376,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
     end
     
     # Asexually produced offspring
-    asexuals = filter(x -> x.mated == false && x.clonal == true && x.mass["repr"] > x.emass, orgs) #find which the individuals the can reproduce assexually and then go through them, by species
+    asexuals = filter(x -> x.mated == false && x.clonal == true && x.mass["repr"] > x.seedmass, orgs) #find which the individuals the can reproduce assexually and then go through them, by species
 
     for sp in unique(getfield.(asexuals, :sp))
         cloning = find(x -> x.sp == sp && x.id in unique(getfield.(asexuals, :id)) , orgs)
@@ -382,7 +385,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
         spclonescounter = 0
 
         for c in cloning # mothers cloning
-            offs = div(0.5*orgs[c].mass["repr"], orgs[c].emass)
+            offs = div(0.5*orgs[c].mass["repr"], orgs[c].seedmass)
 
             # unity test
             if  orgs[c].mass["repr"] <= 0
@@ -399,12 +402,12 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 spclonescounter += offs
 
                 # update reproductive mass
-                orgs[c].mass["repr"] -= (offs * orgs[c].emass)
+                orgs[c].mass["repr"] -= (offs * orgs[c].seedmass)
 
                 # get a copy of the mother, which the clones will look like 
                 clonetemplate = deepcopy(orgs[c])
                 clonetemplate.stage = "j" #clones have already germinated
-                clonetemplate.mass["veg"] = orgs[c].emass
+                clonetemplate.mass["veg"] = orgs[c].seedmass
                 clonetemplate.mass["repr"] = 0.0
 
                 for o in offs
@@ -578,24 +581,24 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
             mprob = 1
 
         elseif o in seeds
-            if orgs[o].age >= orgs[o].elong
+            if orgs[o].age >= orgs[o].bankduration
                 mprob = 1
             elseif rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
-                Bm = orgs[o].b0m * seedm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-                #println("Bm: $Bm, b0m = $(orgs[o].b0m), seed mass = $(orgs[o].mass["veg"])")
+                Bm = orgs[o].b0mort * seedm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+                #println("Bm: $Bm, b0mort = $(orgs[o].b0mort), seed mass = $(orgs[o].mass["veg"])")
                 mprob = 1 - exp(-Bm)
             else
                 mprob = 0
             end 
 
-        elseif orgs[o].age >= orgs[o].span #oldies die
-            mprob = 1
+        #elseif orgs[o].age >= orgs[o].span #oldies die
+        #    mprob = 1
             
         else #calculate mortality for juveniles or adults
             if orgs[o].stage == "j"
-                Bm = orgs[o].b0m * juvm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+                Bm = orgs[o].b0mort * juvm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             else
-                Bm = orgs[o].b0m * adultm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+                Bm = orgs[o].b0mort * adultm_factor * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
             end
 
             mprob = 1 - exp(-Bm)
@@ -660,17 +663,17 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                     d = rand(samegrid,1)[1]
 
                     if d.stage == "s"
-                        Bm = d.b0m * seedm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        Bm = d.b0mort * seedm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                     elseif d.stage == "j"
-                        Bm = d.b0m * juvm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                        Bm = d.b0mort * juvm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                     else
-                        Bm = d.b0m * adultm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T)) 
+                        Bm = d.b0mort * adultm_factor * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T)) 
                     end
                     # calculate probability
                     mprob = 1 - exp(-Bm)
                     
                     #unity test: Check mortality rate to probability conversion
-                    if mprob < 0
+                   if mprob < 0
                         error("mprob < 0")
                         mprob = 0
                     elseif mprob > 1
