@@ -120,7 +120,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
 			      0, #seed number
 			      rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s]+non0sd),1)[1],
 			      rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s]+non0sd),1)[1],
-			      rand(Distributions.Normal(orgsref.b0mort_mean[s],orgsref.b0mort_sd[s]+non0sd),1)[1]),
+			      rand(Distributions.Normal(orgsref.b0mort_mean[s],orgsref.b0mort_sd[s]+non0sd),1)[1],
                               Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s]+non0sd),1)[1])),
                               Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s]+non0sd),1)[1])),
@@ -323,7 +323,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 continue
             else
                 # limit offspring production to the maximal number of seeds the species can produce
-                offs > orgs[s].wseedn ? offs = orgs[s].wseedn : offs
+                offs > orgs[s].seednumber ? offs = orgs[s].seednumber : offs
 
                 # update available biomass for reproduction
                 orgs[s].mass["repr"] -= (offs * seedmass)
@@ -400,7 +400,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 continue
             else
                 # limit offspring production to the maximal number of seeds the species can produce
-                offs > orgs[c].wseedn ? offs = orgs[c].wseedn : offs
+                offs > orgs[c].seednumber ? offs = orgs[c].seednumber : offs
 
                 # count clonal production  
                 spclonescounter += offs
