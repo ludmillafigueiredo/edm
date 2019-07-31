@@ -347,13 +347,13 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
                     newvalue_seedmass = rand(Distributions.Normal(0,abs(embryo.seedmass-conspp.seedmass+non0sd)/embryo.seedmass))
                     0.5*orgsref.seedmass[embryo.sp] >= embryo.seedmass + newvalue_seedmass >= 0.5*orgsref.seedmass[embryo.sp] ? embryo.seedmass += newvalue_seedmass : embryo.seedmass += 0 #seed mass cannot decrese to half the species initial mean size
-                    embryo.b0grow += rand(Distributions.Normal(0,abs(embryo.b0grow-conspp.b0grow+non0sd)/embryo.b0grow))
-                    embryo.b0mort += rand(Distributions.Normal(0,abs(embryo.b0mort-conspp.b0mort+non0sd)/embryo.b0mort))
-                    embryo.b0germ += rand(Distributions.Normal(0,abs(embryo.b0germ-conspp.b0germ+non0sd)/embryo.b0germ))
-                    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron+non0sd)/embryo.floron)),RoundUp))
-                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff+non0sd)/conspp.floroff)),RoundUp))
-                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon+non0sd)/embryo.seedon)),RoundUp))
-                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff+non0sd)/embryo.seedoff)),RoundUp))
+                    embryo.b0grow += rand(Distributions.Normal(0,abs(embryo.b0grow-conspp.b0grow)+non0sd/embryo.b0grow))
+                    embryo.b0mort += rand(Distributions.Normal(0,abs(embryo.b0mort-conspp.b0mort)+non0sd/embryo.b0mort))
+                    embryo.b0germ += rand(Distributions.Normal(0,abs(embryo.b0germ-conspp.b0germ)+non0sd/embryo.b0germ))
+                    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron)+non0sd/embryo.floron)),RoundUp))
+                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff)+non0sd/conspp.floroff)),RoundUp))
+                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon)+non0sd/embryo.seedon)),RoundUp))
+                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff)+non0sd/embryo.seedoff)),RoundUp))
                     
                     # set embryos state variables
                     embryo.id = hex(id_counter) 
