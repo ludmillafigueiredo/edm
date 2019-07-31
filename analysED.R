@@ -2,13 +2,13 @@
                                         # This is an R script intended at faster analysis. Details on the RNotebook file of same name
 
                                         # Set up directory and environement to store analysis
-analysEDdir <- file.path(outdir, paste(parentsimID, "analysED", sep = "_"))
+analysEDdir <- file.path(outputsdir, paste(parentsimID, "analysED", sep = "_"))
 dir.create(analysEDdir)
 
 if(nreps > 1){
-	repfolder <- paste(file.path(outdir, parentsimID), 1:nreps, sep = "_"); #parentsimID
+	repfolder <- paste(file.path(outputsdir, parentsimID), 1:nreps, sep = "_"); #parentsimID
 }else{
-	repfolder <- outdir
+	repfolder <- outputsdir
 }
 
 # Load packages 
@@ -32,16 +32,16 @@ theme_set(theme_minimal())
 #' 
 #' @param parentsimID The simulation ID
 #' @param nreps Number of replicates
-#' @param outdir The path to the outputs folder, if not default
+#' @param outputsdir The path to the outputs folder, if not default
 #' @param EDdir The path to EDM, if not default
-getoutput <- function(parentsimID, repfolder, nreps, outdir, EDdir = file.path("~/model")){
+getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.path("~/model")){
     
                                         # initiliaze list to contain outputs 
                                         #outdatalist <- list()
     for(repli in repfolder){
         
                                         # get raw outputs
-        outraw <- as_tibble(read.table(file.path(repli, "orgsweekly.txt"), header = TRUE, sep = "\t"));
+        outraw <- read_tsv(file.path(repli, "orgsweekly.txt"), col_names = TRUE);
                                         # clean it
         ## take parentheses out of location column ("()")
         loc <- gsub("[\\(|\\)]", "", outraw$location)
@@ -511,7 +511,7 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
 #                          Organize analysis output                        #
 ############################################################################
 
-cleanoutput <- getoutput(parentsimID, repfolder, nreps, outdir = outdir, EDdir = EDdir)  
+cleanoutput <- getoutput(parentsimID, repfolder, nreps, outputsdir = outputsdir, EDdir = EDdir)  
 
 ## Identify replicates
 replicates <- orgreplicates(parentsimID, repfolder, nreps)
