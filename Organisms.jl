@@ -37,25 +37,25 @@ mutable struct OrgsRef
     span_mean::Dict{String,Float64}
     span_sd::Dict{String,Float64}
     firstflower_mean::Dict{String,Float64}
-    firstflower_sd::Dict{String,Float64} 
-    bankduration_mean::Dict{String,Float64}
-    bankduration_sd::Dict{String,Float64}
+    firstflower_sd::Dict{String,Float64}
+    floron_mean::Dict{String,Int}
+    floron_sd::Dict{String,Float64}
+    floroff_mean::Dict{String,Int}
+    floroff_sd::Dict{String,Float64}
     seednumber_mean::Dict{String,Float64}
     seednumber_sd::Dict{String,Float64}
+    seedon_mean::Dict{String,Int}
+    seedon_sd::Dict{String,Float64}
+    seedoff_mean::Dict{String,Int}
+    seedoff_sd::Dict{String,Float64}
+    bankduration_mean::Dict{String,Float64}
+    bankduration_sd::Dict{String,Float64}
     b0grow_mean::Dict{String,Float64}
     b0grow_sd::Dict{String,Float64}
     b0germ_mean::Dict{String,Float64}
     b0germ_sd::Dict{String,Float64}
     b0mort_mean::Dict{String,Float64}
     b0mort_sd::Dict{String,Float64}
-    floron_mean::Dict{String,Int}
-    floron_sd::Dict{String,Float64}
-    floroff_mean::Dict{String,Int}
-    floroff_sd::Dict{String,Float64}
-    seedon_mean::Dict{String,Int}
-    seedon_sd::Dict{String,Float64}
-    seedoff_mean::Dict{String,Int}
-    seedoff_sd::Dict{String,Float64}
 end
 
 mutable struct Organism
@@ -70,15 +70,15 @@ mutable struct Organism
     maxmass::Float64
     span::Int
     firstflower::Int
-    bankduration::Int
+    floron::Int
+    floroff::Int
     seednumber::Int
+    seedon::Int
+    seedoff::Int
+    bankduration::Int
     b0grow::Float64
     b0germ::Float64
     b0mort::Float64
-    floron::Int
-    floroff::Int
-    seedon::Int
-    seedoff::Int
     #### State variables #### 
     age::Int64 # control death when older than max. lifespan
     mass::Dict{String, Float64}
@@ -116,15 +116,16 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
 			      orgsref.maxmass[s], #maxmass
 			      Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s]+non0sd),1)[1])),
 			      Int(round(rand(Distributions.Normal(orgsref.firstflower_mean[s], orgsref.firstflower_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.bankduration_mean[s],orgsref.bankduration_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s]+non0sd),1)[1])),
 			      0, #seed number
+                              Int(round(rand(Distributions.Normal(orgsref.bankduration_mean[s],orgsref.bankduration_sd[s]+non0sd),1)[1])),
+			      Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s]+non0sd),1)[1])),
+                              Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1])),
 			      rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s]+non0sd),1)[1],
 			      rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s]+non0sd),1)[1],
 			      rand(Distributions.Normal(orgsref.b0mort_mean[s],orgsref.b0mort_sd[s]+non0sd),1)[1],
-                              Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1])),
+                              
                               0, #age
                               Dict("veg" => 0.0, "repr" => 0.0), #mass
                               false) #mated
@@ -345,15 +346,29 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
                     embryo = deepcopy(orgs[s])
 
-                    newvalue_seedmass = rand(Distributions.Normal(0,abs(embryo.seedmass-conspp.seedmass+non0sd)/embryo.seedmass))
+                    # unity test
+                    for f in fieldnames(embryo)
+		    	if getfield(embryo, f) in [Int Float64]
+		    	   if getfield(embryo, f) < 0 | getfield(embryo, f) == Inf
+			      error(f, " is smaller than 0 or Inf")
+			      end
+			end
+		    end
+		    
+                    newvalue_seedmass = rand(Distributions.Normal(0,abs(embryo.seedmass-conspp.seedmass+non0sd/embryo.seedmass)))[1]
                     0.5*orgsref.seedmass[embryo.sp] >= embryo.seedmass + newvalue_seedmass >= 0.5*orgsref.seedmass[embryo.sp] ? embryo.seedmass += newvalue_seedmass : embryo.seedmass += 0 #seed mass cannot decrese to half the species initial mean size
-                    embryo.b0grow += rand(Distributions.Normal(0,abs(embryo.b0grow-conspp.b0grow)+non0sd/embryo.b0grow))
-                    embryo.b0mort += rand(Distributions.Normal(0,abs(embryo.b0mort-conspp.b0mort)+non0sd/embryo.b0mort))
-                    embryo.b0germ += rand(Distributions.Normal(0,abs(embryo.b0germ-conspp.b0germ)+non0sd/embryo.b0germ))
-                    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron)+non0sd/embryo.floron)),RoundUp))
-                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff)+non0sd/conspp.floroff)),RoundUp))
-                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon)+non0sd/embryo.seedon)),RoundUp))
-                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff)+non0sd/embryo.seedoff)),RoundUp))
+		    embryo.maxmass += rand(Distributions.Normal(0,abs(embryo.maxmass-conspp.maxmass+non0sd/embryo.maxmass)))[1]
+                    embryo.span += Int(round(rand(Distributions.Normal(0,abs(embryo.span-conspp.span+non0sd/embryo.span)))[1], RoundUp))
+                    embryo.firstflower += Int(round(rand(Distributions.Normal(0,abs(embryo.firstflower-conspp.firstflower+non0sd/embryo.firstflower)))[1], RoundUp))
+		    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron+non0sd/embryo.floron)))[1],RoundUp))
+                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff+non0sd/embryo.floroff)))[1],RoundUp))
+		    embryo.seednumber += Int(round(rand(Distributions.Normal(0,abs(embryo.seednumber-conspp.seednumber+non0sd/embryo.seednumber)))[1], RoundUp))                    
+                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon+non0sd/embryo.seedon)))[1],RoundUp))
+                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff+non0sd/embryo.seedoff)))[1],RoundUp))
+		    embryo.bankduration += Int(round(rand(Distributions.Normal(0,abs(embryo.bankduration-conspp.bankduration+non0sd/embryo.bankduration)))[1], RoundUp))                    
+		    embryo.b0grow += rand(Distributions.Normal(0,abs(embryo.b0grow-conspp.b0grow+non0sd/embryo.b0grow)))[1]
+                    embryo.b0germ += rand(Distributions.Normal(0,abs(embryo.b0germ-conspp.b0germ+non0sd/embryo.b0germ)))[1]
+                    embryo.b0mort += rand(Distributions.Normal(0,abs(embryo.b0mort-conspp.b0mort+non0sd/embryo.b0mort)))[1]
                     
                     # set embryos state variables
                     embryo.id = hex(id_counter) 
@@ -718,8 +733,8 @@ end
                                 """
 function shedd!(orgs::Array{Organisms.Organism,1}, orgsref::Organisms.OrgsRef, t::Int)
 
-    flowering = find(x -> (x.mass["repr"] > 0), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char (''). 
-
+    flowering = find(x -> (x.mass["repr"] > 0), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
+    
     for f in flowering
         if rem(t,52) > orgs[f].floroff
             orgs[f].mass["repr"] = 0
