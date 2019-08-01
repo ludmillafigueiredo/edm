@@ -33,20 +33,20 @@ mutable struct OrgsRef
     kernel::Dict{String,String}
     clonality::Dict{String,Bool}
     seedmass::Dict{String,Float64}
-    maxmass::Dict{String,Int}
+    maxmass::Dict{String,Float64}
     span_mean::Dict{String,Float64}
     span_sd::Dict{String,Float64}
     firstflower_mean::Dict{String,Float64}
     firstflower_sd::Dict{String,Float64}
-    floron_mean::Dict{String,Int}
+    floron_mean::Dict{String,Float64}
     floron_sd::Dict{String,Float64}
-    floroff_mean::Dict{String,Int}
+    floroff_mean::Dict{String,Float64}
     floroff_sd::Dict{String,Float64}
     seednumber_mean::Dict{String,Float64}
     seednumber_sd::Dict{String,Float64}
-    seedon_mean::Dict{String,Int}
+    seedon_mean::Dict{String,Float64}
     seedon_sd::Dict{String,Float64}
-    seedoff_mean::Dict{String,Int}
+    seedoff_mean::Dict{String,Float64}
     seedoff_sd::Dict{String,Float64}
     bankduration_mean::Dict{String,Float64}
     bankduration_sd::Dict{String,Float64}
@@ -68,14 +68,14 @@ mutable struct Organism
     #### Evolvable traits ####
     seedmass::Float64
     maxmass::Float64
-    span::Int
-    firstflower::Int
-    floron::Int
-    floroff::Int
-    seednumber::Int
-    seedon::Int
-    seedoff::Int
-    bankduration::Int
+    span::Int64
+    firstflower::Int64
+    floron::Int64
+    floroff::Int64
+    seednumber::Int64
+    seedon::Int64
+    seedoff::Int64
+    bankduration::Int64
     b0grow::Float64
     b0germ::Float64
     b0mort::Float64
