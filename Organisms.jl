@@ -114,18 +114,17 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
                               orgsref.clonality[s],
                               orgsref.seedmass[s],
 			      orgsref.maxmass[s], #maxmass
-			      Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s]+non0sd),1)[1])),
-			      Int(round(rand(Distributions.Normal(orgsref.firstflower_mean[s], orgsref.firstflower_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s]+non0sd),1)[1])),
+			      Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s]+non0sd),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Normal(orgsref.firstflower_mean[s], orgsref.firstflower_sd[s]+non0sd),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s]+non0sd),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s]+non0sd),1)[1], RoundUp)),
 			      0, #seed number
-                              Int(round(rand(Distributions.Normal(orgsref.bankduration_mean[s],orgsref.bankduration_sd[s]+non0sd),1)[1])),
-			      Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s]+non0sd),1)[1])),
-                              Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1])),
+			      Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s]+non0sd),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Normal(orgsref.bankduration_mean[s],orgsref.bankduration_sd[s]+non0sd),1)[1], RoundUp)),
 			      rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s]+non0sd),1)[1],
 			      rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s]+non0sd),1)[1],
 			      rand(Distributions.Normal(orgsref.b0mort_mean[s],orgsref.b0mort_sd[s]+non0sd),1)[1],
-                              
                               0, #age
                               Dict("veg" => 0.0, "repr" => 0.0), #mass
                               false) #mated
@@ -133,7 +132,10 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
             ## Set conditional traits and variables
             # weekly number of seeds
 	    nseeds = rand(Distributions.Normal(orgsref.seednumber_mean[s],orgsref.seednumber_sd[s]+non0sd),1)[1]
-            neworg.seednumber = Int(round(nseeds/(neworg.floroff-neworg.floron+1)))
+	    if (neworg.floroff-neworg.floron+1) < 0
+	    error("floroff - floron <0")
+	    end
+            neworg.seednumber = Int(round(nseeds/(neworg.floroff-neworg.floron+1), RoundUp))
 
             # initial biomass
             if neworg.stage == "e"                  
@@ -348,27 +350,43 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
                     # unity test
                     for f in fieldnames(embryo)
-		    	if getfield(embryo, f) in [Int Float64]
-		    	   if getfield(embryo, f) < 0 | getfield(embryo, f) == Inf
+		    	if typeof(getfield(embryo, f)) in [Int64 Float64]
+		    	   if getfield(embryo, f) < 0 || getfield(embryo, f) == Inf
 			      error(f, " is smaller than 0 or Inf")
 			      end
 			end
 		    end
-		    
-                    newvalue_seedmass = rand(Distributions.Normal(0,abs(embryo.seedmass-conspp.seedmass+non0sd/embryo.seedmass)))[1]
-                    0.5*orgsref.seedmass[embryo.sp] >= embryo.seedmass + newvalue_seedmass >= 0.5*orgsref.seedmass[embryo.sp] ? embryo.seedmass += newvalue_seedmass : embryo.seedmass += 0 #seed mass cannot decrese to half the species initial mean size
-		    embryo.maxmass += rand(Distributions.Normal(0,abs(embryo.maxmass-conspp.maxmass+non0sd/embryo.maxmass)))[1]
-                    embryo.span += Int(round(rand(Distributions.Normal(0,abs(embryo.span-conspp.span+non0sd/embryo.span)))[1], RoundUp))
-                    embryo.firstflower += Int(round(rand(Distributions.Normal(0,abs(embryo.firstflower-conspp.firstflower+non0sd/embryo.firstflower)))[1], RoundUp))
-		    embryo.floron += Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron+non0sd/embryo.floron)))[1],RoundUp))
-                    embryo.floroff += Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff+non0sd/embryo.floroff)))[1],RoundUp))
-		    embryo.seednumber += Int(round(rand(Distributions.Normal(0,abs(embryo.seednumber-conspp.seednumber+non0sd/embryo.seednumber)))[1], RoundUp))                    
-                    embryo.seedon += Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon+non0sd/embryo.seedon)))[1],RoundUp))
-                    embryo.seedoff += Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff+non0sd/embryo.seedoff)))[1],RoundUp))
-		    embryo.bankduration += Int(round(rand(Distributions.Normal(0,abs(embryo.bankduration-conspp.bankduration+non0sd/embryo.bankduration)))[1], RoundUp))                    
-		    embryo.b0grow += rand(Distributions.Normal(0,abs(embryo.b0grow-conspp.b0grow+non0sd/embryo.b0grow)))[1]
-                    embryo.b0germ += rand(Distributions.Normal(0,abs(embryo.b0germ-conspp.b0germ+non0sd/embryo.b0germ)))[1]
-                    embryo.b0mort += rand(Distributions.Normal(0,abs(embryo.b0mort-conspp.b0mort+non0sd/embryo.b0mort)))[1]
+
+                   #
+		   newvalue_seedmass = rand(Distributions.Normal(0,abs(embryo.seedmass-conspp.seedmass+non0sd)/embryo.seedmass))[1]
+		   maxmass_diff = rand(Distributions.Normal(0,abs(embryo.maxmass-conspp.maxmass+non0sd)/embryo.maxmass))[1]
+		   span_diff = Int(round(rand(Distributions.Normal(0,abs(embryo.span-conspp.span+non0sd)/embryo.span))[1], RoundUp))
+                   firstflower_diff = Int(round(rand(Distributions.Normal(0,abs(embryo.firstflower-conspp.firstflower+non0sd)/embryo.firstflower))[1], RoundUp))
+		   floron_diff = Int(round(rand(Distributions.Normal(0,abs(embryo.floron-conspp.floron+non0sd)/embryo.floron))[1],RoundUp))
+		   floroff_diff = Int(round(rand(Distributions.Normal(0,abs(embryo.floroff-conspp.floroff+non0sd)/embryo.floroff))[1],RoundUp))
+		   seednumber_diff = Int(round(rand(Distributions.Normal(0,abs(embryo.seednumber-conspp.seednumber+non0sd)/embryo.seednumber))[1], RoundUp))
+		   seedon_diff = Int(round(rand(Distributions.Normal(0,abs(embryo.seedon-conspp.seedon+non0sd)/embryo.seedon))[1],RoundUp))
+		   seedoff_diff = Int(round(rand(Distributions.Normal(0,abs(embryo.seedoff-conspp.seedoff+non0sd)/embryo.seedoff))[1],RoundUp))
+		   bankduration_diff = Int(round(rand(Distributions.Normal(0,abs(embryo.bankduration-conspp.bankduration+non0sd)/embryo.bankduration))[1], RoundUp))
+		   b0grow_diff = rand(Distributions.Normal(0,abs(embryo.b0grow-conspp.b0grow+non0sd)/embryo.b0grow))[1]
+		   b0germ_diff = rand(Distributions.Normal(0,abs(embryo.b0germ-conspp.b0germ+non0sd)/embryo.b0germ))[1]
+		   b0mort_diff = rand(Distributions.Normal(0,abs(embryo.b0mort-conspp.b0mort+non0sd)/embryo.b0mort))[1]
+		   
+                   #constrain seed mass: it cannot decrease to half the species initial mean size
+                    
+                    0.5*orgsref.seedmass[embryo.sp] >= embryo.seedmass + newvalue_seedmass >= 0.5*orgsref.seedmass[embryo.sp] ? embryo.seedmass += newvalue_seedmass : embryo.seedmass += 0
+		    embryo.maxmass += maxmass_diff
+                    embryo.span += span_diff
+                    embryo.firstflower = firstflower_diff
+		    embryo.floron += floron_diff
+                    embryo.floroff += floroff_diff
+		    embryo.seednumber += seednumber_diff             
+                    embryo.seedon += seedon_diff
+                    embryo.seedoff += seedoff_diff
+		    embryo.bankduration += bankduration_diff
+		    embryo.b0grow += b0grow_diff 
+                    embryo.b0germ += b0germ_diff
+                    embryo.b0mort += b0mort_diff
                     
                     # set embryos state variables
                     embryo.id = hex(id_counter) 
