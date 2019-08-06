@@ -135,7 +135,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
         for i in 1:orgsref.abund[s]
 
             id_counter += 1 # update individual counter
-	    non0sd = 1e-7 #avoid error due to sd = 0
+	    minvalue = 1e-7 # Distribution.Normal requires sd > 0, and Distribution.Uniform requires max > min
 
             if settings["traitdist"] == "uniform"
                 neworg = Organism(hex(id_counter),
@@ -146,24 +146,24 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
                               orgsref.clonality[s],
                               orgsref.seedmass[s],
 			      orgsref.maxmass[s], #maxmass
-			      Int(round(rand(Distributions.Uniform(orgsref.span_min[s], orgsref.span_max[s]),1)[1], RoundUp)),
-			      Int(round(rand(Distributions.Uniform(orgsref.firstflower_min[s], orgsref.firstflower_max[s]),1)[1], RoundUp)),
-                              Int(round(rand(Distributions.Uniform(orgsref.floron_min[s],orgsref.floron_max[s]),1)[1], RoundUp)),
-                              Int(round(rand(Distributions.Uniform(orgsref.floroff_min[s],orgsref.floroff_max[s]),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Uniform(orgsref.span_min[s], orgsref.span_max[s] + minvalue),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Uniform(orgsref.firstflower_min[s], orgsref.firstflower_max[s] + minvalue),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Uniform(orgsref.floron_min[s],orgsref.floron_max[s] + minvalue),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Uniform(orgsref.floroff_min[s],orgsref.floroff_max[s] + minvalue),1)[1], RoundUp)),
 			      0, #seed number
-			      Int(round(rand(Distributions.Uniform(orgsref.seedon_min[s],orgsref.seedon_max[s]),1)[1], RoundUp)),
-                              Int(round(rand(Distributions.Uniform(orgsref.seedoff_min[s],orgsref.seedoff_max[s]),1)[1], RoundUp)),
-			      Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s]),1)[1], RoundUp)),
-			      rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s]),1)[1],
-			      rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s]),1)[1],
-			      rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s]),1)[1],
+			      Int(round(rand(Distributions.Uniform(orgsref.seedon_min[s],orgsref.seedon_max[s] + minvalue),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Uniform(orgsref.seedoff_min[s],orgsref.seedoff_max[s] + minvalue),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
+			      rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
+			      rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
+			      rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
                               0, #age
                               Dict("veg" => 0.0, "repr" => 0.0), #mass
                               false) #mated
 
             ## Set conditional traits and variables
             # weekly number of seeds
-	    nseeds = rand(Distributions.Uniform(orgsref.seednumber_min[s],orgsref.seednumber_max[s]+non0sd),1)[1]
+	    nseeds = rand(Distributions.Uniform(orgsref.seednumber_min[s],orgsref.seednumber_max[s] + minvalue),1)[1]
 	        
             elseif settings["traitsdist"] == "normal"
                 neworg = Organism(hex(id_counter),
@@ -174,24 +174,24 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
                               orgsref.clonality[s],
                               orgsref.seedmass[s],
 			      orgsref.maxmass[s], #maxmass
-			      Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s]+non0sd),1)[1], RoundUp)),
-			      Int(round(rand(Distributions.Normal(orgsref.firstflower_mean[s], orgsref.firstflower_sd[s]+non0sd),1)[1], RoundUp)),
-                              Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s]+non0sd),1)[1], RoundUp)),
-                              Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s]+non0sd),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s] + minvalue),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Normal(orgsref.firstflower_mean[s], orgsref.firstflower_sd[s] + minvalue),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s] + minvalue),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s] + minvalue),1)[1], RoundUp)),
 			      0, #seed number
-			      Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s]+non0sd),1)[1], RoundUp)),
-                              Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s]+non0sd),1)[1], RoundUp)),
-			      Int(round(rand(Distributions.Normal(orgsref.bankduration_mean[s],orgsref.bankduration_sd[s]+non0sd),1)[1], RoundUp)),
-			      rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s]+non0sd),1)[1],
-			      rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s]+non0sd),1)[1],
-			      rand(Distributions.Normal(orgsref.b0mort_mean[s],orgsref.b0mort_sd[s]+non0sd),1)[1],
+			      Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s] + minvalue),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s] + minvalue),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Normal(orgsref.bankduration_mean[s],orgsref.bankduration_sd[s] + minvalue),1)[1], RoundUp)),
+			      rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s] + minvalue),1)[1],
+			      rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s] + minvalue),1)[1],
+			      rand(Distributions.Normal(orgsref.b0mort_mean[s],orgsref.b0mort_sd[s] + minvalue),1)[1],
                               0, #age
                               Dict("veg" => 0.0, "repr" => 0.0), #mass
                               false) #mated
 
             ## Set conditional traits and variables
             # weekly number of seeds
-	    nseeds = rand(Distributions.Normal(orgsref.seednumber_mean[s],orgsref.seednumber_sd[s]+non0sd),1)[1]
+	    nseeds = rand(Distributions.Normal(orgsref.seednumber_mean[s],orgsref.seednumber_sd[s] + minvalue),1)[1]
 	        
             end
 
