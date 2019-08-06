@@ -241,8 +241,7 @@ function read_spinput(settings::Dict{String,Any})
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:maxmass)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id)))
-,
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:span_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
@@ -256,16 +255,40 @@ function read_spinput(settings::Dict{String,Any})
                            rows(spinputtbl,:firstflower_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:bankduration_mean)[i]
+                           rows(spinputtbl,:floron_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:bankduration_sd)[i]
+                           rows(spinputtbl,:floron_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:floroff_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:floroff_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:seednumber_mean)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:seednumber_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seedon_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seedon_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seedoff_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seedoff_sd)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:bankduration_mean)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:bankduration_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:b0grow_mean)[i]
@@ -284,32 +307,8 @@ function read_spinput(settings::Dict{String,Any})
                            for i in 1:length(rows(spinputtbl,:sp_id))),
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:b0mort_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-			   Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:floron_mean)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:floron_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:floroff_mean)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:floroff_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:seedon_mean)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:seedon_sd)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:seedoff_mean)[i]
-                           for i in 1:length(rows(spinputtbl,:sp_id))),
-                      Dict(rows(spinputtbl,:sp_id)[i] =>
-                           rows(spinputtbl,:seedoff_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id)))
-                      )
+		      )
     return orgsref
 
 end
