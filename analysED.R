@@ -101,14 +101,14 @@ stagemass <- function(output_repli, stages = factor(c("a", "j", "s"))){
     biomass_tab <- output_repli%>%
         select(week, id, stage, sp, veg, repr, repli)%>%
         group_by(week, stage, sp, repli)%>%
-        summarize(repli_mean_reprmass = mean(repr),
-                  repli_mean_vegmass = mean(veg))%>%
+        summarize(repli_mean_reprmass = mean(repr, na.rm = TRUE),
+                  repli_mean_vegmass = mean(veg, na.rm = TRUE))%>%
         ungroup()%>%
         group_by(week, stage, sp)%>%
-        summarize(mean_reprmass = mean(repli_mean_reprmass),
-                  mean_vegmass = mean(repli_mean_vegmass),
-                  sd_reprmass = sd(repli_mean_reprmass),
-                  sd_vegmass = sd(repli_mean_vegmass))%>%
+        summarize(mean_reprmass = mean(repli_mean_reprmass, na.rm = TRUE),
+                  mean_vegmass = mean(repli_mean_vegmass, na.rm = TRUE),
+                  sd_reprmass = sd(repli_mean_reprmass, na.rm = TRUE),
+                  sd_vegmass = sd(repli_mean_vegmass, na.rm = TRUE))%>%
         ungroup()
     
     # Filter all adult individuals and use colours to distinguish the lines representing each individual
@@ -144,18 +144,19 @@ stagemass <- function(output_repli, stages = factor(c("a", "j", "s"))){
 #' Extract and plot population abundances
 popabund <- function(output_repli){
     
-                                        # extract relevant variables
+    # extract relevant variables
     pop_tab <- output_repli%>%
         select(week,sp,stage,repli)%>%
         ungroup()
     
-                                        # summarize abundaces/species/week
+    # summarize abundaces/species/week
     spabund_tab <- pop_tab%>%
         group_by(week,sp,repli)%>%
         summarize(abundance = n())%>%
         ungroup()%>%
         group_by(week,sp)%>%
-        summarize(mean_abundance = mean(abundance), sd_abundance = sd(abundance))%>%
+        summarize(mean_abundance = mean(abundance, na.rm = TRUE), 
+                  sd_abundance = sd(abundance, na.rm = TRUE))%>%
         ungroup()
     
     abund_plottED <- ggplot(spabund_tab, aes(x = week, y = mean_abundance, group = sp, color = factor(sp)))+
@@ -175,7 +176,7 @@ popabund <- function(output_repli){
 popstruct <- function(pop_tab, offspring_repli, parentsimID, spp){
     
     if (missing(spp)){
-                                        # Population strucuture: abundances
+        # Population strucuture: abundances
         weekstruct_tab <- pop_tab%>%
             group_by(week, sp, stage, repli)%>%
             summarize(abundance = n())%>%
@@ -183,8 +184,8 @@ popstruct <- function(pop_tab, offspring_repli, parentsimID, spp){
             bind_rows(., select(offspring_repli, -mode))%>% #merge offspring file
             ungroup()%>%
             group_by(week, sp, stage)%>%
-            summarize(mean_abundance = mean(abundance),
-                      sd_abundance = sd(abundance))
+            summarize(mean_abundance = mean(abundance, na.rm = TRUE),
+                      sd_abundance = sd(abundance, na.rm = TRUE))
         
                                         # Population strucuture: proportions
         relativestruct_tab <- weekstruct_tab%>%
@@ -204,8 +205,8 @@ popstruct <- function(pop_tab, offspring_repli, parentsimID, spp){
             bind_rows(., select(offspring_repli, -mode))%>% #merge offspring file
             ungroup()%>%
             group_by(week, sp, stage)%>%
-            summarize(mean_abundance = mean(abundance),
-                      sd_abundance = sd(abundance))
+            summarize(mean_abundance = mean(abundance, na.rm = TRUE),
+                      sd_abundance = sd(abundance, na.rm = TRUE))
                                         # Population strucuture: proportions
         relativestruct_tab <- weekstruct_tab%>%
             filter(sp %in% spps)%>%
@@ -253,8 +254,8 @@ richness <- function(pop_tab,parentsimID,disturbance,tdist){
         summarize(richness = length(unique(sp)))%>%
         ungroup()%>%
         group_by(week)%>%
-        summarize(mean_richness = mean(richness),
-                  sd_richness = sd(richness))%>%
+        summarize(mean_richness = mean(richness, na.rm = TRUE),
+                  sd_richness = sd(richness, na.rm = TRUE))%>%
         ungroup()
     
                                         # create plots
@@ -306,7 +307,7 @@ rankabund <- function(pop_tab, timesteps){
                 summarize(abundance = n())%>%
                 ungroup()%>%
                 group_by(sp, week)%>%
-                summarize(mean_abundance = mean(abundance))%>%
+                summarize(mean_abundance = mean(abundance, na.rm = TRUE))%>%
                 ungroup()%>%
 		group_by(week)%>%
                 mutate(relabund = mean_abundance/sum(mean_abundance))
@@ -330,16 +331,16 @@ groupdyn <- function(output_repli, singlestages){
     
     # create table
     grouppop_tab <- output_repli%>%
-        group_by(week, sp, emass, stage, repli)%>%
+        group_by(week, sp, seedmass, stage, repli)%>%
         summarize(abundance = n())%>%
         ungroup()%>%
         bind_rows(., select(offspring_repli, -mode))%>% # merge seed info
         group_by(sp)%>% # necessary to fill in seed size according to species
-        fill(emass)%>%
+        fill(seedmass)%>%
         ungroup()%>%
-        group_by(week, emass, stage)%>% 
-        summarize(mean_abundance = mean(abundance),
-                  sd_abundance = sd(abundance))%>%
+        group_by(week, seedmass, stage)%>% 
+        summarize(mean_abundance = mean(abundance, na.rm = TRUE),
+                  sd_abundance = sd(abundance, na.rm = TRUE))%>%
         ungroup()
     
     # create plots 
@@ -361,25 +362,25 @@ groupdyn <- function(output_repli, singlestages){
                       stat = "identity", position = position_dodge(0.1), colour = "gray50", width = 0.01)+
         geom_line()+
         geom_point()+
-        facet_wrap(~emass, ncol = 1, nrow = 3)+
+        facet_wrap(~seedmass, ncol = 1, nrow = 3)+
         labs(title = "Population structure per group size")+
         scale_color_viridis(discrete = TRUE, option = "magma")
     
                                         # plot weigh variation
     groupweight_plot <- ggplot(data = weightdata_to_plot%>%
-                                      group_by(week, emass, stage, repli)%>%
-                                      summarize(repli_mean_weight = mean(veg))%>%
+                                      group_by(week, seedmass, stage, repli)%>%
+                                      summarize(repli_mean_weight = mean(veg, na.rm = TRUE))%>%
                                       ungroup()%>%
-                                      group_by(week, emass, stage)%>%
-                                      summarize(mean_weight = mean(repli_mean_weight), 
-                                                sd_weight = sd(repli_mean_weight)),
+                                      group_by(week, seedmass, stage)%>%
+                                      summarize(mean_weight = mean(repli_mean_weight, na.rm = TRUE), 
+                                                sd_weight = sd(repli_mean_weight, na.rm = TRUE)),
                                   aes(x = week, y = mean_weight, colour = stage))+
         geom_errorbar(aes(ymin = mean_weight-sd_weight, ymax = mean_weight + sd_weight), 
                       colour = "black", width=.01, position = position_dodge(0.1))+
         geom_line(position = position_dodge(0.1))+
         geom_point(position = position_dodge(0.1))+
         scale_color_viridis(discrete = TRUE, option = "magma")+
-        facet_wrap(~emass, ncol = 1, nrow = 3)
+        facet_wrap(~seedmass, ncol = 1, nrow = 3)
     
     return(list(a = grouppop_tab, b = grouppop_plot, c = groupweight_plot))
     
@@ -394,8 +395,8 @@ production <- function(output_repli){
         summarize(production = sum(veg,repr)/(10^3))%>%
         ungroup()%>%
         group_by(week)%>%
-        summarize(mean_prod = mean(production),
-                  sd_prod = sd(production))%>%
+        summarize(mean_prod = mean(production, na.rm = TRUE),
+                  sd_prod = sd(production, na.rm = TRUE))%>%
         ungroup()
     
     production_plot<- ggplot(production_tab, aes(x= week, y = mean_prod))+
@@ -435,7 +436,7 @@ traitchange  <- function(output_repli, timesteps, species){
                       filter(week %in% timesteps),
                       key = trait,
                       value = value,
-                      emass_mean:maxmass_mean,
+                      seedmass_mean:maxmass_mean,
                       factor_key = TRUE)
 		      
     plottrait <- function(spp){
