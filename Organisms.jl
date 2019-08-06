@@ -27,7 +27,7 @@ const λ_long = 100
 const Q = 5
 
 # Initial organisms parametrization is read from an input file and stored in OrgsRef
-mutable struct OrgsRef
+mutable struct OrgsRef_normal
     sp_id::Array{String, 1}
     abund::Dict{String,Int}
     kernel::Dict{String,String}
@@ -56,6 +56,37 @@ mutable struct OrgsRef
     b0germ_sd::Dict{String,Float64}
     b0mort_mean::Dict{String,Float64}
     b0mort_sd::Dict{String,Float64}
+end
+
+mutable struct OrgsRef_unif
+    sp_id::Array{String, 1}
+    abund::Dict{String,Int}
+    kernel::Dict{String,String}
+    clonality::Dict{String,Bool}
+    seedmass::Dict{String,Float64}
+    maxmass::Dict{String,Float64}
+    span_min::Dict{String,Float64}
+    span_max::Dict{String,Float64}
+    firstflower_min::Dict{String,Float64}
+    firstflower_max::Dict{String,Float64}
+    floron_min::Dict{String,Float64}
+    floron_max::Dict{String,Float64}
+    floroff_min::Dict{String,Float64}
+    floroff_max::Dict{String,Float64}
+    seednumber_min::Dict{String,Float64}
+    seednumber_max::Dict{String,Float64}
+    seedon_min::Dict{String,Float64}
+    seedon_max::Dict{String,Float64}
+    seedoff_min::Dict{String,Float64}
+    seedoff_max::Dict{String,Float64}
+    bankduration_min::Dict{String,Float64}
+    bankduration_max::Dict{String,Float64}
+    b0grow_min::Dict{String,Float64}
+    b0grow_max::Dict{String,Float64}
+    b0germ_min::Dict{String,Float64}
+    b0germ_max::Dict{String,Float64}
+    b0mort_min::Dict{String,Float64}
+    b0mort_max::Dict{String,Float64}
 end
 
 mutable struct Organism
@@ -91,7 +122,7 @@ end
                     Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
 
                     """
-function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id_counter::Int)
+function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, settings::Dict{String, Any})
 
     orgs = Organism[]
     
@@ -106,7 +137,36 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
             id_counter += 1 # update individual counter
 	    non0sd = 1e-7 #avoid error due to sd = 0
 
-            neworg = Organism(hex(id_counter),
+            if settings["traitdist"] == "uniform"
+                neworg = Organism(hex(id_counter),
+                              rand(["a" "j" "e"]),
+                              (XYs[i,1],XYs[i,2]),
+                              s,
+                              orgsref.kernel[s],
+                              orgsref.clonality[s],
+                              orgsref.seedmass[s],
+			      orgsref.maxmass[s], #maxmass
+			      Int(round(rand(Distributions.Uniform(orgsref.span_min[s], orgsref.span_max[s]),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Uniform(orgsref.firstflower_min[s], orgsref.firstflower_max[s]),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Uniform(orgsref.floron_min[s],orgsref.floron_max[s]),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Uniform(orgsref.floroff_min[s],orgsref.floroff_max[s]),1)[1], RoundUp)),
+			      0, #seed number
+			      Int(round(rand(Distributions.Uniform(orgsref.seedon_min[s],orgsref.seedon_max[s]),1)[1], RoundUp)),
+                              Int(round(rand(Distributions.Uniform(orgsref.seedoff_min[s],orgsref.seedoff_max[s]),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s]),1)[1], RoundUp)),
+			      rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s]),1)[1],
+			      rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s]),1)[1],
+			      rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s]),1)[1],
+                              0, #age
+                              Dict("veg" => 0.0, "repr" => 0.0), #mass
+                              false) #mated
+
+            ## Set conditional traits and variables
+            # weekly number of seeds
+	    nseeds = rand(Distributions.Uniform(orgsref.seednumber_min[s],orgsref.seednumber_max[s]+non0sd),1)[1]
+	        
+            elseif settings["traitsdist"] == "normal"
+                neworg = Organism(hex(id_counter),
                               rand(["a" "j" "e"]),
                               (XYs[i,1],XYs[i,2]),
                               s,
@@ -132,12 +192,16 @@ function initorgs(landavail::BitArray{N} where N, orgsref::Organisms.OrgsRef, id
             ## Set conditional traits and variables
             # weekly number of seeds
 	    nseeds = rand(Distributions.Normal(orgsref.seednumber_mean[s],orgsref.seednumber_sd[s]+non0sd),1)[1]
-	    if (neworg.floroff-neworg.floron+1) < 0
+	        
+            end
+
+            # adjustments to traits than depend on other values
+            if (neworg.floroff-neworg.floron+1) < 0
 	    error("floroff - floron <0")
 	    end
-            neworg.seednumber = Int(round(nseeds/(neworg.floroff-neworg.floron+1), RoundUp))
-
-            # initial biomass
+                neworg.seednumber = Int(round(nseeds/(neworg.floroff-neworg.floron+1), RoundUp))
+            
+            ## initial biomass
             if neworg.stage == "e"                  
                 neworg.mass["veg"] = neworg.seedmass
                 neworg.age = 1

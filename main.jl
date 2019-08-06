@@ -59,6 +59,11 @@ function parse_commandline()
         arg_type = String
         default = abspath(pwd(),"inputs/species.csv")
 
+        "--traitdist"
+        help = "Type of distribution to initialize species traits"
+        arg_type = String
+        default = "uniform"
+
         "--competition"
         help = "Type of competition: \"individual\", based on FON or \"capacity\", based on the landscape carrying capacity"
         arg_type = String
@@ -225,7 +230,93 @@ function read_spinput(settings::Dict{String,Any})
     #spinputtbl = loadtable(abspath(pwd(),"inputs/species.csv"))
     spinputtbl = loadtable(settings["spinput"])
 
+    if settings["traitdist"] == "unif"
     orgsref = OrgsRef(Array(rows(spinputtbl,:sp_id)),
+    
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:abund)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:kernel)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:clonality)[i] == "true" #translates R's true into Julia's TRUE
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seedmass)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:maxmass)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:span_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:span_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+	              Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:firstflower_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:firstflower_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:floron_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:floron_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:floroff_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:floroff_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seednumber_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seednumber_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seedon_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seedon_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seedoff_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:seedoff_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:bankduration_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:bankduration_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0grow_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0grow_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0germ_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0germ_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0mort_min)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id))),
+                      Dict(rows(spinputtbl,:sp_id)[i] =>
+                           rows(spinputtbl,:b0mort_max)[i]
+                           for i in 1:length(rows(spinputtbl,:sp_id)))
+		      )
+elseif settings["traitdist"] == "normal"
+orgsref = OrgsRef_unif(Array(rows(spinputtbl,:sp_id)),
     
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:abund)[i]
@@ -309,8 +400,8 @@ function read_spinput(settings::Dict{String,Any})
                            rows(spinputtbl,:b0mort_sd)[i]
                            for i in 1:length(rows(spinputtbl,:sp_id)))
 		      )
+end
     return orgsref
-
 end
 
 """
