@@ -229,8 +229,8 @@ function read_spinput(settings::Dict{String,Any})
 
     #spinputtbl = loadtable(abspath(pwd(),"inputs/species.csv"))
     spinputtbl = loadtable(settings["spinput"])
-
-    if settings["traitdist"] == "unif"
+    
+    if settings["traitdist"] == "uniform"
     orgsref = OrgsRef_unif(Array(rows(spinputtbl,:sp_id)),
     
                       Dict(rows(spinputtbl,:sp_id)[i] =>
@@ -615,7 +615,7 @@ function simulate()
     id_counter = 0
     
     # Create initial individuals
-    orgs, id_counter = initorgs(landavail, orgsref, id_counter)
+    orgs, id_counter = initorgs(landavail, orgsref, id_counter, settings)
     
     println("Plants initialized: type $(typeof(orgs))")
 
