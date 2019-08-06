@@ -13,7 +13,7 @@ using StatsBase
 #using Setworld
 using Fileprep
 
-export Organism, OrgsRef, initorgs, develop!, allocate!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!, release!
+export Organism, OrgsRef_normal, OrgsRef_unif, initorgs, develop!, allocate!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!, release!
 
 # Set up model constants
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
@@ -226,7 +226,7 @@ end
                 allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
                 Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
                                 """
-function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef,T::Float64)
+function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref,T::Float64)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
 
@@ -267,7 +267,7 @@ end
                 develop!()
                 Controls individual juvenile maturation.
                 """
-function develop!(orgs::Array{Organism,1}, orgsref::Organisms.OrgsRef)
+function develop!(orgs::Array{Organism,1}, orgsref)
     juvs = find(x->x.stage == "j",orgs)
 
     for j in juvs
@@ -367,7 +367,7 @@ end
                                 mkoffspring!()
                                 After mating happened (marked in `reped`), calculate the amount of offspring
                                 """
-function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref::Organisms.OrgsRef, id_counter::Int, landavail::BitArray{2}, T::Float64)
+function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref, id_counter::Int, landavail::BitArray{2}, T::Float64)
 
     offspring = Organism[]
     non0sd = 1e-7
@@ -550,7 +550,7 @@ end
                                 release!()
                                 Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
                                 """
-function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref::Organisms.OrgsRef )
+function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref)
 
     # Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
 
@@ -565,7 +565,7 @@ end
                 Seeds are dispersed.
                 """
 
-function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landpars::Any, tdist::Any)#Setworld.LandPars)}
+function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref, landpars::Any, tdist::Any)#Setworld.LandPars)}
 
     lost = Int64[]
 
@@ -645,7 +645,7 @@ end
                                 establish!
                 Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
                                 """
-function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, T::Float64)
+function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e" && rem(t,52) > x.seedon, orgs)
 
@@ -665,7 +665,7 @@ end
                                 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
                                 plants in nogrwth are subjected to two probability rates
                                 """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref::Organisms.OrgsRef, landavail::BitArray{2},T, nogrowth::Array{Int64,1})
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref, landavail::BitArray{2},T, nogrowth::Array{Int64,1})
     #open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
     #    println(sim,"Running mortality")
     #end
@@ -813,7 +813,7 @@ end
                                 shedd!()
                                 Plants loose their reproductive biomasses at the end of the reproductive season.
                                 """
-function shedd!(orgs::Array{Organisms.Organism,1}, orgsref::Organisms.OrgsRef, t::Int)
+function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int)
 
     flowering = find(x -> (x.mass["repr"] > 0), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
     

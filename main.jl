@@ -231,7 +231,7 @@ function read_spinput(settings::Dict{String,Any})
     spinputtbl = loadtable(settings["spinput"])
 
     if settings["traitdist"] == "unif"
-    orgsref = OrgsRef(Array(rows(spinputtbl,:sp_id)),
+    orgsref = OrgsRef_unif(Array(rows(spinputtbl,:sp_id)),
     
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:abund)[i]
@@ -316,7 +316,7 @@ function read_spinput(settings::Dict{String,Any})
                            for i in 1:length(rows(spinputtbl,:sp_id)))
 		      )
 elseif settings["traitdist"] == "normal"
-orgsref = OrgsRef_unif(Array(rows(spinputtbl,:sp_id)),
+orgsref = OrgsRef_normal(Array(rows(spinputtbl,:sp_id)),
     
                       Dict(rows(spinputtbl,:sp_id)[i] =>
                            rows(spinputtbl,:abund)[i]
