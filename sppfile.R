@@ -9,8 +9,8 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, traitsmode, spplist = NU
     
     # Define folders
     if(Sys.info()["user"] == "ludmilla"){
-      EDdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/")
-      EDdocsdir <- file.path(EDdir, "models_docs/")
+      EDdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model")
+      EDdocsdir <- file.path(EDdir, "models_docs")
       traitsdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis","functional_types")
     }else if (Sys.info()["user"] == "ubuntu") {
       EDdir <- file.path("/home/ubuntu/model")
@@ -39,7 +39,7 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, traitsmode, spplist = NU
     
     if (mode == "spplist"){
                                         # read species lists
-        spps <- read_csv(file.path(spplist), col_names = TRUE)
+        spps <- read_csv(file.path(EDdocsdir, spplist), col_names = TRUE)
                                         # select spp from the list that have known trait values
         traits <- spptraits %>% filter(species %in% spps$species)
         richp <- length(traits$species)
@@ -53,8 +53,7 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, traitsmode, spplist = NU
     ## initial abundances
     sppinput <- traits%>%
                 add_column(abund = ceiling(runif(richp,20,100)),
-                           sp_id = paste(rep("p", richp), 1:richp, sep = "-"))%>%
-                dplyr::select(sp_id, abund, species:seedoff_sd)
+                           sp_id = paste(rep("p", richp), 1:richp, sep = "-"))
 
     ## output species id used in EDM            
     write.csv(dplyr::select(sppinput, species, sp_id),
