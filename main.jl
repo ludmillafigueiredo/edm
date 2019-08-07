@@ -404,6 +404,70 @@ end
     return orgsref
 end
 
+function define_traitranges(settings::Dict{String,Any})
+
+    #spinputtbl = loadtable(abspath(pwd(),"inputs/species.csv"))
+    spinputtbl = loadtable(settings["spinput"])
+
+    traitranges = TraitRanges(
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:seedmass)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:seedmass)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:maxmass)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:maxmass)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:span_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:span_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:firstflower_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:firstflower_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:floron_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:floron_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:floroff_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:floroff_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:seednumber_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:seednumber_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:seedon_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:seedon_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:seedoff_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:seedoff_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:bankduration_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:bankduration_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:b0grow_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:b0grow_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:b0germ_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:b0germ_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id))),
+    Dict(rows(spinputtbl,:sp_id)[i] =>
+         range(Int(round(0.95*rows(spinputtbl,:b0mort_min)[i], RoundDown)),
+	       Int(round(1.05*rows(spinputtbl,:b0mort_max)[i], RoundUp)))
+	 for i in 1:length(rows(spinputtbl,:sp_id)))
+)
+
+return traitranges
+
+end
+
 """
                             implicit_insect(settings)
                             Reads how insects are going to be implicitly simulated.
@@ -600,8 +664,11 @@ function simulate()
 
     # Store species information
     orgsref = read_spinput(settings)
-    # unity test
+    ## unity test
     println("Sp info stored in object of type $(typeof(orgsref))")
+    traitranges = define_traitranges(settings)
+    ## unity test
+    println("Sp ranges stored in object of type $(typeof(traitranges))")
 
     # Set insects implicit simulation
     interaction, scen, remaining = implicit_insect(settings)
@@ -705,7 +772,7 @@ function simulate()
 
             mate!(orgs, t, settings, scen, tdist, remaining)
 
-            id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail, T)
+            id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail, T, traitranges)
 
             seedsi = release!(orgs, t, settings, orgsref) # only recently released seeds need to disperse. The others only need to survive
 
