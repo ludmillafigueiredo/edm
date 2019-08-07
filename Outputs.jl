@@ -23,8 +23,8 @@ function analysED(settings, results_folder)
     disturbance = settings["disturbtype"]
     @rput disturbance
 
-    outdir = results_folder
-    @rput outdir
+    outputsdir = results_folder
+    @rput outputsdir
     
     # run analysis
     R"source(\"analysED.R\")"
