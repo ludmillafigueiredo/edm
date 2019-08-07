@@ -278,7 +278,6 @@ function develop!(orgs::Array{Organism,1}, orgsref)
     end
 end
 
-
 """
             mate!()
             Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
@@ -416,7 +415,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     for f in fieldnames(embryo)
 		    	if typeof(getfield(embryo, f)) in [Int64 Float64]
 		    	   if getfield(embryo, f) < 0 || getfield(embryo, f) == Inf
-			      error(f, " is smaller than 0 or Inf")
+			       error(f, " has value: ", getfield(embryo, f), "Ind: ", embryo.id, "sp: ", embryo.sp)
 			      end
 			end
 		    end
