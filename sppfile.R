@@ -1,6 +1,6 @@
 # Subset species from the Göttingen pool
 
-goetspp <- function(inputID, rseed, mode, richp = NULL, traitsmode, spplist = NULL){
+goetspp <- function(inputID, rseed, mode, richp = NULL, traitsmode, traitsdir, spplist = NULL){
 
     require(tidyverse)
     options(scipen=999)
@@ -25,10 +25,10 @@ goetspp <- function(inputID, rseed, mode, richp = NULL, traitsmode, spplist = NU
                                         # get mean values
     ## table with species traits from leda and Weiss classification
     if (traitsmode == "normal"){
-      spptraits <- read_csv(file.path(traitsdir, "goetspp_EDMtraits_normal.csv"),
+      spptraits <- read_csv(file.path(EDdocsdir, "goetspp_EDMtraits_normal.csv"),
                             col_names = TRUE)
     }else{
-      spptraits <- read_csv(file.path(EDdir, "goetspp_EDMtraits_unif.csv"),
+      spptraits <- read_csv(file.path(EDdocsdir, "goetspp_EDMtraits_unif.csv"),
                             col_names = TRUE)
       }
       

@@ -418,7 +418,7 @@ traitchange  <- function(output_repli, timesteps, species){
 
     # take the mean values for each individual (they are replicated in each experiment) and then plot the violin plots
     traitvalues_tab  <- output_repli%>%
-        select(-c(kernel, clonal, age, xloc, yloc, veg, repr, mated, repli))%>%
+        select(-c(kernel, clonality, age, xloc, yloc, veg, repr, mated, repli))%>%
         group_by(week, id, stage, sp)%>%
         summarize_all(funs(mean = mean,
                            sd = sd))%>%
@@ -556,7 +556,6 @@ timesteps <- factor(c(min(pop_tab$week), max(pop_tab$week))) #provided or not, m
 rank <- rankabund(pop_tab, timesteps)
 rank$a -> relabund_tab
 rank$b -> rankabunds_plot
-
 rm(rank)
 
 ## Population structure by group size
@@ -593,10 +592,11 @@ save(cleanoutput,
      grouppop_plot, grouppop_tab, groupweight_plot,
      traitvalues_tab, traitvalues_plot,
      #traitpcas, timepca, timepca_plot,
-     file = file.path(analysEDdir, 
+     file = file.path(outputsdir, 
                       paste(parentsimID, ".RData", sep = "")))
 
 # Plot all graphs
 EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
 map(EDplots,
-    ~ ggsave(file.path(analysEDdir, paste(.x, ".png", sep ="")), get(.x)))
+    ~ ggsave(file.path(outputsdir, paste(.x, ".png", sep ="")), get(.x)))
+
