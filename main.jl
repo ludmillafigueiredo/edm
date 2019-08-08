@@ -494,9 +494,9 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
     # output header
     if t == 1
         header = hcat(["week"],
-                      reshape(string.(fieldnames(Organism)[1:19]),1,:),
+                      reshape(string.(fieldnames(Organism)[1:20]),1,:),
                       ["veg" "repr"],
-                      reshape(string.(fieldnames(Organism)[21:end]),1,length(fieldnames(Organism)[21:end])))
+                      reshape(string.(fieldnames(Organism)[22:end]),1,length(fieldnames(Organism)[22:end])))
         open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
@@ -515,17 +515,18 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
                                       orgs[o].kernel,
                                       orgs[o].clonality,
                                       orgs[o].seedmass,
-                                      orgs[o].bankduration,
+                                      orgs[o].maxmass,
+                                      orgs[o].span,
+				      orgs[o].firstflower,
                                       orgs[o].floron,
                                       orgs[o].floroff,
+                                      orgs[o].seednumber,
                                       orgs[o].seedon,
                                       orgs[o].seedoff,
-                                      orgs[o].span,
+                                      orgs[o].bankduration,
                                       orgs[o].b0grow,
                                       orgs[o].b0mort,
                                       orgs[o].b0germ,
-                                      orgs[o].seednumber,
-                                      orgs[o].maxmass,
                                       orgs[o].age,
                                       orgs[o].mass["veg"],
                                       orgs[o].mass["repr"],
