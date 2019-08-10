@@ -513,7 +513,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
         # output seeds per species (file is initialized in main.jl)
         open(abspath(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv")),"a") do seedfile
-            writedlm(seedfile, hcat(t, sp, "s", "sex", spoffspringcounter))
+            writedlm(seedfile, hcat(t, sp, "e", "sex", spoffspringcounter))
         end
     end
     
@@ -594,8 +594,7 @@ end
 function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref)
 
     # Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
-
-    seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, orgs)
+   seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, orgs)
     # using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it does do contain, it throws an error.
 
     return seedsi
@@ -804,7 +803,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                     # any individual can die
                     d = rand(samegrid,1)[1]
 
-                    if d.stage == "s"
+                    if d.stage == "e"
                         Bm = d.b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
                     elseif d.stage == "j"
                         Bm = d.b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
