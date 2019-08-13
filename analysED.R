@@ -1,6 +1,19 @@
 # !Run it from the model's directory!
-# This is an R script intended at faster analysis. Details on the RNotebook file of same name
-
+# This is an R script intended at fast analysis. Details on the RNotebook file of same name
+# 
+if(Sys.info()["user"] == "ludmilla"){
+  EDdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model")
+  EDdocsdir <- file.path(EDdir, "models_docs")
+  traitsdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis","functional_types")
+}else if (Sys.info()["user"] == "ubuntu") {
+  EDdir <- file.path("/home/ubuntu/model")
+  traitsdir <- file.path(EDdir, "inputs")
+}else{
+  EDdir <- file.path("/home/luf74xx/model")
+  EDdocsdir <- file.path("/home/luf74xx/Dokumente/model_docs")
+  traitsdir <- file.path(EDdocsdir,"functional_types")
+}
+inputsdir <- file.path(EDdir, "inputs")
 # Set up directory and environement to store analysis
 analysEDdir <- file.path(outputsdir, paste(parentsimID, "analysED", sep = "_"))
 dir.create(analysEDdir)
@@ -90,7 +103,7 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
 #' @param nreps number of replicates, which identify the folders containing results
 orgreplicates <- function(parentsimID, repfolder, nreps){
   
-  output_repli <- data.frame()
+  adultjuv_repli <- data.frame()
   offspring_repli <- data.frame()
   
   for(i in 1:nreps) {
@@ -103,26 +116,26 @@ orgreplicates <- function(parentsimID, repfolder, nreps){
       mutate(repli = as.factor(rep(sim, nrow(.))))
     
     # fill in cleanoutput object (necessary step because of bind_rows)
-    if(length(output_repli) == 0){
-      output_repli <- outdatasim
+    if(length(adultjuv_repli) == 0){
+      adultjuv_repli <- outdatasim
       offspring_repli <- offspringsim
     }else{
       # identify the lines corresponding to it with its replicate ID
-      output_repli <- bind_rows(output_repli, outdatasim, .id = "repli")
+      adultjuv_repli <- bind_rows(adultjuv_repli, outdatasim, .id = "repli")
       offspring_repli <- bind_rows(offspringsim, offspringsim, .id = "repli")
       offspring_repli$week = factor(offspring_repli$week)
     } 
   }
-  return(list(a = output_repli, b = offspring_repli))
+  return(list(a = adultjuv_repli, b = offspring_repli))
 }
 
 #' Extract and plot species-specific mean and sd biomass compartiments (these are means of each simulation' means   
 #' @param outdatalist
 #' @param plotit Boolean specifying whether graph shouuld be plotted or not
-stagemass <- function(output_repli, stages = factor(c("a", "j", "s"))){
+stagemass <- function(adultjuv_repli, stages = factor(c("a", "j", "s"))){
   
   # get biomasses
-  biomass_tab <- output_repli%>%
+  biomass_tab <- adultjuv_repli%>%
     select(week, id, stage, sp, veg, repr, repli)%>%
     group_by(week, stage, sp, repli)%>%
     summarize(repli_mean_reprmass = mean(repr, na.rm = TRUE),
@@ -166,10 +179,10 @@ stagemass <- function(output_repli, stages = factor(c("a", "j", "s"))){
 }
 
 #' Extract and plot population abundances
-popabund <- function(output_repli){
+popabund <- function(adultjuv_repli){
   
   # extract relevant variables
-  pop_tab <- output_repli%>%
+  pop_tab <- adultjuv_repli%>%
     select(week,sp,stage,repli)%>%
     ungroup()
   
@@ -351,10 +364,10 @@ rankabund <- function(pop_tab, timesteps){
 }
 
 #' Population structure by group size
-groupdyn <- function(output_repli, singlestages){
+groupdyn <- function(adultjuv_repli, singlestages){
   
   # create table
-  grouppop_tab <- output_repli%>%
+  grouppop_tab <- adultjuv_repli%>%
     group_by(week, sp, seedmass, stage, repli)%>%
     summarize(abundance = n())%>%
     ungroup()%>%
@@ -371,11 +384,11 @@ groupdyn <- function(output_repli, singlestages){
   ## filter data, if necessary
   if (missing(singlestages)){
     popdata_to_plot <- grouppop_tab
-    weightdata_to_plot <- output_repli
+    weightdata_to_plot <- adultjuv_repli
   }else{
     popdata_to_plot <- grouppop_tab %>%
       filter(stage %in% singlestages)
-    weightdata_to_plot <- output_repli%>%
+    weightdata_to_plot <- adultjuv_repli%>%
       filter(stage %in% singlestages)
   }
   ## plot it
@@ -411,9 +424,9 @@ groupdyn <- function(output_repli, singlestages){
 }
 
 #' Calculate biomass production
-production <- function(output_repli){
+production <- function(adultjuv_repli){
   
-  production_tab <- output_repli%>%
+  production_tab <- adultjuv_repli%>%
     select(week,veg,repr,repli)%>%
     group_by(week, repli)%>%
     summarize(production = sum(veg,repr)/(10^3))%>%
@@ -438,10 +451,10 @@ production <- function(output_repli){
 
 #' Analysis of change in trait values distribution
 
-traitchange  <- function(output_repli, timesteps, species){
+traitchange  <- function(adultjuv_repli, timesteps, species){
   
   # take the mean values for each individual (they are replicated in each experiment) and then plot the violin plots
-  traitvalues_tab  <- output_repli%>%
+  traitvalues_tab  <- adultjuv_repli%>%
     select(-c(kernel, clonality, age, xloc, yloc, veg, repr, mated, repli))%>%
     group_by(week, id, stage, sp)%>%
     summarize_all(funs(mean = mean,
@@ -540,19 +553,19 @@ cleanoutput <- getoutput(parentsimID, repfolder, nreps, outputsdir = outputsdir,
 
 ## Identify replicates
 replicates <- orgreplicates(parentsimID, repfolder, nreps)
-replicates$a -> output_repli
+replicates$a -> adultjuv_repli
 replicates$b -> offspring_repli
 rm(replicates)
 
 ## Individual vegetative and reproductive biomasses of juveniles and adults (NOT seeds)
-mass <- stagemass(output_repli,TRUE) # spp is an optional argument and stage is set to default
+mass <- stagemass(adultjuv_repli,TRUE) # spp is an optional argument and stage is set to default
 mass$a -> vegmass_plot 
 mass$b -> repmass_plot 
 mass$c -> biomass_tab
 rm(mass)
 
 ## Species abundance variation
-abund <- popabund(output_repli)
+abund <- popabund(adultjuv_repli)
 abund$a -> pop_tab
 abund$b -> spabund_tab
 abund$c -> abund_plot
@@ -583,18 +596,18 @@ rank$b -> rankabunds_plot
 rm(rank)
 
 ## Population structure by group size
-groups <- groupdyn(output_repli) #specifying singlestages is optional
+groups <- groupdyn(adultjuv_repli) #specifying singlestages is optional
 groups$a -> grouppop_tab
 groups$b -> grouppop_plot
 groups$c -> groupweight_plot
 rm(groups)
 
 ## Biomass production
-production_plot <- production(output_repli)
+production_plot <- production(adultjuv_repli)
 
 ## Trait change
 ### trait values
-traitschange <- traitchange(output_repli, timesteps)
+traitschange <- traitchange(adultjuv_repli, timesteps)
 traitschange$a -> traitvalues_tab
 traitschange$b -> traitvalues_plot # no 's' so it can be detected by `plotall`
 rm(traitschange)
@@ -607,7 +620,7 @@ rm(traitschange)
 
 # Save bundle of tabs and plots as RData
 save(cleanoutput,
-     output_repli,offspring_repli,
+     adultjuv_repli,offspring_repli,
      vegmass_plot,repmass_plot,biomass_tab,
      pop_tab, abund_plot,
      # weekstruct_tab, weekstruct_plot, relativestruct_tab, relativestruct_plot, 
