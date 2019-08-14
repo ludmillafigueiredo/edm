@@ -525,8 +525,8 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
                                       orgs[o].seedoff,
                                       orgs[o].bankduration,
                                       orgs[o].b0grow,
-                                      orgs[o].b0mort,
                                       orgs[o].b0germ,
+                                      orgs[o].b0mort,
                                       orgs[o].age,
                                       orgs[o].mass["veg"],
                                       orgs[o].mass["repr"],
@@ -789,6 +789,7 @@ function simulate()
     end
 
     return settings, results_folder
+
 end
 
 # run simulation
