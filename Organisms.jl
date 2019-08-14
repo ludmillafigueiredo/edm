@@ -254,13 +254,13 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
         #only vegetative biomass helps growth
         B_grow = b0*(orgs[o].mass["veg"])^(-1/4)*exp(-aE/(Boltz*T))
         # Growth happens according to the Richards model
-        new_mass = orgs[o].seedmass + orgs[o].maxmass/((1 + Q*exp(-B_grow*(t-orgs[o].firstflower)))^(1/Q))
+        new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])
         
         if isapprox(new_mass,0) # if it is not growing, there is no need to allocate
             push!(nogrowth,o)
         elseif orgs[o].stage == "j"
             # juveniles grow vegetative biomass only
-            orgs[o].mass["veg"] = new_mass 
+            orgs[o].mass["veg"] += new_mass 
         elseif orgs[o].stage == "a" &&
             (orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
             (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass))
