@@ -1,4 +1,4 @@
-"""
+"
                                 This module contains the
 
                                 Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
@@ -287,11 +287,12 @@ function develop!(orgs::Array{Organism,1}, orgsref)
     juvs = find(x->x.stage == "j",orgs)
 
     for j in juvs
-        if  orgs[j].mass["veg"] >= 0.5*orgs[j].maxmass
+        if  orgs[j].age >= orgs[j].firstflower
             # If an individual grows quite fast, it is more vigorous, and should transfer it to adult fecundity. The only variable capable of transfering this property is the weigh, which, combined with the MTE rate, makes it  generate more offspring
             orgs[j].stage = "a"
-        end
+	end
     end
+    
 end
 
 """
@@ -696,8 +697,8 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
         if germinate(orgs[o],T,settings)
             orgs[o].stage = "j"
         end
-
     end
+    
 end
 
 """
