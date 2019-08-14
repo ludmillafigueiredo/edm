@@ -779,7 +779,9 @@ function simulate()
 
             disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
 
+            if 12 < rem(t,52) < 38
             establish!(orgs, t, settings, orgsref, T)
+            end
             
             shedd!(orgs, orgsref, t)
             
