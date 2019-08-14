@@ -723,17 +723,16 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
             mprob = 1
 
         elseif o in seeds
-            if rem(t,52) > 38 || rem(t,52) < 12 #seeds only die during winter
                 #if orgs[o].age >= orgs[o].bankduration
                 #    mprob = 1
-            elseif rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
+            if (rem(t,52) > 38 || rem(t,52) < 12) && # seeds can only die during winter
+	       rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated 
                 Bm = orgs[o].b0mort * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
                 #println("Bm: $Bm, b0mort = $(orgs[o].b0mort), seed mass = $(orgs[o].mass["veg"])")
                 mprob = 1 - exp(-Bm)
             else
                 mprob = 0
             end
-        end
 
     elseif orgs[o].age >= orgs[o].span #oldies die
         mprob = 1
