@@ -733,18 +733,12 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                 mprob = 0
             end
 
-    elseif orgs[o].age >= orgs[o].span #oldies die
+    elseif (orgs[o].stage == "a" && orgs[o].age >= orgs[o].span) #oldies die
         mprob = 1
         
     else #calculate mortality for juveniles or adults
-        if orgs[o].stage == "j"
-            Bm = orgs[o].b0mort * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-        else
-            Bm = orgs[o].b0mort *  (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-        end
-
+        Bm = orgs[o].b0mort *  (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
         mprob = 1 - exp(-Bm)
-        
     end
 
     # Check mortality rate to probability conversion
