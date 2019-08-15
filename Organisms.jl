@@ -171,7 +171,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
                                   Int(round(rand(Distributions.Uniform(orgsref.seedoff_min[s],orgsref.seedoff_max[s] + minvalue),1)[1], RoundUp)),
 			          Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
 			          rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
-			          rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
+			          100*rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
 			          rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
                                   0, #age
                                   Dict("veg" => 0.0, "repr" => 0.0), #mass
@@ -253,19 +253,17 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
         
         #only vegetative biomass helps growth
         B_grow = b0*(orgs[o].mass["veg"])^(-1/4)*exp(-aE/(Boltz*T))
-        # Growth happens according to the Richards model
-        new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])
         
-        if isapprox(new_mass,0) # if it is not growing, there is no need to allocate
-            push!(nogrowth,o)
-        elseif orgs[o].stage == "j"
+        if orgs[o].stage == "j"
             # juveniles grow vegetative biomass only
+	    new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])
             orgs[o].mass["veg"] += new_mass 
         elseif orgs[o].stage == "a" &&
             (orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
             (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass))
             # adults in their reproductive season and with enough weight, invest in reproduction
             #sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + new_mass)^0.95)
+            new_mass = B_grow*(orgs[o].mass["veg"])
             if haskey(orgs[o].mass,"repr")
                 orgs[o].mass["repr"] += new_mass #sowingmass 
             else
@@ -273,6 +271,7 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
             end
         elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].maxmass
             # adults that have not yet reached maximum size can still grow vegetative biomass, independently of the season
+            new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])  
             orgs[o].mass["veg"] += new_mass 
         end            
     end
