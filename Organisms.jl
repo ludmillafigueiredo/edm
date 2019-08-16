@@ -250,16 +250,17 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
     nogrowth = Int64[]
 
     growing = find(x->(x.stage in ["a" "j"]),orgs)
+    
     for o in growing
 
         b0 = orgs[o].b0grow
         
         #only vegetative biomass helps growth
-        B_grow = b0*(orgs[o].mass["veg"])^(-1/4)*exp(-aE/(Boltz*T))
+        B_grow = (b0*(orgs[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))
         
         if orgs[o].stage == "j"
             # juveniles grow vegetative biomass only
-	    new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])
+	    new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])*orgs[o].mass["veg"]
             orgs[o].mass["veg"] += new_mass 
         elseif orgs[o].stage == "a" &&
             (orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
@@ -274,7 +275,7 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
             end
         elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].maxmass
             # adults that have not yet reached maximum size can still grow vegetative biomass, independently of the season
-            new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])  
+            new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])*orgs[o].mass["veg"]  
             orgs[o].mass["veg"] += new_mass 
         end            
     end
@@ -439,7 +440,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 			end
 		    end
 
-                    #
+#
 		    newvalue_seedmass = rand(Distributions.Normal(orgs[s].seedmass, abs(orgs[s].seedmass-conspp.seedmass+non0sd)/6))[1]
 		    embryo.maxmass = rand(Distributions.Normal(orgs[s].maxmass, abs(orgs[s].maxmass-conspp.maxmass+non0sd)/6))[1]
 		    embryo.span = Int(round(rand(Distributions.Normal(orgs[s].span, abs(orgs[s].span-conspp.span+non0sd)/6))[1], RoundUp))
@@ -495,6 +496,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                     embryo.b0mort in traitranges.b0mort[embryo.sp] ? continue :
                         embryo.b0mort < traitranges.b0mort[embryo.sp][1] ? embryo.b0mort == 0.95*orgsref.b0mort_min[embryo.sp] :
                         embryo.b0mort == 1.05*orgsref.b0mort_max[embryo.sp]
+
 
 # set embryos state variables
 embryo.id = hex(id_counter) 
