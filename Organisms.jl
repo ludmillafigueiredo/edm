@@ -171,7 +171,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
                                   Int(round(rand(Distributions.Uniform(orgsref.seedoff_min[s],orgsref.seedoff_max[s] + minvalue),1)[1], RoundUp)),
 			          Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
 			          rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
-			          100*rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
+			          rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
 			          rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
                                   0, #age
                                   Dict("veg" => 0.0, "repr" => 0.0), #mass
@@ -440,7 +440,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 		    newvalue_seedmass = rand(Distributions.Normal(orgs[s].seedmass, abs(orgs[s].seedmass-conspp.seedmass+non0sd)/6))[1]
 		    embryo.maxmass = rand(Distributions.Normal(orgs[s].maxmass, abs(orgs[s].maxmass-conspp.maxmass+non0sd)/6))[1]
 		    embryo.span = Int(round(rand(Distributions.Normal(orgs[s].span, abs(orgs[s].span-conspp.span+non0sd)/6))[1], RoundUp))
-                    embryo.firstflower = Int(round(rand(Distributions.Normal(orgs[s].firstflower, abs(orgs[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
+                   embryo.firstflower = Int(round(rand(Distributions.Normal(orgs[s].firstflower, abs(orgs[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
 		    embryo.floron = Int(round(rand(Distributions.Normal(orgs[s].floron, abs(orgs[s].floron-conspp.floron+non0sd)/6))[1],RoundUp))
 		    embryo.floroff = Int(round(rand(Distributions.Normal(orgs[s].floroff, abs(orgs[s].floroff-conspp.floroff+non0sd)/6))[1],RoundUp))
 		    embryo.seednumber = Int(round(rand(Distributions.Normal(orgs[s].seednumber, abs(orgs[s].seednumber-conspp.seednumber+non0sd)/6))[1], RoundUp))
@@ -470,12 +470,12 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 			embryo.floron == 1.05*orgsref.floron_max[embryo.sp]
 	            embryo.floroff in traitranges.floroff[embryo.sp] ? continue :
 		   	embryo.floroff < traitranges.floroff[embryo.sp][1] ? embryo.floroff == 0.95*orgsref.floroff_min[embryo.sp] :
-			embryo.floroff == 1.05*orgsref.floroff_max[embryo.sp]
+		        embryo.floroff == 1.05*orgsref.floroff_max[embryo.sp]
                     embryo.seednumber in traitranges.seednumber[embryo.sp] ? continue :
-		   	embryo.seednumber < traitranges.seednumber[embryo.sp][1] ? embryo.seednumber == 0.95*orgsref.seednumber_min[embryo.sp] :
+		    	embryo.seednumber < traitranges.seednumber[embryo.sp][1] ? embryo.seednumber == 0.95*orgsref.seednumber_min[embryo.sp] :
 			embryo.seednumber == 1.05*orgsref.seednumber_max[embryo.sp]
 		    embryo.seedon in traitranges.seedon[embryo.sp] ? continue :
-		   	embryo.seedon < traitranges.seedon[embryo.sp][1] ? embryo.seedon == 0.95*orgsref.seedon_min[embryo.sp] :
+	   	        embryo.seedon < traitranges.seedon[embryo.sp][1] ? embryo.seedon == 0.95*orgsref.seedon_min[embryo.sp] :
 			embryo.seedon == 1.05*orgsref.seedon_max[embryo.sp]
 		    embryo.seedoff in traitranges.seedoff[embryo.sp] ? continue :
 		   	embryo.seedoff < traitranges.seedoff[embryo.sp][1] ? embryo.seedoff == 0.95*orgsref.seedof_min[embryo.sp] :
@@ -486,12 +486,12 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 		    embryo.b0grow in traitranges.b0grow[embryo.sp] ? continue :
 		   	embryo.b0grow < traitranges.b0grow[embryo.sp][1] ? embryo.b0grow == 0.95*orgsref.b0grow_min[embryo.sp] :
 			embryo.b0grow == 1.05*orgsref.b0grow_max[embryo.sp]
-embryo.b0germ in traitranges.b0germ[embryo.sp] ? continue :
-    embryo.b0germ < traitranges.b0germ[embryo.sp][1] ? embryo.b0germ == 0.95*orgsref.b0germ_min[embryo.sp] :
-    embryo.b0germ == 1.05*orgsref.b0germ_max[embryo.sp]
-embryo.b0mort in traitranges.b0mort[embryo.sp] ? continue :
-    embryo.b0mort < traitranges.b0mort[embryo.sp][1] ? embryo.b0mort == 0.95*orgsref.b0mort_min[embryo.sp] :
-    embryo.b0mort == 1.05*orgsref.b0mort_max[embryo.sp]
+                    embryo.b0germ in traitranges.b0germ[embryo.sp] ? continue :
+                        embryo.b0germ < traitranges.b0germ[embryo.sp][1] ? embryo.b0germ == 0.95*orgsref.b0germ_min[embryo.sp] :
+                        embryo.b0germ == 1.05*orgsref.b0germ_max[embryo.sp]
+                    embryo.b0mort in traitranges.b0mort[embryo.sp] ? continue :
+                        embryo.b0mort < traitranges.b0mort[embryo.sp][1] ? embryo.b0mort == 0.95*orgsref.b0mort_min[embryo.sp] :
+                        embryo.b0mort == 1.05*orgsref.b0mort_max[embryo.sp]
 
 # set embryos state variables
 embryo.id = hex(id_counter) 
@@ -690,11 +690,16 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
     establishing = find(x -> x.stage == "e" && rem(t,52) > x.seedon, orgs)
 
     lost = Int64[]
+    germinated = 0
 
     for o in establishing
 
         if germinate(orgs[o],T,settings)
             orgs[o].stage = "j"
+	    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+            writedlm(sim, hcat(t, "germination", orgs[o].stage, orgs[o].age))
+        end
+
         end
     end
     
@@ -752,6 +757,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
     if 1 == rand(Distributions.Bernoulli(mprob))
         push!(deaths, o)
         #println("$(orgs[o].stage) dying INDEP.")
+	# test
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+            writedlm(sim, hcat(t, "death", orgs[o].stage, orgs[o].age))
+        end
+
     else
         orgs[o].age += 1
     end
@@ -761,7 +771,6 @@ deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality
 
 open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
     println(sim, "Density-independent mortality: ", length(deaths))
-
 end
 
 deaths = Int64[] # reset before calculating density-dependent mortality
@@ -823,6 +832,12 @@ if sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
                     #currentk -= sum(values(orgs[o].mass)) #update currentk to calculate density-dependent mortality
                     push!(deaths, o)
                     #println("$(orgs[o].stage) dying INDEP.")
+
+                    # test
+                    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+                        writedlm(sim, hcat(t, "death-K", orgs[o].stage, orgs[o].age))
+                    end
+		    
                 else
                     orgs[o].age += 1
                 end

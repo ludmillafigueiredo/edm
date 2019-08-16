@@ -730,6 +730,11 @@ function simulate()
             println(sim,string("Simulation: ",settings["simID"],now()))
         end
 
+        # START ID SIMULATION 1LOG FILE
+        open(abspath(joinpath(simresults_folder, "eventslog.txt")),"w") do sim
+            writedlm(sim, hcat("week", "event", "stage", "age"))
+        end
+	
         # START SEED PRODUCTION FILE
         open(abspath(simresults_folder, "offspringproduction.csv"),"w") do seedfile
             writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
