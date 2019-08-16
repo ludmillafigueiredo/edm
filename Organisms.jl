@@ -440,7 +440,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 			end
 		    end
 
-#
+# Trait microevolution
 		    newvalue_seedmass = rand(Distributions.Normal(orgs[s].seedmass, abs(orgs[s].seedmass-conspp.seedmass+non0sd)/6))[1]
 		    embryo.maxmass = rand(Distributions.Normal(orgs[s].maxmass, abs(orgs[s].maxmass-conspp.maxmass+non0sd)/6))[1]
 		    embryo.span = Int(round(rand(Distributions.Normal(orgs[s].span, abs(orgs[s].span-conspp.span+non0sd)/6))[1], RoundUp))
