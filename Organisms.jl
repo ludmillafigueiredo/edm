@@ -422,7 +422,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
                 spoffspringcounter += offs
 
                 # get another parent
-                conspp = orgs[rand(find(x -> x.sp == sp && x.stage == "a", orgs))] 
+                conspp = rand(ferts) 
 
                 for n in 1:offs
 
