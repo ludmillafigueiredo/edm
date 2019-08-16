@@ -221,7 +221,10 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
             if neworg.stage == "e"                  
                 neworg.mass["veg"] = neworg.seedmass
                 neworg.age = 1
-            elseif neworg.stage in ["j" "a"]
+            elseif neworg.stage in ["j"]
+                neworg.mass["veg"] = neworg.maxmass * 0.25
+                neworg.age = 26
+	    elseif neworg.stage in ["a"]
                 neworg.mass["veg"] = neworg.maxmass * 0.5
                 neworg.age = 26
             else
@@ -549,7 +552,7 @@ for sp in unique(getfield.(asexuals, :sp))
             # get a copy of the mother, which the clones will look like 
             clonetemplate = deepcopy(orgs[c])
             clonetemplate.stage = "j" #clones have already germinated
-            clonetemplate.mass["veg"] = orgs[c].seedmass
+            clonetemplate.mass["veg"] = orgs[c].maxmass*0.1
             clonetemplate.mass["repr"] = 0.0
 
             for o in offs
