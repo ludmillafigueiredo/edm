@@ -614,11 +614,11 @@ function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, 
         end
 
         # habitat area
-        habitatarea = length(find(x -> x == true, landavail))*625 # cells area 25x25cm
+        habitatarea = length(find(x -> x == true, landavail))*625 # cells area 25x25cm; habitatarea in cm²
 	totalarea = prod(size(landavail))
 	
         # K and grid-cell K
-        global K = (1.5/100)*habitatarea # xtons/ha = x.10-²g/1m²
+        global K = (1.5/100)*habitatarea # xtons/ha = x.10-²g/1cm²
         global cK = K/length(find(x -> x == true, landavail))
 
         open(abspath(joinpath(settings["outputat"],settings["simID"],"landlog.txt")),"a") do sim
