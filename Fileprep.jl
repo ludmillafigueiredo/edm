@@ -8,7 +8,7 @@ A fragment of 5 ha area: 5.10⁴ m² = 5.10⁴.10⁴ = 5.10⁸ cm² (Mühlenberg
 grid
 areatocell(50000)
 
-  gridsizes(realxlen, realylen)
+gridsizes(realxlen, realylen)
 Convert fragments real length values give in `realxlen` and `realylen` from m to the equivalent number of grid cell lengths.
 1 m = 100 cm, 3 cm of cell side size
 """
@@ -20,7 +20,7 @@ function gridsizes(realxlen::Array{Float64,1}, realylen::Array{Float64,1})
 end
 
 """
-  lengthtocell(d)
+lengthtocell(d)
 Converts distance values from m to cell size.
 """
 function lengthtocell(d::Float64)
@@ -29,7 +29,7 @@ function lengthtocell(d::Float64)
 end
 
 """
-  areatocell(area)
+areatocell(area)
 Calculate the side length of a square grid of a fragment of `area` m².
 1 m² = 10000 cm², 3 cm of cell side size
 # 2 methods:
@@ -48,7 +48,7 @@ end
 
 
 """
-  connectivity()
+connectivity()
 Calculate connectivity between ...
 """
 function connectivity()
