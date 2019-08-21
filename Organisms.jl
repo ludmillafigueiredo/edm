@@ -145,10 +145,10 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 	for s in orgsref.sp_id # all fragments are populated from the same species pool
 
 		# create random locations
-		XYs = hcat(rand(1:size(landavail,1),orgsref.abund[s]),
-		rand(1:size(landavail,2),orgsref.abund[s]))
+		XYs = hcat(rand(1:size(landavail,1), orgsref.abund[s]),
+		rand(1:size(landavail,2), orgsref.abund[s]))
 
-		for i in 1:orgsref.abund[s]
+		for i in 1:1000
 
 			id_counter += 1 # update individual counter
 			minvalue = 1e-7 # Distribution.Normal requires sd > 0, and Distribution.Uniform requires max > min
@@ -262,18 +262,19 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 			# juveniles grow vegetative biomass only
 			new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])*orgs[o].mass["veg"]
 			orgs[o].mass["veg"] += new_mass
-		elseif orgs[o].stage == "a" &&
+
+                elseif orgs[o].stage == "a" &&
 			(orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
-			(sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass))
-			# adults in their reproductive season and with enough weight, invest in reproduction
-			#sowingmass = (5.5*(10.0^(-2)))*((orgs[o].mass["veg"]/(orgs[o].floroff-orgs[o].floron + 1) + new_mass)^0.95)
-			new_mass = B_grow*(orgs[o].mass["veg"])
+			(sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass)) # adults in their reproductive season and with enough weight, invest in reproduction
+
+                        new_mass = B_grow*(orgs[o].mass["veg"])
 			if haskey(orgs[o].mass,"repr")
 				orgs[o].mass["repr"] += new_mass #sowingmass
 			else
 				orgs[o].mass["repr"] = new_mass #sowingmass
 			end
-		elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].maxmass
+
+                elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].maxmass
 			# adults that have not yet reached maximum size can still grow vegetative biomass, independently of the season
 			new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])*orgs[o].mass["veg"]
 			orgs[o].mass["veg"] += new_mass
@@ -286,13 +287,18 @@ end
 develop!()
 Controls individual juvenile maturation.
 """
-function develop!(orgs::Array{Organism,1}, orgsref)
+function develop!(orgs::Array{Organism,1}, orgsref, settings::Dict{String, Any}, t::Int)
 	juvs = find(x->x.stage == "j",orgs)
 
 	for j in juvs
 		if  orgs[j].age >= orgs[j].firstflower
 			# If an individual grows quite fast, it is more vigorous, and should transfer it to adult fecundity. The only variable capable of transfering this property is the weigh, which, combined with the MTE rate, makes it  generate more offspring
 			orgs[j].stage = "a"
+			
+			# test
+			open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+				writedlm(sim, hcat(t, "maturation", orgs[j].stage, orgs[j].age))
+			end
 		end
 	end
 
@@ -451,9 +457,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 					embryo.seedon += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seedon-conspp.seedon+non0sd)/6))[1],RoundUp))
 					embryo.seedoff += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seedoff-conspp.seedoff+non0sd)/6))[1],RoundUp))
 					embryo.bankduration += Int(round(rand(Distributions.Normal(0, abs(orgs[s].bankduration-conspp.bankduration+non0sd)/6))[1], RoundUp))
-					#embryo.b0grow += rand(Distributions.Normal(0, abs(orgs[s].b0grow-conspp.b0grow+non0sd)/6))[1]
-					#embryo.b0germ += rand(Distributions.Normal(0, abs(orgs[s].b0germ-conspp.b0germ+non0sd)/6))[1]
-					#embryo.b0mort += rand(Distributions.Normal(0, abs(orgs[s].b0mort-conspp.b0mort+non0sd)/6))[1]
+					embryo.b0grow += rand(Distributions.Normal(0, abs(orgs[s].b0grow-conspp.b0grow+non0sd)/6))[1]
+					embryo.b0germ += rand(Distributions.Normal(0, abs(orgs[s].b0germ-conspp.b0germ+non0sd)/6))[1]
+					embryo.b0mort += rand(Distributions.Normal(0, abs(orgs[s].b0mort-conspp.b0mort+non0sd)/6))[1]
 
 					# constrain values: avoid to trait changes that generates negative values (and also values that get too high)
 
@@ -469,7 +475,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 					embryo.firstflower in traitranges.firstflower[embryo.sp] ? continue :
 					embryo.firstflower < traitranges.firstflower[embryo.sp][1] ? embryo.firstflower == traitranges.firstflower[embryo.sp][1] :
 					embryo.firstflower == traitranges.firstflower[embryo.sp][end]
-					embryo.floron in traitranges.floron[embryo.sp] ? continue :
+
+                                        embryo.floron in traitranges.floron[embryo.sp] ? continue :
 					embryo.floron < traitranges.floron[embryo.sp][1] ? embryo.floron == traitranges.floron[embryo.sp][1] :
 					embryo.floron == traitranges.floron[embryo.sp][end]
 					embryo.floroff in traitranges.floroff[embryo.sp] ? continue :
@@ -487,15 +494,15 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 					embryo.bankduration in traitranges.bankduration[embryo.sp] ? continue :
 					embryo.bankduration < traitranges.bankduration[embryo.sp][1] ? embryo.bankduration == traitranges.bankduration[embryo.sp][1] :
 					embryo.bankduration == traitranges.bankduration[embryo.sp][end]
-					#embryo.b0grow in traitranges.b0grow[embryo.sp] ? continue :
-					#embryo.b0grow < traitranges.b0grow[embryo.sp][1] ? embryo.b0grow == traitranges.b0grow[embryo.sp][1] :
-					#embryo.b0grow == traitranges.b0grow[embryo.sp][end]
-					#embryo.b0germ in traitranges.b0germ[embryo.sp] ? continue :
-					#embryo.b0germ < traitranges.b0germ[embryo.sp][1] ? embryo.b0germ == traitranges.b0germ[embryo.sp][1] :
-					#embryo.b0germ == traitranges.b0germ[embryo.sp][end]
-					#embryo.b0mort in traitranges.b0mort[embryo.sp] ? continue :
-					#embryo.b0mort < traitranges.b0mort[embryo.sp][1] ? embryo.b0mort == traitranges.b0mort[embryo.sp][1] :
-					#embryo.b0mort == traitranges.b0mort[embryo.sp][end]
+					embryo.b0grow in traitranges.b0grow[embryo.sp] ? continue :
+					embryo.b0grow < traitranges.b0grow[embryo.sp][1] ? embryo.b0grow == traitranges.b0grow[embryo.sp][1] :
+					embryo.b0grow == traitranges.b0grow[embryo.sp][end]
+					embryo.b0germ in traitranges.b0germ[embryo.sp] ? continue :
+					embryo.b0germ < traitranges.b0germ[embryo.sp][1] ? embryo.b0germ == traitranges.b0germ[embryo.sp][1] :
+					embryo.b0germ == traitranges.b0germ[embryo.sp][end]
+					embryo.b0mort in traitranges.b0mort[embryo.sp] ? continue :
+					embryo.b0mort < traitranges.b0mort[embryo.sp][1] ? embryo.b0mort == traitranges.b0mort[embryo.sp][1] :
+					embryo.b0mort == traitranges.b0mort[embryo.sp][end]
 
 
 					# set embryos state variables
@@ -654,6 +661,10 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
 		else # if the new location is in an unavailable habitat or outside the landscape, the seed dies
 
 			push!(lost,d)
+			# test
+			open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+				writedlm(sim, hcat(t, "lost in dispersal", orgs[d].stage, orgs[d].age))
+			end
 
 		end
 	end
@@ -672,6 +683,10 @@ Seeds have a probability of germinating (`gprob`).
 function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, Any})
 	Bg = org.b0germ * (org.mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
 	gprob = 1 - exp(-Bg)
+	# test
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+				writedlm(sim, hcat(org.stage, org.age, Bg, gprob, "germination"))
+			end
 
 	if gprob < 0
 		error("gprob < 0")
@@ -721,20 +736,19 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	#end
 
 	deaths = Int64[]
-	seeds = find(x -> x.stage == "e", orgs)
+	#seeds = find(x -> x.stage == "e", orgs)
 	mprob = 0
 	Bm = 0
 
 	# Density-independent mortality
 	for o in 1:length(orgs)
 
-		if sum(values(orgs[o].mass)) <= 0 || orgs[o] in nogrowth #probably unnecessary to verify negative or null weights
-			mprob = 1
+		if sum(values(orgs[o].mass)) <= 0 #|| orgs[o] in nogrowth #probably unnecessary to verify negative or null weights
+			error("negative biomass")
 
-		elseif o in seeds
-			#if orgs[o].age >= orgs[o].bankduration
-			#    mprob = 1
-			if (rem(t,52) > 38 || rem(t,52) < 12) && # seeds can only die during winter
+		elseif orgs[o].stage == "e" #o in seeds
+
+                        if (rem(t,52) > 38 || rem(t,52) < 12) && # seeds can only die during winter
 				rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
 				Bm = orgs[o].b0mort * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
 				#println("Bm: $Bm, b0mort = $(orgs[o].b0mort), seed mass = $(orgs[o].mass["veg"])")
@@ -742,6 +756,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 			else
 				mprob = 0
 			end
+			
 
 		elseif (orgs[o].stage == "a" && orgs[o].age >= orgs[o].span) #oldies die
 			mprob = 1
@@ -751,6 +766,12 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 			mprob = 1 - exp(-Bm)
 
 		end
+
+                # test
+	                        open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+				    writedlm(sim, hcat(orgs[o].stage, orgs[o].age, Bm, mprob, "death"))
+			        end
+
 
 		# Check mortality rate to probability conversion
 		if mprob < 0
@@ -780,7 +801,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	end
 
 	deaths = Int64[] # reset before calculating density-dependent mortality
-
+        mprob = 0
+	Bm = 0
+	
 	## Density-dependent mortality
 
 	if sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
@@ -822,6 +845,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 					end
 					# calculate probability
 					mprob = 1 - exp(-Bm)
+					# test
+	                        open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+				    writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
+			        end
+
 
 					#unity test: Check mortality rate to probability conversion
 					if mprob < 0

@@ -618,7 +618,7 @@ function parse_commandline()
                                                                                                                                                                                                                                                                                         totalarea = prod(size(landavail))
 
                                                                                                                                                                                                                                                                                         # K and grid-cell K
-                                                                                                                                                                                                                                                                                        global K = (1.5/100)*habitatarea # xtons/ha = x.10-²g/1cm²
+                                                                                                                                                                                                                                                                                        global K = (1.5/100)*habitatarea # xtons/ha = x.10-2g/1cm²
                                                                                                                                                                                                                                                                                         global cK = K/length(find(x -> x == true, landavail))
 
                                                                                                                                                                                                                                                                                         open(abspath(joinpath(settings["outputat"],settings["simID"],"landlog.txt")),"a") do sim
@@ -735,6 +735,14 @@ function parse_commandline()
                                                                                                                                                                                                                                                                                             writedlm(sim, hcat("week", "event", "stage", "age"))
                                                                                                                                                                                                                                                                                         end
 
+                                                                          # START FILE TO LOG METABOLIC RATES
+	                                                                  open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+
+                                                                              writedlm(sim, hcat("stage", "age", "rate", "probability", "event"))
+
+                                                                          end
+
+
                                                                                                                                                                                                                                                                                         # START SEED PRODUCTION FILE
                                                                                                                                                                                                                                                                                         open(abspath(simresults_folder, "offspringproduction.csv"),"w") do seedfile
                                                                                                                                                                                                                                                                                             writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
@@ -774,7 +782,7 @@ function parse_commandline()
 
                                                                                                                                                                                                                                                                                             global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T)
 
-                                                                                                                                                                                                                                                                                            develop!(orgs, orgsref)
+                                                                                                                                                                                                                                                                                            develop!(orgs, orgsref, settings, t)
 
                                                                                                                                                                                                                                                                                             mate!(orgs, t, settings, scen, tdist, remaining)
 
