@@ -148,7 +148,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 		XYs = hcat(rand(1:size(landavail,1), orgsref.abund[s]),
 		rand(1:size(landavail,2), orgsref.abund[s]))
 
-		for i in 1:1000
+		for i in 1:orgsref.abund[s]
 
 			id_counter += 1 # update individual counter
 			minvalue = 1e-7 # Distribution.Normal requires sd > 0, and Distribution.Uniform requires max > min
