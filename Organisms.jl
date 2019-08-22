@@ -13,7 +13,7 @@ using StatsBase
 #using Setworld
 using Fileprep
 
-export OrgsRef_normal, OrgsRef_unif, TraitRanges, Organism, initorgs, develop!, allocate!, mate!, mkoffspring!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!, release!
+export OrgsRef_normal, OrgsRef_unif, TraitRanges, Organism, initorgs, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!, release!
 
 # Set up model constants
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
@@ -155,7 +155,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 
 			if settings["traitdist"] == "uniform"
 				neworg = Organism(hex(id_counter),
-				rand(["a" "j" "j" "e"]), #higher chance of initializing juveniles
+				rand(["a" "j" "j" "j" "j" "j" "j" "j" "e" "e"]), #higher chance of initializing juveniles
 				(XYs[i,1],XYs[i,2]),
 				s,
 				orgsref.kernel[s],
@@ -170,9 +170,9 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 				Int(round(rand(Distributions.Uniform(orgsref.seedon_min[s],orgsref.seedon_max[s] + minvalue),1)[1], RoundUp)),
 				Int(round(rand(Distributions.Uniform(orgsref.seedoff_min[s],orgsref.seedoff_max[s] + minvalue),1)[1], RoundUp)),
 				Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
-				3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
-				141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
-				159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
+				4*3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
+				100*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
+				100*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
 				0, #age
 				Dict("veg" => 0.0, "repr" => 0.0), #mass
 				false) #mated
@@ -396,6 +396,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
 	offspring = Organism[]
 	non0sd = 1e-7
+	embryo_counter = 0
 
 	# Sexually produced offspring
 	ferts = filter(x -> x.mated == true, orgs)
@@ -431,11 +432,12 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 				# get another parent
 				conspp = rand(ferts)
 
-				for n in 1:offs
+                                for n in 1:offs
 
 					id_counter += 1 # update individual counter
 
 					embryo = deepcopy(orgs[s])
+					embryo_counter += 1
 
 					# unity test
 					for f in fieldnames(embryo)
@@ -446,87 +448,30 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 						end
 					end
 
-					# Trait microevolution
-					embryo.seedmass += rand(Distributions.Normal(0, abs(orgs[s].seedmass-conspp.seedmass+non0sd)/6))[1]
-					embryo.maxmass += rand(Distributions.Normal(0, abs(orgs[s].maxmass-conspp.maxmass+non0sd)/6))[1]
-					embryo.span += Int(round(rand(Distributions.Normal(0, abs(orgs[s].span-conspp.span+non0sd)/6))[1], RoundUp))
-					embryo.firstflower += Int(round(rand(Distributions.Normal(0, abs(orgs[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
-					embryo.floron += Int(round(rand(Distributions.Normal(0, abs(orgs[s].floron-conspp.floron+non0sd)/6))[1],RoundUp))
-					embryo.floroff += Int(round(rand(Distributions.Normal(0, abs(orgs[s].floroff-conspp.floroff+non0sd)/6))[1],RoundUp))
-					embryo.seednumber += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seednumber-conspp.seednumber+non0sd)/6))[1], RoundUp))
-					embryo.seedon += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seedon-conspp.seedon+non0sd)/6))[1],RoundUp))
-					embryo.seedoff += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seedoff-conspp.seedoff+non0sd)/6))[1],RoundUp))
-					embryo.bankduration += Int(round(rand(Distributions.Normal(0, abs(orgs[s].bankduration-conspp.bankduration+non0sd)/6))[1], RoundUp))
-					embryo.b0grow += rand(Distributions.Normal(0, abs(orgs[s].b0grow-conspp.b0grow+non0sd)/6))[1]
-					embryo.b0germ += rand(Distributions.Normal(0, abs(orgs[s].b0germ-conspp.b0germ+non0sd)/6))[1]
-					embryo.b0mort += rand(Distributions.Normal(0, abs(orgs[s].b0mort-conspp.b0mort+non0sd)/6))[1]
-
-					# constrain values: avoid to trait changes that generates negative values (and also values that get too high)
-
-					embryo.seedmass in traitranges.seedmass[embryo.sp] ? continue :
-					embryo.seedmass < traitranges.seedmass[embryo.sp][1] ? embryo.seedmass == traitranges.seedmass[embryo.sp][1] :
-					embryo.seedmass == traitranges.seedmass[embryo.sp][end]
-					embryo.maxmass in traitranges.maxmass[embryo.sp] ? continue :
-					embryo.maxmass < traitranges.maxmass[embryo.sp][1] ? embryo.maxmass == traitranges.maxmass[embryo.sp][1] :
-					embryo.maxmass == traitranges.maxmass[embryo.sp][end]
-					embryo.span in traitranges.span[embryo.sp] ? continue :
-					embryo.span < traitranges.span[embryo.sp][1] ? embryo.span == traitranges.span[embryo.sp][1] :
-					embryo.span == traitranges.span[embryo.sp][end]
-					embryo.firstflower in traitranges.firstflower[embryo.sp] ? continue :
-					embryo.firstflower < traitranges.firstflower[embryo.sp][1] ? embryo.firstflower == traitranges.firstflower[embryo.sp][1] :
-					embryo.firstflower == traitranges.firstflower[embryo.sp][end]
-
-                                        embryo.floron in traitranges.floron[embryo.sp] ? continue :
-					embryo.floron < traitranges.floron[embryo.sp][1] ? embryo.floron == traitranges.floron[embryo.sp][1] :
-					embryo.floron == traitranges.floron[embryo.sp][end]
-					embryo.floroff in traitranges.floroff[embryo.sp] ? continue :
-					embryo.floroff < traitranges.floroff[embryo.sp][1] ? embryo.floroff == traitranges.floroff[embryo.sp][1] :
-					embryo.floroff == traitranges.floroff[embryo.sp][end]
-					embryo.seednumber in traitranges.seednumber[embryo.sp] ? continue :
-					embryo.seednumber < traitranges.seednumber[embryo.sp][1] ? embryo.seednumber == traitranges.seednumber[embryo.sp][1] :
-					embryo.seednumber == traitranges.seednumber[embryo.sp][end]
-					embryo.seedon in traitranges.seedon[embryo.sp] ? continue :
-					embryo.seedon < traitranges.seedon[embryo.sp][1] ? embryo.seedon == traitranges.seedon[embryo.sp][1] :
-					embryo.seedon == traitranges.seedon[embryo.sp][end]
-					embryo.seedoff in traitranges.seedoff[embryo.sp] ? continue :
-					embryo.seedoff < traitranges.seedoff[embryo.sp][1] ? embryo.seedoff == traitranges.seedoff[embryo.sp][1] :
-					embryo.seedoff == traitranges.seedoff[embryo.sp][end]
-					embryo.bankduration in traitranges.bankduration[embryo.sp] ? continue :
-					embryo.bankduration < traitranges.bankduration[embryo.sp][1] ? embryo.bankduration == traitranges.bankduration[embryo.sp][1] :
-					embryo.bankduration == traitranges.bankduration[embryo.sp][end]
-					embryo.b0grow in traitranges.b0grow[embryo.sp] ? continue :
-					embryo.b0grow < traitranges.b0grow[embryo.sp][1] ? embryo.b0grow == traitranges.b0grow[embryo.sp][1] :
-					embryo.b0grow == traitranges.b0grow[embryo.sp][end]
-					embryo.b0germ in traitranges.b0germ[embryo.sp] ? continue :
-					embryo.b0germ < traitranges.b0germ[embryo.sp][1] ? embryo.b0germ == traitranges.b0germ[embryo.sp][1] :
-					embryo.b0germ == traitranges.b0germ[embryo.sp][end]
-					embryo.b0mort in traitranges.b0mort[embryo.sp] ? continue :
-					embryo.b0mort < traitranges.b0mort[embryo.sp][1] ? embryo.b0mort == traitranges.b0mort[embryo.sp][1] :
-					embryo.b0mort == traitranges.b0mort[embryo.sp][end]
-
-
 					# set embryos state variables
 					embryo.id = hex(id_counter)
 					embryo.mass = Dict("veg" => embryo.seedmass,
 					"repr" => 0.0)
-					embryo.stage = "e"
+					embryo.stage = "new-e"
 					embryo.age = 0
 					embryo.mated = false
 
-					push!(offspring, embryo)
-					#unity test
-					#open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a")do sim
-					#println("Pushed new org ", embryo, " into offspring")
-					#end
+					push!(orgs, embryo)
+					
 				end
 				orgs[s].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
-			end
+                                
+                        end
 		end
 
 		# output seeds per species (file is initialized in main.jl)
 		open(abspath(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv")),"a") do seedfile
 			writedlm(seedfile, hcat(t, sp, "e", "sex", spoffspringcounter))
 		end
+		# test
+                #open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+	        #        writedlm(sim, hcat("Embryos created:", length(offspring)))
+                #end
 	end
 
 	# Asexually produced offspring
@@ -552,9 +497,6 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 				# limit offspring production to the maximal number of seeds the species can produce
 				offs > orgs[c].seednumber ? offs = orgs[c].seednumber : offs
 
-				# count clonal production
-				spclonescounter += offs
-
 				# update reproductive mass
 				orgs[c].mass["repr"] -= (offs * orgs[c].seedmass)
 
@@ -576,7 +518,8 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 						id_counter += 1
 						clone.id = hex(id_counter)
 
-						push!(offspring, clone)
+						push!(orgs, clone)
+						spclonescounter += 1
 					end
 				end
 			end
@@ -588,29 +531,17 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 		end
 	end
 
-	append!(orgs, offspring)
+	#append!(orgs, offspring)
 
 	#unity test
 	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-		println(sim, "Offspring = " ,length(offspring), "and adults = ", length(find(x -> x.stage == "a", orgs)))
+		println(sim, "Offspring = " ,length(offspring), "seeds = ", length(find(x -> x.stage == "e", orgs)), "adults = ", length(find(x -> x.stage == "a", orgs)))
 	end
 
 	return id_counter
 
 end
 
-"""
-release!()
-Probably need to call disperse here, because not all "e"s in orgs are released at the same time.
-"""
-function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref)
-
-	# Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
-	seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, orgs)
-	# using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it does do contain, it throws an error.
-
-	return seedsi
-end
 
 """
 disperse!(landscape, orgs, t, seetings, orgsref,)
@@ -620,7 +551,8 @@ Seeds are dispersed.
 function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref, landpars::Any, tdist::Any)#Setworld.LandPars)}
 
 	lost = Int64[]
-
+	justdispersed = String[]
+	
 	# Only seeds that have been released can disperse
 	for d in seedsi
 		if orgs[d].kernel == "short"
@@ -653,10 +585,15 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
 		xdest = orgs[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
 		ydest = orgs[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
 
-		# Check if individual can have a chance of establishing there
+		# Check if individual fall inside the habitat area, otherwise, discard it already
 		if checkbounds(Bool, landavail, xdest, ydest) && landavail[xdest, ydest] == true # checking the suitability first would make more sense but cant be done if cell is out of bounds
 
 			orgs[d].location = (xdest,ydest)
+			push!(justdispersed, orgs[d].id)
+			# test
+                        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+	                    writedlm(sim, hcat("Number of dispersing:", length(justdispersed)))
+                        end
 
 		else # if the new location is in an unavailable habitat or outside the landscape, the seed dies
 
@@ -673,6 +610,8 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
 	println("Lost $(length(lost))")
 	#end
 	deleteat!(orgs,lost)
+
+        return justdispersed
 end
 
 """
@@ -705,17 +644,43 @@ end
 establish!
 Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
 """
-function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64)
+function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed)
 	#REFERENCE: May et al. 2009
-	establishing = find(x -> x.stage == "e" && rem(t,52) > x.seedon, orgs)
+	establishing = find(x -> x.stage == "e", orgs)
 
+        # test
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+	        writedlm(sim, hcat("Number of establishing:", length(establishing)))
+        end
+			
 	lost = Int64[]
-	germinated = 0
+	Bm = 0
+	gprob = 0
 
-	for o in establishing
+        for o in establishing
 
-		if germinate(orgs[o],T,settings)
+        Bg = orgs[o].b0germ * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+	gprob = 1 - exp(-Bg)
+	# test
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+				writedlm(sim, hcat(orgs[o].stage, orgs[o].age, Bg, gprob, "germination"))
+			end
+
+	if gprob < 0
+		error("gprob < 0")
+	elseif gprob > 1
+		error("gprob > 1")
+	end
+
+	germ = false
+	if 1 == rand(Distributions.Bernoulli(gprob))
+		germ = true
+	end
+
+		if germ == true
 			orgs[o].stage = "j"
+			orgs[o].mass["veg"] = 1000*orgs[o].seedmass
+			
 			open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
 				writedlm(sim, hcat(t, "germination", orgs[o].stage, orgs[o].age))
 			end
@@ -746,25 +711,18 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		if sum(values(orgs[o].mass)) <= 0 #|| orgs[o] in nogrowth #probably unnecessary to verify negative or null weights
 			error("negative biomass")
 
-		elseif orgs[o].stage == "e" #o in seeds
-
-                        if (rem(t,52) > 38 || rem(t,52) < 12) && # seeds can only die during winter
-				rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
-				Bm = orgs[o].b0mort * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-				#println("Bm: $Bm, b0mort = $(orgs[o].b0mort), seed mass = $(orgs[o].mass["veg"])")
-				mprob = 1 - exp(-Bm)
-			else
-				mprob = 0
-			end
-			
+		elseif orgs[o].stage == "e" && rem(t,52) > orgs[o].seedoff #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
+		        Bm = orgs[o].b0mort * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+			mprob = 1 - exp(-Bm)
 
 		elseif (orgs[o].stage == "a" && orgs[o].age >= orgs[o].span) #oldies die
 			mprob = 1
 
-		else #calculate mortality for juveniles or adults
-			Bm = orgs[o].b0mort *  (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+		elseif orgs[o].stage in ["j" "a"]
+			Bm = orgs[o].b0mort * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
 			mprob = 1 - exp(-Bm)
-
+	        else
+		        mprob = 0
 		end
 
                 # test
