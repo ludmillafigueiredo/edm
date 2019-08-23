@@ -465,6 +465,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 					embryo.seednumber += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seednumber-conspp.seednumber+non0sd)/6))[1], RoundUp))
 					embryo.seedon += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seedon-conspp.seedon+non0sd)/6))[1],RoundUp))
 					embryo.seedoff += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seedoff-conspp.seedoff+non0sd)/6))[1],RoundUp))
+					embryo.bankduration += Int(round(rand(Distributions.Normal(0, abs(orgs[s].bankduration-conspp.bankduration+non0sd)/6))[1],RoundUp))
 					
 					# constrain values: avoid to trait changes that generates negative values (and also values that get too high)
 
@@ -511,6 +512,11 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 					if (embryo.seedoff < traitranges.seedoff[embryo.sp][1] || embryo.seedoff > traitranges.seedoff[embryo.sp][end])
 					   embryo.seedoff < traitranges.seedoff[embryo.sp][1] ? embryo.seedoff = traitranges.seedoff[embryo.sp][1] :
 					   embryo.seedoff = traitranges.seedoff[embryo.sp][end]
+					end
+
+					if (embryo.bankduration < traitranges.bankduration[embryo.sp][1] || embryo.bankduration > traitranges.bankduration[embryo.sp][end])
+					   embryo.bankduration < traitranges.bankduration[embryo.sp][1] ? embryo.bankduration = traitranges.bankduration[embryo.sp][1] :
+					   embryo.bankduration = traitranges.bankduration[embryo.sp][end]
 					end
 					
 					# set embryos state variables
@@ -802,6 +808,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 			mprob = 1 - exp(-Bm)
 
 		elseif (orgs[o].stage == "a" && orgs[o].age >= orgs[o].span) #oldies die
+			mprob = 1
+
+		elseif (orgs[o].stage == "e" && orgs[o].age >= orgs[o].bankduration) #oldies die
 			mprob = 1
 
 		elseif orgs[o].stage in ["j" "a"]
