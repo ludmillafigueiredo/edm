@@ -465,53 +465,54 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 					embryo.seednumber += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seednumber-conspp.seednumber+non0sd)/6))[1], RoundUp))
 					embryo.seedon += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seedon-conspp.seedon+non0sd)/6))[1],RoundUp))
 					embryo.seedoff += Int(round(rand(Distributions.Normal(0, abs(orgs[s].seedoff-conspp.seedoff+non0sd)/6))[1],RoundUp))
-					#embryo.bankduration += Int(round(rand(Distributions.Normal(0, abs(orgs[s].bankduration-conspp.bankduration+non0sd)/6))[1], RoundUp))
-					#embryo.b0grow += rand(Distributions.Normal(0, abs(orgs[s].b0grow-conspp.b0grow+non0sd)/6))[1]
-					#embryo.b0germ += rand(Distributions.Normal(0, abs(orgs[s].b0germ-conspp.b0germ+non0sd)/6))[1]
-					#embryo.b0mort += rand(Distributions.Normal(0, abs(orgs[s].b0mort-conspp.b0mort+non0sd)/6))[1]
 					
 					# constrain values: avoid to trait changes that generates negative values (and also values that get too high)
+
+                                        if (embryo.seedmass < traitranges.seedmass[embryo.sp][1] || embryo.seedmass > traitranges.seedmass[embryo.sp][end])
+					   embryo.seedmass < traitranges.seedmass[embryo.sp][1] ? embryo.seedmass = traitranges.seedmass[embryo.sp][1] :
+					   embryo.seedmass = traitranges.seedmass[embryo.sp][end]
+					end
+
+					if (embryo.maxmass < traitranges.maxmass[embryo.sp][1] || embryo.maxmass > traitranges.maxmass[embryo.sp][end])
+					   embryo.maxmass < traitranges.maxmass[embryo.sp][1] ? embryo.maxmass = traitranges.maxmass[embryo.sp][1] :
+					   embryo.maxmass = traitranges.maxmass[embryo.sp][end]
+					end
+
+					if (embryo.span < traitranges.span[embryo.sp][1] || embryo.span > traitranges.span[embryo.sp][end])
+					   embryo.span < traitranges.span[embryo.sp][1] ? embryo.span = traitranges.span[embryo.sp][1] :
+					   embryo.span = traitranges.span[embryo.sp][end]
+					end
+
+					if (embryo.firstflower < traitranges.firstflower[embryo.sp][1] || embryo.firstflower > traitranges.firstflower[embryo.sp][end])
+					   embryo.firstflower < traitranges.firstflower[embryo.sp][1] ? embryo.firstflower = traitranges.firstflower[embryo.sp][1] :
+					   embryo.firstflower = traitranges.firstflower[embryo.sp][end]
+					end
 					
-					embryo.seedmass in traitranges.seedmass[embryo.sp] ? continue :
-					embryo.seedmass < traitranges.seedmass[embryo.sp][1] ? embryo.seedmass == traitranges.seedmass[embryo.sp][1] :
-					embryo.seedmass == traitranges.seedmass[embryo.sp][end]
-					embryo.maxmass in traitranges.maxmass[embryo.sp] ? continue :
-					embryo.maxmass < traitranges.maxmass[embryo.sp][1] ? embryo.maxmass == traitranges.maxmass[embryo.sp][1] :
-					embryo.maxmass == traitranges.maxmass[embryo.sp][end]
-					embryo.span in traitranges.span[embryo.sp] ? continue :
-					embryo.span < traitranges.span[embryo.sp][1] ? embryo.span == traitranges.span[embryo.sp][1] :
-					embryo.span == traitranges.span[embryo.sp][end]
-					embryo.firstflower in traitranges.firstflower[embryo.sp] ? continue :
-					embryo.firstflower < traitranges.firstflower[embryo.sp][1] ? embryo.firstflower == traitranges.firstflower[embryo.sp][1] :
-					embryo.firstflower == traitranges.firstflower[embryo.sp][end]
-                                        embryo.floron in traitranges.floron[embryo.sp] ? continue :
-					embryo.floron < traitranges.floron[embryo.sp][1] ? embryo.floron == traitranges.floron[embryo.sp][1] :
-					embryo.floron == traitranges.floron[embryo.sp][end]
-					embryo.floroff in traitranges.floroff[embryo.sp] ? continue :
-					embryo.floroff < traitranges.floroff[embryo.sp][1] ? embryo.floroff == traitranges.floroff[embryo.sp][1] :
-					embryo.floroff == traitranges.floroff[embryo.sp][end]
-					embryo.seednumber in traitranges.seednumber[embryo.sp] ? continue :
-					embryo.seednumber < traitranges.seednumber[embryo.sp][1] ? embryo.seednumber == traitranges.seednumber[embryo.sp][1] :
-					embryo.seednumber == traitranges.seednumber[embryo.sp][end]
-					embryo.seedon in traitranges.seedon[embryo.sp] ? continue :
-					embryo.seedon < traitranges.seedon[embryo.sp][1] ? embryo.seedon == traitranges.seedon[embryo.sp][1] :
-					embryo.seedon == traitranges.seedon[embryo.sp][end]
-					embryo.seedoff in traitranges.seedoff[embryo.sp] ? continue :
-					embryo.seedoff < traitranges.seedoff[embryo.sp][1] ? embryo.seedoff == traitranges.seedoff[embryo.sp][1] :
-					embryo.seedoff == traitranges.seedoff[embryo.sp][end]
-					embryo.bankduration in traitranges.bankduration[embryo.sp] ? continue :
-					embryo.bankduration < traitranges.bankduration[embryo.sp][1] ? embryo.bankduration == traitranges.bankduration[embryo.sp][1] :
-					embryo.bankduration == traitranges.bankduration[embryo.sp][end]
-                                        #embryo.b0grow in traitranges.b0grow[embryo.sp] ? continue :
-					#embryo.b0grow < traitranges.b0grow[embryo.sp][1] ? embryo.b0grow == traitranges.b0grow[embryo.sp][1] :
-					#embryo.b0grow == traitranges.b0grow[embryo.sp][end]
-					#embryo.b0germ in traitranges.b0germ[embryo.sp] ? continue :
-					#embryo.b0germ < traitranges.b0germ[embryo.sp][1] ? embryo.b0germ == traitranges.b0germ[embryo.sp][1] :
-					#embryo.b0germ == traitranges.b0germ[embryo.sp][end]
-					#embryo.b0mort in traitranges.b0mort[embryo.sp] ? continue :
-					#embryo.b0mort < traitranges.b0mort[embryo.sp][1] ? embryo.b0mort == traitranges.b0mort[embryo.sp][1] :
-					#embryo.b0mort == traitranges.b0mort[embryo.sp][end]
-                                       
+					if (embryo.floron < traitranges.floron[embryo.sp][1] || embryo.floron > traitranges.floron[embryo.sp][end])
+					   embryo.floron < traitranges.floron[embryo.sp][1] ? embryo.floron = traitranges.floron[embryo.sp][1] :
+					   embryo.floron = traitranges.floron[embryo.sp][end]
+					end
+
+					if (embryo.floroff < traitranges.floroff[embryo.sp][1] || embryo.floroff > traitranges.floroff[embryo.sp][end])
+					   embryo.floroff < traitranges.floroff[embryo.sp][1] ? embryo.floroff = traitranges.floroff[embryo.sp][1] :
+					   embryo.floroff = traitranges.floroff[embryo.sp][end]
+					end
+					
+					if (embryo.seednumber < traitranges.seednumber[embryo.sp][1] || embryo.seednumber > traitranges.seednumber[embryo.sp][end])
+					   embryo.seednumber < traitranges.seednumber[embryo.sp][1] ? embryo.seednumber = traitranges.seednumber[embryo.sp][1] :
+					   embryo.seednumber = traitranges.seednumber[embryo.sp][end]
+					end
+
+					if (embryo.seedon < traitranges.seedon[embryo.sp][1] || embryo.seedon > traitranges.seedon[embryo.sp][end])
+					   embryo.seedon < traitranges.seedon[embryo.sp][1] ? embryo.seedon = traitranges.seedon[embryo.sp][1] :
+					   embryo.seedon = traitranges.seedon[embryo.sp][end]
+					end
+
+					if (embryo.seedoff < traitranges.seedoff[embryo.sp][1] || embryo.seedoff > traitranges.seedoff[embryo.sp][end])
+					   embryo.seedoff < traitranges.seedoff[embryo.sp][1] ? embryo.seedoff = traitranges.seedoff[embryo.sp][1] :
+					   embryo.seedoff = traitranges.seedoff[embryo.sp][end]
+					end
+					
 					# set embryos state variables
 					embryo.id = hex(id_counter)
 					embryo.mass = Dict("veg" => embryo.seedmass,
