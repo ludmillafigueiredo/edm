@@ -765,8 +765,6 @@ toc()
 # LIFE CYCLE
 tic()
 
-survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth)
-
 global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T)
 
 develop!(orgs, orgsref, settings, t)
@@ -783,6 +781,8 @@ establish!(orgs, t, settings, orgsref, T, justdispersed)
 #end
 
 shedd!(orgs, orgsref, t)
+
+survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth)
 
 timing("LIFE CYCLE", settings)
 toc()
