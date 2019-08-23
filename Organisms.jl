@@ -155,7 +155,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 
 			if settings["traitdist"] == "uniform"
 				neworg = Organism(hex(id_counter),
-				rand(["a" "j" "j" "j" "j" "j" "j" "j" "e" "e"]), #higher chance of initializing juveniles
+				rand(["a" "j" "e"]), #higher chance of initializing juveniles
 				(XYs[i,1],XYs[i,2]),
 				s,
 				orgsref.kernel[s],
