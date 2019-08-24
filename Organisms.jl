@@ -678,10 +678,6 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
 
 			orgs[d].location = (xdest,ydest)
 			push!(justdispersed, orgs[d].id)
-			# test
-                        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	                    writedlm(sim, hcat("Number of dispersing:", length(justdispersed)))
-                        end
 
 		else # if the new location is in an unavailable habitat or outside the landscape, the seed dies
 
@@ -693,10 +689,14 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
 
 		end
 	end
+	# test
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+	    writedlm(sim, hcat("Number of dispersing:", length(justdispersed)))
+        end
 	#unity test
-	#open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-	println("Lost $(length(lost))")
-	#end
+	open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+	    writedlm(sim, "Lost $(length(lost))")
+	end
 	deleteat!(orgs,lost)
 
         return justdispersed
@@ -857,14 +857,14 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 	if sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
 
-		locs = map(x -> x.location,orgs) #probably optimizable
+	   	locs = map(x -> x.location,orgs) #probably optimizable
 		l = DataFrame(locs)
 
 		# separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
 		fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
-		#open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-		#    println(sim,"# of cell with competition: $(length(fullcells))")
-		#end
+		open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
+		    println(sim,"# of cell with competition: $(length(fullcells))")
+		end
 		if length(fullcells) > 0
 			for c in fullcells
 
