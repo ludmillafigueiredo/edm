@@ -742,11 +742,6 @@ for t in 1:settings["timesteps"]
 
 println("running week $t")
 
-# track simulation: header
-open(abspath(joinpath(results_folder, "simulog.txt")),"a") do sim
-println(sim, "WEEK $t")
-end
-
 # UPDATE temperature: weekly temperature and precipitation
 T = updateenv!(t, landpars)
 
@@ -759,7 +754,7 @@ updateK!(landavail, settings, t, tdist)
 # OUTPUT: First thing, to see how community is initialized
 tic()
 orgstable(orgs,t,settings)
-timing("WRITING ORGSOUTPUT", settings)
+timing("Time writing output", settings)
 toc()
 
 # LIFE CYCLE
@@ -772,6 +767,7 @@ develop!(orgs, orgsref, settings, t)
 mate!(orgs, t, settings, scen, tdist, remaining)
 
 id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail, T, traitranges)
+
 seedsi = release!(orgs, t, settings, orgsref) # only recently released seeds need to disperse. The others only need to survive
 
 justdispersed = disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
@@ -784,7 +780,7 @@ shedd!(orgs, orgsref, t)
 
 survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth)
 
-timing("LIFE CYCLE", settings)
+timing("Time running life cycle:", settings)
 toc()
 end
 end
