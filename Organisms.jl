@@ -166,21 +166,17 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 				Int(round(rand(Distributions.Uniform(orgsref.firstflower_min[s], orgsref.firstflower_max[s] + minvalue),1)[1], RoundUp)),
 				Int(round(rand(Distributions.Uniform(orgsref.floron_min[s],orgsref.floron_max[s] + minvalue),1)[1], RoundUp)),
 				Int(round(rand(Distributions.Uniform(orgsref.floroff_min[s],orgsref.floroff_max[s] + minvalue),1)[1], RoundUp)),
-				0, #seed number
+				Int(round(rand(Distributions.Uniform(orgsref.seednumber_min[s],orgsref.seednumber_max[s] + minvalue),1)[1], RoundUp)), #seed number
 				Int(round(rand(Distributions.Uniform(orgsref.seedon_min[s],orgsref.seedon_max[s] + minvalue),1)[1], RoundUp)),
 				Int(round(rand(Distributions.Uniform(orgsref.seedoff_min[s],orgsref.seedoff_max[s] + minvalue),1)[1], RoundUp)),
 				Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
 				3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
-				1000*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
-				50*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
+				300*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
+				30*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
 				0, #age
 				Dict("veg" => 0.0, "repr" => 0.0), #mass
 				false) #mated
-
-				## Set conditional traits and variables
-				# number of seeds over the reproductive season
-				nseeds_total = rand(Distributions.Uniform(orgsref.seednumber_min[s],orgsref.seednumber_max[s] + minvalue),1)[1]
-
+				
 			elseif settings["traitsdist"] == "normal"
 				neworg = Organism(hex(id_counter),
 				rand(["a" "j" "e"]),
@@ -215,8 +211,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 			if (neworg.floroff-neworg.floron+1) < 0
 				error("floroff - floron <0")
 			end
-			neworg.seednumber = Int(round(nseeds_total/(neworg.seedoff-neworg.seedon), RoundUp))
-
+			
 			## initial biomass
 			if neworg.stage == "e"
 				neworg.mass["veg"] = neworg.seedmass
@@ -268,6 +263,7 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 			(sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass)) # adults in their reproductive season and with enough weight, invest in reproduction
 
                         new_mass = B_grow*(orgs[o].mass["veg"])
+			
 			if haskey(orgs[o].mass,"repr")
 				orgs[o].mass["repr"] += new_mass #sowingmass
 			else
@@ -948,17 +944,24 @@ end
 
 """
 shedd!()
-Plants loose their reproductive biomasses at the end of the reproductive season.
+Plants loose their reproductive biomasses at the end of the reproductive season and 50% of biomass during winter.
 """
 function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int)
 
-	flowering = find(x -> (x.mass["repr"] > 0), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
+	flowering = find(x -> (x.mass["repr"] > 0 || rem(t,52) > x.floroff), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
 
 	for f in flowering
-		if rem(t,52) > orgs[f].floroff
-			orgs[f].mass["repr"] = 0
-		end
+		orgs[f].mass["repr"] = 0
 	end
+
+	if (rem(t,52) == 51 || rem(t,52) < 12) 
+
+           adults = find(x -> (x.stage == "a"), orgs) 
+
+	   for a in adults
+		 orgs[a].mass["veg"] = 0.5*orgs[a].mass["veg"]
+	   end
+        end
 end
 
 """
