@@ -172,7 +172,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 				Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
 				3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
 				300*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
-				30*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
+				40*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
 				0, #age
 				Dict("veg" => 0.0, "repr" => 0.0), #mass
 				false) #mated
@@ -954,7 +954,7 @@ function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int)
 		orgs[f].mass["repr"] = 0
 	end
 
-	if (rem(t,52) == 51 || rem(t,52) < 12) 
+	if (rem(t,52) == 51) 
 
            adults = find(x -> (x.stage == "a"), orgs) 
 
