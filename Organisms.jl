@@ -278,7 +278,7 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 	end
 
 	# unity test
-	masserror <- find(x -> sum(values(x.mass)) <= 0, orgs)
+	masserror = find(x -> sum(values(x.mass)) <= 0, orgs)
 	if length(masserror) > 0
 		error("Negative values of biomass detected.")
 	end
@@ -798,11 +798,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	# Density-independent mortality
 
 		# Old ones die
-	    old <- find( x -> ((x.stage == "a" && x.age >= x.span) || (x.stage == "e" && x.age >= x.bankduration)), orgs)
+	    old = find( x -> ((x.stage == "a" && x.age >= x.span) || (x.stage == "e" && x.age >= x.bankduration)), orgs)
 		deleteat!(orgs, old)
 
 		# Go through individuals that migh be dying
-		dying <- find((orgs[o].stage == "e" && rem(t,52) > orgs[o].seedoff) || (orgs[o].stage in ["j" "a"]), orgs) #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
+		dying = find(x -> ((x.stage == "e" && rem(t,52) > x.seedoff) || x.stage in ["j" "a"]), orgs) #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
 
 		for d in dying
 			Bm = orgs[d].b0mort * (orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
