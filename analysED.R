@@ -631,13 +631,13 @@ save(cleanoutput,
      grouppop_plot, grouppop_tab, groupweight_plot,
      traitvalues_tab, traitvalues_plot,
      lifeevents_tab, lifeevents_plot,
-     metabolics_summary,
+     metabolic_summary,
      #traitpcas, timepca, timepca_plot,
      file = file.path(outputsdir, 
                       paste(parentsimID, ".RData", sep = "")))
 
 # Plot all graphs
-EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
-map(EDplots,
-    ~ ggsave(file.path(outputsdir, paste(.x, ".png", sep ="")), get(.x)))
+#EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
+#map(EDplots,
+#    ~ ggsave(file.path(outputsdir, paste(.x, ".png", sep ="")), get(.x)))
 
