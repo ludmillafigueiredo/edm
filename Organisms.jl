@@ -701,7 +701,7 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
         end
 	#unity test
 	open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-	    writedlm(sim, "Lost $(length(lost))")
+	    writedlm(sim, hcat("Lost in dispersal:", length(lost)))
 	end
 	deleteat!(orgs,lost)
 
