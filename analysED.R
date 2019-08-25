@@ -525,6 +525,27 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
   
 }
 
+# Life-history events
+lifeevents_tab <- read_tsv(file.path(outputsdir, "eventslog.txt"), col_names = TRUE)
+lifeevents_plot <- lifeevents_tab%>%
+  select(-age)%>%
+  group_by(week, event, stage)%>%
+  summarize(total = n())%>%
+  ggplot(aes(x = week, y = total, color = event))+
+  geom_line()+
+  facet_wrap(~stage, ncol = 1, scales = "free_y")+
+  scale_color_viridis(discrete = TRUE)
+
+# Metabolic rates
+metabolic_tab <- read_tsv(file.path(outputsdir, "metaboliclog.txt"), col_names = TRUE)
+metabolic_summary <- metabolic_tab%>%
+  select(-age)%>%
+  gather(c(rate, probability), key = "metric", value = value)%>%
+  group_by(stage, event, metric)%>%
+  summarize(mean = mean(value),
+            sd = sd(value))
+  #facet_grid(rows = vars(stage), cols = vars(metric), scales = "free_y")+
+  #scale_color_viridis(discrete = TRUE)
 
 ############################################################################
 #                          Organize analysis output                        #
@@ -609,6 +630,8 @@ save(cleanoutput,
      relabund_tab, rankabunds_plot,
      grouppop_plot, grouppop_tab, groupweight_plot,
      traitvalues_tab, traitvalues_plot,
+     lifeevents_tab, lifeevents_plot,
+     metabolics_summary,
      #traitpcas, timepca, timepca_plot,
      file = file.path(outputsdir, 
                       paste(parentsimID, ".RData", sep = "")))
