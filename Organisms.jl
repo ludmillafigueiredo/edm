@@ -798,7 +798,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	# Density-independent mortality
 
 		# Old ones die
-	    old <- find( x -> ((x.stage == "a" && x.age >= x.span) || (x.stage == "e" && x.age >= x.bankduration), orgs)
+	    old <- find( x -> ((x.stage == "a" && x.age >= x.span) || (x.stage == "e" && x.age >= x.bankduration)), orgs)
 		deleteat!(orgs, old)
 
 		# Go through individuals that migh be dying
