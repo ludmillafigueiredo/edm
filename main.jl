@@ -760,7 +760,9 @@ toc()
 # LIFE CYCLE
 tic()
 
+if 12 < rem(t,52) < 39 # growth happens during Spring and Summer
 global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T)
+end
 
 develop!(orgs, orgsref, settings, t)
 
@@ -772,9 +774,9 @@ seedsi = release!(orgs, t, settings, orgsref) # only recently released seeds nee
 
 justdispersed = disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
 
-#if 12 < rem(t,52) < 38
+if (11 < rem(t,52) < 24) ||(38 < rem(t,52) < 50) #Establishment during Spring and Fall
 establish!(orgs, t, settings, orgsref, T, justdispersed)
-#end
+end
 
 shedd!(orgs, orgsref, t)
 
