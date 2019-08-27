@@ -773,7 +773,7 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
 
 		if germ == true
 			orgs[o].stage = "j"
-			orgs[o].mass["veg"] = 1000*orgs[o].seedmass
+			orgs[o].mass["veg"] = orgs[o].seedmass
 
 			open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
 				writedlm(sim, hcat(t, "germination", orgs[o].stage, orgs[o].age))
