@@ -611,12 +611,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
 	#append!(orgs, offspring)
 
-	#unity test
-	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-		println(sim, "Offspring = " ,length(offspring), "seeds = ", length(find(x -> x.stage == "e", orgs)), "adults = ", length(find(x -> x.stage == "a", orgs)))
-	end
-
-        # Number of individuals before and after
+	# Number of individuals before and after
 		open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
 			writedlm(sim, hcat("Total number of individuals after ASEX:", length(orgs)))
 		end
@@ -855,34 +850,37 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	mprob = 0
 	b0mort = 0
 
-	if sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
+	#check-point
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+		writedlm(sim, hcat("Current production:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)), "g; K =", K))
+	end
 
+	#check-point
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+		writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "e", orgs)),
+		"# juveniles:", length(find(x -> x.stage == "j", orgs)),
+		"# adults:", length(find(x -> x.stage == "a", orgs)),
+		"weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+	end
+
+	while sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
+	
 	   	locs = map(x -> x.location,orgs) #probably optimizable
 		l = DataFrame(locs)
 
 		# separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
 		fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
-		open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-		    println(sim,"# of cell with competition: $(length(fullcells))")
-		end
+		
 		if length(fullcells) > 0
 			for c in fullcells
 
 				#find plant that are in the same grid
 				samegrid = filter(x -> x.location == locs[c], orgs)
 
-				# ceck-point
-				#open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-				println("N of inds in same cell: $(length(samegrid))")
-				#end
-				#println("Inds in same cell $(locs[c]) : $samegrid")
-
-				# sum their weight to see if > than carrying capacity.
-				println("Same grid mass", sum(map(x -> x.mass["veg"], samegrid)))
 				# while the sum of weights in a "shared grid" is higher than cell carrying capacity
 				while sum(vcat(map(x -> x.mass["veg"],samegrid),0.00001)) > cK #vcat is necessary for avoid that sum throws an error when empty
 
-					# any individual can die
+					# any individual if the overflown grid can die
 					d = rand(samegrid,1)[1]
 
 					# Seeds have highr mortality
@@ -893,15 +891,16 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 					elseif d.stage == "a"
 	           			   b0mort = d.b0mort
 					else
-				 	   error("Error with organism's stage assignment") 
+				 	   error("Error with orgarnism's stage assignment") 
 					end
 		
-                    Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+                                        Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
 					mprob = 1 - exp(-Bm)
-					# check-point
-	                open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-	 			    	writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
-			        end
+
+                                        # check-point
+	                		open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+	 			 	    writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
+			        	end
 
 					#unity test: Check mortality rate to probability conversion
 					if mprob < 0
@@ -927,9 +926,56 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 					samegrid = filter(x -> x.location == locs[c], orgs)
 				end
 			end
-		end
+		else
+			# any individual if the overflown grid can die
+					d = rand(orgs,1)[1]
 
-		deleteat!(orgs, deaths)
+					# Seeds have highr mortality
+					if d.stage == "e"
+		   			   b0mort = d.b0mort*20
+					elseif d.stage == "j"
+	           			   b0mort = d.b0mort*7.5
+					elseif d.stage == "a"
+	           			   b0mort = d.b0mort
+					else
+				 	   error("Error with orgarnism's stage assignment") 
+					end
+		
+                    Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+					mprob = 1 - exp(-Bm)
+					# check-point
+	                open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+	 			    	writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
+			        end
+
+					#unity test: Check mortality rate to probability conversion
+					if mprob < 0
+						error("mprob < 0")
+						mprob = 0
+					elseif mprob > 1
+						mprob = 1
+						error("mprob > 1")
+					end
+
+					o = find(x -> x.id == d.id, orgs)[1]
+
+					if 1 == rand(Distributions.Bernoulli(mprob))
+						deleteat!(orgs, o)
+						# check-point
+						open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+		                                    writedlm(sim, hcat(t, "death", orgs[o].stage, orgs[o].age))
+				                end
+				        end
+			
+		end
+	end
+
+        #check-point
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+		writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "e", orgs)),
+		"# juveniles:", length(find(x -> x.stage == "j", orgs)),
+		"# adults:", length(find(x -> x.stage == "a", orgs)),
+		"weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
 	end
 
 	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")), "a") do sim
