@@ -171,8 +171,8 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 				Int(round(rand(Distributions.Uniform(orgsref.seedoff_min[s],orgsref.seedoff_max[s] + minvalue),1)[1], RoundUp)),
 				Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
 				3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
-				300*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
-				40*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
+				150*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
+				7*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
 				0, #age
 				Dict("veg" => 0.0, "repr" => 0.0), #mass
 				false) #mated
@@ -794,18 +794,31 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	deaths = Int64[]
 	mprob = 0
 	Bm = 0
+	b0mort = 0
 
 	# Density-independent mortality
 
 		# Old ones die
-	    old = find( x -> ((x.stage == "a" && x.age >= x.span) || (x.stage == "e" && x.age >= x.bankduration)), orgs)
+	    old = find( x -> (x.stage == "a" && x.age >= x.span), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
 		deleteat!(orgs, old)
 
 		# Go through individuals that migh be dying
-		dying = find(x -> ((x.stage == "e" && rem(t,52) > x.seedoff) || x.stage in ["j" "a"]), orgs) #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
+		dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage in ["j" "a"]), orgs) #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
 
 		for d in dying
-			Bm = orgs[d].b0mort * (orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+
+		# Seeds have highr mortality
+		if orgs[d].stage == "e"
+		   b0mort = orgs[d].b0mort*20
+		elseif orgs[d].stage == "j"
+	           b0mort = orgs[d].b0mort*7.5
+		elseif orgs[d].stage == "a"
+	           b0mort = orgs[d].b0mort
+		else
+	           error("Error with organism's stage assignment") 
+		end
+		   
+			Bm = b0mort * (orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
 			mprob = 1 - exp(-Bm)
 
 			# unity test
@@ -818,7 +831,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 			if 1 == rand(Distributions.Bernoulli(mprob))
 				push!(deaths, d)
-				#println("$(orgs[o].stage) dying INDEP.")
+				#println("$(orgs[d].stage) dying INDEP.")
 				# check-point
 				open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
 					writedlm(sim, hcat(t, "death", orgs[d].stage, orgs[d].age))
@@ -840,6 +853,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	deaths = Int64[] # reset before calculating density-dependent mortality
 	Bm = 0
 	mprob = 0
+	b0mort = 0
 
 	if sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
 
@@ -871,7 +885,18 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 					# any individual can die
 					d = rand(samegrid,1)[1]
 
-                    Bm = d.b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+					# Seeds have highr mortality
+					if d.stage == "e"
+		   			   b0mort = d.b0mort*20
+					elseif d.stage == "j"
+	           			   b0mort = d.b0mort*7.5
+					elseif d.stage == "a"
+	           			   b0mort = d.b0mort
+					else
+				 	   error("Error with organism's stage assignment") 
+					end
+		
+                    Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
 					mprob = 1 - exp(-Bm)
 					# check-point
 	                open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
