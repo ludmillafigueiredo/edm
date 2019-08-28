@@ -669,6 +669,9 @@ println("Landscape initialized: type $(typeof(mylandscape))")
 # Initialize individual tagger: It tags all individuals ever created. It does not change if individuals die, so there is no risk of re-use of a tag.
 id_counter = 0
 
+# Initialize management counter
+management_counter = 0
+
 # Create initial individuals
 orgs, id_counter = initorgs(landavail, orgsref, id_counter, settings)
 
@@ -740,7 +743,10 @@ end
 #############
 for t in 1:settings["timesteps"]
 
-println("running week $t")
+open(abspath(joinpath(simresults_folder, "simulog.txt")),"w") do sim
+println("WEEK $t")
+end
+
 
 # UPDATE temperature: weekly temperature and precipitation
 T = updateenv!(t, landpars)
@@ -759,6 +765,16 @@ toc()
 
 # LIFE CYCLE
 tic()
+
+# management happens at least once every year, annually
+if rem(t,52) == 0
+management_counter = 0
+end
+if (rem(t,52) > 27 && rem(t,52) < 38 && management_counter < 3) #mowing cannot happen before the 1st of July
+management_counter = manage!(orgs, t, management_counter, settings)
+end
+
+survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth)
 
 #if 12 < rem(t,52) < 39 # growth happens during Spring and Summer
 global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T)
@@ -779,8 +795,6 @@ establish!(orgs, t, settings, orgsref, T, justdispersed)
 #end
 
 shedd!(orgs, orgsref, t)
-
-survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth)
 
 timing("Time running life cycle:", settings)
 toc()

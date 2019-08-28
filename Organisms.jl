@@ -1,3 +1,4 @@
+
 """
 This module contains the
 
@@ -13,7 +14,7 @@ using StatsBase
 #using Setworld
 using Fileprep
 
-export OrgsRef_normal, OrgsRef_unif, TraitRanges, Organism, initorgs, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, destroyorgs!, release!
+export OrgsRef_normal, OrgsRef_unif, TraitRanges, Organism, initorgs, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, manage!, destroyorgs!, release!
 
 # Set up model constants
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
@@ -1036,22 +1037,35 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::BitArray{2},
 end
 
 """
-occupied()
-Finds indexes of occupied cells in the landscape.
+manage!()
+Plants loose 20% of vegetative biomass and all of the reproductive biomass due to mowing. Mowing happens at most 3 times a year, between July and August.
 """
-function occupied(orgs)
-	locs = fill!(Array{Tuple{Int64,Int64,Int64}}(reverse(size(orgs))),(0,0,0))
-	#masses = zeros(Float64,size(orgs))
-	map!(x -> x.location,locs,orgs) #probably optimizable
-	l = DataFrame(locs)
-	#println("$l")
-	#map!(x -> x.mass["veg"],masses,orgs)
-	# separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
-	fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
-	#open(string("EDoutputs/",settings["simID"],"/simulog.txt"), "a") do sim
-	#    println(sim,"# of cell with competition: $(length(fullcells))")
-	#end
+function manage!(orgs::Array{Organisms.Organism,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
+
+if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.1))
+
+    #check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+	writedlm(sim, hcat("Biomass before mowing =", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+    end
+    
+    adults = find(x -> (x.stage == "a"), orgs)
+
+    for a in adults
+	 orgs[a].mass["veg"] = 0.2*orgs[a].mass["veg"]
+	 orgs[a].mass["repr"] = 0
+    end
+
+    management_counter += 1
+
+    #check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+	writedlm(sim, hcat("Biomass after mowing =", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+    end
 end
+    return management_counter
+end
+
 
 """
 pollination!()
