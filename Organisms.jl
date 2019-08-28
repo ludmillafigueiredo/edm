@@ -172,7 +172,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 				Int(round(rand(Distributions.Uniform(orgsref.seedoff_min[s],orgsref.seedoff_max[s] + minvalue),1)[1], RoundUp)),
 				Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
 				3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
-				150*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
+				100*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
 				7*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
 				0, #age
 				Dict("veg" => 0.0, "repr" => 0.0), #mass
@@ -805,7 +805,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 		# Seeds have highr mortality
 		if orgs[d].stage == "e"
-		   b0mort = orgs[d].b0mort*20
+		   b0mort = orgs[d].b0mort*15
 		elseif orgs[d].stage == "j"
 	           b0mort = orgs[d].b0mort*7.5
 		elseif orgs[d].stage == "a"
@@ -886,7 +886,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 					# Seeds have highr mortality
 					if d.stage == "e"
-		   			   b0mort = d.b0mort*20
+		   			   b0mort = d.b0mort*15
 					elseif d.stage == "j"
 	           			   b0mort = d.b0mort*7.5
 					elseif d.stage == "a"
@@ -928,12 +928,12 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 				end
 			end
 		else
-			# any individual if the overflown grid can die
+			# any individual can die
 					d = rand(orgs,1)[1]
 
 					# Seeds have highr mortality
 					if d.stage == "e"
-		   			   b0mort = d.b0mort*20
+		   			   b0mort = d.b0mort*15
 					elseif d.stage == "j"
 	           			   b0mort = d.b0mort*7.5
 					elseif d.stage == "a"
@@ -949,23 +949,14 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	 			    	writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
 			        end
 
-					#unity test: Check mortality rate to probability conversion
-					if mprob < 0
-						error("mprob < 0")
-						mprob = 0
-					elseif mprob > 1
-						mprob = 1
-						error("mprob > 1")
-					end
-
 					o = find(x -> x.id == d.id, orgs)[1]
 
 					if 1 == rand(Distributions.Bernoulli(mprob))
+					# check-point
+					open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+		                                   writedlm(sim, hcat(t, "death", orgs[o].stage, orgs[o].age))
+				        end
 						deleteat!(orgs, o)
-						# check-point
-						open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-		                                    writedlm(sim, hcat(t, "death", orgs[o].stage, orgs[o].age))
-				                end
 				        end
 			
 		end
