@@ -259,11 +259,11 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 			new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])
 			orgs[o].mass["veg"] += new_mass
 
-                elseif orgs[o].stage == "a" &&
+		elseif orgs[o].stage == "a" &&
 			(orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
 			(sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass)) # adults in their reproductive season and with enough weight, invest in reproduction
 
-                        new_mass = B_grow*(orgs[o].mass["veg"])
+			new_mass = B_grow*(orgs[o].mass["veg"])
 
 			if haskey(orgs[o].mass,"repr")
 				orgs[o].mass["repr"] += new_mass #sowingmass
@@ -271,7 +271,7 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 				orgs[o].mass["repr"] = new_mass #sowingmass
 			end
 
-                elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].maxmass
+		elseif orgs[o].stage == "a" && orgs[o].mass["veg"] < orgs[o].maxmass
 			# adults that have not yet reached maximum size can still grow vegetative biomass, independently of the season
 			new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])
 			orgs[o].mass["veg"] += new_mass
@@ -397,12 +397,12 @@ After mating happened (marked in `reped`), calculate the amount of offspring
 """
 function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::Organisms.TraitRanges)
 
-        # Number of individuals before and after
-		open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-			writedlm(sim, hcat("Total number of individuals:", length(orgs)))
-		end
+	# Number of individuals before and after
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+		writedlm(sim, hcat("Total number of individuals:", length(orgs)))
+	end
 
-        offspring = Organism[]
+	offspring = Organism[]
 	non0sd = 1e-7
 	embryo_counter = 0
 
@@ -441,12 +441,12 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 				# get another parent
 				conspp = rand(ferts)
 
-                                for n in 1:offs
+				for n in 1:offs
 
 					id_counter += 1 # update individual counter
 
-				       embryo = deepcopy(orgs[s])
-				       embryo_counter += 1
+					embryo = deepcopy(orgs[s])
+					embryo_counter += 1
 
 
 					# unity test
@@ -458,9 +458,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 						end
 					end
 
-                                        # Trait microevolution
+					# Trait microevolution
 					#embryo.seedmass += rand(Distributions.Normal(0, abs(orgs[s].seedmass-conspp.seedmass+non0sd)/6))[1]
-                                        embryo.maxmass += rand(Distributions.Normal(0, abs(orgs[s].maxmass-conspp.maxmass+non0sd)/6))[1]
+					embryo.maxmass += rand(Distributions.Normal(0, abs(orgs[s].maxmass-conspp.maxmass+non0sd)/6))[1]
 					embryo.span += Int(round(rand(Distributions.Normal(0, abs(orgs[s].span-conspp.span+non0sd)/6))[1], RoundUp))
 					embryo.firstflower += Int(round(rand(Distributions.Normal(0, abs(orgs[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
 					embryo.floron += Int(round(rand(Distributions.Normal(0, abs(orgs[s].floron-conspp.floron+non0sd)/6))[1],RoundUp))
@@ -472,54 +472,54 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
 					# constrain values: avoid to trait changes that generates negative values (and also values that get too high)
 
-                                        #if (embryo.seedmass < traitranges.seedmass[embryo.sp][1] || embryo.seedmass > traitranges.seedmass[embryo.sp][end])
+					#if (embryo.seedmass < traitranges.seedmass[embryo.sp][1] || embryo.seedmass > traitranges.seedmass[embryo.sp][end])
 					#   embryo.seedmass < traitranges.seedmass[embryo.sp][1] ? embryo.seedmass = traitranges.seedmass[embryo.sp][1] :
 					#   embryo.seedmass = traitranges.seedmass[embryo.sp][end]
 					#end
 
 					if (embryo.maxmass < traitranges.maxmass[embryo.sp][1] || embryo.maxmass > traitranges.maxmass[embryo.sp][end])
-					   embryo.maxmass < traitranges.maxmass[embryo.sp][1] ? embryo.maxmass = traitranges.maxmass[embryo.sp][1] :
-					   embryo.maxmass = traitranges.maxmass[embryo.sp][end]
+						embryo.maxmass < traitranges.maxmass[embryo.sp][1] ? embryo.maxmass = traitranges.maxmass[embryo.sp][1] :
+						embryo.maxmass = traitranges.maxmass[embryo.sp][end]
 					end
 
 					if (embryo.span < traitranges.span[embryo.sp][1] || embryo.span > traitranges.span[embryo.sp][end])
-					   embryo.span < traitranges.span[embryo.sp][1] ? embryo.span = traitranges.span[embryo.sp][1] :
-					   embryo.span = traitranges.span[embryo.sp][end]
+						embryo.span < traitranges.span[embryo.sp][1] ? embryo.span = traitranges.span[embryo.sp][1] :
+						embryo.span = traitranges.span[embryo.sp][end]
 					end
 
 					if (embryo.firstflower < traitranges.firstflower[embryo.sp][1] || embryo.firstflower > traitranges.firstflower[embryo.sp][end])
-					   embryo.firstflower < traitranges.firstflower[embryo.sp][1] ? embryo.firstflower = traitranges.firstflower[embryo.sp][1] :
-					   embryo.firstflower = traitranges.firstflower[embryo.sp][end]
+						embryo.firstflower < traitranges.firstflower[embryo.sp][1] ? embryo.firstflower = traitranges.firstflower[embryo.sp][1] :
+						embryo.firstflower = traitranges.firstflower[embryo.sp][end]
 					end
 
 					if (embryo.floron < traitranges.floron[embryo.sp][1] || embryo.floron > traitranges.floron[embryo.sp][end])
-					   embryo.floron < traitranges.floron[embryo.sp][1] ? embryo.floron = traitranges.floron[embryo.sp][1] :
-					   embryo.floron = traitranges.floron[embryo.sp][end]
+						embryo.floron < traitranges.floron[embryo.sp][1] ? embryo.floron = traitranges.floron[embryo.sp][1] :
+						embryo.floron = traitranges.floron[embryo.sp][end]
 					end
 
 					if (embryo.floroff < traitranges.floroff[embryo.sp][1] || embryo.floroff > traitranges.floroff[embryo.sp][end])
-					   embryo.floroff < traitranges.floroff[embryo.sp][1] ? embryo.floroff = traitranges.floroff[embryo.sp][1] :
-					   embryo.floroff = traitranges.floroff[embryo.sp][end]
+						embryo.floroff < traitranges.floroff[embryo.sp][1] ? embryo.floroff = traitranges.floroff[embryo.sp][1] :
+						embryo.floroff = traitranges.floroff[embryo.sp][end]
 					end
 
 					if (embryo.seednumber < traitranges.seednumber[embryo.sp][1] || embryo.seednumber > traitranges.seednumber[embryo.sp][end])
-					   embryo.seednumber < traitranges.seednumber[embryo.sp][1] ? embryo.seednumber = traitranges.seednumber[embryo.sp][1] :
-					   embryo.seednumber = traitranges.seednumber[embryo.sp][end]
+						embryo.seednumber < traitranges.seednumber[embryo.sp][1] ? embryo.seednumber = traitranges.seednumber[embryo.sp][1] :
+						embryo.seednumber = traitranges.seednumber[embryo.sp][end]
 					end
 
 					if (embryo.seedon < traitranges.seedon[embryo.sp][1] || embryo.seedon > traitranges.seedon[embryo.sp][end])
-					   embryo.seedon < traitranges.seedon[embryo.sp][1] ? embryo.seedon = traitranges.seedon[embryo.sp][1] :
-					   embryo.seedon = traitranges.seedon[embryo.sp][end]
+						embryo.seedon < traitranges.seedon[embryo.sp][1] ? embryo.seedon = traitranges.seedon[embryo.sp][1] :
+						embryo.seedon = traitranges.seedon[embryo.sp][end]
 					end
 
 					if (embryo.seedoff < traitranges.seedoff[embryo.sp][1] || embryo.seedoff > traitranges.seedoff[embryo.sp][end])
-					   embryo.seedoff < traitranges.seedoff[embryo.sp][1] ? embryo.seedoff = traitranges.seedoff[embryo.sp][1] :
-					   embryo.seedoff = traitranges.seedoff[embryo.sp][end]
+						embryo.seedoff < traitranges.seedoff[embryo.sp][1] ? embryo.seedoff = traitranges.seedoff[embryo.sp][1] :
+						embryo.seedoff = traitranges.seedoff[embryo.sp][end]
 					end
 
 					if (embryo.bankduration < traitranges.bankduration[embryo.sp][1] || embryo.bankduration > traitranges.bankduration[embryo.sp][end])
-					   embryo.bankduration < traitranges.bankduration[embryo.sp][1] ? embryo.bankduration = traitranges.bankduration[embryo.sp][1] :
-					   embryo.bankduration = traitranges.bankduration[embryo.sp][end]
+						embryo.bankduration < traitranges.bankduration[embryo.sp][1] ? embryo.bankduration = traitranges.bankduration[embryo.sp][1] :
+						embryo.bankduration = traitranges.bankduration[embryo.sp][end]
 					end
 
 					# set embryos state variables
@@ -535,7 +535,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 				end
 				orgs[s].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
 
-                        end
+			end
 		end
 
 		# output seeds per species (file is initialized in main.jl)
@@ -543,15 +543,15 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 			writedlm(seedfile, hcat(t, sp, "e", "sex", spoffspringcounter))
 		end
 		# test
-                #open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	        #        writedlm(sim, hcat("Embryos created:", length(offspring)))
-                #end
+		#open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+		#        writedlm(sim, hcat("Embryos created:", length(offspring)))
+		#end
 	end
 
-        # Number of individuals before and after
-		open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-			writedlm(sim, hcat("Total number of individuals after SEX:", length(orgs)))
-		end
+	# Number of individuals before and after
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+		writedlm(sim, hcat("Total number of individuals after SEX:", length(orgs)))
+	end
 
 
 	# Asexually produced offspring
@@ -613,9 +613,9 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 	#append!(orgs, offspring)
 
 	# Number of individuals before and after
-		open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-			writedlm(sim, hcat("Total number of individuals after ASEX:", length(orgs)))
-		end
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+		writedlm(sim, hcat("Total number of individuals after ASEX:", length(orgs)))
+	end
 
 
 	return id_counter
@@ -625,12 +625,12 @@ end
 
 """
 release!()
- """
+"""
 function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref)
 
-       # Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
-       seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, orgs)
-       # using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it doesdo contain, it throws an error.
+	# Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
+	seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, orgs)
+	# using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it doesdo contain, it throws an error.
 end
 
 """
@@ -692,16 +692,16 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
 		end
 	end
 	# test
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	    writedlm(sim, hcat("Number of dispersing:", length(justdispersed)))
-        end
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+		writedlm(sim, hcat("Number of dispersing:", length(justdispersed)))
+	end
 	#unity test
 	open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
-	    writedlm(sim, hcat("Lost in dispersal:", length(lost)))
+		writedlm(sim, hcat("Lost in dispersal:", length(lost)))
 	end
 	deleteat!(orgs,lost)
 
-        return justdispersed
+	return justdispersed
 end
 
 """
@@ -714,8 +714,8 @@ function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, A
 	gprob = 1 - exp(-Bg)
 	# test
 	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-				writedlm(sim, hcat(org.stage, org.age, Bg, gprob, "germination"))
-			end
+		writedlm(sim, hcat(org.stage, org.age, Bg, gprob, "germination"))
+	end
 
 	if gprob < 0
 		error("gprob < 0")
@@ -738,34 +738,34 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
 	#REFERENCE: May et al. 2009
 	establishing = find(x -> x.stage == "e", orgs)
 
-        # test
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	        writedlm(sim, hcat("Number of establishing:", length(establishing)))
-        end
+	# test
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+		writedlm(sim, hcat("Number of establishing:", length(establishing)))
+	end
 
 	lost = Int64[]
 	Bm = 0
 	gprob = 0
 
-        for o in establishing
+	for o in establishing
 
-        Bg = orgs[o].b0germ * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-	gprob = 1 - exp(-Bg)
-	# test
-	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-				writedlm(sim, hcat(orgs[o].stage, orgs[o].age, Bg, gprob, "germination"))
-			end
+		Bg = orgs[o].b0germ * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+		gprob = 1 - exp(-Bg)
+		# test
+		open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+			writedlm(sim, hcat(orgs[o].stage, orgs[o].age, Bg, gprob, "germination"))
+		end
 
-	if gprob < 0
-		error("gprob < 0")
-	elseif gprob > 1
-		error("gprob > 1")
-	end
+		if gprob < 0
+			error("gprob < 0")
+		elseif gprob > 1
+			error("gprob > 1")
+		end
 
-	germ = false
-	if 1 == rand(Distributions.Bernoulli(gprob))
-		germ = true
-	end
+		germ = false
+		if 1 == rand(Distributions.Bernoulli(gprob))
+			germ = true
+		end
 
 		if germ == true
 			orgs[o].stage = "j"
@@ -794,49 +794,49 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 	# Density-independent mortality
 
-		# Old ones die
-	    old = find( x -> (x.stage == "a" && x.age >= x.span), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
-		deleteat!(orgs, old)
+	# Old ones die
+	old = find( x -> (x.stage == "a" && x.age >= x.span), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
+	deleteat!(orgs, old)
 
-		# Go through individuals that migh be dying
-		dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage in ["j" "a"]), orgs) #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
+	# Go through individuals that migh be dying
+	dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage in ["j" "a"]), orgs) #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
 
-		for d in dying
+	for d in dying
 
 		# Seeds have highr mortality
 		if orgs[d].stage == "e"
-		   b0mort = orgs[d].b0mort*15
+			b0mort = orgs[d].b0mort*15
 		elseif orgs[d].stage == "j"
-	           b0mort = orgs[d].b0mort*7.5
+			b0mort = orgs[d].b0mort*7.5
 		elseif orgs[d].stage == "a"
-	           b0mort = orgs[d].b0mort
+			b0mort = orgs[d].b0mort
 		else
-	           error("Error with organism's stage assignment") 
+			error("Error with organism's stage assignment")
 		end
-		   
-			Bm = b0mort * (orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-			mprob = 1 - exp(-Bm)
 
-			# unity test
-			if mprob < 0
-				error("mprob < 0")
-				#mprob = 0
-			elseif mprob > 1            #mprob = 1
-				error("mprob > 1")
+		Bm = b0mort * (orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+		mprob = 1 - exp(-Bm)
+
+		# unity test
+		if mprob < 0
+			error("mprob < 0")
+			#mprob = 0
+		elseif mprob > 1            #mprob = 1
+			error("mprob > 1")
+		end
+
+		if 1 == rand(Distributions.Bernoulli(mprob))
+			push!(deaths, d)
+			#println("$(orgs[d].stage) dying INDEP.")
+			# check-point
+			open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+				writedlm(sim, hcat(t, "death", orgs[d].stage, orgs[d].age))
 			end
-
-			if 1 == rand(Distributions.Bernoulli(mprob))
-				push!(deaths, d)
-				#println("$(orgs[d].stage) dying INDEP.")
-				# check-point
-				open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-					writedlm(sim, hcat(t, "death", orgs[d].stage, orgs[d].age))
-				end
-				open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-					writedlm(sim, hcat(orgs[d].stage, orgs[d].age, Bm, mprob, "death"))
-				end
+			open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+				writedlm(sim, hcat(orgs[d].stage, orgs[d].age, Bm, mprob, "death"))
 			end
 		end
+	end
 
 	deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
 	# check-point
@@ -865,13 +865,13 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	end
 
 	while sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
-	
-	   	locs = map(x -> x.location,orgs) #probably optimizable
+
+		locs = map(x -> x.location,orgs) #probably optimizable
 		l = DataFrame(locs)
 
 		# separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
 		fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
-		
+
 		if length(fullcells) > 0
 			for c in fullcells
 
@@ -886,22 +886,22 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 					# Seeds have highr mortality
 					if d.stage == "e"
-		   			   b0mort = d.b0mort*15
+						b0mort = d.b0mort*15
 					elseif d.stage == "j"
-	           			   b0mort = d.b0mort*7.5
+						b0mort = d.b0mort*7.5
 					elseif d.stage == "a"
-	           			   b0mort = d.b0mort
+						b0mort = d.b0mort
 					else
-				 	   error("Error with orgarnism's stage assignment") 
+						error("Error with orgarnism's stage assignment")
 					end
-		
-                                        Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+
+					Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
 					mprob = 1 - exp(-Bm)
 
-                                        # check-point
-	                		open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-	 			 	    writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
-			        	end
+					# check-point
+					open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+						writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
+					end
 
 					#unity test: Check mortality rate to probability conversion
 					if mprob < 0
@@ -929,40 +929,40 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 			end
 		else
 			# any individual can die
-					d = rand(orgs,1)[1]
+			d = rand(orgs,1)[1]
 
-					# Seeds have highr mortality
-					if d.stage == "e"
-		   			   b0mort = d.b0mort*15
-					elseif d.stage == "j"
-	           			   b0mort = d.b0mort*7.5
-					elseif d.stage == "a"
-	           			   b0mort = d.b0mort
-					else
-				 	   error("Error with orgarnism's stage assignment") 
-					end
-		
-                    Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
-					mprob = 1 - exp(-Bm)
-					# check-point
-	                open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-	 			    	writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
-			        end
+			# Seeds have highr mortality
+			if d.stage == "e"
+				b0mort = d.b0mort*15
+			elseif d.stage == "j"
+				b0mort = d.b0mort*7.5
+			elseif d.stage == "a"
+				b0mort = d.b0mort
+			else
+				error("Error with orgarnism's stage assignment")
+			end
 
-					o = find(x -> x.id == d.id, orgs)[1]
+			Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+			mprob = 1 - exp(-Bm)
+			# check-point
+			open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+				writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
+			end
 
-					if 1 == rand(Distributions.Bernoulli(mprob))
-					# check-point
-					open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-		                                   writedlm(sim, hcat(t, "death", orgs[o].stage, orgs[o].age))
-				        end
-						deleteat!(orgs, o)
-				        end
-			
+			o = find(x -> x.id == d.id, orgs)[1]
+
+			if 1 == rand(Distributions.Bernoulli(mprob))
+				# check-point
+				open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+					writedlm(sim, hcat(t, "death", orgs[o].stage, orgs[o].age))
+				end
+				deleteat!(orgs, o)
+			end
+
 		end
 	end
 
-        #check-point
+	#check-point
 	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
 		writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "e", orgs)),
 		"# juveniles:", length(find(x -> x.stage == "j", orgs)),
@@ -995,12 +995,12 @@ function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int)
 
 	if (rem(t,52) == 51)
 
-           adults = find(x -> (x.stage == "a"), orgs)
+		adults = find(x -> (x.stage == "a"), orgs)
 
-	   for a in adults
-		 orgs[a].mass["veg"] = 0.5*orgs[a].mass["veg"]
-	   end
-        end
+		for a in adults
+			orgs[a].mass["veg"] = 0.5*orgs[a].mass["veg"]
+		end
+	end
 end
 
 """
@@ -1033,28 +1033,28 @@ Plants loose 20% of vegetative biomass and all of the reproductive biomass due t
 """
 function manage!(orgs::Array{Organisms.Organism,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
 
-if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.1))
+	if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.1))
 
-    #check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	writedlm(sim, hcat("Biomass before mowing =", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
-    end
-    
-    adults = find(x -> (x.stage == "a"), orgs)
+		#check-point
+		open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+			writedlm(sim, hcat("Biomass before mowing =", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+		end
 
-    for a in adults
-	 orgs[a].mass["veg"] = 0.2*orgs[a].mass["veg"]
-	 orgs[a].mass["repr"] = 0
-    end
+		adults = find(x -> (x.stage == "a"), orgs)
 
-    management_counter += 1
+		for a in adults
+			orgs[a].mass["veg"] = 0.2*orgs[a].mass["veg"]
+			orgs[a].mass["repr"] = 0
+		end
 
-    #check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	writedlm(sim, hcat("Biomass after mowing =", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
-    end
-end
-    return management_counter
+		management_counter += 1
+
+		#check-point
+		open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+			writedlm(sim, hcat("Biomass after mowing =", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+		end
+	end
+	return management_counter
 end
 
 
