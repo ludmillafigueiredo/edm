@@ -117,7 +117,7 @@ arg_type = String
 default = abspath(pwd(),"inputs/temp1917_2017.csv")
 
 "--timemsg"
-help = "Output timing to terminal, as well as simulog."
+help = "Output timing to terminal, as well as simulog"
 arg_type = Bool
 default = false
 end
@@ -743,7 +743,7 @@ end
 #############
 for t in 1:settings["timesteps"]
 
-open(abspath(joinpath(simresults_folder, "simulog.txt")),"w") do sim
+open(abspath(joinpath(simresults_folder, "simulog.txt")),"a") do sim
 println("WEEK $t")
 end
 
@@ -767,17 +767,23 @@ toc()
 tic()
 
 # management happens at least once every year, annually
-if rem(t,52) == 0
-management_counter = 0
-end
-if (rem(t,52) > 27 && rem(t,52) < 38 && management_counter < 3) #mowing cannot happen before the 1st of July
-management_counter = manage!(orgs, t, management_counter, settings)
+#if rem(t,52) == 0
+#management_counter = 0
+#end
+#if (rem(t,52) > 27 && rem(t,52) < 38 && management_counter < 3) #mowing cannot happen before the 1st of July
+#management_counter = manage!(orgs, t, management_counter, settings)
+#end
+
+biomass_production = sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))
+#check-point
+open(abspath(joinpath(simresults_folder, "simulog.txt")),"a") do sim
+writedlm(sim, hcat("Biomass production:", biomass_production))
 end
 
-survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth)
+survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, biomass_production)
 
 #if 12 < rem(t,52) < 39 # growth happens during Spring and Summer
-global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T)
+global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T, biomass_production, K)
 #end
 
 develop!(orgs, orgsref, settings, t)
@@ -791,7 +797,7 @@ seedsi = release!(orgs, t, settings, orgsref) # only recently released seeds nee
 justdispersed = disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
 
 #if (11 < rem(t,52) < 24) ||(38 < rem(t,52) < 50) #Establishment during Spring and Fall
-establish!(orgs, t, settings, orgsref, T, justdispersed)
+establish!(orgs, t, settings, orgsref, T, justdispersed, biomass_production, K)
 #end
 
 shedd!(orgs, orgsref, t)

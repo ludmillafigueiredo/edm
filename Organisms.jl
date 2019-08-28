@@ -241,7 +241,7 @@ end
 allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
 Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
 """
-function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref,T::Float64)
+function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64)
 	#1. Initialize storage of those that dont growi and will have higher prob of dying (later)
 	nogrowth = Int64[]
 
@@ -249,8 +249,12 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 
 	for o in growing
 
-		b0 = orgs[o].b0grow
-
+	      	if biomass_production > K
+		  b0 = orgs[o].b0grow*(K/biomass_production)
+		else
+		  b0 = orgs[o].b0grow
+		end
+		
 		#only vegetative biomass helps growth
 		B_grow = (b0*(orgs[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))
 
@@ -710,7 +714,8 @@ Seeds have a probability of germinating (`gprob`).
 """
 
 function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, Any})
-	Bg = org.b0germ * (org.mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+
+	Bg = b0germ * (org.mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
 	gprob = 1 - exp(-Bg)
 	# test
 	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
@@ -722,7 +727,7 @@ function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, A
 	elseif gprob > 1
 		error("gprob > 1")
 	end
-
+	
 	germ = false
 	if 1 == rand(Distributions.Bernoulli(gprob))
 		germ = true
@@ -734,7 +739,7 @@ end
 establish!
 Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
 """
-function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed)
+function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed, biomass_production::Float64, K::Float64)
 	#REFERENCE: May et al. 2009
 	establishing = find(x -> x.stage == "e", orgs)
 
@@ -749,7 +754,13 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
 
         for o in establishing
 
-        Bg = orgs[o].b0germ * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+	if biomass_production > K
+	   b0germ = orgs[o].b0germ*(K/biomass_production)
+	else
+	   b0germ = orgs[o].b0germ
+	end
+	
+        Bg = b0germ * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
 	gprob = 1 - exp(-Bg)
 	# test
 	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
@@ -785,7 +796,7 @@ survive!(orgs, nogrowth,landscape)
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 plants in nogrwth are subjected to two probability rates
 """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref, landavail::BitArray{2},T, nogrowth::Array{Int64,1})
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, biomass_production::Float64)
 
 	deaths = Int64[]
 	mprob = 0
@@ -864,8 +875,8 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		"weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
 	end
 
-	while sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
-	
+	if sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
+
 	   	locs = map(x -> x.location,orgs) #probably optimizable
 		l = DataFrame(locs)
 
@@ -886,11 +897,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 					# Seeds have highr mortality
 					if d.stage == "e"
-		   			   b0mort = d.b0mort*15
+		   			   b0mort = d.b0mort*15*(biomass_production/K)
 					elseif d.stage == "j"
-	           			   b0mort = d.b0mort*7.5
+	           			   b0mort = d.b0mort*7.5*(biomass_production/K)
 					elseif d.stage == "a"
-	           			   b0mort = d.b0mort
+	           			   b0mort = d.b0mort*(biomass_production/K)
 					else
 				 	   error("Error with orgarnism's stage assignment") 
 					end
@@ -933,11 +944,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 					# Seeds have highr mortality
 					if d.stage == "e"
-		   			   b0mort = d.b0mort*15
+		   			   b0mort = d.b0mort*15*(biomass_production/K)
 					elseif d.stage == "j"
-	           			   b0mort = d.b0mort*7.5
+	           			   b0mort = d.b0mort*7.5*(biomass_production/K)
 					elseif d.stage == "a"
-	           			   b0mort = d.b0mort
+	           			   b0mort = d.b0mort*(biomass_production/K)
 					else
 				 	   error("Error with orgarnism's stage assignment") 
 					end
@@ -1043,7 +1054,7 @@ if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.1))
     adults = find(x -> (x.stage == "a"), orgs)
 
     for a in adults
-	 orgs[a].mass["veg"] = 0.2*orgs[a].mass["veg"]
+	 orgs[a].mass["veg"] = 0.5*orgs[a].mass["veg"]
 	 orgs[a].mass["repr"] = 0
     end
 
