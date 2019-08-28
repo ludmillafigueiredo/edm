@@ -770,9 +770,9 @@ tic()
 #if rem(t,52) == 0
 #management_counter = 0
 #end
-#if (rem(t,52) > 27 && rem(t,52) < 38 && management_counter < 3) #mowing cannot happen before the 1st of July
-#management_counter = manage!(orgs, t, management_counter, settings)
-#end
+if ((27 < rem(t,52) < 31 || 35 < rem(t,52) < 39) && management_counter < 1) #mowing cannot happen before the 1st of July
+management_counter = manage!(orgs, t, management_counter, settings)
+end
 
 biomass_production = sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))
 #check-point

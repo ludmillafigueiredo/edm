@@ -1044,7 +1044,7 @@ Plants loose 20% of vegetative biomass and all of the reproductive biomass due t
 """
 function manage!(orgs::Array{Organisms.Organism,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
 
-if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.1))
+if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.5))
 
     #check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
