@@ -249,14 +249,14 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 
 	for o in growing
 
-	      	if biomass_production > K
-		  b0 = orgs[o].b0grow*(K/biomass_production)
-		else
-		  b0 = orgs[o].b0grow
+	      	if biomass_production < K/2
+		  b0grow = orgs[o].b0grow
+		elseif biomass_production > K/2
+		  b0grow = orgs[o].b0grow*(1-(0.95/(1+exp(-0.02*(biomass_production-(K/2))))))
 		end
 		
 		#only vegetative biomass helps growth
-		B_grow = (b0*(orgs[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))
+		B_grow = (b0grow*(orgs[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))
 
 		if orgs[o].stage == "j"
 			# juveniles grow vegetative biomass only
@@ -754,12 +754,12 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
 
         for o in establishing
 
-	if biomass_production > K
-	   b0germ = orgs[o].b0germ*(K/biomass_production)
-	else
-	   b0germ = orgs[o].b0germ
+	if biomass_production < K/2
+	  b0germ = orgs[o].b0germ
+	else biomass_production > K/2
+	  b0germ = orgs[o].b0germ*(1-(0.95/(1+exp(-0.02*(biomass_production-(K/2))))))
 	end
-	
+		
         Bg = b0germ * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
 	gprob = 1 - exp(-Bg)
 	# test
@@ -816,16 +816,16 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 		# Seeds have highr mortality
 		if orgs[d].stage == "e"
-		   b0mort = orgs[d].b0mort*15
+		   m_stage = 15
 		elseif orgs[d].stage == "j"
-	           b0mort = orgs[d].b0mort*7.5
+	           m_stage = 7.5
 		elseif orgs[d].stage == "a"
-	           b0mort = orgs[d].b0mort
+	           m_stage = 1
 		else
-	           error("Error with organism's stage assignment") 
+		   error("Error with organism's stage assignment") 
 		end
 		   
-			Bm = b0mort * (orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+			Bm = orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
 			mprob = 1 - exp(-Bm)
 
 			# unity test
@@ -875,7 +875,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		"weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
 	end
 
-	if sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
+	while sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
+
+	m_comp = biomass_production/K # weight of reaching K, on mortality
 
 	   	locs = map(x -> x.location,orgs) #probably optimizable
 		l = DataFrame(locs)
@@ -884,12 +886,14 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		fullcells = find(nonunique(l)) # indexes in l are the same as in orgs, right?
 		
 		if length(fullcells) > 0
+		
 			for c in fullcells
 
 				#find plant that are in the same grid
 				samegrid = filter(x -> x.location == locs[c], orgs)
 
 				# while the sum of weights in a "shared grid" is higher than cell carrying capacity
+
 				while sum(vcat(map(x -> x.mass["veg"],samegrid),0.00001)) > cK #vcat is necessary for avoid that sum throws an error when empty
 
 					# any individual if the overflown grid can die
@@ -897,17 +901,19 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 					# Seeds have highr mortality
 					if d.stage == "e"
-		   			   b0mort = d.b0mort*15*(biomass_production/K)
+		   			   m_stage = 15
 					elseif d.stage == "j"
-	           			   b0mort = d.b0mort*7.5*(biomass_production/K)
+	           			   m_stage = 7.5
 					elseif d.stage == "a"
-	           			   b0mort = d.b0mort*(biomass_production/K)
+	           			   m_stage = 1
 					else
 				 	   error("Error with orgarnism's stage assignment") 
 					end
-		
+					
+					b0mort = d.b0mort*m_stage
+					
                                         Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
-					mprob = 1 - exp(-Bm)
+					mprob = 1 - exp(-(Bm+m_comp))
 
                                         # check-point
 	                		open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
@@ -944,21 +950,23 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 					# Seeds have highr mortality
 					if d.stage == "e"
-		   			   b0mort = d.b0mort*15*(biomass_production/K)
+		   			   m_stage = 15
 					elseif d.stage == "j"
-	           			   b0mort = d.b0mort*7.5*(biomass_production/K)
+	           			   m_stage = 7.5
 					elseif d.stage == "a"
-	           			   b0mort = d.b0mort*(biomass_production/K)
+	           			   m_stage = 1
 					else
 				 	   error("Error with orgarnism's stage assignment") 
 					end
-		
-                    Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
-					mprob = 1 - exp(-Bm)
+					
+					b0mort = d.b0mort*m_stage
+					
+                    			Bm = b0mort * (sum(collect(values(d.mass["veg"]))))^(-1/4)*exp(-aE/(Boltz*T))
+					mprob = 1 - exp(-(Bm+m_comp))
 					# check-point
-	                open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-	 			    	writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
-			        end
+	                		open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+	 			           writedlm(sim, hcat(d.stage, d.age, Bm, mprob, "death-K"))
+			        	end
 
 					o = find(x -> x.id == d.id, orgs)[1]
 
@@ -968,8 +976,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		                                   writedlm(sim, hcat(t, "death", orgs[o].stage, orgs[o].age))
 				        end
 						deleteat!(orgs, o)
-				        end
-			
+				        end	
 		end
 	end
 
