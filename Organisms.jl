@@ -798,6 +798,9 @@ plants in nogrwth are subjected to two probability rates
 """
 function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, biomass_production::Float64)
 
+	seed_mfactor = 15
+	juv_mfactor = 7.5
+	
 	deaths = Int64[]
 	mprob = 0
 	Bm = 0
@@ -806,19 +809,19 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	# Density-independent mortality
 
 		# Old ones die
-	    old = find( x -> (x.stage == "a" && x.age >= x.span), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
+	    old = find( x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || (x.stage == "a" && x.age >= x.span)), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
 		deleteat!(orgs, old)
 
 		# Go through individuals that migh be dying
-		dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage in ["j" "a"]), orgs) #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
+		dying = find(x -> (x.stage in ["j" "a"]), orgs) #seeds that are still in the mother plant cant die. If their release season is over, it is certain thatthey are not anymore, even if they have not germinated
 
 		for d in dying
 
 		# Seeds have highr mortality
 		if orgs[d].stage == "e"
-		   m_stage = 15
+		   m_stage = seed_mfactor
 		elseif orgs[d].stage == "j"
-	           m_stage = 7.5
+	           m_stage = juv_mfactor
 		elseif orgs[d].stage == "a"
 	           m_stage = 1
 		else
@@ -901,9 +904,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 					# Seeds have highr mortality
 					if d.stage == "e"
-		   			   m_stage = 15
+		   			   m_stage = seed_mfactor
 					elseif d.stage == "j"
-	           			   m_stage = 7.5
+	           			   m_stage = juv_mfactor
 					elseif d.stage == "a"
 	           			   m_stage = 1
 					else
@@ -950,9 +953,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 					# Seeds have highr mortality
 					if d.stage == "e"
-		   			   m_stage = 15
+		   			   m_stage = seed_mfactor
 					elseif d.stage == "j"
-	           			   m_stage = 7.5
+	           			   m_stage = juv_mfactor
 					elseif d.stage == "a"
 	           			   m_stage = 1
 					else
