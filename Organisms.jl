@@ -798,8 +798,9 @@ plants in nogrwth are subjected to two probability rates
 """
 function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, biomass_production::Float64)
 
-	seed_mfactor = 15
-	juv_mfactor = 7.5
+	seed_mfactor = 20
+	juv_mfactor = 10
+	adult_mfactor = 10
 	
 	deaths = Int64[]
 	mprob = 0
@@ -823,7 +824,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		elseif orgs[d].stage == "j"
 	           m_stage = juv_mfactor
 		elseif orgs[d].stage == "a"
-	           m_stage = 1
+	           m_stage = adult_mfactor
 		else
 		   error("Error with organism's stage assignment") 
 		end
@@ -908,7 +909,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 					elseif d.stage == "j"
 	           			   m_stage = juv_mfactor
 					elseif d.stage == "a"
-	           			   m_stage = 1
+	           			   m_stage = adult_mfactor
 					else
 				 	   error("Error with orgarnism's stage assignment") 
 					end
@@ -957,7 +958,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 					elseif d.stage == "j"
 	           			   m_stage = juv_mfactor
 					elseif d.stage == "a"
-	           			   m_stage = 1
+	           			   m_stage = adult_mfactor
 					else
 				 	   error("Error with orgarnism's stage assignment") 
 					end
