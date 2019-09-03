@@ -770,7 +770,7 @@ tic()
 #if rem(t,52) == 0
 #management_counter = 0
 #end
-if ((27 < rem(t,52) < 31 || 35 < rem(t,52) < 39) && management_counter < 1) #mowing cannot happen before the 1st of July
+if ((31 < rem(t,52) < 39) && management_counter < 1) #mowing cannot happen before the 1st of July
 management_counter = manage!(orgs, t, management_counter, settings)
 end
 
