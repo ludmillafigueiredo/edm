@@ -537,24 +537,31 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
 }
 
 #' Life-history events
-lifeevents_tab <- read_tsv(file.path(outputsdir, "eventslog.txt"), col_names = TRUE)
-lifeevents_plot <- lifeevents_tab%>%
-    select(-age)%>%
-    group_by(week, event, stage)%>%
-    summarize(total = n())%>%
-    ggplot(aes(x = week, y = total, color = event))+
-    geom_line()+
-    facet_wrap(~stage, ncol = 1, scales = "free_y")+
-    scale_color_viridis(discrete = TRUE)
+lifehistory <- function(outputsdir){
+    
+    lifeevents_tab <- read_tsv(file.path(outputsdir, "eventslog.txt"), col_names = TRUE)
+    lifeevents_plot <- lifeevents_tab%>%
+        select(-age)%>%
+        group_by(week, event, stage)%>%
+        summarize(total = n())%>%
+        ggplot(aes(x = week, y = total, color = event))+
+        geom_line()+
+        facet_wrap(~stage, ncol = 1, scales = "free_y")+
+        scale_color_viridis(discrete = TRUE)
+
+    metabolic_tab <- read_tsv(file.path(outputsdir, "metaboliclog.txt"), col_names = TRUE)
+    metabolic_summary <- metabolic_tab%>%
+        select(-age)%>%
+        gather(c(rate, probability), key = "metric", value = value)%>%
+        group_by(stage, event, metric)%>%
+        summarize(mean = mean(value),
+                  sd = sd(value))
+
+    return(list(a = lifeevents_tab, b = lifeevents_plot, c = metabolic_tab, d = metabolic_summary))
+}
 
 #' Metabolic rates
-metabolic_tab <- read_tsv(file.path(outputsdir, "metaboliclog.txt"), col_names = TRUE)
-metabolic_summary <- metabolic_tab%>%
-    select(-age)%>%
-    gather(c(rate, probability), key = "metric", value = value)%>%
-    group_by(stage, event, metric)%>%
-    summarize(mean = mean(value),
-              sd = sd(value))
+
 ##facet_grid(rows = vars(stage), cols = vars(metric), scales = "free_y")+
 ##scale_color_viridis(discrete = TRUE)
 
@@ -608,7 +615,7 @@ timesteps <- factor(c(min(pop_tab$week), max(pop_tab$week))) #provided or not, m
 ## Species rank-abundance 
 rank <- rankabund(pop_tab, timesteps)
 rank$a -> relabund_tab
-rank$b -> rankabunds_plot
+rank$b -> rankabunds
 rm(rank)
 
 ## Population structure by group size
@@ -634,24 +641,22 @@ rm(traitschange)
 ##traitspace$c -> timepca_plot
 ##rm(traitspace)
 
+## Life history
+lifehistory <- lifehistory(outputsdir)
+lifehistory$a -> events_tab
+lifehistory$b -> events_plot
+lifehistory$c -> metabolic_tab
+lifehistory$d -> metabolic_plot
+
 ## Save bundle of tabs and plots as RData
-save(cleanoutput,
-     adultjuv_repli,offspring_repli,
-     vegmass_plot,repmass_plot,biomass_tab,
-     pop_tab, spabund_tab, abund_plot,
-     weekstruct_tab, weekstruct_plot, relativestruct_tab, relativestruct_plot, 
-     spprichness_tab, spprichness_plot, groupspprichness_tab, groupspprichness_plot,
-     relabund_tab, rankabunds_plot,
-     grouppop_plot, grouppop_tab, groupweight_plot,
-     traitvalues_tab, traitvalues_plot,
-     lifeevents_tab, lifeevents_plot,
-     metabolic_summary,
-     ##traitpcas, timepca, timepca_plot,
-     file = file.path(outputsdir, 
-                      paste(parentsimID, ".RData", sep = "")))
+EDtabs <- objects(name = environment(), all.names = FALSE, pattern = "_tab$")
+save(list = EDtabs, file = file.path(outputsdir,
+                                     paste(parentsimID, "_tabs.RData", sep = "")))
+
+EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
+save(list = EDplots, file = file.path(outputsdir,
+                                      paste(parentsimID, "_plots.RData", sep = "")))
 
 ## Plot all graphs
-##EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
-##map(EDplots,
-                                        #    ~ ggsave(file.path(outputsdir, paste(.x, ".png", sep ="")), get(.x)))
+map(EDplots, ~ save_plot(filename = file.path(outputsdir, paste(.x, ".png", sep ="")), plot = get(.x)))
 
