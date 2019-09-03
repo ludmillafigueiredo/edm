@@ -268,7 +268,7 @@ popstruct <- function(pop_tab, offspring_repli, parentsimID, spp){
 }
 
 #' Calculate mean species richness from replicates and per group of size
-richness <- function(adultjuv_repli, pop_tab,parentsimID,disturbance,tdist){
+richness <- function(adultjuv_repli, pop_tab, parentsimID, disturbance,tdist){
     
     ## extract richness from output
     spprichness_tab <- pop_tab%>%
@@ -282,7 +282,7 @@ richness <- function(adultjuv_repli, pop_tab,parentsimID,disturbance,tdist){
     
     ## create plots
     ## identify when disturbance happens, if it does
-    if (disturbance == "none" && missing(tdist)){
+    #if (disturbance == "none" && missing(tdist)){
         spprichness_plottED <- ggplot(spprichness_tab,
                                       aes(x = week, y = mean_richness))+
             geom_errorbar(aes(ymin = mean_richness - sd_richness,
@@ -323,7 +323,7 @@ richness <- function(adultjuv_repli, pop_tab,parentsimID,disturbance,tdist){
         group_by(week, seedmass)%>%
         summarize(richness = length(unique(sp)))%>%
         ungroup()
-    groupspprichness_plottED <- ggplot(data = grouprichness_tab, aes(x = week, y = richness))+
+    groupspprichness_plottED <- ggplot(data = groupspprichness_tab, aes(x = week, y = richness))+
         facet_wrap(~seedmass, scales = "free_y", ncol = 1)+
         geom_line()
     
@@ -353,10 +353,10 @@ rankabund <- function(pop_tab, timesteps){
             theme(axis.text.x = element_text(angle = 50, size = 10, vjust = 0.5))
     }
     
-    rankabunds_plot <- timesteps%>%
+    rankabunds <- timesteps%>%
         map(. %>% plot_rankabund)
     
-    return(list(a = relabund_tab, b = rankabunds_plot))
+    return(list(a = relabund_tab, b = rankabunds))
 }
 
 #' Population structure by group size
@@ -564,8 +564,6 @@ lifehistory <- function(outputsdir){
     return(list(a = lifeevents_tab, b = lifeevents_plot, c = metabolic_tab, d = metabolic_summary))
 }
 
-#' Metabolic rates
-
 ##facet_grid(rows = vars(stage), cols = vars(metric), scales = "free_y")+
 ##scale_color_viridis(discrete = TRUE)
 
@@ -597,12 +595,12 @@ abund$c -> abund_plot
 rm(abund)
 
 ## Population structure variation
-pop <- popstruct(pop_tab, offspring_repli, parentsimID) #specifying species is optional
-pop$a -> weekstruct_tab
-pop$b -> weekstruct_plot
-pop$c -> relativestruct_tab
-pop$d -> relativestruct_plot
-rm(pop)
+population <- popstruct(pop_tab, offspring_repli, parentsimID) #specifying species is optional
+poputation$a -> weekstruct_tab
+population$b -> weekstruct_plot
+population$c -> relativestruct_tab
+population$d -> relativestruct_plot
+rm(population)
 
 ## Species richness
 rich <- richness(pop_tab, parentsimID, disturbance) # tdist is optional
@@ -610,7 +608,7 @@ rich$a -> spprichness_tab
 rich$b -> spprichness_plot
 rich$c -> groupspprichness_tab 
 rich$d -> groupspprichness_plot
-rm(rich)
+#rm(rich)
 
 ## Set up time-steps for which to output derived analysis
                                         #if(!("timesteps" %in% ls())){timesteps <- c(min(pop_tab$week), max(pop_tab$week))}
@@ -636,7 +634,7 @@ production_plot <- production(adultjuv_repli)
 ### trait values
 traitschange <- traitchange(adultjuv_repli, timesteps)
 traitschange$a -> traitvalues_tab
-traitschange$b -> traitvalues_plot # no 's' so it can be detected by `plotall`
+traitschange$b -> traitvalues # no 's' so it can be detected by `plotall`
 rm(traitschange)
 ### trait space
 ##traitspace <- traitspacechange(traitvalues_tab, timesteps)
@@ -650,7 +648,7 @@ lifehistory <- lifehistory(outputsdir)
 lifehistory$a -> events_tab
 lifehistory$b -> events_plot
 lifehistory$c -> metabolic_tab
-lifehistory$d -> metabolic_plot
+lifehistory$d -> metabolic_summary
 
 ## Save bundle of tabs and plots as RData
 EDtabs <- objects(name = environment(), all.names = FALSE, pattern = "_tab$")
@@ -660,6 +658,9 @@ save(list = EDtabs, file = file.path(analysEDdir,
 EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
 save(list = EDplots, file = file.path(analysEDdir,
                                       paste(parentsimID, "_plots.RData", sep = "")))
+# rank-abundance plots are in a list
+save(metabolic_summary, rankabunds, file = file.path(analysEDdir,
+		                  paste(parentsimID, "rankabunds", ".RData", sep = "")))
 
 ## Plot all graphs
 map(EDplots, ~ save_plot(filename = file.path(analysEDdir, paste(.x, ".png", sep ="")), plot = get(.x)))
