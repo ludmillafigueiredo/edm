@@ -16,6 +16,10 @@ library(cowplot);
 ## Set directories
 source("dirnames_ludmilla.R")
 
+# Set up directory and environement to store analysis
+analysEDdir <- file.path(outputsdir, paste(parentsimID, "analysED", sep = "_"))
+dir.create(analysEDdir)
+
 ## Set theme and colours
 theme_set(theme_minimal())
 ## scale_color_viridis(discrete = TRUE, option = "magma)
@@ -650,13 +654,13 @@ lifehistory$d -> metabolic_plot
 
 ## Save bundle of tabs and plots as RData
 EDtabs <- objects(name = environment(), all.names = FALSE, pattern = "_tab$")
-save(list = EDtabs, file = file.path(outputsdir,
+save(list = EDtabs, file = file.path(analysEDdir,
                                      paste(parentsimID, "_tabs.RData", sep = "")))
 
 EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
-save(list = EDplots, file = file.path(outputsdir,
+save(list = EDplots, file = file.path(analysEDdir,
                                       paste(parentsimID, "_plots.RData", sep = "")))
 
 ## Plot all graphs
-map(EDplots, ~ save_plot(filename = file.path(outputsdir, paste(.x, ".png", sep ="")), plot = get(.x)))
+map(EDplots, ~ save_plot(filename = file.path(analysEDdir, paste(.x, ".png", sep ="")), plot = get(.x)))
 

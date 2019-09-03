@@ -11,9 +11,6 @@ if(Sys.info()["user"] == "ludmilla"){
   traitsdir <- file.path(EDdocsdir,"functional_types")
 }
 inputsdir <- file.path(EDdir, "inputs")
-# Set up directory and environement to store analysis
-analysEDdir <- file.path(outputsdir, paste(parentsimID, "analysED", sep = "_"))
-dir.create(analysEDdir)
 
 if(nreps > 1 | missing(nreps)){
   repfolder <- paste(file.path(outputsdir, parentsimID), 1:nreps, sep = "_"); #parentsimID
