@@ -780,11 +780,9 @@ open(abspath(joinpath(simresults_folder, "simulog.txt")),"a") do sim
 writedlm(sim, hcat("Biomass production:", biomass_production))
 end
 
-survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, biomass_production)
-
-#if 12 < rem(t,52) < 39 # growth happens during Spring and Summer
 global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T, biomass_production, K)
-#end
+    
+survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, biomass_production)
 
 develop!(orgs, orgsref, settings, t)
 
