@@ -1,9 +1,9 @@
 
 """
-                This module contains the
+                    This module contains the
 
-                Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
-                """
+                    Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
+                    """
 module Organisms
 
 using Distributions
@@ -134,11 +134,11 @@ mutable struct Organism
 end
 
 """
-                initorgs(landavail, orgsref,id_counter)
+                    initorgs(landavail, orgsref,id_counter)
 
-                Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
+                    Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
 
-                """
+                    """
 function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, settings::Dict{String, Any})
 
     orgs = Organism[]
@@ -238,9 +238,9 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 end
 
 """
-                allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
-                Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
-                """
+                    allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
+                    Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
+                    """
 function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
@@ -291,9 +291,9 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 end
 
 """
-                develop!()
-                Controls individual juvenile maturation.
-                """
+                    develop!()
+                    Controls individual juvenile maturation.
+                    """
 function develop!(orgs::Array{Organism,1}, orgsref, settings::Dict{String, Any}, t::Int)
     juvs = find(x->x.stage == "j",orgs)
 
@@ -312,10 +312,10 @@ function develop!(orgs::Array{Organism,1}, orgsref, settings::Dict{String, Any},
 end
 
 """
-                mate!()
-                Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
-                - visited: reduction in pollination service
-                """
+                    mate!()
+                    Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
+                    - visited: reduction in pollination service
+                    """
 function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.seedmass, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
@@ -387,18 +387,18 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
 
 	else
 	    error("Please chose a pollination scenario \"scen\" in insect.csv:
-			                - \"indep\": sexual reproduction happens independently of pollination
-			                - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
-			                - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
+			                    - \"indep\": sexual reproduction happens independently of pollination
+			                    - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
+			                    - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
 	end
 
     end
 end
 
 """
-                mkoffspring!()
-                After mating happened (marked in `reped`), calculate the amount of offspring
-                """
+                    mkoffspring!()
+                    After mating happened (marked in `reped`), calculate the amount of offspring
+                    """
 function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::Organisms.TraitRanges)
 
     # Number of individuals before and after
@@ -628,8 +628,8 @@ end
 
 
 """
-                release!()
-                 """
+                    release!()
+                     """
 function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref)
 
     # Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
@@ -638,9 +638,9 @@ function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{Stri
 end
 
 """
-                disperse!(landscape, orgs, t, seetings, orgsref,)
-                Seeds are dispersed.
-                """
+                    disperse!(landscape, orgs, t, seetings, orgsref,)
+                    Seeds are dispersed.
+                    """
 
 function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref, landpars::Any, tdist::Any)#Setworld.LandPars)}
 
@@ -709,9 +709,9 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
 end
 
 """
-                germinate(org)
-                Seeds have a probability of germinating (`gprob`).
-                """
+                    germinate(org)
+                    Seeds have a probability of germinating (`gprob`).
+                    """
 
 function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, Any})
 
@@ -736,9 +736,9 @@ function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, A
 end
 
 """
-                establish!
-                Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
-                """
+                    establish!
+                    Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
+                    """
 function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed, biomass_production::Float64, K::Float64)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
@@ -984,9 +984,9 @@ end
 end
 
 """
-                shedd!()
-                Plants loose their reproductive biomasses at the end of the reproductive season and 50% of biomass during winter.
-                """
+                    shedd!()
+                    Plants loose their reproductive biomasses at the end of the reproductive season and 50% of biomass during winter.
+                    """
 function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int)
 
     flowering = find(x -> (x.mass["repr"] > 0 || rem(t,52) > x.floroff), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
@@ -1006,9 +1006,9 @@ function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int)
 end
 
 """
-                destroyorgs!(orgs)
-                Kill organisms that where in the lost habitat cells.
-                """
+                    destroyorgs!(orgs)
+                    Kill organisms that where in the lost habitat cells.
+                    """
 function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::BitArray{2}, settings::Dict{String,Any})
 
     kills = []
@@ -1030,9 +1030,9 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::BitArray{2},
 end
 
 """
-                manage!()
-                Plants loose 20% of vegetative biomass and all of the reproductive biomass due to mowing. Mowing happens at most 3 times a year, between July and August.
-                """
+                    manage!()
+                    Plants loose 20% of vegetative biomass and all of the reproductive biomass due to mowing. Mowing happens at most 3 times a year, between July and August.
+                    """
 function manage!(orgs::Array{Organisms.Organism,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
 
     if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.5))
@@ -1061,9 +1061,9 @@ end
 
 
 """
-                pollination!()
-                Simulates plant-insect encounters and effective pollen transfer.
-                """
+                    pollination!()
+                    Simulates plant-insect encounters and effective pollen transfer.
+                    """
 #TODO find a not too cumbersome way of modelling pollen transfer: draw from Poisot's probability
 
 # """
