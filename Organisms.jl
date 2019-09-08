@@ -57,6 +57,8 @@ mutable struct OrgsRef_normal
     b0germ_sd::Dict{String,Float64}
     b0mort_mean::Dict{String,Float64}
     b0mort_sd::Dict{String,Float64}
+    temp_opt::Dict{String, Float64}
+    temp_tol::Dict{String, Float64}
 end
 
 mutable struct OrgsRef_unif
@@ -88,6 +90,8 @@ mutable struct OrgsRef_unif
     b0germ_max::Dict{String,Float64}
     b0mort_min::Dict{String,Float64}
     b0mort_max::Dict{String,Float64}
+    temp_opt::Dict{String, Float64}
+    temp_tol::Dict{String, Float64}
 end
 
 mutable struct TraitRanges

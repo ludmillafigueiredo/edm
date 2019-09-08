@@ -313,8 +313,15 @@ function read_spinput(settings::Dict{String,Any})
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:b0mort_max)[i]
+                                    for i in 1:length(rows(spinputtbl,:sp_id))),
+                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                    rows(spinputtbl,:temp_opt)[i]
+                                    for i in 1:length(rows(spinputtbl,:sp_id))),
+                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                    rows(spinputtbl,:temp_tol)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id)))
                                )
+
 elseif settings["traitdist"] == "normal"
 orgsref = OrgsRef_normal(Array(rows(spinputtbl,:sp_id)),
 
@@ -398,6 +405,12 @@ orgsref = OrgsRef_normal(Array(rows(spinputtbl,:sp_id)),
                               for i in 1:length(rows(spinputtbl,:sp_id))),
                          Dict(rows(spinputtbl,:sp_id)[i] =>
                               rows(spinputtbl,:b0mort_sd)[i]
+                              for i in 1:length(rows(spinputtbl,:sp_id))),
+                         Dict(rows(spinputtbl,:sp_id)[i] =>
+                              rows(spinputtbl,:temp_opt)[i]
+                              for i in 1:length(rows(spinputtbl,:sp_id))),
+                         Dict(rows(spinputtbl,:sp_id)[i] =>
+                              rows(spinputtbl,:temp_tol)[i]
                               for i in 1:length(rows(spinputtbl,:sp_id)))
                          )
 end
@@ -640,8 +653,10 @@ end
     - `std_tol::Float64`: parameter `c` is the standard deviation, 
      """
 
-function updatefitness!(fitnessdict::Dict{String, Array{Float64, 1}}, mean_opt::Float64, std_tol::Float64, T::Float64, max_fitness::Float64)
+function updatefitness!(fitnessdict::Dict{String, Array{Float64, 1}}, orgsref::Any, T::Float64, max_fitness::Float64)
     for sp in keys(fitnessdict)
+        mean_opt = orgsref[sp].temp_opt
+        std_tol = orgsref[sp].temp_tol
         if std_col != 0
             push!(fitnessdict[sp], max_fitness*exp(((T-mean_opt)^2)/(2*(std_tol^2))))
         else
@@ -777,7 +792,7 @@ function simulate()
             T = updateenv!(t, landpars)
 
             # UPDATE species fitness
-            updatefitness!(fitnessdict, mean_otp, std_tol, T, max_fitness = 1.0)
+            updatefitness!(fitnessdict, orgsref, T, max_fitness = 1.0)
             
             # IMPLEMENT LANDSCAPE DISTURBANCE
             if settings["disturbtype"] in ["frag" "loss"] && t in tdist
