@@ -241,7 +241,7 @@ end
                     allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
                     Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
                     """
-function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64)
+function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64, fitnessdict::Dict{String, Array{Float64, 1}})
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
 
@@ -399,7 +399,7 @@ end
                     mkoffspring!()
                     After mating happened (marked in `reped`), calculate the amount of offspring
                     """
-function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::Organisms.TraitRanges)
+function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::Organisms.TraitRanges, fitnessdict::Dict{String, Array{Float64, 1}})
 
     # Number of individuals before and after
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
@@ -739,7 +739,7 @@ end
                     establish!
                     Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
                     """
-function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed, biomass_production::Float64, K::Float64)
+function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed, biomass_production::Float64, K::Float64, fitnessdict::Dict{String, Array{Float64, 1}},)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
