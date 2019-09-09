@@ -71,8 +71,8 @@ function parse_commandline()
 
         "--insect"
         help = "How to explicitly model insects:
-        pollination-independent reproduction \"indep\";
-        equal pollination loss for all species \"equal\"."
+            pollination-independent reproduction \"indep\";
+            equal pollination loss for all species \"equal\"."
         arg_type = String
         default = abspath(pwd(),"inputs/insects.csv")
 
@@ -127,10 +127,10 @@ end
 
 
 """
-        read_landin(settings)
-        Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
-        Two methods because "real" landscapes do not need
-        """
+            read_landin(settings)
+            Reads in and stores landscape conditions and organisms from `"landscape_init.in"` and `"organisms.in"` and stores values in composite types.
+            Two methods because "real" landscapes do not need
+            """
 
 function read_landpars(settings::Dict{String,Any})
     # Read in temperature time series, which is used in both modes
@@ -221,9 +221,9 @@ function read_landpars(settings::Dict{String,Any})
 end
 
 """
-        read_spinput(settings)
-        Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
-        """
+            read_spinput(settings)
+            Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
+            """
 
 function read_spinput(settings::Dict{String,Any})
 
@@ -469,9 +469,9 @@ function define_traitranges(settings::Dict{String,Any})
 end
 
 """
-        implicit_insect(settings)
-        Reads how insects are going to be implicitly simulated.
-        """
+            implicit_insect(settings)
+            Reads how insects are going to be implicitly simulated.
+            """
 function implicit_insect(settings::Dict{String,Any})
 
     insectsinput = loadtable(settings["insect"])
@@ -484,9 +484,9 @@ function implicit_insect(settings::Dict{String,Any})
 end
 
 """
-        outputorgs(orgs,t,settings)
-        Saves a long format table with the organisms field informations.
-        """
+            outputorgs(orgs,t,settings)
+            Saves a long format table with the organisms field informations.
+            """
 function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any})
 
     outorgs = find(x -> x.stage != "e", orgs)
@@ -494,9 +494,9 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
     # output header
     if t == 1
         header = hcat(["week"],
-                      reshape(string.(fieldnames(Organism)[1:20]),1,:),
+                      reshape(string.(fieldnames(Organism)[1:22]),1,:),
                       ["veg" "repr"],
-                      reshape(string.(fieldnames(Organism)[22:end]),1,length(fieldnames(Organism)[22:end])))
+                      reshape(string.(fieldnames(Organism)[23:end]),1,length(fieldnames(Organism)[23:end])))
         open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
@@ -527,6 +527,7 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
                                       orgs[o].b0grow,
                                       orgs[o].b0germ,
                                       orgs[o].b0mort,
+                                      orgs[o].fitness,
                                       orgs[o].age,
                                       orgs[o].mass["veg"],
                                       orgs[o].mass["repr"],
@@ -537,9 +538,9 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
 end
 
 """
-        loaddisturbance()
-        Store parameters necessary to implement disturbance.
-        """
+            loaddisturbance()
+            Store parameters necessary to implement disturbance.
+            """
 function loaddisturbance(settings)
 
     tdist = nothing
@@ -563,19 +564,19 @@ function loaddisturbance(settings)
 
         else
             error("Please specify one of the disturbance scenarios with `--disturb`:
-        \n\'none\' if no disturbance should be simulated,
-        \n\'loss\' for habitat area loss,
-        \n\'frag\' for habitat fragmentation,
-        \n\'temp\' for temperature change,
-        \n\'poll\' for pollination loss.")
+            \n\'none\' if no disturbance should be simulated,
+            \n\'loss\' for habitat area loss,
+            \n\'frag\' for habitat fragmentation,
+            \n\'temp\' for temperature change,
+            \n\'poll\' for pollination loss.")
         end
     end
 end
 
 """
-        disturb!()
+            disturb!()
 
-        """
+            """
 function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{2}, orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any}, landpars::NeutralLandPars, tdist::Any)
 
     if settings["disturbtype"] == "loss"
@@ -591,9 +592,9 @@ function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::B
 end
 
 """
-        updateK!()
-        Updates the carrying capacity of the landscape (`K`) and of each gridcell (`cK`).
-        """
+            updateK!()
+            Updates the carrying capacity of the landscape (`K`) and of each gridcell (`cK`).
+            """
 
 function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
 
@@ -640,35 +641,42 @@ function timing(operation::String, settings::Dict{String,Any})
 end
 
 """
-    updatefitness!(fitnessdict::Dict{String, Array{Float64, 1}}, mean_opt::Float64, std_tol::Float64, T::Float64, max_fitness::Float64)
+        updatefitness!(orgs::Array{Organisms.Organism,1}, mean_opt::Float64, std_tol::Float64, T::Float64, max_fitness::Float64)
 
-    Calculate the fitness value according to a Gauss function:
+        Calculate the fitness value according to a Gauss function:
 
-        f(x) = a*exp(((x-b)²)/(2*c²)),
+            f(x) = a*exp(((x-b)²)/(2*c²)),
 
-    # Arguments
-    - `fitnessdict::Dict{String, Array{Float64, 1}}`: dictionnary holding the species performance for each timestep
-    - `maximal fitness::Float64=1.0`: parameter `a`, the height of the curve's peak.
-    - `mean_opt::Float64`: parameter `b` is the position of the center of the peak.
-    - `std_tol::Float64`: parameter `c` is the standard deviation, 
-     """
+        # Arguments
+        - `fitnessdict::Dict{String, Array{Float64, 1}}`: dictionnary holding the species performance for each timestep
+        - `maximal fitness::Float64=1.0`: parameter `a`, the height of the curve's peak.
+        - `mean_opt::Float64`: parameter `b` is the position of the center of the peak.
+        - `std_tol::Float64`: parameter `c` is the standard deviation, 
+         """
 
-function updatefitness!(fitnessdict::Dict{String, Array{Float64, 1}}, orgsref::Any, T::Float64, max_fitness::Float64)
+function updatefitness!(orgs::Array{Organisms.Organism,1}, orgsref::Any, T::Float64, max_fitness::Float64)
     for sp in keys(fitnessdict)
+
         mean_opt = orgsref[sp].temp_opt
         std_tol = orgsref[sp].temp_tol
-        if std_col != 0
-            push!(fitnessdict[sp], max_fitness*exp(((T-mean_opt)^2)/(2*(std_tol^2))))
-        else
-            push!(fitnessdict[sp], 0)
+
+        sp_inds = find(x -> x.sp == sp, orgs)
+        for o in sp_inds
+            
+            if std_col != 0
+                current_fitness = max_fitness*exp(((T-mean_opt)^2)/(2*(std_tol^2))))
+            else
+                current_fitness = 0
+            end
+            orgs[o].fitnessdict = current_fitness
         end
     end
 end
 
 
 """
-        simulate!()
-        """
+            simulate!()
+            """
 function simulate()
     # INITIALIZATION
     # Read in command line arguments
@@ -823,7 +831,7 @@ function simulate()
                 writedlm(sim, hcat("Biomass production:", biomass_production))
             end
 
-            global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T, biomass_production, K, fitnessdict)
+            global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T, biomass_production, K)
             
             survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, biomass_production)
 
@@ -831,14 +839,14 @@ function simulate()
 
             mate!(orgs, t, settings, scen, tdist, remaining)
 
-            id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail, T, traitranges, fitnessdict)
+            id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail, T, traitranges)
 
             seedsi = release!(orgs, t, settings, orgsref) # only recently released seeds need to disperse. The others only need to survive
 
             justdispersed = disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
 
             #if (11 < rem(t,52) < 24) ||(38 < rem(t,52) < 50) #Establishment during Spring and Fall
-            establish!(orgs, t, settings, orgsref, T, justdispersed, biomass_production, K, fitnessdict::Dict{String, Array{Float64, 1}})
+            establish!(orgs, t, settings, orgsref, T, justdispersed, biomass_production, K)
             #end
 
             shedd!(orgs, orgsref, t)

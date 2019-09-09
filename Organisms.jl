@@ -132,6 +132,7 @@ mutable struct Organism
     b0germ::Float64
     b0mort::Float64
     #### State variables ####
+    fitness::Float64
     age::Int64 # control death when older than max. lifespan
     mass::Dict{String, Float64}
     mated::Bool
@@ -245,13 +246,15 @@ end
                     allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
                     Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
                     """
-function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64, fitnessdict::Dict{String, Array{Float64, 1}})
+function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
 
     growing = find(x->(x.stage in ["a" "j"]),orgs)
 
     for o in growing
+
+        indfitness = orgs[o].fitness
 
 	if biomass_production < K/2
 	    b0grow = orgs[o].b0grow
@@ -260,7 +263,7 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 	end
 	
 	#only vegetative biomass helps growth
-	B_grow = (b0grow*(orgs[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))
+	B_grow = (indfitness*b0grow*(orgs[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))
 
 	if orgs[o].stage == "j"
 	    # juveniles grow vegetative biomass only
@@ -403,7 +406,7 @@ end
                     mkoffspring!()
                     After mating happened (marked in `reped`), calculate the amount of offspring
                     """
-function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::Organisms.TraitRanges, fitnessdict::Dict{String, Array{Float64, 1}})
+function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::Organisms.TraitRanges)
 
     # Number of individuals before and after
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
@@ -743,7 +746,7 @@ end
                     establish!
                     Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
                     """
-function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed, biomass_production::Float64, K::Float64, fitnessdict::Dict{String, Array{Float64, 1}},)
+function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed, biomass_production::Float64, K::Float64)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
@@ -758,14 +761,16 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
 
     for o in establishing
 
+        indfitness = orgs[o].fitness
+        
 	if biomass_production < K/2
 	    b0germ = orgs[o].b0germ
 	else biomass_production > K/2
 	    b0germ = orgs[o].b0germ*(1-(0.95/(1+exp(-0.02*(biomass_production-(K/2))))))
 	end
 	
-        Bg = b0germ * (orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-	gprob = 1 - exp(-Bg)
+        Bg = indfitness*b0germ*(orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+	gprob = 1-exp(-Bg)
 	# test
 	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
 	    writedlm(sim, hcat(orgs[o].stage, orgs[o].age, Bg, gprob, "germination"))
@@ -840,22 +845,30 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		# while the sum of weights in a "shared grid" is higher than cell carrying capacity
                 # only adults and juveniles 
                 dying_juvs = filter(x -> x.stage == "j", samegrid)
+                
                 dying_adts = filter(x -> x.stage == "a", samegrid)
-
+                fitness_adts = map(x -> x.fitness, dying_adts)
+                
 		while (sum(vcat(map(x -> x.mass["veg"],samegrid),0.00001)) > cK && #vcat is necessary for avoid that sum throws an error when empty
                        (length(dying_juvs) > 0 || length(dying_adults > 0)))
 
+                    # start with less specie with less fitness
+                                     
                     if length(dying_juvs) > 0
 			
                         # loop through young individuals (older ones establish first)
-                        ages = map(x -> x.age, dying_juvs)
-		        dying = filter(x -> x.age == minimum(ages), dying_juvs)[1] #id value can only be assessed individuallly, therefore each individual has to be picked individually
+                        fitness_juvs = map(x -> x.fitness, dying_juvs)
+                        unfit = filter(x -> x.fitness == minimum(fitness), dying_juvs) #one or more individuals might be unfit
+                        ages = map(x -> x.age, unfit)
+		        dying = filter(x -> x.age == minimum(ages), unfit)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
                         
                     else
 
                         # loop through young individuals (older ones establish first)
-                        ages = map(x -> x.age, dying_adults)
-		        dying = filter(x -> x.age == minimum(ages), dying_adults)[1]
+                        fitness = map(x -> x.fitness, dying_adts)
+                        unfit = filter(x -> x.fitness == minimum(fitness), dying_adts)
+                        ages = map(x -> x.age, unfit)
+		        dying = filter(x -> x.age == minimum(ages), unfit)[1]
 		        
                     end
 
@@ -936,8 +949,10 @@ for d in dying
     else
 	error("Error with organism's stage assignment") 
     end
-    
-    Bm = orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+
+    # fitness has an inverse effect on mortality
+    indfitness = orgs[o].fitness
+    Bm = (1/indfitness)*orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
     mprob = 1 - exp(-Bm)
 
     # unity test
