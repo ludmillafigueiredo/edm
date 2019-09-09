@@ -646,7 +646,7 @@ function updatefitness!(orgs::Array{Organisms.Organism,1}, orgsref::Any, T::Floa
         for o in sp_inds
             
             if std_tol != 0
-                current_fitness = max_fitness*exp(((T-mean_opt)^2)/(2*(std_tol^2)))
+                current_fitness = max_fitness*exp(-((T-mean_opt)^2)/(2*(std_tol^2)))
             else
                 current_fitness = 0
             end
