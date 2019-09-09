@@ -84,14 +84,11 @@ mutable struct OrgsRef_unif
     seedoff_max::Dict{String,Float64}
     bankduration_min::Dict{String,Float64}
     bankduration_max::Dict{String,Float64}
-    b0grow_min::Dict{String,Float64}
-    b0grow_max::Dict{String,Float64}
-    b0germ_min::Dict{String,Float64}
-    b0germ_max::Dict{String,Float64}
-    b0mort_min::Dict{String,Float64}
-    b0mort_max::Dict{String,Float64}
-    temp_opt::Dict{String, Float64}
-    temp_tol::Dict{String, Float64}
+    b0grow::Dict{String,Float64}
+    b0germ::Dict{String,Float64}
+    b0mort::Dict{String,Float64}
+    temp_opt::Dict{String,Float64}
+    temp_tol::Dict{String,Float64}
 end
 
 mutable struct TraitRanges
@@ -105,9 +102,6 @@ mutable struct TraitRanges
     seedon::Dict{String,Array{Int64,1}}
     seedoff::Dict{String,Array{Int64,1}}
     bankduration::Dict{String,Array{Int64,1}}
-    b0grow::Dict{String,Array{Float64,1}}
-    b0germ::Dict{String,Array{Float64,1}}
-    b0mort::Dict{String,Array{Float64,1}}
 end
 
 mutable struct Organism
@@ -179,6 +173,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 				  3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
 				  100*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
 				  7*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
+				  0, #fitness
 				  0, #age
 				  Dict("veg" => 0.0, "repr" => 0.0), #mass
 				  false) #mated
@@ -951,7 +946,7 @@ for d in dying
     end
 
     # fitness has an inverse effect on mortality
-    indfitness = orgs[o].fitness
+    indfitness = orgs[d].fitness
     Bm = (1/indfitness)*orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
     mprob = 1 - exp(-Bm)
 

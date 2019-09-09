@@ -297,22 +297,13 @@ function read_spinput(settings::Dict{String,Any})
                                     rows(spinputtbl,:bankduration_max)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:b0grow_min)[i]
+                                    rows(spinputtbl,:b0grow)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:b0grow_max)[i]
+                                    rows(spinputtbl,:b0germ)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:b0germ_min)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:b0germ_max)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:b0mort_min)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:b0mort_max)[i]
+                                    rows(spinputtbl,:b0mort)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:temp_opt)[i]
@@ -452,15 +443,6 @@ function define_traitranges(settings::Dict{String,Any})
              for i in 1:length(rows(spinputtbl,:sp_id))),
         Dict(rows(spinputtbl,:sp_id)[i] =>
              [Int(round(0.95*rows(spinputtbl,:bankduration_min)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:bankduration_max)[i], RoundUp))]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [0.95*rows(spinputtbl,:b0grow_min)[i], 1.05*rows(spinputtbl,:b0grow_max)[i]]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [0.95*rows(spinputtbl,:b0germ_min)[i], 1.05*rows(spinputtbl,:b0germ_max)[i]]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [0.95*rows(spinputtbl,:b0mort_min)[i], 1.05*rows(spinputtbl,:b0mort_max)[i]]
              for i in 1:length(rows(spinputtbl,:sp_id)))
     )
 
@@ -655,20 +637,20 @@ end
          """
 
 function updatefitness!(orgs::Array{Organisms.Organism,1}, orgsref::Any, T::Float64, max_fitness::Float64)
-    for sp in keys(fitnessdict)
+    for sp in map(x -> x.sp, orgs)
 
-        mean_opt = orgsref[sp].temp_opt
-        std_tol = orgsref[sp].temp_tol
+        mean_opt = orgsref.temp_opt[sp]
+        std_tol = orgsref.temp_tol[sp]
 
         sp_inds = find(x -> x.sp == sp, orgs)
         for o in sp_inds
             
-            if std_col != 0
-                current_fitness = max_fitness*exp(((T-mean_opt)^2)/(2*(std_tol^2))))
+            if std_tol != 0
+                current_fitness = max_fitness*exp(((T-mean_opt)^2)/(2*(std_tol^2)))
             else
                 current_fitness = 0
             end
-            orgs[o].fitnessdict = current_fitness
+            orgs[o].fitness = current_fitness
         end
     end
 end
@@ -800,7 +782,7 @@ function simulate()
             T = updateenv!(t, landpars)
 
             # UPDATE species fitness
-            updatefitness!(fitnessdict, orgsref, T, max_fitness = 1.0)
+            updatefitness!(orgs, orgsref, T, 1.0)
             
             # IMPLEMENT LANDSCAPE DISTURBANCE
             if settings["disturbtype"] in ["frag" "loss"] && t in tdist
