@@ -60,7 +60,8 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
                                             col_double(), #b0grow
                                             col_double(), #b0germ
                                             col_double(), #b0mort
-                                            col_integer(), #age
+                                            col_double(), #fitness
+					    col_integer(), #age
                                             col_double(), #veg
                                             col_double(), #repr
                                             col_character())); #mated
@@ -282,7 +283,7 @@ richness <- function(adultjuv_repli, pop_tab, parentsimID, disturbance,tdist){
     
     ## create plots
     ## identify when disturbance happens, if it does
-    #if (disturbance == "none" && missing(tdist)){
+    if(disturbance == "none" && missing(tdist)){
         spprichness_plottED <- ggplot(spprichness_tab,
                                       aes(x = week, y = mean_richness))+
             geom_errorbar(aes(ymin = mean_richness - sd_richness,
@@ -292,7 +293,7 @@ richness <- function(adultjuv_repli, pop_tab, parentsimID, disturbance,tdist){
             geom_point()+
             scale_color_viridis(discrete = TRUE)
         
-    } else {
+    }else{
         
         if (disturbance == "loss"){
             text <- "Area loss"
@@ -596,7 +597,7 @@ rm(abund)
 
 ## Population structure variation
 population <- popstruct(pop_tab, offspring_repli, parentsimID) #specifying species is optional
-poputation$a -> weekstruct_tab
+population$a -> weekstruct_tab
 population$b -> weekstruct_plot
 population$c -> relativestruct_tab
 population$d -> relativestruct_plot

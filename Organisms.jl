@@ -249,16 +249,14 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 
     for o in growing
 
-        indfitness = orgs[o].fitness
-
-	if biomass_production < K/2
+        if biomass_production < K/2
 	    b0grow = orgs[o].b0grow
 	elseif biomass_production > K/2
 	    b0grow = orgs[o].b0grow*(1-(0.95/(1+exp(-0.02*(biomass_production-(K/2))))))
 	end
 	
 	#only vegetative biomass helps growth
-	B_grow = (indfitness*b0grow*(orgs[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))
+	B_grow = (b0grow*(orgs[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))
 
 	if orgs[o].stage == "j"
 	    # juveniles grow vegetative biomass only
@@ -756,15 +754,13 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
 
     for o in establishing
 
-        indfitness = orgs[o].fitness
-        
-	if biomass_production < K/2
+        if biomass_production < K/2
 	    b0germ = orgs[o].b0germ
 	else biomass_production > K/2
 	    b0germ = orgs[o].b0germ*(1-(0.95/(1+exp(-0.02*(biomass_production-(K/2))))))
 	end
 	
-        Bg = indfitness*b0germ*(orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+        Bg = b0germ*(orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
 	gprob = 1-exp(-Bg)
 	# test
 	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
@@ -946,8 +942,7 @@ for d in dying
     end
 
     # fitness has an inverse effect on mortality
-    indfitness = orgs[d].fitness
-    Bm = (1/indfitness)*orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+    Bm = orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
     mprob = 1 - exp(-Bm)
 
     # unity test
