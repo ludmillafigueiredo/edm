@@ -831,37 +831,50 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	    for c in fullcells_indxs
 
 		#find plant that are in the same grid
-		samegrid = filter(x -> x.location == locs[c] && x.stage != "e", orgs) #seeds remain in the seed bank
+		samecell = filter(x -> x.location == locs[c] && x.stage != "e", orgs) #seeds remain in the seed bank
 
-		# while the sum of weights in a "shared grid" is higher than cell carrying capacity
-                # only adults and juveniles 
-                dying_juvs = filter(x -> x.stage == "j", samegrid)
-                
-                dying_adts = filter(x -> x.stage == "a", samegrid)
-                fitness_adts = map(x -> x.fitness, dying_adts)
-                
-		while (sum(vcat(map(x -> x.mass["veg"],samegrid),0.00001)) > cK && #vcat is necessary for avoid that sum throws an error when empty
-                       (length(dying_juvs) > 0 || length(dying_adults > 0)))
+		# go by species, killing through species-specific K
+		cell_sps = map(x -> x.sp, samecell)
+
+		for sp in cell_sps
+		    cell_spinds = filter(x->x.sp==sp, samecell)
+		    cK_sp = cK*cell_spinds[1].fitness #all individuals of a species have the same fitness
+
+		    # while the sum of the species biomass in the same grid is higher than cell the carrying capacity for the species, younger individuals die (bu never seeds)
+                    dying_juvs = filter(x -> x.stage == "j", cell_spinds)
+                    dying_adts = filter(x -> x.stage == "a", cell_spinds)
+                    dying_seeds = filter(x -> x.stage == "e", cell_spinds)
+
+		    while sum(vcat(map(x -> x.mass["veg"], sell_spinds),0.00001)) > cK_sp
 
                     # start with less specie with less fitness
                                      
                     if length(dying_juvs) > 0
 			
-                        # loop through young individuals (older ones establish first)
-                        fitness_juvs = map(x -> x.fitness, dying_juvs)
-                        unfit = filter(x -> x.fitness == minimum(fitness), dying_juvs) #one or more individuals might be unfit
-                        ages = map(x -> x.age, unfit)
-		        dying = filter(x -> x.age == minimum(ages), unfit)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
+                        # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                        masses = map(x -> x.mass["veg"], dying_juvs)
+		        dying = filter(x -> x.mass["veg"] == minimum(masses), dying_juvs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
                         
-                    else
+                    elseif length(dying_adts) > 0 
 
-                        # loop through young individuals (older ones establish first)
-                        fitness = map(x -> x.fitness, dying_adts)
-                        unfit = filter(x -> x.fitness == minimum(fitness), dying_adts)
-                        ages = map(x -> x.age, unfit)
-		        dying = filter(x -> x.age == minimum(ages), unfit)[1]
-		        
-                    end
+                        # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                        masses = map(x -> x.mass["veg"], dying_adts)
+		        dying = filter(x -> x.mass["veg"] == minimum(masses), dying_adts)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
+		    elseif length(dying_seeds) > 0 
+
+		    	# check-point
+			open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+			    println(sim, "Seeds of $sp going over cell carrying capacity.")
+		        end
+
+                        # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                        masses = map(x -> x.mass["veg"], dying_seeds)
+		        dying = filter(x -> x.mass["veg"] == minimum(masses), dying_seeds)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
+		    else
+			# unity test
+			error("Cell carrying capacity overboard, but no individuals of $sp") 
+
+		    end
 
                     o = find(x -> x.id == dying.id, orgs)
                     deleteat!(orgs, o)                                     
@@ -872,41 +885,71 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                     end
                     
                     # update the list of plants sharing the same cell
-		    samegrid = filter(x -> x.location == locs[c], orgs)
-                    dying_juvs = filter(x -> x.stage == "j", samegrid)
-                    dying_adts = filter(x -> x.stage == "a", samegrid)
+		    samecell = filter(x -> x.location == locs[c], orgs)
+                    dying_juvs = filter(x -> x.stage == "j", samecell)
+                    dying_adts = filter(x -> x.stage == "a", samecell)
 
+		    end
 
-	        end
+		end
+
             end
-            
+
 	else
-            
-            dying_juvs = filter(x -> x.stage == "j", orgs)
-            dying_adts = filter(x -> x.stage == "a", orgs)
+		# go by species, killing through species-specific K
+		orgs_sps = map(x -> x.sp, samecell)
 
-	    if length(dying_juvs) > 0
+            for sp in orgs_sps
+		orgs_spinds = filter(x->x.sp==sp, orgs)
+		K_sp = K*orgs_spinds[1].fitness #all individuals of a species have the same fitness
 		
-                # loop through young individuals (older ones establish first)
-                ages = map(x -> x.age, dying_juvs)
-		dying = filter(x -> x.age == minimum(ages), dying_juvs)[1] #id value can only be assessed individuallly, therefore each individual has to be picked individually
-                
-            else
+		while sum(vcat(map(x -> x.mass["veg"], orgs_spinds),0.00001)) > K_sp
 
-                # loop through young individuals (older ones establish first)
-                ages = map(x -> x.age, dying_adults)
-		dying = filter(x -> x.age == minimum(ages), dying_adults)[1]
+		      dying_juvs = filter(x -> x.stage == "j", orgs_spinds)
+                      dying_adts = filter(x -> x.stage == "a", orgs_spinds)
+                      dying_seeds = filter(x -> x.stage == "e", orgs_spinds)
+
+
+            	      if length(dying_juvs) > 0
+			
+            		# loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                	masses = map(x -> x.mass["veg"], dying_juvs)
+			dying = filter(x -> x.mass["veg"] == minimum(masses), dying_juvs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
+                        
+            	      elseif length(dying_adts) > 0 
+
+                      	# loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                      	masses = map(x -> x.mass["veg"], dying_adts)
+			dying = filter(x -> x.mass["veg"] == minimum(masses), dying_adts)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
+
+            	      elseif length(dying_seeds) > 0 
+
+	    	      	# check-point
+			open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+			  println(sim, "Seeds of $sp going over cell carrying capacity.")
+			end
+
+                	# loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                	masses = map(x -> x.mass["veg"], dying_seeds)
+			dying = filter(x -> x.mass["veg"] == minimum(masses), dying_seeds)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
 		
-            end
+		      else
+			# unity test
+		      	error("Cell carrying capacity overboard, but no individuals of $sp") 
 
-            o = find(x -> x.id == dying.id, orgs)
-            deleteat!(orgs, o)                                     
+            	      end
 
-	    # check-point
-	    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-		writedlm(sim, hcat(t, "death-K", orgs[o].stage, orgs[o].age))
-            end
+		      
+		      o = find(x -> x.id == dying.id, orgs)
+                      deleteat!(orgs, o)                                     
 
+		      # check-point
+		      open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+		         writedlm(sim, hcat(t, "death-K", orgs[o].stage, orgs[o].age))
+	              end
+		end
+
+	   end
 	end
     end
 
