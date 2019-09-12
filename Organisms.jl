@@ -846,7 +846,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                     dying_adts = filter(x -> x.stage == "a", cell_spinds)
                     dying_seeds = filter(x -> x.stage == "e", cell_spinds)
 
-		    while sum(vcat(map(x -> x.mass["veg"], sell_spinds),0.00001)) > cK_sp
+		    while sum(vcat(map(x -> x.mass["veg"], cell_spinds),0.00001)) > cK_sp
 
                     # start with less specie with less fitness
                                      
