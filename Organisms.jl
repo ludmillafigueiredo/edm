@@ -59,6 +59,7 @@ mutable struct OrgsRef_normal
     b0mort_sd::Dict{String,Float64}
     temp_opt::Dict{String, Float64}
     temp_tol::Dict{String, Float64}
+    fitness::Dict{String, Float64}
 end
 
 mutable struct OrgsRef_unif
@@ -89,6 +90,7 @@ mutable struct OrgsRef_unif
     b0mort::Dict{String,Float64}
     temp_opt::Dict{String,Float64}
     temp_tol::Dict{String,Float64}
+    fitness::Dict{String, Float64}
 end
 
 mutable struct TraitRanges
@@ -821,10 +823,9 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
     while sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
 
 	locs = map(x -> x.location,orgs)
-	l = DataFrame(locs)
 
 	# separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
-	fullcells_indxs = find(nonunique(hcat(l)))
+	fullcells_indxs = find(nonunique(DataFrame(hcat(locs))))
 	
 	if length(fullcells_indxs) > 0
 	    
@@ -838,7 +839,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
 		for sp in cell_sps
 		    cell_spinds = filter(x->x.sp==sp, samecell)
-		    cK_sp = cK*cell_spinds[1].fitness #all individuals of a species have the same fitness
+		    cK_sp = cK*orgsref.fitness[sp] #all individuals of a species have the same fitness
 
 		    # while the sum of the species biomass in the same grid is higher than cell the carrying capacity for the species, younger individuals die (bu never seeds)
                     dying_juvs = filter(x -> x.stage == "j", cell_spinds)
@@ -901,7 +902,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 
             for sp in orgs_sps
 		orgs_spinds = filter(x->x.sp==sp, orgs)
-		K_sp = K*orgs_spinds[1].fitness #all individuals of a species have the same fitness
+		K_sp = K*orgsref.fitness[sp] #all individuals of a species have the same fitness
 		
 		while sum(vcat(map(x -> x.mass["veg"], orgs_spinds),0.00001)) > K_sp
 
