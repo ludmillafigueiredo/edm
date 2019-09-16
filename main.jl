@@ -261,16 +261,10 @@ function read_spinput(settings::Dict{String,Any})
                                     rows(spinputtbl,:firstflower_max)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:floron_min)[i]
+                                    rows(spinputtbl,:floron)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:floron_max)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:floroff_min)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:floroff_max)[i]
+                                    rows(spinputtbl,:floroff)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:seednumber_min)[i]
@@ -279,16 +273,10 @@ function read_spinput(settings::Dict{String,Any})
                                     rows(spinputtbl,:seednumber_max)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:seedon_min)[i]
+                                    rows(spinputtbl,:seedon)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:seedon_max)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:seedoff_min)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
-                                    rows(spinputtbl,:seedoff_max)[i]
+                                    rows(spinputtbl,:seedoff)[i]
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:bankduration_min)[i]
@@ -310,7 +298,8 @@ function read_spinput(settings::Dict{String,Any})
                                     for i in 1:length(rows(spinputtbl,:sp_id))),
                                Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:temp_tol)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id)))
+                                    for i in 1:length(rows(spinputtbl,:sp_id))),
+			       Dict()
                                )
 
 elseif settings["traitdist"] == "normal"
@@ -427,19 +416,19 @@ function define_traitranges(settings::Dict{String,Any})
              [Int(round(0.95*rows(spinputtbl,:firstflower_min)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:firstflower_max)[i], RoundUp))]
              for i in 1:length(rows(spinputtbl,:sp_id))),
         Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(0.95*rows(spinputtbl,:floron_min)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:floron_max)[i], RoundUp))]
+             [Int(round(0.95*rows(spinputtbl,:floron)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:floron)[i], RoundUp))]
              for i in 1:length(rows(spinputtbl,:sp_id))),
         Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(0.95*rows(spinputtbl,:floroff_min)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:floroff_max)[i], RoundUp))]
+             [Int(round(0.95*rows(spinputtbl,:floroff)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:floroff)[i], RoundUp))]
              for i in 1:length(rows(spinputtbl,:sp_id))),
         Dict(rows(spinputtbl,:sp_id)[i] =>
              [Int(round(0.95*rows(spinputtbl,:seednumber_min)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:seednumber_max)[i], RoundUp))]
              for i in 1:length(rows(spinputtbl,:sp_id))),
         Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(0.95*rows(spinputtbl,:seedon_min)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:seedon_max)[i], RoundUp))]
+             [Int(round(0.95*rows(spinputtbl,:seedon)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:seedon)[i], RoundUp))]
              for i in 1:length(rows(spinputtbl,:sp_id))),
         Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(0.95*rows(spinputtbl,:seedoff_min)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:seedoff_max)[i], RoundUp))]
+             [Int(round(0.95*rows(spinputtbl,:seedoff)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:seedoff)[i], RoundUp))]
              for i in 1:length(rows(spinputtbl,:sp_id))),
         Dict(rows(spinputtbl,:sp_id)[i] =>
              [Int(round(0.95*rows(spinputtbl,:bankduration_min)[i], RoundDown)), Int(round(1.05*rows(spinputtbl,:bankduration_max)[i], RoundUp))]
@@ -476,7 +465,7 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
     # output header
     if t == 1
         header = hcat(["week"],
-                      reshape(string.(fieldnames(Organism)[1:22]),1,:),
+                      reshape(string.(fieldnames(Organism)[1:21]),1,:),
                       ["veg" "repr"],
                       reshape(string.(fieldnames(Organism)[23:end]),1,length(fieldnames(Organism)[23:end])))
         open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
@@ -611,6 +600,19 @@ function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, 
 
 end
 
+function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
+
+	 # habitat area
+
+	habitatarea = length(find(x -> x == true, landavail))*625 # cells area 25x25cm; habitatarea in cm²
+        totalarea = prod(size(landavail))
+
+        # K and grid-cell K
+        global K = (1.5/100)*habitatarea # xtons/ha = x.10-2g/1cm²
+        global cK = K/length(find(x -> x == true, landavail))
+end
+
+
 function timing(operation::String, settings::Dict{String,Any})
     timing_stamp = string(operation," lasted: ")
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
@@ -651,7 +653,25 @@ function updatefitness!(orgs::Array{Organisms.Organism,1}, orgsref::Any, T::Floa
                 current_fitness = 0
             end
             orgs[o].fitness = current_fitness
+	    orgsref.fitness[sp] = current_fitness
         end
+    end
+end
+
+function updatefitness!(orgsref::Any, T::Float64, max_fitness::Float64)
+
+    for sp in orgsref.sp_id
+    
+        mean_opt = orgsref.temp_opt[sp]
+        std_tol = orgsref.temp_tol[sp]
+
+            if std_tol != 0
+                current_fitness = max_fitness*exp(-((T-mean_opt)^2)/(2*(std_tol^2)))
+            else
+                current_fitness = 0
+            end
+            
+	    orgsref.fitness[sp] = current_fitness
     end
 end
 
@@ -702,8 +722,13 @@ function simulate()
     # Initialize management counter
     management_counter = 0
 
+    # Initialize abundances according to species fitness
+    updateK!(landavail, settings, 1)
+    T = updateenv!(1, landpars)
+    updatefitness!(orgsref, T, 1.0)
+
     # Create initial individuals
-    orgs, id_counter = initorgs(landavail, orgsref, id_counter, settings)
+    orgs, id_counter = initorgs(landavail, orgsref, id_counter, settings, K)
 
     println("Plants initialized: type $(typeof(orgs))")
 
@@ -777,19 +802,18 @@ function simulate()
                 println("WEEK $t")
             end
 
-
-            # UPDATE current temperature
-            T = updateenv!(t, landpars)
-
-            # UPDATE species fitness
-            updatefitness!(orgs, orgsref, T, 1.0)
-            
             # IMPLEMENT LANDSCAPE DISTURBANCE
             if settings["disturbtype"] in ["frag" "loss"] && t in tdist
                 landscape, landavail = disturb!(mylandscape,landavail,orgs,t,settings,landpars,tdist)
             end
             updateK!(landavail, settings, t, tdist)
 
+	    # UPDATE current temperature
+            T = updateenv!(t, landpars)
+
+            # UPDATE species fitness
+            updatefitness!(orgsref, T, 1.0)
+            
             # OUTPUT: First thing, to see how community is initialized
             tic()
             orgstable(orgs,t,settings)

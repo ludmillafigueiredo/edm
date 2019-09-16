@@ -73,16 +73,12 @@ mutable struct OrgsRef_unif
     span_max::Dict{String,Float64}
     firstflower_min::Dict{String,Float64}
     firstflower_max::Dict{String,Float64}
-    floron_min::Dict{String,Float64}
-    floron_max::Dict{String,Float64}
-    floroff_min::Dict{String,Float64}
-    floroff_max::Dict{String,Float64}
+    floron::Dict{String,Float64}
+    floroff::Dict{String,Float64}
     seednumber_min::Dict{String,Float64}
     seednumber_max::Dict{String,Float64}
-    seedon_min::Dict{String,Float64}
-    seedon_max::Dict{String,Float64}
-    seedoff_min::Dict{String,Float64}
-    seedoff_max::Dict{String,Float64}
+    seedon::Dict{String,Float64}
+    seedoff::Dict{String,Float64}
     bankduration_min::Dict{String,Float64}
     bankduration_max::Dict{String,Float64}
     b0grow::Dict{String,Float64}
@@ -140,17 +136,19 @@ end
                     Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
 
                     """
-function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, settings::Dict{String, Any})
+function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, settings::Dict{String, Any}, K::Float64)
 
     orgs = Organism[]
 
     for s in orgsref.sp_id # all fragments are populated from the same species pool
 
+    sp_abund = Int(round(orgsref.fitness[s]*K/orgsref.maxmass[s], RoundUp))
+    
 	# create random locations
-	XYs = hcat(rand(1:size(landavail,1), orgsref.abund[s]),
-		   rand(1:size(landavail,2), orgsref.abund[s]))
+	XYs = hcat(rand(1:size(landavail,1), sp_abund),
+		   rand(1:size(landavail,2), sp_abund))
 
-	for i in 1:orgsref.abund[s]
+	for i in 1:sp_abund
 
 	    id_counter += 1 # update individual counter
 	    minvalue = 1e-7 # Distribution.Normal requires sd > 0, and Distribution.Uniform requires max > min
@@ -166,11 +164,11 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 				  orgsref.maxmass[s], #maxmass
 				  Int(round(rand(Distributions.Uniform(orgsref.span_min[s], orgsref.span_max[s] + minvalue),1)[1], RoundUp)),
 				  Int(round(rand(Distributions.Uniform(orgsref.firstflower_min[s], orgsref.firstflower_max[s] + minvalue),1)[1], RoundUp)),
-				  Int(round(rand(Distributions.Uniform(orgsref.floron_min[s],orgsref.floron_max[s] + minvalue),1)[1], RoundUp)),
-				  Int(round(rand(Distributions.Uniform(orgsref.floroff_min[s],orgsref.floroff_max[s] + minvalue),1)[1], RoundUp)),
+				  orgsref.floron[s],
+				  orgsref.floroff[s],
 				  Int(round(rand(Distributions.Uniform(orgsref.seednumber_min[s],orgsref.seednumber_max[s] + minvalue),1)[1], RoundUp)), #seed number
-				  Int(round(rand(Distributions.Uniform(orgsref.seedon_min[s],orgsref.seedon_max[s] + minvalue),1)[1], RoundUp)),
-				  Int(round(rand(Distributions.Uniform(orgsref.seedoff_min[s],orgsref.seedoff_max[s] + minvalue),1)[1], RoundUp)),
+				  orgsref.seedon[s],
+				  orgsref.seedoff[s],
 				  Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
 				  3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
 				  100*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
@@ -251,10 +249,10 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 
     for o in growing
 
-        if biomass_production < K/2
+        if biomass_production < K
 	    b0grow = orgs[o].b0grow
-	elseif biomass_production > K/2
-	    b0grow = orgs[o].b0grow*(1-(0.95/(1+exp(-0.02*(biomass_production-(K/2))))))
+	elseif biomass_production > K
+	    b0grow = orgs[o].b0grow*(1-(0.95/(1+exp(-0.02*(biomass_production-(K))))))
 	end
 	
 	#only vegetative biomass helps growth
@@ -756,10 +754,10 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
 
     for o in establishing
 
-        if biomass_production < K/2
+        if biomass_production < K
 	    b0germ = orgs[o].b0germ
-	else biomass_production > K/2
-	    b0germ = orgs[o].b0germ*(1-(0.95/(1+exp(-0.02*(biomass_production-(K/2))))))
+	else biomass_production > K
+	    b0germ = orgs[o].b0germ*(1-(0.95/(1+exp(-0.02*(biomass_production-(K))))))
 	end
 	
         Bg = b0germ*(orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
@@ -825,84 +823,121 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	locs = map(x -> x.location,orgs)
 
 	# separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
+
 	fullcells_indxs = find(nonunique(DataFrame(hcat(locs))))
 	
 	if length(fullcells_indxs) > 0
 	    
 	    for c in fullcells_indxs
 
-		#find plant that are in the same grid
-		samecell = filter(x -> x.location == locs[c] && x.stage != "e", orgs) #seeds remain in the seed bank
+		#find plants that are in the same grid
+		samecell = filter(x -> x.location == locs[c], orgs)
 
-		# go by species, killing through species-specific K
-		cell_sps = map(x -> x.sp, samecell)
+		if sum(vcat(map(x -> x.mass["veg"], samecell),0.00001)) > cK
 
-		for sp in cell_sps
-		    cell_spinds = filter(x->x.sp==sp, samecell)
-		    cK_sp = cK*orgsref.fitness[sp] #all individuals of a species have the same fitness
+		   # accessory in find sp with smallest fitness
+		   mirror_fitness = deepcopy(orgsref.fitness)
 
-		    # while the sum of the species biomass in the same grid is higher than cell the carrying capacity for the species, younger individuals die (bu never seeds)
-                    dying_juvs = filter(x -> x.stage == "j", cell_spinds)
-                    dying_adts = filter(x -> x.stage == "a", cell_spinds)
-                    dying_seeds = filter(x -> x.stage == "e", cell_spinds)
+		   while sum(vcat(map(x -> x.mass["veg"], samecell),0.00001)) > cK
 
-		    while sum(vcat(map(x -> x.mass["veg"], cell_spinds),0.00001)) > cK_sp
+		      # go by species, killing through species-specific K
+		      cell_sps = unique(map(x -> x.sp, samecell))
+		      println("Sps in same cell: $cell_sps")
+		      
+		      #find sp in the cell with smallest fitness
+		      lessfit_sp = collect(keys(mirror_fitness))[indmin(collect(values(mirror_fitness)))]
+		      println("Less fit species: $lessfit_sp")
+		      while !(lessfit_sp in cell_sps)
+		      	    pop!(mirror_fitness, lessfit_sp)
+			    println("Kicking $lessfit_sp out")
+		      	    lessfit_sp = collect(keys(mirror_fitness))[indmin(collect(values(mirror_fitness)))]
+	              end
+		
+		      lessfit_inds = filter(x->x.sp==lessfit_sp, samecell)
+		      cK_sp = cK*orgsref.fitness[lessfit_sp] #all individuals of a species have the same fitness
 
-                    # start with less specie with less fitness
-                                     
-                    if length(dying_juvs) > 0
-			
-                        # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
-                        masses = map(x -> x.mass["veg"], dying_juvs)
-		        dying = filter(x -> x.mass["veg"] == minimum(masses), dying_juvs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
-                        
-                    elseif length(dying_adts) > 0 
+		      # while the sum of the species biomass in the same grid is higher than cell the carrying capacity for the species, younger individuals die (bu never seeds)
+                      dying_juvs = filter(x -> x.stage == "j", lessfit_inds)
+		      println("Juveniles: $(length(dying_juvs))")
+                      dying_adts = filter(x -> x.stage == "a", lessfit_inds)
+		      println("Adults: $(length(dying_adts))")
+		      dying_seeds = filter(x -> x.stage == "e", lessfit_inds)
+		      println("Seeds: $(length(dying_seeds))")
+                      
+		      while sum(vcat(map(x -> x.mass["veg"], lessfit_inds),0.00001)) > cK_sp
 
-                        # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
-                        masses = map(x -> x.mass["veg"], dying_adts)
-		        dying = filter(x -> x.mass["veg"] == minimum(masses), dying_adts)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
-		    elseif length(dying_seeds) > 0 
+		      	println("Killing in same cell")
 
-		    	# check-point
-			open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-			    println(sim, "Seeds of $sp going over cell carrying capacity.")
+                      	# start with less specie with less fitness     
+                      	if length(dying_juvs) > 0
+
+			   # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                           masses = map(x -> x.mass["veg"], dying_juvs)
+		           dying = filter(x -> x.mass["veg"] == minimum(masses), dying_juvs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
+			   println("Juv dying.")
+                           
+			elseif length(dying_adts) > 0 
+
+                           # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                           masses = map(x -> x.mass["veg"], dying_adts)
+		           dying = filter(x -> x.mass["veg"] == minimum(masses), dying_adts)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
+			   println("Adt dying.")
+
+			elseif length(dying_seeds) > 0 
+
+		    	   # check-point
+			   open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+			      println(sim, "Seeds of $lessfit_sp going over cell carrying capacity.")
+		           end
+
+			   println("Seed dying.")
+
+                           # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                           masses = map(x -> x.mass["veg"], dying_seeds)
+		           dying = filter(x -> x.mass["veg"] == minimum(masses), dying_seeds)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
+
+			else
+
+			   # unity test
+			   error("Cell carrying capacity overboard, but no individuals of $lessfit_sp") 
+
 		        end
 
-                        # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
-                        masses = map(x -> x.mass["veg"], dying_seeds)
-		        dying = filter(x -> x.mass["veg"] == minimum(masses), dying_seeds)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
-		    else
-			# unity test
-			error("Cell carrying capacity overboard, but no individuals of $sp") 
+                    	o = find(x -> x.id == dying.id, orgs)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
+                    	# check-point
+ 			open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+		           writedlm(sim, hcat(t, "death-K-gridcell", orgs[o].stage, orgs[o].age))
+                    	end
 
+		    	deleteat!(orgs, o)                                     
+		    
+			# update the list of plants sharing the same cell
+		    	samecell = filter(x -> x.location == locs[c], orgs)
+                    	dying_juvs = filter(x -> x.stage == "j", samecell)
+                    	dying_adts = filter(x -> x.stage == "a", samecell)
+			dying_seeds = filter(x -> x.stage == "e", samecell)
+			lessfit_inds = filter(x->x.sp==lessfit_sp, samecell)
 		    end
 
-                    o = find(x -> x.id == dying.id, orgs)
-                    deleteat!(orgs, o)                                     
-
-		    # check-point
-		    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-			writedlm(sim, hcat(t, "death-K-gridcell", orgs[o].stage, orgs[o].age))
-                    end
-                    
-                    # update the list of plants sharing the same cell
-		    samecell = filter(x -> x.location == locs[c], orgs)
-                    dying_juvs = filter(x -> x.stage == "j", samecell)
-                    dying_adts = filter(x -> x.stage == "a", samecell)
-
-		    end
-
+		    samecell = filter(x -> x.location == locs[c] && x.sp != lessfit_sp, orgs)
+                    	
+		   end
 		end
-
             end
 
 	else
-		# go by species, killing through species-specific K
-		orgs_sps = map(x -> x.sp, samecell)
 
-            for sp in orgs_sps
-		orgs_spinds = filter(x->x.sp==sp, orgs)
-		K_sp = K*orgsref.fitness[sp] #all individuals of a species have the same fitness
+           mirror_fitness = deepcopy(orgsref.fitness)
+	   # go by species, killing through species-specific K
+	   #find smallest fitness
+	   lessfit_sp = collect(keys(mirror_fitness))[indmin(collect(values(mirror_fitness)))]
+	   while !(lessfit_sp in cell_sps)
+	    pop!(mirror_fitness, lessfit_sp)
+	    lessfit_sp = collect(keys(mirror_fitness))[indmin(collect(values(mirror_fitness)))]
+	   end
+	   
+            orgs_spinds = filter(x->x.sp==lessfit_sp, orgs)
+	    K_sp = K*orgsref.fitness[lessfit_sp] #all individuals of a species have the same fitness
 		
 		while sum(vcat(map(x -> x.mass["veg"], orgs_spinds),0.00001)) > K_sp
 
@@ -924,7 +959,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 			dying = filter(x -> x.mass["veg"] == minimum(masses), dying_adts)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
 
             	      elseif length(dying_seeds) > 0 
-
+ 
 	    	      	# check-point
 			open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
 			  println(sim, "Seeds of $sp going over cell carrying capacity.")
@@ -939,16 +974,13 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		      	error("Cell carrying capacity overboard, but no individuals of $sp") 
 
             	      end
-
 		      
-		      o = find(x -> x.id == dying.id, orgs)
-                      deleteat!(orgs, o)                                     
-
-		      # check-point
+		      o = find(x -> x.id == dying.id, orgs)[1]
+                      # check-point
 		      open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
 		         writedlm(sim, hcat(t, "death-K", orgs[o].stage, orgs[o].age))
 	              end
-		end
+		      deleteat!(orgs, o)                                   
 
 	   end
 	end
