@@ -28,6 +28,7 @@ const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 const aE = 0.63
 global K = 0.0
 global cK = 0.0
+global mean_annual = 0.0
 global nogrowth = Int64[]
 
 function parse_commandline()
@@ -625,7 +626,7 @@ function timing(operation::String, settings::Dict{String,Any})
 end
 
 """
-        updatefitness!(orgs::Array{Organisms.Organism,1}, mean_opt::Float64, std_tol::Float64, T::Float64, max_fitness::Float64)
+        updatefitness!(orgsref, mean_opt::Float64, std_tol::Float64, mean_annual::Float64, max_fitness::Float64)
 
         Calculate the fitness value according to a Gauss function:
 
@@ -638,27 +639,7 @@ end
         - `std_tol::Float64`: parameter `c` is the standard deviation, 
          """
 
-function updatefitness!(orgs::Array{Organisms.Organism,1}, orgsref::Any, T::Float64, max_fitness::Float64)
-    for sp in map(x -> x.sp, orgs)
-
-        mean_opt = orgsref.temp_opt[sp]
-        std_tol = orgsref.temp_tol[sp]
-
-        sp_inds = find(x -> x.sp == sp, orgs)
-        for o in sp_inds
-            
-            if std_tol != 0
-                current_fitness = max_fitness*exp(-((T-mean_opt)^2)/(2*(std_tol^2)))
-            else
-                current_fitness = 0
-            end
-            orgs[o].fitness = current_fitness
-	    orgsref.fitness[sp] = current_fitness
-        end
-    end
-end
-
-function updatefitness!(orgsref::Any, T::Float64, max_fitness::Float64)
+function updatefitness!(orgsref::Any, mean_annual::Float64, max_fitness::Float64)
 
     for sp in orgsref.sp_id
     
@@ -666,12 +647,19 @@ function updatefitness!(orgsref::Any, T::Float64, max_fitness::Float64)
         std_tol = orgsref.temp_tol[sp]
 
             if std_tol != 0
-                current_fitness = max_fitness*exp(-((T-mean_opt)^2)/(2*(std_tol^2)))
+                absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
             else
-                current_fitness = 0
+                absolute_fitness = 0
             end
             
-	    orgsref.fitness[sp] = current_fitness
+	    orgsref.fitness[sp] = absolute_fitness
+    end
+
+    sum_fitness = sum(collect(values(orgsref.fitness)))
+    
+    for sp in orgsref.sp_id
+    	normalized_fitness = orgsref.fitness[sp]/sum_fitness
+	orgsref.fitness[sp] = normalized_fitness
     end
 end
 
@@ -725,7 +713,7 @@ function simulate()
     # Initialize abundances according to species fitness
     updateK!(landavail, settings, 1)
     T = updateenv!(1, landpars)
-    updatefitness!(orgsref, T, 1.0)
+    updatefitness!(orgsref, mean_annual, 1.0)
 
     # Create initial individuals
     orgs, id_counter = initorgs(landavail, orgsref, id_counter, settings, K)
@@ -812,7 +800,7 @@ function simulate()
             T = updateenv!(t, landpars)
 
             # UPDATE species fitness
-            updatefitness!(orgsref, T, 1.0)
+            updatefitness!(orgsref, mean_annual, 1.0)
             
             # OUTPUT: First thing, to see how community is initialized
             tic()

@@ -94,8 +94,12 @@ This module contains the type of the cell and functions for setting up initial e
 	function updateenv!(t::Int64, landpars::LandPars)
 
 		T = landpars.meantempts[t] + tK
+		if rem(t, 52) == 1
+		   global mean_annual = mean(landpars.meantempts[t:(t+51)] + tK)
+		end
 		#unity test
 		println("Temperature for week $t: $T")
+		println("Mean for the year of week $t: $mean_annual")
 
 		return T
 	end
@@ -103,8 +107,12 @@ This module contains the type of the cell and functions for setting up initial e
 	function updateenv!(t::Int64, landpars::NeutralLandPars)
 
 		T = landpars.meantempts[t] + tK
+		if rem(t, 52) == 1
+		   global mean_annual = mean(landpars.meantempts[t:(t+51)] + tK)
+		end
 		#unity test
 		println("Temperature for week $t: $T")
+		println("Mean for the year of week $t: $mean_annual")
 
 		return T
 	end
