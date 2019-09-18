@@ -170,8 +170,8 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 				  orgsref.seedon[s],
 				  orgsref.seedoff[s],
 				  Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
-				  100*3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
-				  141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
+				  3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
+				  100*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
 				  7*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
 				  0, #fitness
 				  0, #age
@@ -244,16 +244,16 @@ end
 function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
-
+    
     growing = find(x->(x.stage in ["a" "j"]),orgs)
 
     for o in growing
 
-        if biomass_production < K
+        #if biomass_production < K
 	    b0grow = orgs[o].b0grow
-	elseif biomass_production > K
-	    b0grow = orgs[o].b0grow*(1-(0.95/(1+exp(-0.02*(biomass_production-(K))))))
-	end
+	#elseif biomass_production > K
+	#    b0grow = orgs[o].b0grow*(1-(0.95/(1+exp(-0.02*(biomass_production-(K))))))
+	#end
 	
 	#only vegetative biomass helps growth
 	B_grow = (b0grow*(orgs[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))
@@ -754,11 +754,11 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
 
     for o in establishing
 
-        if biomass_production < K
+        #if biomass_production < K
 	    b0germ = orgs[o].b0germ
-	else biomass_production > K
-	    b0germ = orgs[o].b0germ*(1-(0.95/(1+exp(-0.02*(biomass_production-(K))))))
-	end
+	#else biomass_production > K
+	#    b0germ = orgs[o].b0germ*(1-(0.95/(1+exp(-0.02*(biomass_production-(K))))))
+	#end
 	
         Bg = b0germ*(orgs[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
 	gprob = 1-exp(-Bg)
