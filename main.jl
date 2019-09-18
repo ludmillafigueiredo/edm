@@ -28,7 +28,6 @@ const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 const aE = 0.63
 global K = 0.0
 global cK = 0.0
-global mean_annual = 0.0
 global nogrowth = Int64[]
 
 function parse_commandline()
@@ -630,7 +629,7 @@ end
 
         Calculate the fitness value according to a Gauss function:
 
-            f(x) = a*exp(((x-b)²)/(2*c²)),
+            f(x) = a*exp(-((x-b)²)/(2*c²)),
 
         # Arguments
         - `fitnessdict::Dict{String, Array{Float64, 1}}`: dictionnary holding the species performance for each timestep
@@ -646,13 +645,8 @@ function updatefitness!(orgsref::Any, mean_annual::Float64, max_fitness::Float64
         mean_opt = orgsref.temp_opt[sp]
         std_tol = orgsref.temp_tol[sp]
 
-            if std_tol != 0
-                absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
-            else
-                absolute_fitness = 0
-            end
-            
-	    orgsref.fitness[sp] = absolute_fitness
+            absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
+            orgsref.fitness[sp] = absolute_fitness
     end
 
     sum_fitness = sum(collect(values(orgsref.fitness)))
@@ -660,6 +654,30 @@ function updatefitness!(orgsref::Any, mean_annual::Float64, max_fitness::Float64
     for sp in orgsref.sp_id
     	normalized_fitness = orgsref.fitness[sp]/sum_fitness
 	orgsref.fitness[sp] = normalized_fitness
+    end
+end
+
+
+function updatefitness!(orgsref::Any, mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Dict{String, Any})
+
+    for sp in orgsref.sp_id
+    
+        mean_opt = orgsref.temp_opt[sp]
+        std_tol = orgsref.temp_tol[sp]
+
+            absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
+            orgsref.fitness[sp] = absolute_fitness
+    end
+
+    sum_fitness = sum(collect(values(orgsref.fitness)))
+    
+    for sp in orgsref.sp_id
+    	normalized_fitness = orgsref.fitness[sp]/sum_fitness
+	orgsref.fitness[sp] = normalized_fitness
+    end
+
+    open(abspath(joinpath(settings["outputat"], settings["simID"], "spp_fitness.csv")),"a") do fitnessfile
+    	writedlm(fitnessfile, hcat(t, sp, get(orgsref.fitness, sp, "NA")) for sp in collect(keys(orgsref.fitness)))
     end
 end
 
@@ -712,7 +730,7 @@ function simulate()
 
     # Initialize abundances according to species fitness
     updateK!(landavail, settings, 1)
-    T = updateenv!(1, landpars)
+    T, mean_annual = updateenv!(1, landpars)
     updatefitness!(orgsref, mean_annual, 1.0)
 
     # Create initial individuals
@@ -775,10 +793,14 @@ function simulate()
 
         end
 
-
         # START SEED PRODUCTION FILE
         open(abspath(simresults_folder, "offspringproduction.csv"),"w") do seedfile
             writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
+        end
+
+	# START FITNESS FILE
+        open(abspath(simresults_folder, "spp_fitness.csv"),"w") do fitnessfile
+            writedlm(fitnessfile, hcat("week", "sp", "fitness"))
         end
 
         #############
@@ -797,10 +819,14 @@ function simulate()
             updateK!(landavail, settings, t, tdist)
 
 	    # UPDATE current temperature
-            T = updateenv!(t, landpars)
-
+	    if rem(t, 52) == 1
+               T, mean_annual = updateenv!(t, landpars)
+	    else
+	       T = updateenv!(t, landpars)
+	    end
+	       
             # UPDATE species fitness
-            updatefitness!(orgsref, mean_annual, 1.0)
+            updatefitness!(orgsref, mean_annual, 1.0, t, settings)
             
             # OUTPUT: First thing, to see how community is initialized
             tic()
