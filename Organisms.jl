@@ -280,12 +280,13 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 	    new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])
 	    orgs[o].mass["veg"] += new_mass
 	end
+	
     end
-
     # unity test
-    masserror = find(x -> sum(values(x.mass)) <= 0, orgs)
+    masserror = find(x -> sum(collect(values(x.mass))) <= 0, orgs)
     if length(masserror) > 0
-	error("Negative values of biomass detected.")
+        println("Org: orgs[masserror[1]]")
+	error("Zero or negative values of biomass detected.")
     end
     return nogrowth
 end
@@ -878,8 +879,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		                    dying = filter(x -> x.mass["veg"] == minimum(masses), dying_orgs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
 				    
                                     o = find(x -> x.id == dying.id, orgs)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()# check-point
- 			            println("dying index: $o")
-		      	            open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+ 			            open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
 		                        writedlm(sim, hcat(t, "death-K-gridcell", orgs[o].stage, orgs[o].age))
                     	            end
 		    	            deleteat!(orgs, o)
