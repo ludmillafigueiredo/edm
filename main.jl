@@ -809,8 +809,12 @@ function simulate()
         for t in 1:settings["timesteps"]
 
             open(abspath(joinpath(simresults_folder, "simulog.txt")),"a") do sim
-                println("WEEK $t")
+                println(sim, "WEEK $t")
+		println(sim, "Species richness: $(length(unique(map(x -> x.sp, orgs))))")
             end
+	    
+	    println("WEEK $t")
+	    println("Species richness: $(length(unique(map(x -> x.sp, orgs))))")
 
             # IMPLEMENT LANDSCAPE DISTURBANCE
             if settings["disturbtype"] in ["frag" "loss"] && t in tdist
