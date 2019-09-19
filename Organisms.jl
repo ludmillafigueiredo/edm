@@ -861,14 +861,14 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 			        error("Cell carrying capacity overboard, but no individuals of $sp were detected") 
 		            end
                             
-                            for stage in ["j" "a" "e"] #juveniles are killed first, by order of size
+                            for dying_stages in [("j", "a"), ["e"]] #juveniles are killed first, by order of size
                                 
-		      	        dying_orgs = filter(x -> x.stage == stage, samecell_sp)
+		      	        dying_orgs = filter(x -> x.stage in dying_stages, samecell_sp)
 		      	        
                       	        while (sum(vcat(map(x -> x.mass["veg"], samecell_sp), 0.00001)) > cK_sp && length(dying_orgs) > 0)
 
                                     # checkpoint: seeds are the last to be killed, because they are supposed to form a seed bank
-                                    if stage == "e"
+                                    if "e" in dying_stages
                                         open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
 	                                    println(sim, "Seeds of $sp going over cell carrying capacity.")
 	                                end
@@ -887,7 +887,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 				    # update control of while-loop  
                                     o_cell = find(x -> x.id == dying.id, samecell_sp)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
                     	            deleteat!(samecell_sp, o_cell)
-                                    dying_orgs = filter(x -> x.stage == stage, samecell_sp)
+                                    dying_orgs = filter(x -> x.stage in dying_stages, samecell_sp)
           			                                        
                                 end
 			    end
@@ -968,7 +968,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
     b0mort = 0
 
     ### Seeds have higher mortality factor
-    seed_mfactor = 1
+    seed_mfactor = 20
     juv_mfactor = 1
     adult_mfactor = 1
 
