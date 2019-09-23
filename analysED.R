@@ -566,6 +566,32 @@ lifehistory <- function(outputsdir){
     return(list(a = lifeevents_tab, b = lifeevents_plot, c = metabolic_tab, d = metabolic_summary))
 }
 
+#' Age distribution of stages
+agetraits <- function(adultjuv_complete_tab){
+
+ meanage_plot <- adultjuv_complete_tab%>%
+  select(-repli)%>%
+  group_by(week, sp, stage)%>%
+        summarize(mean_age = mean(age),
+                  sd_age = sd(age),
+                  mean_span = mean(span),
+                  sd_span = sd(span),
+                  mean_firstflower = mean(firstflower),
+                  sd_firstflower = sd(firstflower))%>%
+        ungroup()%>%
+  ggplot(aes(x=week, y=mean_age, colour=stage))+
+  geom_line()+
+  geom_errorbar(aes(ymin=mean_age-sd_age, ymax=mean_age+sd_age))+
+  geom_hline(aes(yintercept = mean_span), colour = "grey", alpha = 0.1)+
+  geom_hline(aes(yintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
+  geom_vline(aes(xintercept = mean_span), colour = "grey", alpha = 0.1)+
+  geom_vline(aes(xintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
+  scale_color_viridis(discrete = TRUE)+
+  theme(legend.position = "bottom")
+
+  return(meanage_plot)
+}
+
 ##facet_grid(rows = vars(stage), cols = vars(metric), scales = "free_y")+
 ##scale_color_viridis(discrete = TRUE)
 
@@ -651,6 +677,9 @@ lifehistory$a -> events_tab
 lifehistory$b -> events_plot
 lifehistory$c -> metabolic_tab
 lifehistory$d -> metabolic_summary
+
+## Age traits
+meanage_plot <- agetraits(adultjuv_complete_tab)
 
 ## Save bundle of tabs and plots as RData
 EDtabs <- objects(name = environment(), all.names = FALSE, pattern = "_tab$")
