@@ -451,7 +451,7 @@ production <- function(adultjuv_complete_tab){
 traitchange  <- function(adultjuv_complete_tab, timesteps, species){
     
     ## take the mean values for each individual (they are replicated in each experiment) and then plot the violin plots
-    traitvalues_tab  <- adultjuv_complete_tab%>%
+    traitsdistributions_tab  <- adultjuv_complete_tab%>%
         select(-c(kernel, clonality, age, xloc, yloc, veg, repr, mated, repli))%>%
         group_by(week, id, stage, sp)%>%
         summarize_all(funs(mean = mean,
@@ -459,36 +459,39 @@ traitchange  <- function(adultjuv_complete_tab, timesteps, species){
         ungroup()
     
     if(missing(species)){
-        species <- unique(traitvalues_tab$sp)
+        species <- unique(traitsdistributions_tab$sp)
     }
     species <- factor(species)
     
     ## internal function for different species and the same time step (map() goes through each spp, for the same timesteps). Internal function because maps needs single function and because column select
 ## inside gather() does not work otherwise, probably piped objects get mixed (mapped spp vector and piped trait table).
     
-    traittab4plot <- gather(traitvalues_tab%>%
+    traittab4plot <- gather(traitsdistributions_tab%>%
                             select(-tidyselect::ends_with("_sd"))%>%
                             filter(week %in% timesteps),
                             key = trait,
                             value = value,
-                            seedmass_mean:maxmass_mean,
-                            factor_key = TRUE)
-    
+                            seedmass_mean:fitness_mean,
+                            factor_key = TRUE)%>%
+                     split(.$trait)
+
     plottrait <- function(spp){
-        ggplot(traittab4plot%>%filter(sp %in% spp),
-               aes(x = sp, y = value))+
-            geom_violin()+
-            ##geom_dotplot(color = "grey31", fill = "white", alpha = 0.8)+
-            geom_boxplot(width = 0.2)+
-            facet_wrap(c("week", "trait"), #facet_grid cannot free y axis
-                       nrow = length(unique(timesteps)),
-                       ncol = length(select(traitvalues_tab, tidyselect::ends_with("_mean"))),
-                       scales = "free_y")+
-            background_grid(major = "xy", minor = "none")+
-            scale_color_viridis(discrete = TRUE)
+        traitplot <- traittab4plot %>%
+          map(~ ggplot(.x%>%filter(sp %in% spp),
+                     aes(x = sp, y = value))+
+                geom_violin()+
+                        ##geom_dotplot(color = "grey31", fill = "white", alpha = 0.8)+
+                geom_boxplot(width = 0.2)+
+                facet_wrap(c("week", "trait"), #facet_grid cannot free y axis
+                           nrow = length(unique(timesteps)),
+                           scales = "free_y")+
+                background_grid(major = "xy", minor = "none")+
+                scale_color_viridis(discrete = TRUE))
+
+        return(traitplot)
     }
-    
-    traitvalues_plots <- species%>%
+
+    traitsdistributions_plots <- species%>%
         map(. %>% plottrait) 
     
     ##gganimation
@@ -500,17 +503,17 @@ traitchange  <- function(adultjuv_complete_tab, timesteps, species){
     ##        resolution = 300,
     ##        renderer = file_renderer(analysEDdir, prefix = paste("animtrait", species, sep = "_"), overwrite = TRUE))
     
-    return(list(a = traitvalues_tab, b = traitvalues_plots))
+    return(list(a = traitsdistributions_tab, b = traitsdistributions_plots))
 }
 
 #' Analysis of change in trait space
 
-traitspacechange  <- function(traitvalues_tab, timesteps){
+traitspacechange  <- function(traitsdistributions_tab, timesteps){
     
     ## PCA (internal function because it needs to passed to map)
     traitPCA <- function(timestep){
         
-        traitpca <- PCA(traitvalues_tab%>%
+        traitpca <- PCA(traitsdistributions_tab%>%
                         select(-sp, -stage, -ends_with("_sd"))%>%
                         filter(week %in% timestep)%>%
                         select(-week, -id),
@@ -531,7 +534,7 @@ traitspacechange  <- function(traitvalues_tab, timesteps){
                                     geom.ind = "point", # show points only (but not "text")
                                     pointshape = 21,
                                     pointsize = 2.5,
-                                    fill.ind = factor(select(filter(traitvalues_tab, week %in% timesteps), week)), # color by time
+                                    fill.ind = factor(select(filter(traitsdistributions_tab, week %in% timesteps), week)), # color by time
                                     col.ind = "black",
                                     ##addEllipses = TRUE, # Concentration ellipse,
                                     col.var = factor(c("size", "reprd", "reprd", "reprd", "reprd", "reprd", "span", "metab", "metab", "metab","reprd", "size")),
@@ -661,11 +664,11 @@ production_plot <- production(adultjuv_complete_tab)
 ## Trait change
 ### trait values
 traitschange <- traitchange(adultjuv_complete_tab, timesteps)
-traitschange$a -> traitvalues_tab
-traitschange$b -> traitvalues # no 's' so it can be detected by `plotall`
+traitschange$a -> traitsdistributions_tab
+traitschange$b -> traitsdistributions_plots
 rm(traitschange)
 ### trait space
-##traitspace <- traitspacechange(traitvalues_tab, timesteps)
+##traitspace <- traitspacechange(traitsdistributions_tab, timesteps)
 ##traitspace$a -> traitpcas
 ##traitspace$b -> timepca
 ##traitspace$c -> timepca_plot
@@ -692,6 +695,10 @@ save(list = EDplots, file = file.path(analysEDdir,
 # rank-abundance plots are in a list
 save(metabolic_summary, rankabunds, file = file.path(analysEDdir,
 		                  paste(parentsimID, "rankabunds", ".RData", sep = "")))
+
+# plots of trait values
+save(traitsdistributions_plots, file = file.path(analysEDdir,
+		                  paste(parentsimID, "traitsdistributions", ".RData", sep = "")))
 
 ## Plot all graphs
 map(EDplots, ~ save_plot(filename = file.path(analysEDdir, paste(.x, ".png", sep ="")), plot = get(.x)))
