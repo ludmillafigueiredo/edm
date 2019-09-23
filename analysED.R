@@ -1,6 +1,6 @@
 ## !Run it from the model's directory!
 ## This is an R script intended at fast analysis. Details on the RNotebook file of same name
-## 
+##
 
 ## Load packages 
 library(tidyverse);
@@ -252,7 +252,7 @@ popstruct <- function(pop_tab, offspring_complete_tab, parentsimID, spp){
         ##scale_color_discrete("Stages:", labels = c("Adults", "Seeds", "Juveniles"))+
         facet_wrap(~sp, nrow = length(unique(weekstruct_tab$sp)))+
         scale_color_viridis(discrete = TRUE)+
-        theme(legend.position = "none")
+        theme(legend.position = "bottom")
     
     relativestruct_plottED <- ggplot(relativestruct_tab,
                                      aes(x = week, y = proportion, color = as.factor(stage)))+
@@ -262,14 +262,14 @@ popstruct <- function(pop_tab, offspring_complete_tab, parentsimID, spp){
              title = "Population structure")+
         facet_wrap(~sp, nrow = length(unique(weekstruct_tab$sp)))+
         scale_color_viridis(discrete = TRUE)+
-        theme(legend.position = "none")
+        theme(legend.position = "bottom")
     
     return(list(a = weekstruct_tab, b = weekstruct_plottED,
                 c = relativestruct_tab, d = relativestruct_plottED))
 }
 
 #' Calculate mean species richness from replicates and per group of size
-richness <- function(adultjuv_repli, pop_tab, parentsimID, disturbance,tdist){
+richness <- function(adultjuv_complete_tab, pop_tab, parentsimID, disturbance,tdist){
     
     ## extract richness from output
     spprichness_tab <- pop_tab%>%
@@ -277,8 +277,8 @@ richness <- function(adultjuv_repli, pop_tab, parentsimID, disturbance,tdist){
         summarize(richness = length(unique(sp)))%>%
         ungroup()%>%
         group_by(week)%>%
-        summarize(mean_richness = mean(richness, na.rm = TRUE),
-                  sd_richness = sd(richness, na.rm = TRUE))%>%
+        summarize(mean_richness = mean(richness),
+                  sd_richness = sd(richness))%>%
         ungroup()
     
     ## create plots
@@ -318,7 +318,7 @@ richness <- function(adultjuv_repli, pop_tab, parentsimID, disturbance,tdist){
     }
     
     ## richness per group of size
-    groupspprichness_tab  <- adultjuv_repli%>%
+    groupspprichness_tab  <- adultjuv_complete_tab%>%
         select(week, sp, seedmass)%>%
         ungroup()%>%
         group_by(week, seedmass)%>%
