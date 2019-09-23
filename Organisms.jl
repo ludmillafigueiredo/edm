@@ -819,9 +819,11 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		           "weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
     end
 
-    while sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)) > K
+    biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
 
-	locs = map(x -> x.location,orgs)
+    if sum(vcat(map(x -> x.mass["veg"], biomass_orgs), 0.00001)) > K
+
+	locs = map(x -> x.location, biomass_orgs)
 
 	# separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
 
@@ -833,7 +835,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 	    for c in fullcells_indxs
 
 		#find plants that are in the same grid
-		samecell = filter(x -> x.location == locs[c], orgs)
+		samecell = filter(x -> x.location == locs[c], biomass_orgs)
 
 		if sum(vcat(map(x -> x.mass["veg"], samecell),0.00001)) > cK
 
@@ -855,26 +857,21 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                             samecell_sp = filter(x -> x.sp == sp, samecell)
 
                             # unity test
-                            if (length(filter(x -> x.stage == "e", samecell_sp)) == 0 &&
-                                length(filter(x -> x.stage == "j", samecell_sp)) == 0 &&
+                            if (length(filter(x -> x.stage == "j", samecell_sp)) == 0 &&
                                 length(filter(x -> x.stage == "a", samecell_sp)) == 0)
 			        error("Cell carrying capacity overboard, but no individuals of $sp were detected") 
 		            end
+			    if(length(filter(x -> x.stage == "e", samecell_sp)) > 0)
+			        error("Seeds being detected for density-dependent mortality")
+		 	    end	
                             
-                            for dying_stages in [("j", "a"), ["e"]] #juveniles are killed first, by order of size
-                                
-		      	        dying_orgs = filter(x -> x.stage in dying_stages, samecell_sp)
+                            for dying_stage in ["j" "a"] #juveniles are killed first, by order of size
+
+		      	        dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
 		      	        
                       	        while (sum(vcat(map(x -> x.mass["veg"], samecell_sp), 0.00001)) > cK_sp && length(dying_orgs) > 0)
 
-                                    # checkpoint: seeds are the last to be killed, because they are supposed to form a seed bank
-                                    if "e" in dying_stages
-                                        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	                                    println(sim, "Seeds of $sp going over cell carrying capacity.")
-	                                end
-                                    end
-                                    
-			            # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                                    # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
                                     masses = map(x -> x.mass["veg"], dying_orgs)
 		                    dying = filter(x -> x.mass["veg"] == minimum(masses), dying_orgs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
 				    
@@ -887,18 +884,20 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 				    # update control of while-loop  
                                     o_cell = find(x -> x.id == dying.id, samecell_sp)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
                     	            deleteat!(samecell_sp, o_cell)
-                                    dying_orgs = filter(x -> x.stage in dying_stages, samecell_sp)
+                                    dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
           			                                        
                                 end
 			    end
                         end
 
 			# update of control of while-loop
-			samecell = filter(x -> x.location == locs[c], orgs)
+			biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
+       		      	samecell = filter(x -> x.location == locs[c], biomass_orgs)
 		        
                     end
                 end
             end
+	    
         else # in case no individuals are sharing cells but production > K
 
             # get species that are over their carrying capacity for the cell and store their respective fitness values
@@ -911,21 +910,23 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                 end
             end
 
-	    while sum(vcat(map(x -> x.mass["veg"], orgs),0.00001)) > K
+	    while sum(vcat(map(x -> x.mass["veg"], biomass_orgs),0.00001)) > K
 
                 for sp in keys(sppoverK_fitness)
 
                     K_sp = K * orgsref.fitness[sp]
-                    orgs_sp = filter(x -> x.sp == sp, orgs)
+                    orgs_sp = filter(x -> x.sp == sp, biomass_orgs)
 
                     # unity test
-                    if (length(filter(x -> x.stage == "e", samecell_sp)) == 0 &&
-                        length(filter(x -> x.stage == "j", samecell_sp)) == 0 &&
-                        length(filter(x -> x.stage == "a", samecell_sp)) == 0)
+                    if (length(filter(x -> x.stage == "j", orgs_sp)) == 0 &&
+                        length(filter(x -> x.stage == "a", orgs_sp)) == 0)
 			error("Cell carrying capacity overboard, but no individuals of $sp were detected") 
 		    end
-                    
-                    for stage in ["j" "a" "e"] #juveniles are killed first, by order of size
+                    if(length(filter(x -> x.stage == "e", orgs_sp)) > 0)
+		        error("Seeds being detected for density-dependent mortality")
+		    end	
+                            
+                    for stage in ["j" "a"] #juveniles are killed first, by order of size
                         
 		      	dying_orgs = filter(x -> x.stage == stage, orgs_sp)
 		      	
@@ -956,7 +957,8 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                         end
 		    end
                 end
-		
+		# update control of while-loop
+       		biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
             end
        end
     end
@@ -968,7 +970,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
     b0mort = 0
 
     ### Seeds have higher mortality factor
-    seed_mfactor = 20
+    seed_mfactor = 15
     juv_mfactor = 1
     adult_mfactor = 1
 
@@ -1119,7 +1121,6 @@ function manage!(orgs::Array{Organisms.Organism,1}, t::Int64, management_counter
     end
     return management_counter
 end
-
 
 """
                                                     pollination!()
