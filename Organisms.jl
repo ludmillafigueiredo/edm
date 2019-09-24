@@ -1052,7 +1052,7 @@ end
                                                     """
 function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int)
 
-    flowering = find(x -> (x.mass["repr"] > 0 || rem(t,52) > x.floroff), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
+    flowering = find(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
 
     for f in flowering
 	orgs[f].mass["repr"] = 0
