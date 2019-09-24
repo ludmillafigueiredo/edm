@@ -686,7 +686,10 @@ end
                 simulate!()
                 """
 function simulate()
-    # INITIALIZATION
+
+    # INITIALIZATION 
+    #################
+
     # Read in command line arguments
     settings = parse_commandline()
 
@@ -742,7 +745,9 @@ function simulate()
 
     println("Starting simulation")
 
-    # Organize output folders
+    # ORGANIZE OUTPUT FOLDERS
+    #########################
+    
     results_folder = string()
     for rep in 1:settings["nreps"]
 
@@ -763,10 +768,7 @@ function simulate()
             println("Overwriting results to existing '$(simresults_folder)' folder")
         end
 
-
-        ##############################
-        # OUTPUT SIMULATION SETTINGS #
-        ##############################
+        # OUTPUT SIMULATION SETTINGS 
         open(abspath(joinpath(simresults_folder, "simsettings.jl")),"w") do ID
             println(ID, "tdist = ", tdist)
             println(ID, "landpars = ", typeof(landpars), "\ninitial = ", typeof(landpars.initialland), "\ndisturb = ", typeof(landpars.disturbland))
@@ -776,38 +778,39 @@ function simulate()
             println(ID, "commandsettings = ", settings)
         end
 
-        # START ID SIMULATION 1LOG FILE
+        # INITIALIZE FILE TO LOG SIMULATION PROGRESS
         open(abspath(joinpath(simresults_folder, "simulog.txt")),"w") do sim
             println(sim,string("Simulation: ",settings["simID"],now()))
         end
 
-        # START ID SIMULATION 1LOG FILE
+        # INITIALIZE FILE TO LOG LIFE-HISTORY EVENTS
         open(abspath(joinpath(simresults_folder, "eventslog.txt")),"w") do sim
             writedlm(sim, hcat("week", "event", "stage", "age"))
         end
 
-        # START FILE TO LOG METABOLIC RATES
+        # INITIALIZE FILE TO LOG METABOLIC RATES
         open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
 
             writedlm(sim, hcat("stage", "age", "rate", "probability", "event"))
 
         end
 
-        # START SEED PRODUCTION FILE
+        # INITIALIZE FILE TO LOG SEED PRODUCTION
         open(abspath(simresults_folder, "offspringproduction.csv"),"w") do seedfile
             writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
         end
 
-	# START FITNESS FILE
+	# INITIALIZE FILE TO LOG SPECIES FITNESS
         open(abspath(simresults_folder, "spp_fitness.csv"),"w") do fitnessfile
             writedlm(fitnessfile, hcat("week", "sp", "fitness"))
         end
 
-        #############
-        # MODEL RUN #
-        #############
+        # MODEL RUN 
+        ############
+        
         for t in 1:settings["timesteps"]
 
+            # LOGGING PROGRESS
             open(abspath(joinpath(simresults_folder, "simulog.txt")),"a") do sim
                 println(sim, "WEEK $t")
 		println(sim, "Species richness: $(length(unique(map(x -> x.sp, orgs))))")
@@ -822,14 +825,14 @@ function simulate()
             end
             updateK!(landavail, settings, t, tdist)
 
-	    # UPDATE current temperature
+	    # UPDATE CURRENT TEMPERATURE
 	    if rem(t, 52) == 1
                 T, mean_annual = updateenv!(t, landpars)
 	    else
 	        T = updateenv!(t, landpars)
 	    end
 	    
-            # UPDATE species fitness
+            # UPDATE SPECIES FITNESS
             updatefitness!(orgsref, mean_annual, 1.0, t, settings)
             
             # OUTPUT: First thing, to see how community is initialized
@@ -838,22 +841,20 @@ function simulate()
             timing("Time writing output", settings)
             toc()
 
-            # LIFE CYCLE
-            tic()
-
-            # management happens at least once every year, annually
-            #if rem(t,52) == 0
-            #management_counter = 0
-            #end
+            # MANAGEMENT: it happens at least once every year, annually
             if ((31 < rem(t,52) < 39) && management_counter < 1) #mowing cannot happen before the 1st of July
                 management_counter = manage!(orgs, t, management_counter, settings)
             end
 
+            # UPDATE CURRENT BIOMASS PRODUCTION
             biomass_production = sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))
-            #check-point
+            # check-point
             open(abspath(joinpath(simresults_folder, "simulog.txt")),"a") do sim
                 writedlm(sim, hcat("Biomass production:", biomass_production))
             end
+
+            # LIFE CYCLE
+            tic()
 
             global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T, biomass_production, K)
             
@@ -869,10 +870,8 @@ function simulate()
 
             justdispersed = disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
 
-            #if (11 < rem(t,52) < 24) ||(38 < rem(t,52) < 50) #Establishment during Spring and Fall
             establish!(orgs, t, settings, orgsref, T, justdispersed, biomass_production, K)
-            #end
-
+            
             shedd!(orgs, orgsref, t)
 
             timing("Time running life cycle:", settings)
