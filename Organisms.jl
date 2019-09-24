@@ -1,9 +1,9 @@
 
 """
-                                                    This module contains the
+                                                        This module contains the
 
-                                                    Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
-                                                    """
+                                                        Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
+                                                        """
 module Organisms
 
 using Distributions
@@ -131,11 +131,11 @@ mutable struct Organism
 end
 
 """
-                                                    initorgs(landavail, orgsref,id_counter)
+                                                        initorgs(landavail, orgsref,id_counter)
 
-                                                    Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
+                                                        Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
 
-                                                    """
+                                                        """
 function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, settings::Dict{String, Any}, K::Float64)
 
     orgs = Organism[]
@@ -238,9 +238,9 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 end
 
 """
-                                                    allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
-                                                    Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
-                                                    """
+                                                        allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
+                                                        Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
+                                                        """
 function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
@@ -250,7 +250,7 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
     for o in growing
 
         #if biomass_production < K
-	    b0grow = orgs[o].b0grow
+	b0grow = orgs[o].b0grow
 	#elseif biomass_production > K
 	#    b0grow = orgs[o].b0grow*(1-(0.95/(1+exp(-0.02*(biomass_production-(K))))))
 	#end
@@ -264,8 +264,8 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 	    orgs[o].mass["veg"] += new_mass
 
         elseif (orgs[o].stage == "a" &&
-	    (orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
-	    (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass))) # adults in their reproductive season and with enough weight, invest in reproduction
+	        (orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
+	        (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass))) # adults in their reproductive season and with enough weight, invest in reproduction
 
             new_mass = B_grow*(orgs[o].mass["veg"])
 
@@ -292,9 +292,9 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 end
 
 """
-                                                    develop!()
-                                                    Controls individual juvenile maturation.
-                                                    """
+                                                        develop!()
+                                                        Controls individual juvenile maturation.
+                                                        """
 function develop!(orgs::Array{Organism,1}, orgsref, settings::Dict{String, Any}, t::Int)
     juvs = find(x->x.stage == "j",orgs)
 
@@ -313,10 +313,10 @@ function develop!(orgs::Array{Organism,1}, orgsref, settings::Dict{String, Any},
 end
 
 """
-                                                    mate!()
-                                                    Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
-                                                    - visited: reduction in pollination service
-                                                    """
+                                                        mate!()
+                                                        Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
+                                                        - visited: reduction in pollination service
+                                                        """
 function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.seedmass, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
@@ -388,18 +388,18 @@ function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String,
 
 	else
 	    error("Please chose a pollination scenario \"scen\" in insect.csv:
-			                                                    - \"indep\": sexual reproduction happens independently of pollination
-			                                                    - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
-			                                                    - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
+			                                                        - \"indep\": sexual reproduction happens independently of pollination
+			                                                        - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
+			                                                        - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
 	end
 
     end
 end
 
 """
-                                                    mkoffspring!()
-                                                    After mating happened (marked in `reped`), calculate the amount of offspring
-                                                    """
+                                                        mkoffspring!()
+                                                        After mating happened (marked in `reped`), calculate the amount of offspring
+                                                        """
 function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::Organisms.TraitRanges)
 
     # Number of individuals before and after
@@ -629,8 +629,8 @@ end
 
 
 """
-                                                    release!()
-                                                     """
+                                                        release!()
+                                                         """
 function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref)
 
     # Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
@@ -639,9 +639,9 @@ function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{Stri
 end
 
 """
-                                                    disperse!(landscape, orgs, t, seetings, orgsref,)
-                                                    Seeds are dispersed.
-                                                    """
+                                                        disperse!(landscape, orgs, t, seetings, orgsref,)
+                                                        Seeds are dispersed.
+                                                        """
 
 function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref, landpars::Any, tdist::Any)#Setworld.LandPars)}
 
@@ -710,9 +710,9 @@ function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organis
 end
 
 """
-                                                    germinate(org)
-                                                    Seeds have a probability of germinating (`gprob`).
-                                                    """
+                                                        germinate(org)
+                                                        Seeds have a probability of germinating (`gprob`).
+                                                        """
 
 function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, Any})
 
@@ -737,9 +737,9 @@ function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, A
 end
 
 """
-                                                    establish!
-                                                    Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
-                                                    """
+                                                        establish!
+                                                        Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
+                                                        """
 function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed, biomass_production::Float64, K::Float64)
     #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
@@ -756,7 +756,7 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
     for o in establishing
 
         #if biomass_production < K
-	    b0germ = orgs[o].b0germ
+	b0germ = orgs[o].b0germ
 	#else biomass_production > K
 	#    b0germ = orgs[o].b0germ*(1-(0.95/(1+exp(-0.02*(biomass_production-(K))))))
 	#end
@@ -793,10 +793,10 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
 end
 
 """
-                                                    survive!(orgs, nogrowth,landscape)
-                                                    Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
-                                                    plants in nogrwth are subjected to two probability rates
-                                                    """
+                                                        survive!(orgs, nogrowth,landscape)
+                                                        Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
+                                                        plants in nogrwth are subjected to two probability rates
+                                                        """
 function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, biomass_production::Float64)
 
     ## Density-dependent mortality
@@ -885,7 +885,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                                     o_cell = find(x -> x.id == dying.id, samecell_sp)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
                     	            deleteat!(samecell_sp, o_cell)
                                     dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
-          			                                        
+          			    
                                 end
 			    end
                         end
@@ -925,7 +925,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                     if(length(filter(x -> x.stage == "e", orgs_sp)) > 0)
 		        error("Seeds being detected for density-dependent mortality")
 		    end	
-                            
+                    
                     for stage in ["j" "a"] #juveniles are killed first, by order of size
                         
 		      	dying_orgs = filter(x -> x.stage == stage, orgs_sp)
@@ -960,96 +960,96 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		# update control of while-loop
        		biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
             end
-       end
+end
+end
+
+## Density-independent mortality
+deaths = Int64[]
+mprob = 0
+Bm = 0
+b0mort = 0
+
+### Seeds have higher mortality factor
+seed_mfactor = 15
+juv_mfactor = 1
+adult_mfactor = 1
+
+### Old ones die
+old = find( x -> ((x.stage == "a" && x.age >= x.span)), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
+deleteat!(orgs, old)
+
+### The rest has a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
+dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage in ["j" "a"]), orgs)
+
+for d in dying
+
+    # Seeds have higher mortality
+    if orgs[d].stage == "e"
+	m_stage = seed_mfactor
+    elseif orgs[d].stage == "j"
+	m_stage = juv_mfactor
+    elseif orgs[d].stage == "a"
+	m_stage = adult_mfactor
+    else
+	error("Error with organism's stage assignment") 
     end
 
-    ## Density-independent mortality
-    deaths = Int64[]
-    mprob = 0
-    Bm = 0
-    b0mort = 0
+    Bm = orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+    mprob = 1 - exp(-Bm)
 
-    ### Seeds have higher mortality factor
-    seed_mfactor = 15
-    juv_mfactor = 1
-    adult_mfactor = 1
-
-    ### Old ones die
-    old = find( x -> ((x.stage == "a" && x.age >= x.span)), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
-    deleteat!(orgs, old)
-
-    ### The rest has a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
-    dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage in ["j" "a"]), orgs)
-
-    for d in dying
-
-        # Seeds have higher mortality
-        if orgs[d].stage == "e"
-	    m_stage = seed_mfactor
-        elseif orgs[d].stage == "j"
-	    m_stage = juv_mfactor
-        elseif orgs[d].stage == "a"
-	    m_stage = adult_mfactor
-        else
-	    error("Error with organism's stage assignment") 
-        end
-
-        Bm = orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-        mprob = 1 - exp(-Bm)
-
-        # unity test
-        if mprob < 0
-	    error("mprob < 0")
-	    #mprob = 0
-        elseif mprob > 1            #mprob = 1
-	    error("mprob > 1")
-        end
-
-        if 1 == rand(Distributions.Bernoulli(mprob))
-	    push!(deaths, d)
-	    #println("$(orgs[d].stage) dying INDEP.")
-	    # check-point
-	    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-	        writedlm(sim, hcat(t, "death", orgs[d].stage, orgs[d].age))
-	    end
-	    open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-	        writedlm(sim, hcat(orgs[d].stage, orgs[d].age, Bm, mprob, "death"))
-	    end
-        end
+    # unity test
+    if mprob < 0
+	error("mprob < 0")
+	#mprob = 0
+    elseif mprob > 1            #mprob = 1
+	error("mprob > 1")
     end
 
-    deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
-    # check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-        println(sim, "Density-independent mortality: ", length(deaths))
+    if 1 == rand(Distributions.Bernoulli(mprob))
+	push!(deaths, d)
+	#println("$(orgs[d].stage) dying INDEP.")
+	# check-point
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+	    writedlm(sim, hcat(t, "death", orgs[d].stage, orgs[d].age))
+	end
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+	    writedlm(sim, hcat(orgs[d].stage, orgs[d].age, Bm, mprob, "death"))
+	end
     end
+end
+
+deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
+# check-point
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    println(sim, "Density-independent mortality: ", length(deaths))
+end
 
 
-    #check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-        writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "e", orgs)),
-		           "# juveniles:", length(find(x -> x.stage == "j", orgs)),
-		           "# adults:", length(find(x -> x.stage == "a", orgs)),
-		           "weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
-    end
+#check-point
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "e", orgs)),
+		       "# juveniles:", length(find(x -> x.stage == "j", orgs)),
+		       "# adults:", length(find(x -> x.stage == "a", orgs)),
+		       "weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+end
 
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")), "a") do sim
-        println(sim,"$(length(deaths)) dying (density-dependent).","\n",
-	        "Total individuals: ", length(orgs))
-    end
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")), "a") do sim
+    println(sim,"$(length(deaths)) dying (density-dependent).","\n",
+	    "Total individuals: ", length(orgs))
+end
 
-    ## Surviving ones get older: some of them were not filtered above, so the ageing up need to be done separately to include all
-    for o in 1:length(orgs)
-        orgs[o].age += 1
-    end
+## Surviving ones get older: some of them were not filtered above, so the ageing up need to be done separately to include all
+for o in 1:length(orgs)
+    orgs[o].age += 1
+end
 
 end
 
 
 """
-                                                    shedd!()
-                                                    Plants loose their reproductive biomasses at the end of the reproductive season and 50% of biomass during winter.
-                                                    """
+                                                        shedd!()
+                                                        Plants loose their reproductive biomasses at the end of the reproductive season and 50% of biomass during winter.
+                                                        """
 function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int)
 
     flowering = find(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
@@ -1069,9 +1069,9 @@ function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int)
 end
 
 """
-                                                    destroyorgs!(orgs)
-                                                    Kill organisms that where in the lost habitat cells.
-                                                    """
+                                                        destroyorgs!(orgs)
+                                                        Kill organisms that where in the lost habitat cells.
+                                                        """
 function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::BitArray{2}, settings::Dict{String,Any})
 
     kills = []
@@ -1093,9 +1093,9 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::BitArray{2},
 end
 
 """
-                                                    manage!()
-                                                    Plants loose 20% of vegetative biomass and all of the reproductive biomass due to mowing. Mowing happens at most 3 times a year, between July and August.
-                                                    """
+                                                        manage!()
+                                                        Plants loose 20% of vegetative biomass and all of the reproductive biomass due to mowing. Mowing happens at most 3 times a year, between July and August.
+                                                        """
 function manage!(orgs::Array{Organisms.Organism,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
 
     if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.5))
@@ -1123,9 +1123,9 @@ function manage!(orgs::Array{Organisms.Organism,1}, t::Int64, management_counter
 end
 
 """
-                                                    pollination!()
-                                                    Simulates plant-insect encounters and effective pollen transfer.
-                                                    """
+                                                        pollination!()
+                                                        Simulates plant-insect encounters and effective pollen transfer.
+                                                        """
 #TODO find a not too cumbersome way of modelling pollen transfer: draw from Poisot's probability
 
 # """

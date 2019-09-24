@@ -16,7 +16,7 @@ library(cowplot);
 ## Set directories
 source("dirnames_ludmilla.R")
 
-# Set up directory and environement to store analysis
+                                        # Set up directory and environement to store analysis
 analysEDdir <- file.path(outputsdir, paste(parentsimID, "analysED", sep = "_"))
 dir.create(analysEDdir)
 
@@ -455,39 +455,39 @@ traitchange  <- function(adultjuv_complete_tab, timesteps, species){
     }
     species <- factor(species)
     
-#Plot trait distribution for the species, at different time steps
-traitvalue_tab <- adultjuv_complete_tab%>%
+                                        #Plot trait distribution for the species, at different time steps
+    traitvalue_tab <- adultjuv_complete_tab%>%
         select(-c(kernel, clonality, age, xloc, yloc, veg, repr, mated))
 
-traitvalue4dist <- gather(traitvalue_tab%>%
-                            filter(week %in% timesteps),
-                            key = trait,
-                            value = value,
-                            seedmass:bankduration,
-                            factor_key = TRUE)%>%
-  split(.$trait)
+    traitvalue4dist <- gather(traitvalue_tab%>%
+                              filter(week %in% timesteps),
+                              key = trait,
+                              value = value,
+                              seedmass:bankduration,
+                              factor_key = TRUE)%>%
+        split(.$trait)
 
-plotdist <- function(spp){
+    plotdist <- function(spp){
         traitplot <- traitvalue4dist %>%
-          map(~ ggplot(.x%>%filter(sp %in% spp),
-                     aes(x = sp, y = value))+
-                geom_violin()+
-                        ##geom_dotplot(color = "grey31", fill = "white", alpha = 0.8)+
-                geom_boxplot(width = 0.2)+
-                facet_wrap(c("week", "trait"), #facet_grid cannot free y axis
-                           nrow = length(unique(timesteps)),
-                           scales = "free_y")+
-                background_grid(major = "xy", minor = "none")+
-                scale_color_viridis(discrete = TRUE))
+            map(~ ggplot(.x%>%filter(sp %in% spp),
+                         aes(x = sp, y = value))+
+                    geom_violin()+
+                    ##geom_dotplot(color = "grey31", fill = "white", alpha = 0.8)+
+                    geom_boxplot(width = 0.2)+
+                    facet_wrap(c("week", "trait"), #facet_grid cannot free y axis
+                               nrow = length(unique(timesteps)),
+                               scales = "free_y")+
+                    background_grid(major = "xy", minor = "none")+
+                    scale_color_viridis(discrete = TRUE))
 
         return(traitplot)
     }
     
-traitdistribution_plots <- species%>%
+    traitdistribution_plots <- species%>%
         map(. %>% plotdist)
 
-# Plot trait variance over time
-traitsummary_tab  <- adultjuv_complete_tab%>%
+                                        # Plot trait variance over time
+    traitsummary_tab  <- adultjuv_complete_tab%>%
         select(-c(id, stage, kernel, clonality, age, xloc, yloc, veg, repr, mated, b0mort, b0germ, b0grow, fitness, repli))%>%
         group_by(week, sp)%>%
         summarize_all(funs(mean = mean,
@@ -495,36 +495,36 @@ traitsummary_tab  <- adultjuv_complete_tab%>%
         ungroup()
 
 
-traitsummary4plot <-  gather(traitsummary_tab,
-                              key = trait,
-                              value = value,
-                              seedmass_mean:bankduration_sd,
-                              factor_key = TRUE)%>%
-  mutate(trait_metric = str_extract(trait, "^[^_]+"))%>%
-  split(.$trait_metric)%>%
-  #map(~ select(.x, -trait_metric))%>%
-  map(~ spread(.x,
-               key = trait,
-               value = value))%>%
-  map(~ rename(.x, trait_mean = ends_with("mean"),
-                      trait_sd = ends_with("sd")))
+    traitsummary4plot <-  gather(traitsummary_tab,
+                                 key = trait,
+                                 value = value,
+                                 seedmass_mean:bankduration_sd,
+                                 factor_key = TRUE)%>%
+        mutate(trait_metric = str_extract(trait, "^[^_]+"))%>%
+        split(.$trait_metric)%>%
+                                        #map(~ select(.x, -trait_metric))%>%
+        map(~ spread(.x,
+                     key = trait,
+                     value = value))%>%
+        map(~ rename(.x, trait_mean = ends_with("mean"),
+                     trait_sd = ends_with("sd")))
 
-plottrait <- function(spp){
+    plottrait <- function(spp){
         traitplot <- traitsummary4plot %>%
-          map(~ ggplot(.x%>%filter(sp %in% spp),
-                     aes(x = week, y = trait_mean))+
-                geom_line()+
-                geom_point(size = 0.5)+
-                geom_errorbar(aes(ymin = trait_mean-trait_sd, 
-                                  ymax = trait_mean+trait_sd),
-                              colour = "gray", alpha = 0.2)+
-                scale_color_viridis(discrete = TRUE)+
-          labs(title = as.character(unique(.x$trait_metric))))
+            map(~ ggplot(.x%>%filter(sp %in% spp),
+                         aes(x = week, y = trait_mean))+
+                    geom_line()+
+                    geom_point(size = 0.5)+
+                    geom_errorbar(aes(ymin = trait_mean-trait_sd, 
+                                      ymax = trait_mean+trait_sd),
+                                  colour = "gray", alpha = 0.2)+
+                    scale_color_viridis(discrete = TRUE)+
+                    labs(title = as.character(unique(.x$trait_metric))))
         
         return(traitplot)
-}
+    }
 
-traitts_plots <- species%>%
+    traitts_plots <- species%>%
         map(. %>% plottrait)    
 
     return(list(a = traitvalue_tab, b = traitdistribution_plots, c = traitsummary_tab, d = traitts_plots))
@@ -596,9 +596,9 @@ lifehistory <- function(outputsdir){
 #' Age distribution of stages
 agetraits <- function(adultjuv_complete_tab){
 
- meanage_plot <- adultjuv_complete_tab%>%
-  select(-repli)%>%
-  group_by(week, sp, stage)%>%
+    meanage_plot <- adultjuv_complete_tab%>%
+        select(-repli)%>%
+        group_by(week, sp, stage)%>%
         summarize(mean_age = mean(age),
                   sd_age = sd(age),
                   mean_span = mean(span),
@@ -606,23 +606,23 @@ agetraits <- function(adultjuv_complete_tab){
                   mean_firstflower = mean(firstflower),
                   sd_firstflower = sd(firstflower))%>%
         ungroup()%>%
-  ggplot(aes(x=week, y=mean_age, colour=stage))+
-  geom_line()+
-  geom_errorbar(aes(ymin=mean_age-sd_age, ymax=mean_age+sd_age))+
-  geom_hline(aes(yintercept = mean_span), colour = "grey", alpha = 0.1)+
-  geom_hline(aes(yintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
-  geom_vline(aes(xintercept = mean_span), colour = "grey", alpha = 0.1)+
-  geom_vline(aes(xintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
-  scale_color_viridis(discrete = TRUE)+
-  theme(legend.position = "bottom")
+        ggplot(aes(x=week, y=mean_age, colour=stage))+
+        geom_line()+
+        geom_errorbar(aes(ymin=mean_age-sd_age, ymax=mean_age+sd_age))+
+        geom_hline(aes(yintercept = mean_span), colour = "grey", alpha = 0.1)+
+        geom_hline(aes(yintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
+        geom_vline(aes(xintercept = mean_span), colour = "grey", alpha = 0.1)+
+        geom_vline(aes(xintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
+        scale_color_viridis(discrete = TRUE)+
+        theme(legend.position = "bottom")
 
-  return(meanage_plot)
+    return(meanage_plot)
 }
 
 ##facet_grid(rows = vars(stage), cols = vars(metric), scales = "free_y")+
 ##scale_color_viridis(discrete = TRUE)
 
- 
+
 ############################################################################
 ##                         Organize analysis output                       ##
 ############################################################################
@@ -658,12 +658,12 @@ population$d -> relativestruct_plot
 rm(population)
 
 ## Species richness
-#rich <- richness(pop_tab, parentsimID, disturbance) # tdist is optional
-#rich$a -> spprichness_tab 
-#rich$b -> spprichness_plot
-#rich$c -> groupspprichness_tab 
-#rich$d -> groupspprichness_plot
-#rm(rich)
+                                        #rich <- richness(pop_tab, parentsimID, disturbance) # tdist is optional
+                                        #rich$a -> spprichness_tab 
+                                        #rich$b -> spprichness_plot
+                                        #rich$c -> groupspprichness_tab 
+                                        #rich$d -> groupspprichness_plot
+                                        #rm(rich)
 
 ## Set up time-steps for which to output derived analysis
                                         #if(!("timesteps" %in% ls())){timesteps <- c(min(pop_tab$week), max(pop_tab$week))}
@@ -718,14 +718,14 @@ save(list = EDtabs, file = file.path(analysEDdir,
 EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
 save(list = EDplots, file = file.path(analysEDdir,
                                       paste(parentsimID, "_plots.RData", sep = "")))
-# rank-abundance plots are in a list
+                                        # rank-abundance plots are in a list
 save(metabolic_summary, rankabunds, file = file.path(analysEDdir,
-		                  paste(parentsimID, "rankabunds", ".RData", sep = "")))
+                                                     paste(parentsimID, "rankabunds", ".RData", sep = "")))
 
-# plots of trait values
+                                        # plots of trait values
 traitplots <- objects(name = environment(), all.names = FALSE, pattern = "_plots$")
 save(list = traitplots, file = file.path(analysEDdir,
-		                  paste(parentsimID, "traitsdistributions", ".RData", sep = "")))
+                                         paste(parentsimID, "traitsdistributions", ".RData", sep = "")))
 
 ## Plot all graphs
 map(EDplots, ~ save_plot(filename = file.path(analysEDdir, paste(.x, ".png", sep ="")), plot = get(.x)))
