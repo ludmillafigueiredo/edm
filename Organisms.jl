@@ -263,9 +263,9 @@ function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float6
 	    new_mass = B_grow*(orgs[o].maxmass - orgs[o].mass["veg"])
 	    orgs[o].mass["veg"] += new_mass
 
-        elseif orgs[o].stage == "a" &&
+        elseif (orgs[o].stage == "a" &&
 	    (orgs[o].floron <= rem(t,52) < orgs[o].floroff) &&
-	    (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass)) # adults in their reproductive season and with enough weight, invest in reproduction
+	    (sum(collect(values(orgs[o].mass))) >= 0.5*(orgs[o].maxmass))) # adults in their reproductive season and with enough weight, invest in reproduction
 
             new_mass = B_grow*(orgs[o].mass["veg"])
 
