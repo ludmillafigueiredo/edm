@@ -450,33 +450,25 @@ production <- function(adultjuv_complete_tab){
 
 traitchange  <- function(adultjuv_complete_tab, timesteps, species){
     
-    ## take the mean values for each individual (they are replicated in each experiment) and then plot the violin plots
-    traitsdistributions_tab  <- adultjuv_complete_tab%>%
-        select(-c(kernel, clonality, age, xloc, yloc, veg, repr, mated, repli))%>%
-        group_by(week, id, stage, sp)%>%
-        summarize_all(funs(mean = mean,
-                           sd = sd))%>%
-        ungroup()
-    
     if(missing(species)){
-        species <- unique(traitsdistributions_tab$sp)
+        species <- unique(adultjuv_complete_tab$sp)
     }
     species <- factor(species)
     
-    ## internal function for different species and the same time step (map() goes through each spp, for the same timesteps). Internal function because maps needs single function and because column select
-## inside gather() does not work otherwise, probably piped objects get mixed (mapped spp vector and piped trait table).
-    
-    traittab4plot <- gather(traitsdistributions_tab%>%
-                            select(-tidyselect::ends_with("_sd"))%>%
+#Plot trait distribution for the species, at different time steps
+traitvalue_tab <- adultjuv_complete_tab%>%
+        select(-c(kernel, clonality, age, xloc, yloc, veg, repr, mated))
+
+traitvalue4dist <- gather(traitvalue_tab%>%
                             filter(week %in% timesteps),
                             key = trait,
                             value = value,
-                            seedmass_mean:fitness_mean,
+                            seedmass:bankduration,
                             factor_key = TRUE)%>%
-                     split(.$trait)
+  split(.$trait)
 
-    plottrait <- function(spp){
-        traitplot <- traittab4plot %>%
+plotdist <- function(spp){
+        traitplot <- traitvalue4dist %>%
           map(~ ggplot(.x%>%filter(sp %in% spp),
                      aes(x = sp, y = value))+
                 geom_violin()+
@@ -490,20 +482,52 @@ traitchange  <- function(adultjuv_complete_tab, timesteps, species){
 
         return(traitplot)
     }
+    
+traitdistribution_plots <- species%>%
+        map(. %>% plotdist)
 
-    traitsdistributions_plots <- species%>%
-        map(. %>% plottrait) 
-    
-    ##gganimation
-    ##animate(traitchange_plot +
-    ##        transition_states(week, transition_length = 2, state_length= 3)+
-    ##        ease_aes('cubic-in-out'),
-    ##        width = 800, height = 2000, nframes = 100,
-    ##        device = "png",
-    ##        resolution = 300,
-    ##        renderer = file_renderer(analysEDdir, prefix = paste("animtrait", species, sep = "_"), overwrite = TRUE))
-    
-    return(list(a = traitsdistributions_tab, b = traitsdistributions_plots))
+# Plot trait variance over time
+traitsummary_tab  <- adultjuv_complete_tab%>%
+        select(-c(id, stage, kernel, clonality, age, xloc, yloc, veg, repr, mated, b0mort, b0germ, b0grow, fitness, repli))%>%
+        group_by(week, sp)%>%
+        summarize_all(funs(mean = mean,
+                           sd = sd))%>%
+        ungroup()
+
+
+traitsummary4plot <-  gather(traitsummary_tab,
+                              key = trait,
+                              value = value,
+                              seedmass_mean:bankduration_sd,
+                              factor_key = TRUE)%>%
+  mutate(trait_metric = str_extract(trait, "^[^_]+"))%>%
+  split(.$trait_metric)%>%
+  #map(~ select(.x, -trait_metric))%>%
+  map(~ spread(.x,
+               key = trait,
+               value = value))%>%
+  map(~ rename(.x, trait_mean = ends_with("mean"),
+                      trait_sd = ends_with("sd")))
+
+plottrait <- function(spp){
+        traitplot <- traitsummary4plot %>%
+          map(~ ggplot(.x%>%filter(sp %in% spp),
+                     aes(x = week, y = trait_mean))+
+                geom_line()+
+                geom_point(size = 0.5)+
+                geom_errorbar(aes(ymin = trait_mean-trait_sd, 
+                                  ymax = trait_mean+trait_sd),
+                              colour = "gray", alpha = 0.2)+
+                scale_color_viridis(discrete = TRUE)+
+          labs(title = as.character(unique(.x$trait_metric))))
+        
+        return(traitplot)
+}
+
+traitts_plots <- species%>%
+        map(. %>% plottrait)    
+
+    return(list(a = traitvalue_tab, b = traitdistribution_plots, c = traitsummary_tab, d = traitts_plots))
 }
 
 #' Analysis of change in trait space
@@ -634,11 +658,11 @@ population$d -> relativestruct_plot
 rm(population)
 
 ## Species richness
-rich <- richness(pop_tab, parentsimID, disturbance) # tdist is optional
-rich$a -> spprichness_tab 
-rich$b -> spprichness_plot
-rich$c -> groupspprichness_tab 
-rich$d -> groupspprichness_plot
+#rich <- richness(pop_tab, parentsimID, disturbance) # tdist is optional
+#rich$a -> spprichness_tab 
+#rich$b -> spprichness_plot
+#rich$c -> groupspprichness_tab 
+#rich$d -> groupspprichness_plot
 #rm(rich)
 
 ## Set up time-steps for which to output derived analysis
@@ -664,8 +688,10 @@ production_plot <- production(adultjuv_complete_tab)
 ## Trait change
 ### trait values
 traitschange <- traitchange(adultjuv_complete_tab, timesteps)
-traitschange$a -> traitsdistributions_tab
-traitschange$b -> traitsdistributions_plots
+traitschange$a -> traitvalues_tab
+traitschange$b -> traitdistributions_plots
+traitschange$c -> traitssummary_tab
+traitschange$d -> traitssummary_plots
 rm(traitschange)
 ### trait space
 ##traitspace <- traitspacechange(traitsdistributions_tab, timesteps)
@@ -697,7 +723,8 @@ save(metabolic_summary, rankabunds, file = file.path(analysEDdir,
 		                  paste(parentsimID, "rankabunds", ".RData", sep = "")))
 
 # plots of trait values
-save(traitsdistributions_plots, file = file.path(analysEDdir,
+traitplots <- objects(name = environment(), all.names = FALSE, pattern = "_plots$")
+save(list = traitplots, file = file.path(analysEDdir,
 		                  paste(parentsimID, "traitsdistributions", ".RData", sep = "")))
 
 ## Plot all graphs
