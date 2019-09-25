@@ -142,8 +142,13 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 
     for s in orgsref.sp_id # all fragments are populated from the same species pool
 
-        sp_abund = Int(round(orgsref.fitness[s]*K/orgsref.maxmass[s], RoundUp))
-        
+        sp_abund = Int(round(((orgsref.fitness[s]/sum(collect(values(orgsref.fitness))))*K)/mean([orgsref.seedmass[s],orgsref.maxmass[s]]), RoundUp))
+	# check-point
+	open(abspath(joinpath(settings["outputat"], "initialabundances.txt")),"a") do sim
+	     println(sim, "Initial abundance of $s: $sp_abund")
+        end
+
+
 	# create random locations
 	XYs = hcat(rand(1:size(landavail,1), sp_abund),
 		   rand(1:size(landavail,2), sp_abund))
