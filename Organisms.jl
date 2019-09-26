@@ -144,7 +144,7 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 
         sp_abund = Int(round(((orgsref.fitness[s]/sum(collect(values(orgsref.fitness))))*K)/mean([orgsref.seedmass[s],orgsref.maxmass[s]]), RoundUp))
 	# check-point
-	open(abspath(joinpath(settings["outputat"], "initialabundances.txt")),"a") do sim
+	open(abspath(joinpath(settings["outputat"], string(settings["simID"], "initialabundances.txt"))),"a") do sim
 	     println(sim, "Initial abundance of $s: $sp_abund")
         end
 
