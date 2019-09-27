@@ -246,11 +246,11 @@ end
                                                         allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
                                                         Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
                                                         """
-function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64)
+function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
     #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
     
-    growing = find(x->(x.stage in ["a" "j"]),orgs)
+    growing = find(x->x.stage == growing_stage,orgs)
 
     for o in growing
 
@@ -802,7 +802,82 @@ end
                                                         Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
                                                         plants in nogrwth are subjected to two probability rates
                                                         """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, biomass_production::Float64)
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, biomass_production::Float64, dying_stage::String)
+
+## Density-independent mortality
+deaths = Int64[]
+mprob = 0
+Bm = 0
+b0mort = 0
+
+### Seeds have higher mortality factor
+seed_mfactor = 15
+juv_mfactor = 1
+adult_mfactor = 1
+
+### Old ones die
+old = find( x -> ((x.stage == "a" && x.age >= x.span)), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
+deleteat!(orgs, old)
+
+### The rest has a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
+dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), orgs)
+
+for d in dying
+
+    # Seeds have higher mortality
+    if orgs[d].stage == "e"
+	m_stage = seed_mfactor
+    elseif orgs[d].stage == "j"
+	m_stage = juv_mfactor
+    elseif orgs[d].stage == "a"
+	m_stage = adult_mfactor
+    else
+	error("Error with organism's stage assignment") 
+    end
+
+    Bm = orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+    mprob = 1 - exp(-Bm)
+
+    # unity test
+    if mprob < 0
+	error("mprob < 0")
+	#mprob = 0
+    elseif mprob > 1            #mprob = 1
+	error("mprob > 1")
+    end
+
+    if 1 == rand(Distributions.Bernoulli(mprob))
+	push!(deaths, d)
+	#println("$(orgs[d].stage) dying INDEP.")
+	# check-point
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+	    writedlm(sim, hcat(t, "death", orgs[d].stage, orgs[d].age))
+	end
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+	    writedlm(sim, hcat(orgs[d].stage, orgs[d].age, Bm, mprob, "death"))
+	end
+    end
+end
+
+deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
+# check-point
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    println(sim, "Density-independent mortality: ", length(deaths))
+end
+
+
+#check-point
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "e", orgs)),
+		       "# juveniles:", length(find(x -> x.stage == "j", orgs)),
+		       "# adults:", length(find(x -> x.stage == "a", orgs)),
+		       "weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+end
+
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")), "a") do sim
+    println(sim,"$(length(deaths)) dying (density-dependent).","\n",
+	    "Total individuals: ", length(orgs))
+end
 
     ## Density-dependent mortality
 
@@ -824,7 +899,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 		           "weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
     end
 
-    biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
+    biomass_orgs = filter(x -> x.stage in "j" "a", orgs)
 
     if sum(vcat(map(x -> x.mass["veg"], biomass_orgs), 0.00001)) > K
 
@@ -870,9 +945,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
 			        error("Seeds being detected for density-dependent mortality")
 		 	    end	
                             
-                            for dying_stage in ["j" "a"] #juveniles are killed first, by order of size
-
-		      	        dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
+                                dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
 		      	        
                       	        while (sum(vcat(map(x -> x.mass["veg"], samecell_sp), 0.00001)) > cK_sp && length(dying_orgs) > 0)
 
@@ -891,8 +964,7 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
                     	            deleteat!(samecell_sp, o_cell)
                                     dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
           			    
-                                end
-			    end
+                               end
                         end
 
 			# update of control of while-loop
@@ -966,81 +1038,6 @@ function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Flo
        		biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
             end
 end
-end
-
-## Density-independent mortality
-deaths = Int64[]
-mprob = 0
-Bm = 0
-b0mort = 0
-
-### Seeds have higher mortality factor
-seed_mfactor = 15
-juv_mfactor = 1
-adult_mfactor = 1
-
-### Old ones die
-old = find( x -> ((x.stage == "a" && x.age >= x.span)), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
-deleteat!(orgs, old)
-
-### The rest has a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
-dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage in ["j" "a"]), orgs)
-
-for d in dying
-
-    # Seeds have higher mortality
-    if orgs[d].stage == "e"
-	m_stage = seed_mfactor
-    elseif orgs[d].stage == "j"
-	m_stage = juv_mfactor
-    elseif orgs[d].stage == "a"
-	m_stage = adult_mfactor
-    else
-	error("Error with organism's stage assignment") 
-    end
-
-    Bm = orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-    mprob = 1 - exp(-Bm)
-
-    # unity test
-    if mprob < 0
-	error("mprob < 0")
-	#mprob = 0
-    elseif mprob > 1            #mprob = 1
-	error("mprob > 1")
-    end
-
-    if 1 == rand(Distributions.Bernoulli(mprob))
-	push!(deaths, d)
-	#println("$(orgs[d].stage) dying INDEP.")
-	# check-point
-	open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-	    writedlm(sim, hcat(t, "death", orgs[d].stage, orgs[d].age))
-	end
-	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-	    writedlm(sim, hcat(orgs[d].stage, orgs[d].age, Bm, mprob, "death"))
-	end
-    end
-end
-
-deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
-# check-point
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    println(sim, "Density-independent mortality: ", length(deaths))
-end
-
-
-#check-point
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "e", orgs)),
-		       "# juveniles:", length(find(x -> x.stage == "j", orgs)),
-		       "# adults:", length(find(x -> x.stage == "a", orgs)),
-		       "weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
-end
-
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")), "a") do sim
-    println(sim,"$(length(deaths)) dying (density-dependent).","\n",
-	    "Total individuals: ", length(orgs))
 end
 
 ## Surviving ones get older: some of them were not filtered above, so the ageing up need to be done separately to include all

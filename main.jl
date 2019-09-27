@@ -856,9 +856,13 @@ function simulate()
             # LIFE CYCLE
             tic()
 
-            global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T, biomass_production, K)
+            global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T, biomass_production, K, "a")
             
-            survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, biomass_production)
+            survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, biomass_production, "a")
+
+	    global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T, biomass_production, K, "j")
+            
+            survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, biomass_production, "j")
 
             develop!(orgs, orgsref, settings, t)
 
