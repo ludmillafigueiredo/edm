@@ -876,7 +876,7 @@ function simulate()
 
             establish!(orgs, t, settings, orgsref, T, justdispersed, biomass_production, K)
             
-            shedd!(orgs, orgsref, t)
+            shedd!(orgs, orgsref, t, settings)
 
             timing("Time running life cycle:", settings)
             toc()

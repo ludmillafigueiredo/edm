@@ -247,18 +247,19 @@ end
                                                         Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
                                                         """
 function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
-    #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
+# checkpoint
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("Growth of", growing_stage))
+end
+
+#1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
     
     growing = find(x->x.stage == growing_stage,orgs)
 
     for o in growing
 
-        #if biomass_production < K
-	b0grow = orgs[o].b0grow
-	#elseif biomass_production > K
-	#    b0grow = orgs[o].b0grow*(1-(0.95/(1+exp(-0.02*(biomass_production-(K))))))
-	#end
+        b0grow = orgs[o].b0grow
 	
 	#only vegetative biomass helps growth
 	B_grow = (b0grow*(orgs[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))
@@ -301,6 +302,11 @@ end
                                                         Controls individual juvenile maturation.
                                                         """
 function develop!(orgs::Array{Organism,1}, orgsref, settings::Dict{String, Any}, t::Int)
+# checkpoint
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("Maturation..."))
+end
+
     juvs = find(x->x.stage == "j",orgs)
 
     for j in juvs
@@ -323,6 +329,11 @@ end
                                                         - visited: reduction in pollination service
                                                         """
 function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
+
+# checkpoint
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("Pollination ..."))
+end
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.seedmass, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
     pollinated = []
@@ -409,7 +420,7 @@ function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dic
 
     # Number of individuals before and after
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	writedlm(sim, hcat("Total number of individuals:", length(orgs)))
+	writedlm(sim, hcat("Total number of individuals before REPRODUCTION:", length(orgs)))
     end
 
     offspring = Organism[]
@@ -650,6 +661,11 @@ end
 
 function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref, landpars::Any, tdist::Any)#Setworld.LandPars)}
 
+# checkpoint
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("Dispersing ..."))
+end
+
     lost = Int64[]
     justdispersed = String[]
 
@@ -746,12 +762,12 @@ end
                                                         Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
                                                         """
 function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed, biomass_production::Float64, K::Float64)
-    #REFERENCE: May et al. 2009
+#REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
-    # test
+    # checpoint
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	writedlm(sim, hcat("Number of establishing:", length(establishing)))
+	writedlm(sim, hcat("Seeds trying to ESTABLISH:", length(establishing)))
     end
 
     lost = Int64[]
@@ -804,6 +820,17 @@ end
                                                         """
 function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, biomass_production::Float64, dying_stage::String)
 
+# check-point
+if dying_stage == "a"
+   open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("Running MORTALITY: ADULTS & SEEDS"))
+   end
+elseif dying_stage == "j"
+   open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("Running MORTALITY: ADULTS & SEEDS"))
+   end
+end
+
 ## Density-independent mortality
 deaths = Int64[]
 mprob = 0
@@ -812,15 +839,36 @@ b0mort = 0
 
 ### Seeds have higher mortality factor
 seed_mfactor = 15
-juv_mfactor = 1
-adult_mfactor = 1
+juv_mfactor = 15
+adult_mfactor = 15
+
+# check-point
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    println(sim, "Before density-independent mortality: $(length(orgs)) individuals")
+end
+#check-point
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("# total: ", length(orgs),
+		       "# seeds:", length(find(x -> x.stage == "e", orgs)),
+		       "# juveniles:", length(find(x -> x.stage == "j", orgs)),
+		       "# adults:", length(find(x -> x.stage == "a", orgs)),
+		       "vegetative weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+end
 
 ### Old ones die
 old = find( x -> ((x.stage == "a" && x.age >= x.span)), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
 deleteat!(orgs, old)
+# check-point
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("Dying of age:", length(old)))
+end
 
 ### The rest has a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
-dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), orgs)
+if dying_stage == "a"
+   dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), orgs)
+else
+   dying = find(x -> x.stage == dying_stage, orgs) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
+end
 
 for d in dying
 
@@ -859,24 +907,10 @@ for d in dying
     end
 end
 
-deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they can´t also die due to density-dependent
+deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they won't cramp up density-dependent mortality
 # check-point
 open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
     println(sim, "Density-independent mortality: ", length(deaths))
-end
-
-
-#check-point
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "e", orgs)),
-		       "# juveniles:", length(find(x -> x.stage == "j", orgs)),
-		       "# adults:", length(find(x -> x.stage == "a", orgs)),
-		       "weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
-end
-
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")), "a") do sim
-    println(sim,"$(length(deaths)) dying (density-dependent).","\n",
-	    "Total individuals: ", length(orgs))
 end
 
     ## Density-dependent mortality
@@ -888,7 +922,7 @@ end
 
     #check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	writedlm(sim, hcat("Current production:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)), "g; K =", K))
+	println(sim, "Production before density-dependent mortality: $(sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)))g; K = $K")
     end
 
     #check-point
@@ -896,10 +930,10 @@ end
 	writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "e", orgs)),
 		           "# juveniles:", length(find(x -> x.stage == "j", orgs)),
 		           "# adults:", length(find(x -> x.stage == "a", orgs)),
-		           "weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+		           " vegetative weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
     end
 
-    biomass_orgs = filter(x -> x.stage in "j" "a", orgs)
+    biomass_orgs = filter(x -> x.stage in ["j" "a"], orgs) #biomass of both juveniles and adults is used as criteria, but only only stage dies at each timestep
 
     if sum(vcat(map(x -> x.mass["veg"], biomass_orgs), 0.00001)) > K
 
@@ -1052,7 +1086,11 @@ end
                                                         shedd!()
                                                         Plants loose their reproductive biomasses at the end of the reproductive season and 50% of biomass during winter.
                                                         """
-function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int)
+function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int, settings::Dict{String,Any})
+# checkpoint
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    writedlm(sim, hcat("SHEDDING reproductive biomass/ WInter-die back"))
+end
 
     flowering = find(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
 
@@ -1118,7 +1156,7 @@ function manage!(orgs::Array{Organisms.Organism,1}, t::Int64, management_counter
 
         #check-point
         open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	    writedlm(sim, hcat("Biomass after mowing =", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+	    writedlm(sim, hcat("Biomass after MOWING =", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
         end
     end
     return management_counter
