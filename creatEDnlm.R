@@ -12,7 +12,7 @@ creatEDnlm <- function(loss, area, inputsdir){
     require(raster)
 
     # create random cluster nlm
-    ncells = area*(10^8)/625 # n of cells of 625 cm² covered by the landscape area (ha)
+    ncells = area*(10^8)/10000 # n of cells of 10000 cm² covered by the landscape area (ha)
     fragmented <- nlm_randomcluster(ncol = ceiling(sqrt(ncells)), nrow = ceiling(sqrt(ncells)),
                                     p = 0.1,
                                     ai = c(loss, 1-loss))
