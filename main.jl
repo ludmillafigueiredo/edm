@@ -365,9 +365,9 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
     # output header
     if t == 1
         header = hcat(["week"],
-                      reshape(string.(fieldnames(Organism)[1:21]),1,:),
+                      reshape(string.(fieldnames(Organism)[1:20]),1,:),
                       ["veg" "repr"],
-                      reshape(string.(fieldnames(Organism)[23:end]),1,length(fieldnames(Organism)[23:end])))
+                      reshape(string.(fieldnames(Organism)[22:end]),1,length(fieldnames(Organism)[23:end])))
         open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
@@ -398,7 +398,6 @@ function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{S
                                       orgs[o].b0grow,
                                       orgs[o].b0germ,
                                       orgs[o].b0mort,
-                                      orgs[o].fitness,
                                       orgs[o].age,
                                       orgs[o].mass["veg"],
                                       orgs[o].mass["repr"],

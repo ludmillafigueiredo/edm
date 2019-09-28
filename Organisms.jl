@@ -90,7 +90,6 @@ mutable struct Organism
     b0germ::Float64
     b0mort::Float64
     #### State variables ####
-    fitness::Float64
     age::Int64 # control death when older than max. lifespan
     mass::Dict{String, Float64}
     mated::Bool
@@ -143,7 +142,6 @@ function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::In
 			      3206628344,#0.25*19239770067,#rand(Distributions.Uniform(sppref.b0grow_min[s],sppref.b0grow_max[s] + minvalue),1)[1],
 			      100*141363714,#rand(Distributions.Uniform(sppref.b0germ_min[s],sppref.b0germ_max[s] + minvalue),1)[1],
 			      7*159034178,#rand(Distributions.Uniform(sppref.b0mort_min[s],sppref.b0mort_max[s] + minvalue),1)[1],
-			      0, #fitness
 			      0, #age
 			      Dict("veg" => 0.0, "repr" => 0.0), #mass
 			      false) #mated
