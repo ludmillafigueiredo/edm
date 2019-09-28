@@ -1,9 +1,9 @@
 
 """
-                                                        This module contains the
+                                                                This module contains the
 
-                                                        Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
-                                                        """
+                                                                Organisms have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
+                                                                """
 module Organisms
 
 using Distributions
@@ -14,7 +14,7 @@ using StatsBase
 #using Setworld
 using Fileprep
 
-export OrgsRef_normal, OrgsRef_unif, TraitRanges, Organism, initorgs, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, manage!, destroyorgs!, release!
+export SppRef, TraitRanges, Organism, initorgs, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, manage!, destroyorgs!, release!
 
 # Set up model constants
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
@@ -27,42 +27,8 @@ const µ_long = 1000
 const λ_long = 100
 const Q = 5
 
-# Initial organisms parametrization is read from an input file and stored in OrgsRef
-mutable struct OrgsRef_normal
-    sp_id::Array{String, 1}
-    abund::Dict{String,Int}
-    kernel::Dict{String,String}
-    clonality::Dict{String,Bool}
-    seedmass::Dict{String,Float64}
-    maxmass::Dict{String,Float64}
-    span_mean::Dict{String,Float64}
-    span_sd::Dict{String,Float64}
-    firstflower_mean::Dict{String,Float64}
-    firstflower_sd::Dict{String,Float64}
-    floron_mean::Dict{String,Float64}
-    floron_sd::Dict{String,Float64}
-    floroff_mean::Dict{String,Float64}
-    floroff_sd::Dict{String,Float64}
-    seednumber_mean::Dict{String,Float64}
-    seednumber_sd::Dict{String,Float64}
-    seedon_mean::Dict{String,Float64}
-    seedon_sd::Dict{String,Float64}
-    seedoff_mean::Dict{String,Float64}
-    seedoff_sd::Dict{String,Float64}
-    bankduration_mean::Dict{String,Float64}
-    bankduration_sd::Dict{String,Float64}
-    b0grow_mean::Dict{String,Float64}
-    b0grow_sd::Dict{String,Float64}
-    b0germ_mean::Dict{String,Float64}
-    b0germ_sd::Dict{String,Float64}
-    b0mort_mean::Dict{String,Float64}
-    b0mort_sd::Dict{String,Float64}
-    temp_opt::Dict{String, Float64}
-    temp_tol::Dict{String, Float64}
-    fitness::Dict{String, Float64}
-end
-
-mutable struct OrgsRef_unif
+# Initial organisms parametrization is read from an input file and stored in SppRef
+mutable struct SppRef
     sp_id::Array{String, 1}
     abund::Dict{String,Int}
     kernel::Dict{String,String}
@@ -131,21 +97,21 @@ mutable struct Organism
 end
 
 """
-                                                        initorgs(landavail, orgsref,id_counter)
+                                                                initorgs(landavail, sppref,id_counter)
 
-                                                        Initializes the organisms characterized in the input info stored in `orgsref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
+                                                                Initializes the organisms characterized in the input info stored in `sppref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
 
-                                                        """
-function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, settings::Dict{String, Any}, K::Float64)
+                                                                """
+function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::Int, settings::Dict{String, Any}, K::Float64)
 
     orgs = Organism[]
 
-    for s in orgsref.sp_id # all fragments are populated from the same species pool
+    for s in sppref.sp_id # all fragments are populated from the same species pool
 
-        sp_abund = Int(round(((orgsref.fitness[s]/sum(collect(values(orgsref.fitness))))*K)/mean([orgsref.seedmass[s],orgsref.maxmass[s]]), RoundUp))
+        sp_abund = Int(round(((sppref.fitness[s]/sum(collect(values(sppref.fitness))))*K)/mean([sppref.seedmass[s],sppref.maxmass[s]]), RoundUp))
 	# check-point
 	open(abspath(joinpath(settings["outputat"], string(settings["simID"], "initialabundances.txt"))),"a") do sim
-	     println(sim, "Initial abundance of $s: $sp_abund")
+	    println(sim, "Initial abundance of $s: $sp_abund")
         end
 
 
@@ -158,61 +124,30 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 	    id_counter += 1 # update individual counter
 	    minvalue = 1e-7 # Distribution.Normal requires sd > 0, and Distribution.Uniform requires max > min
 
-	    if settings["traitdist"] == "uniform"
-		neworg = Organism(hex(id_counter),
-				  rand(["a" "j" "e"]), #higher chance of initializing juveniles
-				  (XYs[i,1],XYs[i,2]),
-				  s,
-				  orgsref.kernel[s],
-				  orgsref.clonality[s],
-				  orgsref.seedmass[s],
-				  orgsref.maxmass[s], #maxmass
-				  Int(round(rand(Distributions.Uniform(orgsref.span_min[s], orgsref.span_max[s] + minvalue),1)[1], RoundUp)),
-				  Int(round(rand(Distributions.Uniform(orgsref.firstflower_min[s], orgsref.firstflower_max[s] + minvalue),1)[1], RoundUp)),
-				  orgsref.floron[s],
-				  orgsref.floroff[s],
-				  Int(round(rand(Distributions.Uniform(orgsref.seednumber_min[s],orgsref.seednumber_max[s] + minvalue),1)[1], RoundUp)), #seed number
-				  orgsref.seedon[s],
-				  orgsref.seedoff[s],
-				  Int(round(rand(Distributions.Uniform(orgsref.bankduration_min[s],orgsref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
-				  3206628344,#0.25*19239770067,#rand(Distributions.Uniform(orgsref.b0grow_min[s],orgsref.b0grow_max[s] + minvalue),1)[1],
-				  100*141363714,#rand(Distributions.Uniform(orgsref.b0germ_min[s],orgsref.b0germ_max[s] + minvalue),1)[1],
-				  7*159034178,#rand(Distributions.Uniform(orgsref.b0mort_min[s],orgsref.b0mort_max[s] + minvalue),1)[1],
-				  0, #fitness
-				  0, #age
-				  Dict("veg" => 0.0, "repr" => 0.0), #mass
-				  false) #mated
-
-	    elseif settings["traitsdist"] == "normal"
-		neworg = Organism(hex(id_counter),
-				  rand(["a" "j" "e"]),
-				  (XYs[i,1],XYs[i,2]),
-				  s,
-				  orgsref.kernel[s],
-				  orgsref.clonality[s],
-				  orgsref.seedmass[s],
-				  orgsref.maxmass[s], #maxmass
-				  Int(round(rand(Distributions.Normal(orgsref.span_mean[s], orgsref.span_sd[s] + minvalue),1)[1], RoundUp)),
-				  Int(round(rand(Distributions.Normal(orgsref.firstflower_mean[s], orgsref.firstflower_sd[s] + minvalue),1)[1], RoundUp)),
-				  Int(round(rand(Distributions.Normal(orgsref.floron_mean[s],orgsref.floron_sd[s] + minvalue),1)[1], RoundUp)),
-				  Int(round(rand(Distributions.Normal(orgsref.floroff_mean[s],orgsref.floroff_sd[s] + minvalue),1)[1], RoundUp)),
-				  0, #seed number
-				  Int(round(rand(Distributions.Normal(orgsref.seedon_mean[s],orgsref.seedon_sd[s] + minvalue),1)[1], RoundUp)),
-				  Int(round(rand(Distributions.Normal(orgsref.seedoff_mean[s],orgsref.seedoff_sd[s] + minvalue),1)[1], RoundUp)),
-				  Int(round(rand(Distributions.Normal(orgsref.bankduration_mean[s],orgsref.bankduration_sd[s] + minvalue),1)[1], RoundUp)),
-				  rand(Distributions.Normal(orgsref.b0grow_mean[s],orgsref.b0grow_sd[s] + minvalue),1)[1],
-				  rand(Distributions.Normal(orgsref.b0germ_mean[s],orgsref.b0germ_sd[s] + minvalue),1)[1],
-				  rand(Distributions.Normal(orgsref.b0mort_mean[s],orgsref.b0mort_sd[s] + minvalue),1)[1],
-				  0, #age
-				  Dict("veg" => 0.0, "repr" => 0.0), #mass
-				  false) #mated
-
-		## Set conditional traits and variables
-		# weekly number of seeds
-		nseeds = rand(Distributions.Normal(orgsref.seednumber_mean[s],orgsref.seednumber_sd[s] + minvalue),1)[1]
-
-	    end
-
+	    neworg = Organism(hex(id_counter),
+			      rand(["a" "j" "e"]), #higher chance of initializing juveniles
+			      (XYs[i,1],XYs[i,2]),
+			      s,
+			      sppref.kernel[s],
+			      sppref.clonality[s],
+			      sppref.seedmass[s],
+			      sppref.maxmass[s], #maxmass
+			      Int(round(rand(Distributions.Uniform(sppref.span_min[s], sppref.span_max[s] + minvalue),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Uniform(sppref.firstflower_min[s], sppref.firstflower_max[s] + minvalue),1)[1], RoundUp)),
+			      sppref.floron[s],
+			      sppref.floroff[s],
+			      Int(round(rand(Distributions.Uniform(sppref.seednumber_min[s],sppref.seednumber_max[s] + minvalue),1)[1], RoundUp)), #seed number
+			      sppref.seedon[s],
+			      sppref.seedoff[s],
+			      Int(round(rand(Distributions.Uniform(sppref.bankduration_min[s],sppref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
+			      3206628344,#0.25*19239770067,#rand(Distributions.Uniform(sppref.b0grow_min[s],sppref.b0grow_max[s] + minvalue),1)[1],
+			      100*141363714,#rand(Distributions.Uniform(sppref.b0germ_min[s],sppref.b0germ_max[s] + minvalue),1)[1],
+			      7*159034178,#rand(Distributions.Uniform(sppref.b0mort_min[s],sppref.b0mort_max[s] + minvalue),1)[1],
+			      0, #fitness
+			      0, #age
+			      Dict("veg" => 0.0, "repr" => 0.0), #mass
+			      false) #mated
+            
 	    # adjustments to traits than depend on other values
 	    if (neworg.floroff-neworg.floron+1) < 0
 		error("floroff - floron <0")
@@ -243,16 +178,16 @@ function initorgs(landavail::BitArray{N} where N, orgsref, id_counter::Int, sett
 end
 
 """
-                                                        allocate!(orgs, t, aE, Boltz, setting, orgsref, T)
-                                                        Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
-                                                        """
-function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},orgsref, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
-# checkpoint
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("Growth of", growing_stage))
-end
+                                                                allocate!(orgs, t, aE, Boltz, setting, sppref, T)
+                                                                Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
+                                                                """
+function allocate!(orgs::Array{Organism,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
+    # checkpoint
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        writedlm(sim, hcat("Growth of", growing_stage))
+    end
 
-#1. Initialize storage of those that dont growi and will have higher prob of dying (later)
+    #1. Initialize storage of those that dont growi and will have higher prob of dying (later)
     nogrowth = Int64[]
     
     growing = find(x->x.stage == growing_stage,orgs)
@@ -298,14 +233,14 @@ end
 end
 
 """
-                                                        develop!()
-                                                        Controls individual juvenile maturation.
-                                                        """
-function develop!(orgs::Array{Organism,1}, orgsref, settings::Dict{String, Any}, t::Int)
-# checkpoint
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("Maturation..."))
-end
+                                                                develop!()
+                                                                Controls individual juvenile maturation.
+                                                                """
+function develop!(orgs::Array{Organism,1}, sppref::SppRef, settings::Dict{String, Any}, t::Int)
+    # checkpoint
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        writedlm(sim, hcat("Maturation..."))
+    end
 
     juvs = find(x->x.stage == "j",orgs)
 
@@ -324,16 +259,16 @@ end
 end
 
 """
-                                                        mate!()
-                                                        Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
-                                                        - visited: reduction in pollination service
-                                                        """
+                                                                mate!()
+                                                                Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
+                                                                - visited: reduction in pollination service
+                                                                """
 function mate!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
 
-# checkpoint
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("Pollination ..."))
-end
+    # checkpoint
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        writedlm(sim, hcat("Pollination ..."))
+    end
 
     ready = find(x-> x.stage == "a" && x.mass["repr"] > x.seedmass, orgs) # TODO find those with higher reproductive mas than the mean nb of seeds * seed mass.
     pollinated = []
@@ -404,19 +339,19 @@ end
 
 	else
 	    error("Please chose a pollination scenario \"scen\" in insect.csv:
-			                                                        - \"indep\": sexual reproduction happens independently of pollination
-			                                                        - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
-			                                                        - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
+			                                                                - \"indep\": sexual reproduction happens independently of pollination
+			                                                                - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
+			                                                                - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
 	end
 
     end
 end
 
 """
-                                                        mkoffspring!()
-                                                        After mating happened (marked in `reped`), calculate the amount of offspring
-                                                        """
-function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},orgsref, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::Organisms.TraitRanges)
+                                                                mkoffspring!()
+                                                                After mating happened (marked in `reped`), calculate the amount of offspring
+                                                                """
+function mkoffspring!(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String, Any},sppref::SppRef, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::Organisms.TraitRanges)
 
     # Number of individuals before and after
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
@@ -645,26 +580,26 @@ end
 
 
 """
-                                                        release!()
-                                                         """
-function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},orgsref)
+                                                                release!()
+                                                                 """
+function release!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any},sppref::SppRef)
 
     # Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
     seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, orgs)
-    # using a condition "outside" orgs might not work. This condition with orgsref only works because orgsref always has the sp names of x as keys in the dictionnary. If presented with a key that it doesdo contain, it throws an error.
+    # using a condition "outside" orgs might not work. This condition with sppref only works because sppref always has the sp names of x as keys in the dictionnary. If presented with a key that it doesdo contain, it throws an error.
 end
 
 """
-                                                        disperse!(landscape, orgs, t, seetings, orgsref,)
-                                                        Seeds are dispersed.
-                                                        """
+                                                                disperse!(landscape, orgs, t, seetings, sppref,)
+                                                                Seeds are dispersed.
+                                                                """
 
-function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, orgsref, landpars::Any, tdist::Any)#Setworld.LandPars)}
+function disperse!(landavail::BitArray{2}, seedsi, orgs::Array{Organisms.Organism, 1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, landpars::Any, tdist::Any)#Setworld.LandPars)}
 
-# checkpoint
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("Dispersing ..."))
-end
+    # checkpoint
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        writedlm(sim, hcat("Dispersing ..."))
+    end
 
     lost = Int64[]
     justdispersed = String[]
@@ -731,9 +666,9 @@ end
 end
 
 """
-                                                        germinate(org)
-                                                        Seeds have a probability of germinating (`gprob`).
-                                                        """
+                                                                germinate(org)
+                                                                Seeds have a probability of germinating (`gprob`).
+                                                                """
 
 function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, Any})
 
@@ -758,11 +693,11 @@ function germinate(org::Organisms.Organism, T::Float64, settings::Dict{String, A
 end
 
 """
-                                                        establish!
-                                                        Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
-                                                        """
-function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, orgsref, T::Float64, justdispersed, biomass_production::Float64, K::Float64)
-#REFERENCE: May et al. 2009
+                                                                establish!
+                                                                Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
+                                                                """
+function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, justdispersed, biomass_production::Float64, K::Float64)
+    #REFERENCE: May et al. 2009
     establishing = find(x -> x.stage == "e", orgs)
 
     # checpoint
@@ -814,101 +749,101 @@ function establish!(orgs::Array{Organisms.Organism,1}, t::Int, settings::Dict{St
 end
 
 """
-                                                        survive!(orgs, nogrowth,landscape)
-                                                        Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
-                                                        plants in nogrwth are subjected to two probability rates
-                                                        """
-function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, orgsref, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, biomass_production::Float64, dying_stage::String)
+                                                                survive!(orgs, nogrowth,landscape)
+                                                                Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
+                                                                plants in nogrwth are subjected to two probability rates
+                                                                """
+function survive!(orgs::Array{Organisms.Organism,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, sppref::SppRef, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, biomass_production::Float64, dying_stage::String)
 
-# check-point
-if dying_stage == "a"
-   open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("Running MORTALITY: ADULTS & SEEDS"))
-   end
-elseif dying_stage == "j"
-   open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("Running MORTALITY: JUVENILES"))
-   end
-end
+    # check-point
+    if dying_stage == "a"
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+            writedlm(sim, hcat("Running MORTALITY: ADULTS & SEEDS"))
+        end
+    elseif dying_stage == "j"
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+            writedlm(sim, hcat("Running MORTALITY: JUVENILES"))
+        end
+    end
 
-## Density-independent mortality
-deaths = Int64[]
-mprob = 0
-Bm = 0
-b0mort = 0
+    ## Density-independent mortality
+    deaths = Int64[]
+    mprob = 0
+    Bm = 0
+    b0mort = 0
 
-### Seeds have higher mortality factor
-seed_mfactor = 15
-juv_mfactor = 15
-adult_mfactor = 15
+    ### Seeds have higher mortality factor
+    seed_mfactor = 15
+    juv_mfactor = 15
+    adult_mfactor = 15
 
-# check-point
-#check-point
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("# total: ", length(orgs),
-		       "# seeds:", length(find(x -> x.stage == "e", orgs)),
-		       "# juveniles:", length(find(x -> x.stage == "j", orgs)),
-		       "# adults:", length(find(x -> x.stage == "a", orgs)),
-		       "vegetative weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
-end
+    # check-point
+    #check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        writedlm(sim, hcat("# total: ", length(orgs),
+		           "# seeds:", length(find(x -> x.stage == "e", orgs)),
+		           "# juveniles:", length(find(x -> x.stage == "j", orgs)),
+		           "# adults:", length(find(x -> x.stage == "a", orgs)),
+		           "vegetative weighing:", sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))))
+    end
 
-### Old ones die
-old = find( x -> ((x.stage == "a" && x.age >= x.span)), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
-deleteat!(orgs, old)
-# check-point
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("Dying of age:", length(old)))
-end
+    ### Old ones die
+    old = find( x -> ((x.stage == "a" && x.age >= x.span)), orgs) #|| (x.stage == "e" && x.age >= x.bankduration)), orgs)
+    deleteat!(orgs, old)
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        writedlm(sim, hcat("Dying of age:", length(old)))
+    end
 
-### The rest has a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
-if dying_stage == "a"
-   dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), orgs)
-else
-   dying = find(x -> x.stage == dying_stage, orgs) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
-end
-
-for d in dying
-
-    # Seeds have higher mortality
-    if orgs[d].stage == "e"
-	m_stage = seed_mfactor
-    elseif orgs[d].stage == "j"
-	m_stage = juv_mfactor
-    elseif orgs[d].stage == "a"
-	m_stage = adult_mfactor
+    ### The rest has a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
+    if dying_stage == "a"
+        dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), orgs)
     else
-	error("Error with organism's stage assignment") 
+        dying = find(x -> x.stage == dying_stage, orgs) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
     end
 
-    Bm = orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-    mprob = 1 - exp(-Bm)
+    for d in dying
 
-    # unity test
-    if mprob < 0
-	error("mprob < 0")
-	#mprob = 0
-    elseif mprob > 1            #mprob = 1
-	error("mprob > 1")
+        # Seeds have higher mortality
+        if orgs[d].stage == "e"
+	    m_stage = seed_mfactor
+        elseif orgs[d].stage == "j"
+	    m_stage = juv_mfactor
+        elseif orgs[d].stage == "a"
+	    m_stage = adult_mfactor
+        else
+	    error("Error with organism's stage assignment") 
+        end
+
+        Bm = orgs[d].b0mort*m_stage*(orgs[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+        mprob = 1 - exp(-Bm)
+
+        # unity test
+        if mprob < 0
+	    error("mprob < 0")
+	    #mprob = 0
+        elseif mprob > 1            #mprob = 1
+	    error("mprob > 1")
+        end
+
+        if 1 == rand(Distributions.Bernoulli(mprob))
+	    push!(deaths, d)
+	    #println("$(orgs[d].stage) dying INDEP.")
+	    # check-point
+	    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+	        writedlm(sim, hcat(t, "death", orgs[d].stage, orgs[d].age))
+	    end
+	    open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+	        writedlm(sim, hcat(orgs[d].stage, orgs[d].age, Bm, mprob, "death"))
+	    end
+        end
     end
 
-    if 1 == rand(Distributions.Bernoulli(mprob))
-	push!(deaths, d)
-	#println("$(orgs[d].stage) dying INDEP.")
-	# check-point
-	open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-	    writedlm(sim, hcat(t, "death", orgs[d].stage, orgs[d].age))
-	end
-	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-	    writedlm(sim, hcat(orgs[d].stage, orgs[d].age, Bm, mprob, "death"))
-	end
+    deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they won't cramp up density-dependent mortality
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        println(sim, "Density-independent mortality: ", length(deaths))
     end
-end
-
-deleteat!(orgs, deaths) #delete the ones that are already dying due to mortality rate, so that they won't cramp up density-dependent mortality
-# check-point
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    println(sim, "Density-independent mortality: ", length(deaths))
-end
 
     ## Density-dependent mortality
 
@@ -943,10 +878,10 @@ end
         # mortality intra grid cell first
 	if length(fullcells_indxs) > 0
 
-    #check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	println(sim, "number of occupied cells: $(unique(locs[fullcells_indxs]))")
-    end
+            #check-point
+            open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+	        println(sim, "number of occupied cells: $(unique(locs[fullcells_indxs]))")
+            end
 
 
 	    # loop through each grid cell, looking for the ones with biomass production over the cell carrying-capacity
@@ -955,56 +890,56 @@ end
 		#find plants that are in the same grid
 		samecell = filter(x -> x.location == loc, biomass_orgs)
 
-		 while sum(vcat(map(x -> x.mass["veg"], samecell),0.00001)) > cK
+		while sum(vcat(map(x -> x.mass["veg"], samecell),0.00001)) > cK
 
-		       # get fitness of all species that are in the cell
-                       sppgrid_fitness = Dict(sp => orgsref.fitness[sp] for sp in map(x -> x.sp, samecell))
-                       # calculate the relative fitness, in relation to the other ones
+		    # get fitness of all species that are in the cell
+                    sppgrid_fitness = Dict(sp => sppref.fitness[sp] for sp in map(x -> x.sp, samecell))
+                    # calculate the relative fitness, in relation to the other ones
 
-		       # the species in the dictionnaries are over their respective cell carrying capacity, i.e., individuals must die. Therefore, loop through all species in the dictionary, killing accordingly.
-		       for sp in keys(sppgrid_fitness)
+		    # the species in the dictionnaries are over their respective cell carrying capacity, i.e., individuals must die. Therefore, loop through all species in the dictionary, killing accordingly.
+		    for sp in keys(sppgrid_fitness)
 
-                       	   cK_sp = cK * (sppgrid_fitness[sp]/sum(collect(values(sppgrid_fitness))))
-			   #check-point
+                       	cK_sp = cK * (sppgrid_fitness[sp]/sum(collect(values(sppgrid_fitness))))
+			#check-point
 
-                           samecell_sp = filter(x -> x.sp == sp, samecell)
+                        samecell_sp = filter(x -> x.sp == sp, samecell)
 
-                           # unity test
-                           if (length(filter(x -> x.stage == "j", samecell_sp)) == 0 &&
-                               length(filter(x -> x.stage == "a", samecell_sp)) == 0)
-			       error("Cell carrying capacity overboard, but no juveniles or adults of $sp were detected") 
-		           end
-			   if(length(filter(x -> x.stage == "e", samecell_sp)) > 0)
-			      error("Seeds being detected for density-dependent mortality")
-		 	   end	
-                            
-                           dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
+                        # unity test
+                        if (length(filter(x -> x.stage == "j", samecell_sp)) == 0 &&
+                            length(filter(x -> x.stage == "a", samecell_sp)) == 0)
+			    error("Cell carrying capacity overboard, but no juveniles or adults of $sp were detected") 
+		        end
+			if(length(filter(x -> x.stage == "e", samecell_sp)) > 0)
+			    error("Seeds being detected for density-dependent mortality")
+		 	end	
+                        
+                        dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
 
-                      	   while (sum(vcat(map(x -> x.mass["veg"], samecell_sp), 0.00001)) > cK_sp && length(dying_orgs) > 0)
+                      	while (sum(vcat(map(x -> x.mass["veg"], samecell_sp), 0.00001)) > cK_sp && length(dying_orgs) > 0)
 
-                           	 # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
-                                    masses = map(x -> x.mass["veg"], dying_orgs)
-		                    dying = filter(x -> x.mass["veg"] == minimum(masses), dying_orgs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
-				    
-                                    o = find(x -> x.id == dying.id, orgs)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()# check-point
- 			            open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-		                        writedlm(sim, hcat(t, "death-K-gridcell", orgs[o].stage, orgs[o].age))
-                    	            end
-		    	            deleteat!(orgs, o)
-          			    
-				    # update control of while-loop  
-                                    o_cell = find(x -> x.id == dying.id, samecell_sp)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
-                    	            deleteat!(samecell_sp, o_cell)
-                                    dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
-          			    
-                           end
+                            # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                            masses = map(x -> x.mass["veg"], dying_orgs)
+		            dying = filter(x -> x.mass["veg"] == minimum(masses), dying_orgs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
+			    
+                            o = find(x -> x.id == dying.id, orgs)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()# check-point
+ 			    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+		                writedlm(sim, hcat(t, "death-K-gridcell", orgs[o].stage, orgs[o].age))
+                    	    end
+		    	    deleteat!(orgs, o)
+          		    
+			    # update control of while-loop  
+                            o_cell = find(x -> x.id == dying.id, samecell_sp)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
+                    	    deleteat!(samecell_sp, o_cell)
+                            dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
+          		    
                         end
+                    end
 
-			# update of control of while-loop
-			biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
-       		      	samecell = filter(x -> x.location == loc, biomass_orgs)
-		        
-                 end
+		    # update of control of while-loop
+		    biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
+       		    samecell = filter(x -> x.location == loc, biomass_orgs)
+		    
+                end
             end
 	    
         else # in case no individuals are sharing cells but production > K
@@ -1014,8 +949,8 @@ end
 
             for sp in map(x -> x.sp, orgs)
                 inds_sp = filter(x -> x.sp == sp, orgs)
-                if sum(vcat(map(x -> x.mass["veg"], inds_sp), 0.00001)) > K * orgsref.fitness[sp]
-                    sppoverK_fitness[sp] = orgsref.fitness[sp]
+                if sum(vcat(map(x -> x.mass["veg"], inds_sp), 0.00001)) > K * sppref.fitness[sp]
+                    sppoverK_fitness[sp] = sppref.fitness[sp]
                 end
             end
 
@@ -1023,7 +958,7 @@ end
 
                 for sp in keys(sppoverK_fitness)
 
-                    K_sp = K * orgsref.fitness[sp]
+                    K_sp = K * sppref.fitness[sp]
                     orgs_sp = filter(x -> x.sp == sp, biomass_orgs)
 
                     # unity test
@@ -1035,33 +970,33 @@ end
 		        error("Seeds being detected for density-dependent mortality")
 		    end	
                     
-                    	dying_orgs = filter(x -> x.stage == dying_stage, orgs_sp)
-		      	
-                      	while (sum(vcat(map(x -> x.mass["veg"], orgs_sp), 0.00001)) > K_sp && length(dying_orgs) > 0)
+                    dying_orgs = filter(x -> x.stage == dying_stage, orgs_sp)
+		    
+                    while (sum(vcat(map(x -> x.mass["veg"], orgs_sp), 0.00001)) > K_sp && length(dying_orgs) > 0)
 
-                            # checkpoint: seeds are the last to be killed, because they are supposed to form a seed bank
-                            if stage == "e"
-                                open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	                            println(sim, "Seeds of $sp going over cell carrying capacity.")
-	                        end
-                            end
-                            
-			    # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
-                            masses = map(x -> x.mass["veg"], dying_orgs)
-		            dying = filter(x -> x.mass["veg"] == minimum(masses), dying_orgs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
-                            o = find(x -> x.id == dying.id, orgs)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
-                    	    # check-point
- 			    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-		                writedlm(sim, hcat(t, "death-K", orgs[o].stage, orgs[o].age))
-                    	    end
-		    	    deleteat!(orgs, o)                                     
-
-                            # update control of while-loop  
-                            o_cell = find(x -> x.id == dying.id, orgs_sp)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
-                    	    deleteat!(orgs_sp, o_cell)
-                            dying_orgs = filter(x -> x.stage == dying_stage, orgs_sp)
-		      	    
+                        # checkpoint: seeds are the last to be killed, because they are supposed to form a seed bank
+                        if stage == "e"
+                            open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+	                        println(sim, "Seeds of $sp going over cell carrying capacity.")
+	                    end
                         end
+                        
+			# loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                        masses = map(x -> x.mass["veg"], dying_orgs)
+		        dying = filter(x -> x.mass["veg"] == minimum(masses), dying_orgs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
+                        o = find(x -> x.id == dying.id, orgs)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
+                    	# check-point
+ 			open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+		            writedlm(sim, hcat(t, "death-K", orgs[o].stage, orgs[o].age))
+                    	end
+		    	deleteat!(orgs, o)                                     
+
+                        # update control of while-loop  
+                        o_cell = find(x -> x.id == dying.id, orgs_sp)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
+                    	deleteat!(orgs_sp, o_cell)
+                        dying_orgs = filter(x -> x.stage == dying_stage, orgs_sp)
+		      	
+                    end
 		end
 		# update control of while-loop
        		biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
@@ -1069,9 +1004,9 @@ end
 end
 end
 #check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	println(sim, "Production after density-dependent mortality: $(sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)))g; K = $K")
-    end
+open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    println(sim, "Production after density-dependent mortality: $(sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)))g; K = $K")
+end
 
 ## Surviving ones get older: some of them were not filtered above, so the ageing up need to be done separately to include all
 for o in 1:length(orgs)
@@ -1082,14 +1017,14 @@ end
 
 
 """
-                                                        shedd!()
-                                                        Plants loose their reproductive biomasses at the end of the reproductive season and 50% of biomass during winter.
-                                                        """
-function shedd!(orgs::Array{Organisms.Organism,1}, orgsref, t::Int, settings::Dict{String,Any})
-# checkpoint
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("SHEDDING reproductive biomass/ WInter-die back"))
-end
+                                                                shedd!()
+                                                                Plants loose their reproductive biomasses at the end of the reproductive season and 50% of biomass during winter.
+                                                                """
+function shedd!(orgs::Array{Organisms.Organism,1}, sppref::SppRef, t::Int, settings::Dict{String,Any})
+    # checkpoint
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        writedlm(sim, hcat("SHEDDING reproductive biomass/ WInter-die back"))
+    end
 
     flowering = find(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), orgs) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
 
@@ -1108,9 +1043,9 @@ end
 end
 
 """
-                                                        destroyorgs!(orgs)
-                                                        Kill organisms that where in the lost habitat cells.
-                                                        """
+                                                                destroyorgs!(orgs)
+                                                                Kill organisms that where in the lost habitat cells.
+                                                                """
 function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::BitArray{2}, settings::Dict{String,Any})
 
     kills = []
@@ -1132,9 +1067,9 @@ function destroyorgs!(orgs::Array{Organisms.Organism,1}, landavail::BitArray{2},
 end
 
 """
-                                                        manage!()
-                                                        Plants loose 20% of vegetative biomass and all of the reproductive biomass due to mowing. Mowing happens at most 3 times a year, between July and August.
-                                                        """
+                                                                manage!()
+                                                                Plants loose 20% of vegetative biomass and all of the reproductive biomass due to mowing. Mowing happens at most 3 times a year, between July and August.
+                                                                """
 function manage!(orgs::Array{Organisms.Organism,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
 
     if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.5))
@@ -1162,9 +1097,9 @@ function manage!(orgs::Array{Organisms.Organism,1}, t::Int64, management_counter
 end
 
 """
-                                                        pollination!()
-                                                        Simulates plant-insect encounters and effective pollen transfer.
-                                                        """
+                                                                pollination!()
+                                                                Simulates plant-insect encounters and effective pollen transfer.
+                                                                """
 #TODO find a not too cumbersome way of modelling pollen transfer: draw from Poisot's probability
 
 # """

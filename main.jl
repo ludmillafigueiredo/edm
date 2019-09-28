@@ -59,11 +59,6 @@ function parse_commandline()
         arg_type = String
         default = abspath(pwd(),"inputs/species.csv")
 
-        "--traitdist"
-        help = "Type of distribution to initialize species traits"
-        arg_type = String
-        default = "uniform"
-
         "--competition"
         help = "Type of competition: \"individual\", based on FON or \"capacity\", based on the landscape carrying capacity"
         arg_type = String
@@ -222,7 +217,7 @@ end
 
 """
                 read_spinput(settings)
-                Reads in species initial conditions and parameters. Stores tehm in `orgsref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
+                Reads in species initial conditions and parameters. Stores tehm in `sppref`, a structure with parameters names as Dictionnary fields, where species names are the keys to the parameter values.
                 """
 
 function read_spinput(settings::Dict{String,Any})
@@ -230,171 +225,76 @@ function read_spinput(settings::Dict{String,Any})
     #spinputtbl = loadtable(abspath(pwd(),"inputs/species.csv"))
     spinputtbl = loadtable(settings["spinput"])
 
-    if settings["traitdist"] == "uniform"
-        orgsref = OrgsRef_unif(Array(rows(spinputtbl,:sp_id)),
-
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+    sppref = SppRef(Array(rows(spinputtbl,:sp_id)),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:abund)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:kernel)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:clonality)[i] == "true" #translates R's true into Julia's TRUE
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:seedmass)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:maxmass)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:span_min)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:span_max)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:firstflower_min)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:firstflower_max)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:floron)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:floroff)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:seednumber_min)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:seednumber_max)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:seedon)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:seedoff)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:bankduration_min)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:bankduration_max)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:b0grow)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:b0germ)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:b0mort)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:temp_opt)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-                               Dict(rows(spinputtbl,:sp_id)[i] =>
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict(rows(spinputtbl,:sp_id)[i] =>
                                     rows(spinputtbl,:temp_tol)[i]
-                                    for i in 1:length(rows(spinputtbl,:sp_id))),
-			       Dict()
-                               )
+                                for i in 1:length(rows(spinputtbl,:sp_id))),
+                           Dict())
 
-    elseif settings["traitdist"] == "normal"
-        orgsref = OrgsRef_normal(Array(rows(spinputtbl,:sp_id)),
-
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:abund)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:kernel)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:clonality)[i] == "true" #translates R's true into Julia's TRUE
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:seedmass)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:maxmass)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:span_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:span_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:firstflower_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:firstflower_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:floron_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:floron_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:floroff_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:floroff_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:seednumber_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:seednumber_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:seedon_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:seedon_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:seedoff_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:seedoff_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:bankduration_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:bankduration_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:b0grow_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:b0grow_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:b0germ_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:b0germ_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:b0mort_mean)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:b0mort_sd)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:temp_opt)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id))),
-                                 Dict(rows(spinputtbl,:sp_id)[i] =>
-                                      rows(spinputtbl,:temp_tol)[i]
-                                      for i in 1:length(rows(spinputtbl,:sp_id)))
-                                 )
-end
-return orgsref
+    return sppref
 end
 
 function define_traitranges(settings::Dict{String,Any})
@@ -625,7 +525,7 @@ function timing(operation::String, settings::Dict{String,Any})
 end
 
 """
-            updatefitness!(orgsref, mean_opt::Float64, std_tol::Float64, mean_annual::Float64, max_fitness::Float64)
+            updatefitness!(sppref, mean_opt::Float64, std_tol::Float64, mean_annual::Float64, max_fitness::Float64)
 
             Calculate the fitness value according to a Gauss function:
 
@@ -638,46 +538,46 @@ end
             - `std_tol::Float64`: parameter `c` is the standard deviation, 
              """
 
-function updatefitness!(orgsref::Any, mean_annual::Float64, max_fitness::Float64)
+function updatefitness!(sppref::SppRef, mean_annual::Float64, max_fitness::Float64)
 
-    for sp in orgsref.sp_id
+    for sp in sppref.sp_id
         
-        mean_opt = orgsref.temp_opt[sp]
-        std_tol = orgsref.temp_tol[sp]
+        mean_opt = sppref.temp_opt[sp]
+        std_tol = sppref.temp_tol[sp]
 
         absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
-        orgsref.fitness[sp] = absolute_fitness
+        sppref.fitness[sp] = absolute_fitness
     end
 
-    sum_fitness = sum(collect(values(orgsref.fitness)))
+    sum_fitness = sum(collect(values(sppref.fitness)))
     
-    for sp in orgsref.sp_id
-    	normalized_fitness = orgsref.fitness[sp]/sum_fitness
-	orgsref.fitness[sp] = normalized_fitness
+    for sp in sppref.sp_id
+    	normalized_fitness = sppref.fitness[sp]/sum_fitness
+	sppref.fitness[sp] = normalized_fitness
     end
 end
 
 
-function updatefitness!(orgsref::Any, mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Dict{String, Any})
+function updatefitness!(sppref::SppRef, mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Dict{String, Any})
 
-    for sp in orgsref.sp_id
+    for sp in sppref.sp_id
         
-        mean_opt = orgsref.temp_opt[sp]
-        std_tol = orgsref.temp_tol[sp]
+        mean_opt = sppref.temp_opt[sp]
+        std_tol = sppref.temp_tol[sp]
 
         absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
-        orgsref.fitness[sp] = absolute_fitness
+        sppref.fitness[sp] = absolute_fitness
     end
 
-    sum_fitness = sum(collect(values(orgsref.fitness)))
+    sum_fitness = sum(collect(values(sppref.fitness)))
     
-    for sp in orgsref.sp_id
-    	normalized_fitness = orgsref.fitness[sp]/sum_fitness
-	orgsref.fitness[sp] = normalized_fitness
+    for sp in sppref.sp_id
+    	normalized_fitness = sppref.fitness[sp]/sum_fitness
+	sppref.fitness[sp] = normalized_fitness
     end
 
     open(abspath(joinpath(settings["outputat"], settings["simID"], "spp_fitness.csv")),"a") do fitnessfile
-    	writedlm(fitnessfile, hcat(t, sp, get(orgsref.fitness, sp, "NA")) for sp in collect(keys(orgsref.fitness)))
+    	writedlm(fitnessfile, hcat(t, sp, get(sppref.fitness, sp, "NA")) for sp in collect(keys(sppref.fitness)))
     end
 end
 
@@ -710,9 +610,9 @@ function simulate()
     println("Land init stored in object of type $(typeof(landpars))")
 
     # Store species information
-    orgsref = read_spinput(settings)
+    sppref = read_spinput(settings)
     ## unity test
-    println("Sp info stored in object of type $(typeof(orgsref))")
+    println("Sp info stored in object of type $(typeof(sppref))")
     traitranges = define_traitranges(settings)
     ## unity test
     println("Sp ranges stored in object of type $(typeof(traitranges))")
@@ -734,10 +634,10 @@ function simulate()
     # Initialize abundances according to species fitness
     updateK!(landavail, settings, 1)
     T, mean_annual = updateenv!(1, landpars)
-    updatefitness!(orgsref, mean_annual, 1.0)
+    updatefitness!(sppref, mean_annual, 1.0)
 
     # Create initial individuals
-    orgs, id_counter = initorgs(landavail, orgsref, id_counter, settings, K)
+    orgs, id_counter = initorgs(landavail, sppref, id_counter, settings, K)
 
     println("Plants initialized: type $(typeof(orgs))")
 
@@ -833,7 +733,7 @@ function simulate()
 	    end
 	    
             # UPDATE SPECIES FITNESS
-            updatefitness!(orgsref, mean_annual, 1.0, t, settings)
+            updatefitness!(sppref, mean_annual, 1.0, t, settings)
             
             # OUTPUT: First thing, to see how community is initialized
             tic()
@@ -856,27 +756,27 @@ function simulate()
             # LIFE CYCLE
             tic()
 
-            global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T, biomass_production, K, "a")
+            global nogrowth = allocate!(orgs, t, aE, Boltz, settings, sppref, T, biomass_production, K, "a")
             
-            survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, biomass_production, "a")
+            survive!(orgs, t, cK, K, settings, sppref, landavail, T, nogrowth, biomass_production, "a")
 
-	    global nogrowth = allocate!(orgs, t, aE, Boltz, settings, orgsref, T, biomass_production, K, "j")
+	    global nogrowth = allocate!(orgs, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
             
-            survive!(orgs, t, cK, K, settings, orgsref, landavail, T, nogrowth, biomass_production, "j")
+            survive!(orgs, t, cK, K, settings, sppref, landavail, T, nogrowth, biomass_production, "j")
 
-            develop!(orgs, orgsref, settings, t)
+            develop!(orgs, sppref, settings, t)
 
             mate!(orgs, t, settings, scen, tdist, remaining)
 
-            id_counter = mkoffspring!(orgs, t, settings, orgsref, id_counter, landavail, T, traitranges)
+            id_counter = mkoffspring!(orgs, t, settings, sppref, id_counter, landavail, T, traitranges)
 
-            seedsi = release!(orgs, t, settings, orgsref) # only recently released seeds need to disperse. The others only need to survive
+            seedsi = release!(orgs, t, settings, sppref) # only recently released seeds need to disperse. The others only need to survive
 
-            justdispersed = disperse!(landavail, seedsi, orgs, t, settings, orgsref, landpars, tdist)
+            justdispersed = disperse!(landavail, seedsi, orgs, t, settings, sppref, landpars, tdist)
 
-            establish!(orgs, t, settings, orgsref, T, justdispersed, biomass_production, K)
+            establish!(orgs, t, settings, sppref, T, justdispersed, biomass_production, K)
             
-            shedd!(orgs, orgsref, t, settings)
+            shedd!(orgs, sppref, t, settings)
 
             timing("Time running life cycle:", settings)
             toc()
