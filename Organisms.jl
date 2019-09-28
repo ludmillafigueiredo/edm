@@ -594,7 +594,9 @@ end
 function release!(plants::Array{Organisms.Plant,1}, t::Int, settings::Dict{String, Any},sppref::SppRef)
 
     # Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
+
     seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, plants)
+
     # using a condition "outside" plants might not work. This condition with sppref only works because sppref always has the sp names of x as keys in the dictionnary. If presented with a key that it doesdo contain, it throws an error.
 end
 
@@ -672,33 +674,6 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{Organisms.Plant
     deleteat!(plants,lost)
 
     return justdispersed
-end
-
-"""
-                                                                germinate(plant)
-                                                                Seeds have a probability of germinating (`gprob`).
-                                                                """
-
-function germinate(plant::Organisms.Plant, T::Float64, settings::Dict{String, Any})
-
-    Bg = b0germ * (plant.mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
-    gprob = 1 - exp(-Bg)
-    # test
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-	writedlm(sim, hcat(plant.stage, plant.age, Bg, gprob, "germination"))
-    end
-
-    if gprob < 0
-	error("gprob < 0")
-    elseif gprob > 1
-	error("gprob > 1")
-    end
-    
-    germ = false
-    if 1 == rand(Distributions.Bernoulli(gprob))
-	germ = true
-    end
-    return germ
 end
 
 """
