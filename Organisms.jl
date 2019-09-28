@@ -942,45 +942,47 @@ end
 
         # mortality intra grid cell first
 	if length(fullcells_indxs) > 0
-	    
-	    for c in fullcells_indxs
+
+    #check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+	println(sim, "number of occupied cells: $(unique(locs[fullcells_indxs]))")
+    end
+
+
+	    # loop through each grid cell, looking for the ones with biomass production over the cell carrying-capacity
+	    for loc in unique(locs[fullcells_indxs])
 
 		#find plants that are in the same grid
-		samecell = filter(x -> x.location == locs[c], biomass_orgs)
+		samecell = filter(x -> x.location == loc, biomass_orgs)
 
-		if sum(vcat(map(x -> x.mass["veg"], samecell),0.00001)) > cK
+		 while sum(vcat(map(x -> x.mass["veg"], samecell),0.00001)) > cK
 
-                    # get species that are over their carrying capacity for the cell and store their respective fitness values
-                    sppovercK_fitness = Dict()
+		       # get fitness of all species that are in the cell
+                       sppgrid_fitness = Dict(sp => orgsref.fitness[sp] for sp in map(x -> x.sp, samecell))
+                       # calculate the relative fitness, in relation to the other ones
 
-                    for sp in map(x -> x.sp, samecell)
-                        inds_sp = filter(x -> x.sp == sp, samecell) 
-                        if sum(vcat(map(x -> x.mass["veg"], inds_sp), 0.00001)) > cK * orgsref.fitness[sp]
-                            sppovercK_fitness[sp] = orgsref.fitness[sp]
-                        end
-                    end
+		       # the species in the dictionnaries are over their respective cell carrying capacity, i.e., individuals must die. Therefore, loop through all species in the dictionary, killing accordingly.
+		       for sp in keys(sppgrid_fitness)
 
-		    while sum(vcat(map(x -> x.mass["veg"], samecell),0.00001)) > cK
+                       	   cK_sp = cK * (sppgrid_fitness[sp]/sum(collect(values(sppgrid_fitness))))
+			   #check-point
 
-                        for sp in keys(sppovercK_fitness)
+                           samecell_sp = filter(x -> x.sp == sp, samecell)
 
-                            cK_sp = cK * orgsref.fitness[sp]
-                            samecell_sp = filter(x -> x.sp == sp, samecell)
-
-                            # unity test
-                            if (length(filter(x -> x.stage == "j", samecell_sp)) == 0 &&
-                                length(filter(x -> x.stage == "a", samecell_sp)) == 0)
-			        error("Cell carrying capacity overboard, but no individuals of $sp were detected") 
-		            end
-			    if(length(filter(x -> x.stage == "e", samecell_sp)) > 0)
-			        error("Seeds being detected for density-dependent mortality")
-		 	    end	
+                           # unity test
+                           if (length(filter(x -> x.stage == "j", samecell_sp)) == 0 &&
+                               length(filter(x -> x.stage == "a", samecell_sp)) == 0)
+			       error("Cell carrying capacity overboard, but no juveniles or adults of $sp were detected") 
+		           end
+			   if(length(filter(x -> x.stage == "e", samecell_sp)) > 0)
+			      error("Seeds being detected for density-dependent mortality")
+		 	   end	
                             
-                                dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
-		      	        
-                      	        while (sum(vcat(map(x -> x.mass["veg"], samecell_sp), 0.00001)) > cK_sp && length(dying_orgs) > 0)
+                           dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
 
-                                    # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
+                      	   while (sum(vcat(map(x -> x.mass["veg"], samecell_sp), 0.00001)) > cK_sp && length(dying_orgs) > 0)
+
+                           	 # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
                                     masses = map(x -> x.mass["veg"], dying_orgs)
 		                    dying = filter(x -> x.mass["veg"] == minimum(masses), dying_orgs)[1] #but only one can be tracked down and killed at a time (not possible to order the `orgs` array by any field value)
 				    
@@ -995,15 +997,14 @@ end
                     	            deleteat!(samecell_sp, o_cell)
                                     dying_orgs = filter(x -> x.stage == dying_stage, samecell_sp)
           			    
-                               end
+                           end
                         end
 
 			# update of control of while-loop
 			biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
-       		      	samecell = filter(x -> x.location == locs[c], biomass_orgs)
+       		      	samecell = filter(x -> x.location == loc, biomass_orgs)
 		        
-                    end
-                end
+                 end
             end
 	    
         else # in case no individuals are sharing cells but production > K
@@ -1034,9 +1035,7 @@ end
 		        error("Seeds being detected for density-dependent mortality")
 		    end	
                     
-                    for stage in ["j" "a"] #juveniles are killed first, by order of size
-                        
-		      	dying_orgs = filter(x -> x.stage == stage, orgs_sp)
+                    	dying_orgs = filter(x -> x.stage == dying_stage, orgs_sp)
 		      	
                       	while (sum(vcat(map(x -> x.mass["veg"], orgs_sp), 0.00001)) > K_sp && length(dying_orgs) > 0)
 
@@ -1053,23 +1052,26 @@ end
                             o = find(x -> x.id == dying.id, orgs)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
                     	    # check-point
  			    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-		                writedlm(sim, hcat(t, "death-K-gridcell", orgs[o].stage, orgs[o].age))
+		                writedlm(sim, hcat(t, "death-K", orgs[o].stage, orgs[o].age))
                     	    end
 		    	    deleteat!(orgs, o)                                     
 
                             # update control of while-loop  
                             o_cell = find(x -> x.id == dying.id, orgs_sp)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
                     	    deleteat!(orgs_sp, o_cell)
-                            dying_orgs = filter(x -> x.stage == stage, orgs_sp)
+                            dying_orgs = filter(x -> x.stage == dying_stage, orgs_sp)
 		      	    
                         end
-		    end
-                end
+		end
 		# update control of while-loop
        		biomass_orgs = filter(x -> x.stage in ("j", "a"), orgs)
             end
 end
 end
+#check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+	println(sim, "Production after density-dependent mortality: $(sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001)))g; K = $K")
+    end
 
 ## Surviving ones get older: some of them were not filtered above, so the ageing up need to be done separately to include all
 for o in 1:length(orgs)
