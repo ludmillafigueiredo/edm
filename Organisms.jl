@@ -827,7 +827,7 @@ if dying_stage == "a"
    end
 elseif dying_stage == "j"
    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    writedlm(sim, hcat("Running MORTALITY: ADULTS & SEEDS"))
+    writedlm(sim, hcat("Running MORTALITY: JUVENILES"))
    end
 end
 
@@ -843,9 +843,6 @@ juv_mfactor = 15
 adult_mfactor = 15
 
 # check-point
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-    println(sim, "Before density-independent mortality: $(length(orgs)) individuals")
-end
 #check-point
 open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
     writedlm(sim, hcat("# total: ", length(orgs),
