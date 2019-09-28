@@ -355,53 +355,53 @@ function implicit_insect(settings::Dict{String,Any})
 end
 
 """
-                outputorgs(orgs,t,settings)
+                outputorgs(plants,t,settings)
                 Saves a long format table with the organisms field informations.
                 """
-function orgstable(orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any})
+function orgstable(plants::Array{Organisms.Plant,1}, t::Int64, settings::Dict{String,Any})
 
-    outorgs = find(x -> (x.stage in ["j" "a"] || (x.stage == "e" && x.age > 1)), orgs)
+    outplants = find(x -> (x.stage in ["j" "a"] || (x.stage == "e" && x.age > 1)), plants)
 
     # output header
     if t == 1
         header = hcat(["week"],
-                      reshape(string.(fieldnames(Organism)[1:20]),1,:),
+                      reshape(string.(fieldnames(Plant)[1:20]),1,:),
                       ["veg" "repr"],
-                      reshape(string.(fieldnames(Organism)[22:end]),1,length(fieldnames(Organism)[23:end])))
+                      reshape(string.(fieldnames(Plant)[22:end]),1,length(fieldnames(Plant)[23:end])))
         open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
     end
 
-    # output orgs info
+    # output plants info
     if t == 1 || rem(t,settings["tout"]) == 0
 
-        for o in outorgs
+        for o in outplants
             open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "a") do output
                 writedlm(output, hcat(t,
-                                      orgs[o].id,
-                                      orgs[o].stage,
-                                      orgs[o].location,
-                                      orgs[o].sp,
-                                      orgs[o].kernel,
-                                      orgs[o].clonality,
-                                      orgs[o].seedmass,
-                                      orgs[o].maxmass,
-                                      orgs[o].span,
-                                      orgs[o].firstflower,
-                                      orgs[o].floron,
-                                      orgs[o].floroff,
-                                      orgs[o].seednumber,
-                                      orgs[o].seedon,
-                                      orgs[o].seedoff,
-                                      orgs[o].bankduration,
-                                      orgs[o].b0grow,
-                                      orgs[o].b0germ,
-                                      orgs[o].b0mort,
-                                      orgs[o].age,
-                                      orgs[o].mass["veg"],
-                                      orgs[o].mass["repr"],
-                                      orgs[o].mated))
+                                      plants[o].id,
+                                      plants[o].stage,
+                                      plants[o].location,
+                                      plants[o].sp,
+                                      plants[o].kernel,
+                                      plants[o].clonality,
+                                      plants[o].seedmass,
+                                      plants[o].maxmass,
+                                      plants[o].span,
+                                      plants[o].firstflower,
+                                      plants[o].floron,
+                                      plants[o].floroff,
+                                      plants[o].seednumber,
+                                      plants[o].seedon,
+                                      plants[o].seedoff,
+                                      plants[o].bankduration,
+                                      plants[o].b0grow,
+                                      plants[o].b0germ,
+                                      plants[o].b0mort,
+                                      plants[o].age,
+                                      plants[o].mass["veg"],
+                                      plants[o].mass["repr"],
+                                      plants[o].mated))
             end
         end
     end
@@ -447,7 +447,7 @@ end
                 disturb!()
 
                 """
-function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{2}, orgs::Array{Organisms.Organism,1}, t::Int64, settings::Dict{String,Any}, landpars::NeutralLandPars, tdist::Any)
+function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{2}, plants::Array{Organisms.Plant,1}, t::Int64, settings::Dict{String,Any}, landpars::NeutralLandPars, tdist::Any)
 
     if settings["disturbtype"] == "loss"
         landscape, landavail = Setworld.destroyarea!(landpars, landavail, settings, t)
@@ -455,7 +455,7 @@ function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::B
         landscape, landavail = Setworld.fragment!(landscape, landavail, landpars, t, tdist)
     end
 
-    Organisms.destroyorgs!(orgs, landavail, settings)
+    Organisms.destroyorgs!(plants, landavail, settings)
 
     return landscape,landavail
 
@@ -636,9 +636,9 @@ function simulate()
     updatefitness!(sppref, mean_annual, 1.0)
 
     # Create initial individuals
-    orgs, id_counter = initorgs(landavail, sppref, id_counter, settings, K)
+    plants, id_counter = initorgs(landavail, sppref, id_counter, settings, K)
 
-    println("Plants initialized: type $(typeof(orgs))")
+    println("Plants initialized: type $(typeof(plants))")
 
     cd(pwd())
 
@@ -712,15 +712,15 @@ function simulate()
             # LOGGING PROGRESS
             open(abspath(joinpath(simresults_folder, "simulog.txt")),"a") do sim
                 println(sim, "WEEK $t")
-		println(sim, "Species richness: $(length(unique(map(x -> x.sp, orgs))))")
+		println(sim, "Species richness: $(length(unique(map(x -> x.sp, plants))))")
             end
 	    
 	    println("WEEK $t")
-	    println("Species richness: $(length(unique(map(x -> x.sp, orgs))))")
+	    println("Species richness: $(length(unique(map(x -> x.sp, plants))))")
 
             # IMPLEMENT LANDSCAPE DISTURBANCE
             if settings["disturbtype"] in ["frag" "loss"] && t in tdist
-                landscape, landavail = disturb!(mylandscape,landavail,orgs,t,settings,landpars,tdist)
+                landscape, landavail = disturb!(mylandscape,landavail,plants,t,settings,landpars,tdist)
             end
             updateK!(landavail, settings, t, tdist)
 
@@ -736,17 +736,17 @@ function simulate()
             
             # OUTPUT: First thing, to see how community is initialized
             tic()
-            orgstable(orgs,t,settings)
+            orgstable(plants,t,settings)
             timing("Time writing output", settings)
             toc()
 
             # MANAGEMENT: it happens at least once every year, annually
             if ((31 < rem(t,52) < 39) && management_counter < 1) #mowing cannot happen before the 1st of July
-                management_counter = manage!(orgs, t, management_counter, settings)
+                management_counter = manage!(plants, t, management_counter, settings)
             end
 
             # UPDATE CURRENT BIOMASS PRODUCTION
-            biomass_production = sum(vcat(map(x -> x.mass["veg"], orgs), 0.00001))
+            biomass_production = sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))
             # check-point
             open(abspath(joinpath(simresults_folder, "simulog.txt")),"a") do sim
                 writedlm(sim, hcat("Biomass production:", biomass_production))
@@ -755,27 +755,27 @@ function simulate()
             # LIFE CYCLE
             tic()
 
-            global nogrowth = allocate!(orgs, t, aE, Boltz, settings, sppref, T, biomass_production, K, "a")
+            global nogrowth = allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "a")
             
-            survive!(orgs, t, cK, K, settings, sppref, landavail, T, nogrowth, biomass_production, "a")
+            survive!(plants, t, cK, K, settings, sppref, landavail, T, nogrowth, biomass_production, "a")
 
-	    global nogrowth = allocate!(orgs, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
+	    global nogrowth = allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
             
-            survive!(orgs, t, cK, K, settings, sppref, landavail, T, nogrowth, biomass_production, "j")
+            survive!(plants, t, cK, K, settings, sppref, landavail, T, nogrowth, biomass_production, "j")
 
-            develop!(orgs, sppref, settings, t)
+            develop!(plants, sppref, settings, t)
 
-            mate!(orgs, t, settings, scen, tdist, remaining)
+            mate!(plants, t, settings, scen, tdist, remaining)
 
-            id_counter = mkoffspring!(orgs, t, settings, sppref, id_counter, landavail, T, traitranges)
+            id_counter = mkoffspring!(plants, t, settings, sppref, id_counter, landavail, T, traitranges)
 
-            seedsi = release!(orgs, t, settings, sppref) # only recently released seeds need to disperse. The others only need to survive
+            seedsi = release!(plants, t, settings, sppref) # only recently released seeds need to disperse. The others only need to survive
 
-            justdispersed = disperse!(landavail, seedsi, orgs, t, settings, sppref, landpars, tdist)
+            justdispersed = disperse!(landavail, seedsi, plants, t, settings, sppref, landpars, tdist)
 
-            establish!(orgs, t, settings, sppref, T, justdispersed, biomass_production, K)
+            establish!(plants, t, settings, sppref, T, justdispersed, biomass_production, K)
             
-            shedd!(orgs, sppref, t, settings)
+            shedd!(plants, sppref, t, settings)
 
             timing("Time running life cycle:", settings)
             toc()

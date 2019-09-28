@@ -210,7 +210,7 @@ This module contains the type of the cell and functions for setting up initial e
 	fragment!()
 	This function is only called for simulating the fragmentation of an originally single landscape.
 		"""
-		function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::Dict{String,Any}, landpars::LandPars, orgs::Array{Organisms.Organism,1})
+		function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::Dict{String,Any}, landpars::LandPars, plants::Array{Organisms.Plant,1})
 
 			newlandscape = []
 
@@ -235,12 +235,12 @@ This module contains the type of the cell and functions for setting up initial e
 			# reshap the cells in the same dimensions and sizes as the newlandscape, so the new indexes are correct
 			idxholder = reshape(remaincells, size(newlandscape))
 			# kill the organisms that have not remained in the new landscape configuration
-			filter!(x -> x.location in idxholder, orgs)
+			filter!(x -> x.location in idxholder, plants)
 			# update their .location field
 			newloc = []
-			for o in orgs
-				newloc <- idxholder[find(x->x == collect(orgs[o].location), idxholder)]
-				orgs[o].location = newloc
+			for o in plants
+				newloc <- idxholder[find(x->x == collect(plants[o].location), idxholder)]
+				plants[o].location = newloc
 			end
 
 			landscape = newlandscape
