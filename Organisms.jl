@@ -216,9 +216,7 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
 		plants[o].mass["repr"] = new_mass #sowingmass
 	    end
 
-        else
-            error("$(plants[o].stage) weighing $(plants[o].mass) didn't managed to grow.")
-	end
+        end
 	
     end
 
