@@ -848,7 +848,7 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
 
             # check-point
             open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	        println(sim, "number of occupied cells: $(unique(locs[fullcells_indxs]))")
+	        println(sim, "number of occupied cells: $(length(unique(locs[fullcells_indxs])))")
             end
 
 	    # loop through each grid cell, looking for the ones with biomass production over the cell carrying-capacity
