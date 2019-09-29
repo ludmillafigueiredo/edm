@@ -28,7 +28,6 @@ const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 const aE = 0.63
 global K = 0.0
 global cK = 0.0
-global nogrowth = Int64[]
 
 function parse_commandline()
     sets = ArgParseSettings() #object that will be populated with the arguments by the macro
@@ -755,13 +754,13 @@ function simulate()
             # LIFE CYCLE
             tic()
 
-            global nogrowth = allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "a")
+            allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "a")
             
-            survive!(plants, t, cK, K, settings, sppref, landavail, T, nogrowth, biomass_production, "a")
+            survive!(plants, t, cK, K, settings, sppref, landavail, T, biomass_production, "a")
 
-	    global nogrowth = allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
+	    allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
             
-            survive!(plants, t, cK, K, settings, sppref, landavail, T, nogrowth, biomass_production, "j")
+            survive!(plants, t, cK, K, settings, sppref, landavail, T, biomass_production, "j")
 
             develop!(plants, sppref, settings, t)
 
@@ -771,9 +770,9 @@ function simulate()
 
             seedsi = release!(plants, t, settings, sppref) # only recently released seeds need to disperse. The others only need to survive
 
-            justdispersed = disperse!(landavail, seedsi, plants, t, settings, sppref, landpars, tdist)
+            disperse!(landavail, seedsi, plants, t, settings, sppref, landpars, tdist)
 
-            establish!(plants, t, settings, sppref, T, justdispersed, biomass_production, K)
+            establish!(plants, t, settings, sppref, T, biomass_production, K)
             
             shedd!(plants, sppref, t, settings)
 

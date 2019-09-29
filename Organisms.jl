@@ -602,7 +602,7 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{Organisms.Plant
     end
 
     lost = Int64[]
-    justdispersed = String[]
+    justdispersed = 0
 
     for d in seedsi                    # only seeds that have been released can disperse
 	if plants[d].kernel == "short"
@@ -638,7 +638,7 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{Organisms.Plant
 	if checkbounds(Bool, landavail, xdest, ydest) && landavail[xdest, ydest] == true  # Check if individual fall inside the habitat area, otherwise, discard it already
                                                                                           # checking the suitability first would make more sense but cant be done if cell is out of bounds
 	    plants[d].location = (xdest,ydest)
-	    push!(justdispersed, plants[d].id)
+	    justdispersed += 1
 
 	else # if the new location is in an unavailable habitat or outside the landscape, the seed dies
 
@@ -652,7 +652,7 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{Organisms.Plant
     
     # checkpoint
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	writedlm(sim, hcat("Number of dispersing:", length(justdispersed)))
+	println(sim, "Number of dispersing: $justdispersed")
     end
     
     #unity test
@@ -662,7 +662,6 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{Organisms.Plant
     
     deleteat!(plants,lost)
 
-    return justdispersed
 end
 
 """
@@ -670,7 +669,7 @@ end
 Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
 
 """
-function establish!(plants::Array{Organisms.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, justdispersed, biomass_production::Float64, K::Float64)
+function establish!(plants::Array{Organisms.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64)
     #REFERENCE: May et al. 2009
     
     establishing = find(x -> x.stage == "e", plants)
@@ -718,12 +717,12 @@ function establish!(plants::Array{Organisms.Plant,1}, t::Int, settings::Dict{Str
 end
 
 """
-    survive!(orgs, nogrowth,landscape)
+    survive!(orgs, landscape)
 Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
 plants in nogrwth are subjected to two probability rates
 
 """
-function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, sppref::SppRef, landavail::BitArray{2},T, nogrowth::Array{Int64,1}, biomass_production::Float64, dying_stage::String)
+function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, sppref::SppRef, landavail::BitArray{2},T, biomass_production::Float64, dying_stage::String)
 
     # checkpoint
     if dying_stage == "a"
