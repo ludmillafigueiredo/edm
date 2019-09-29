@@ -186,8 +186,8 @@ Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T`
 
 """
 function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
-    # checkpoint
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("Growth of", growing_stage))
     end
 
@@ -237,8 +237,8 @@ Controls individual juvenile maturation.
 
 """
 function develop!(plants::Array{Organism,1}, sppref::SppRef, settings::Dict{String, Any}, t::Int)
-    # checkpoint
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("Maturation..."))
     end
 
@@ -265,8 +265,8 @@ Calculate proportion of insects that reproduced (encounter?) and mark that propo
 """
 function mate!(plants::Array{Organisms.Plant,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
 
-    # checkpoint
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("Pollination ..."))
     end
 
@@ -355,8 +355,8 @@ After mating happened (marked in `reped`), calculate the amount of offspring
 """
 function mkoffspring!(plants::Array{Organisms.Plant,1}, t::Int64, settings::Dict{String, Any},sppref::SppRef, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::Organisms.TraitRanges)
 
-    # Number of individuals before and after
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
 	writedlm(sim, hcat("Total number of individuals before REPRODUCTION:", length(plants)))
     end
 
@@ -503,8 +503,8 @@ open(abspath(joinpath(settings["outputat"],settings["simID"],"offspringproductio
 end
 end
 
-# checkpoint
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+# check-point
+open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
     writedlm(sim, hcat("Total number of individuals after SEX:", length(plants)))
 end
 
@@ -565,8 +565,8 @@ for sp in unique(getfield.(asexuals, :sp))
     end
 end
 
-# checkpoint
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+# check-point
+open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
     writedlm(sim, hcat("Total number of individuals after ASEX:", length(plants)))
 end
 
@@ -595,8 +595,8 @@ Seeds are dispersed.
 """
 function disperse!(landavail::BitArray{2}, seedsi, plants::Array{Organisms.Plant, 1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, landpars::Any, tdist::Any)#Setworld.LandPars)}
 
-    # checkpoint
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("Dispersing ..."))
     end
 
@@ -649,13 +649,13 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{Organisms.Plant
 	end
     end
     
-    # checkpoint
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
 	println(sim, "Number of dispersing: $justdispersed")
     end
     
-    #unity test
-    open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
 	writedlm(sim, hcat("Lost in dispersal:", length(lost)))
     end
     
@@ -673,8 +673,8 @@ function establish!(plants::Array{Organisms.Plant,1}, t::Int, settings::Dict{Str
     
     establishing = find(x -> x.stage == "s", plants)
 
-    # checkpoint
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
 	writedlm(sim, hcat("Seeds trying to ESTABLISH:", length(establishing)))
     end
 
@@ -723,13 +723,13 @@ plants in nogrwth are subjected to two probability rates
 """
 function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, sppref::SppRef, landavail::BitArray{2},T, biomass_production::Float64, dying_stage::String)
 
-    # checkpoint
+    # check-point
     if dying_stage == "a"
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
             writedlm(sim, hcat("Running MORTALITY: ADULTS & SEEDS"))
         end
     elseif dying_stage == "j"
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
             writedlm(sim, hcat("Running MORTALITY: JUVENILES"))
         end
     end
@@ -746,8 +746,8 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
     juv_mfactor = 15
     adult_mfactor = 15
 
-    #check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("# total: ", length(plants),
 		           "# seeds:", length(find(x -> x.stage == "s", plants)),
 		           "# juveniles:", length(find(x -> x.stage == "j", plants)),
@@ -760,7 +760,7 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
     deleteat!(plants, old)
 
     # check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("Dying of age:", length(old)))
     end
 
@@ -811,7 +811,7 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
     deleteat!(plants, deaths) #delete the ones that are already dying due to mortality rate, so that they won't cramp up density-dependent mortality
 
     # check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         println(sim, "Density-independent mortality: ", length(deaths))
     end
 
@@ -822,13 +822,13 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
     mprob = 0
     b0mort = 0
 
-    #check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
 	println(sim, "Production before density-dependent mortality: $(sum(vcat(map(x -> x.mass["veg"], plants), 0.00001)))g; K = $K")
     end
 
-    #check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
 	writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "s", plants)),
 		           "# juveniles:", length(find(x -> x.stage == "j", plants)),
 		           "# adults:", length(find(x -> x.stage == "a", plants)),
@@ -846,8 +846,8 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
         # mortality intra grid cell first
 	if length(fullcells_indxs) > 0
 
-            #check-point
-            open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+            # check-point
+            open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
 	        println(sim, "number of occupied cells: $(unique(locs[fullcells_indxs]))")
             end
 
@@ -867,7 +867,7 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
 		    for sp in keys(sppgrid_fitness)
 
                        	cK_sp = cK * (sppgrid_fitness[sp]/sum(collect(values(sppgrid_fitness))))
-			#check-point
+			# check-point
 
                         samecell_sp = filter(x -> x.sp == sp, samecell)
 
@@ -914,8 +914,8 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
         end
     end
 
-#check-point
-open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+# check-point
+open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
     println(sim, "Production after density-dependent mortality: $(sum(vcat(map(x -> x.mass["veg"], plants), 0.00001)))g; K = $K")
 end
 
@@ -932,8 +932,8 @@ Plants loose their reproductive biomasses at the end of the reproductive season 
 
 """
 function shedd!(plants::Array{Organisms.Plant,1}, sppref::SppRef, t::Int, settings::Dict{String,Any})
-    # checkpoint
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("SHEDDING reproductive biomass/ WInter-die back"))
     end
 
@@ -972,8 +972,8 @@ function destroyorgs!(plants::Array{Organisms.Plant,1}, landavail::BitArray{2}, 
     if length(kills) > 0 # trying to delete at index 0 generates an error
 	deleteat!(plants, kills)
     end
-    #unity test
-    #open(string("EDoutputs/",settings["simID"],"/simulog.txt"),"a") do sim
+    # check-point
+    #open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
     #println("Killed plants: $(length(kills))")
     #end
 end
@@ -987,8 +987,8 @@ function manage!(plants::Array{Organisms.Plant,1}, t::Int64, management_counter:
 
     if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.5))
 
-        #check-point
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        # check-point
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
 	    writedlm(sim, hcat("Biomass before mowing =", sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))))
         end
         
@@ -1001,8 +1001,8 @@ function manage!(plants::Array{Organisms.Plant,1}, t::Int64, management_counter:
 
         management_counter += 1
 
-        #check-point
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+        # check-point
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
 	    writedlm(sim, hcat("Biomass after MOWING =", sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))))
         end
     end
@@ -1035,7 +1035,7 @@ Simulates plant-insect encounters and effective pollen transfer.
 #             # 1:1 sex-ratio,
 #             if frag == plants[o].location[3]
 #                 if plants[o].location[1:2] in collect(Iterators.product(x-1:x+1,y-1:y+1))
-#                     #check sp, self and already reproduced
+#                     # check sp, self and already reproduced
 #                     # if (sp == plants[o].sp && !(Base.isequal(plant, plants[o])) && plant.repr == false && plants[o].repr = false)
 #                     #     #TODO add stochasticity
 #                     #     plant.repr = true

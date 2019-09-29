@@ -111,7 +111,7 @@ function parse_commandline()
         default = abspath(pwd(),"inputs/temp1917_2017.csv")
 
         "--timemsg"
-        help = "Output timing to terminal, as well as simulog"
+        help = "Output timing to terminal, as well as checkpoint"
         arg_type = Bool
         default = false
     end
@@ -513,7 +513,8 @@ end
 
 function timing(operation::String, settings::Dict{String,Any})
     timing_stamp = string(operation," lasted: ")
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         println(sim,timing_stamp)
     end
     #print to terminal
@@ -677,7 +678,7 @@ function simulate()
         end
 
         # INITIALIZE FILE TO LOG SIMULATION PROGRESS
-        open(abspath(joinpath(simresults_folder, "simulog.txt")),"w") do sim
+        open(abspath(joinpath(simresults_folder, "checkpoint.txt")),"w") do sim
             println(sim,string("Simulation: ",settings["simID"],now()))
         end
 
@@ -708,8 +709,8 @@ function simulate()
         
         for t in 1:settings["timesteps"]
 
-            # LOGGING PROGRESS
-            open(abspath(joinpath(simresults_folder, "simulog.txt")),"a") do sim
+            # check-point
+            open(abspath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim
                 println(sim, "WEEK $t")
 		println(sim, "Species richness: $(length(unique(map(x -> x.sp, plants))))")
             end
@@ -747,7 +748,7 @@ function simulate()
             # UPDATE CURRENT BIOMASS PRODUCTION
             biomass_production = sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))
             # check-point
-            open(abspath(joinpath(simresults_folder, "simulog.txt")),"a") do sim
+            open(abspath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim
                 writedlm(sim, hcat("Biomass production:", biomass_production))
             end
 
