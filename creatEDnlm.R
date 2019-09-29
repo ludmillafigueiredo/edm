@@ -3,6 +3,7 @@
 #library(grid)
 #library(gtable)
 
+#' Create nlm landscape for control and loss/fragmentation experiment. Area in ha
 creatEDnlm <- function(loss, area, inputsdir){
 
     # required packages
@@ -13,7 +14,7 @@ creatEDnlm <- function(loss, area, inputsdir){
 
     # create random cluster nlm
     ncells = area*(10^8)/10000 # n of cells of 10000 cm² covered by the landscape area (ha)
-    fragmented <- nlm_randomcluster(ncol = ceiling(sqrt(ncells)), nrow = ceiling(sqrt(ncells)),
+    fragmented <- nlm_randomcluster(ncol = round(sqrt(ncells)), nrow = round(sqrt(ncells)),
                                     p = 0.1,
                                     ai = c(loss, 1-loss))
 
