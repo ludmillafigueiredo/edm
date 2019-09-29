@@ -366,7 +366,7 @@ function orgstable(plants::Array{Organisms.Plant,1}, t::Int64, settings::Dict{St
         header = hcat(["week"],
                       reshape(string.(fieldnames(Plant)[1:20]),1,:),
                       ["veg" "repr"],
-                      reshape(string.(fieldnames(Plant)[22:end]),1,length(fieldnames(Plant)[23:end])))
+                      reshape(string.(fieldnames(Plant)[22:end]),1,:))
         open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
