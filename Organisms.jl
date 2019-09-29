@@ -236,7 +236,7 @@ end
 Controls individual juvenile maturation.
 
 """
-function develop!(plants::Array{Organism,1}, sppref::SppRef, settings::Dict{String, Any}, t::Int)
+function develop!(plants::Array{Organisms.Plant,1}, sppref::SppRef, settings::Dict{String, Any}, t::Int)
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("Maturation..."))
