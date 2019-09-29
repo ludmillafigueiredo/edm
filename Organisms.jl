@@ -910,67 +910,10 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
                 end
             end
 	    
-        else # in case no individuals are sharing cells but production > K. Probably obsolute,
-
-            # get species that are over their carrying capacity for the cell and store their respective fitness values
-            sppoverK_fitness = Dict()
-
-            for sp in map(x -> x.sp, plants)
-                inds_sp = filter(x -> x.sp == sp, plants)
-                if sum(vcat(map(x -> x.mass["veg"], inds_sp), 0.00001)) > K * sppref.fitness[sp]
-                    sppoverK_fitness[sp] = sppref.fitness[sp]
-                end
-            end
-
-	    while sum(vcat(map(x -> x.mass["veg"], biomass_plants),0.00001)) > K
-
-                for sp in keys(sppoverK_fitness)
-
-                    K_sp = K * sppref.fitness[sp]
-                    plants_sp = filter(x -> x.sp == sp, biomass_plants)
-
-                    # unity test
-                    if (length(filter(x -> x.stage == "j", plants_sp)) == 0 &&
-                        length(filter(x -> x.stage == "a", plants_sp)) == 0)
-			error("Cell carrying capacity overboard, but no individuals of $sp were detected") 
-		    end
-                    if(length(filter(x -> x.stage == "e", plants_sp)) > 0)
-		        error("Seeds being detected for density-dependent mortality")
-		    end	
-                    
-                    dying_plants = filter(x -> x.stage == dying_stage, plants_sp)
-		    
-                    while (sum(vcat(map(x -> x.mass["veg"], plants_sp), 0.00001)) > K_sp && length(dying_plants) > 0)
-
-                        # checkpoint: seeds are the last to be killed, because they are supposed to form a seed bank
-                        if stage == "e"
-                            open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	                        println(sim, "Seeds of $sp going over cell carrying capacity.")
-	                    end
-                        end
-                        
-			# loop through smaller individuals (size instead of age, to keep things at a metabolic base)
-                        masses = map(x -> x.mass["veg"], dying_plants)
-		        dying = filter(x -> x.mass["veg"] == minimum(masses), dying_plants)[1] #but only one can be tracked down and killed at a time (not possible to order the `plants` array by any field value)
-                        o = find(x -> x.id == dying.id, plants)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
-                    	# check-point
- 			open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-		            writedlm(sim, hcat(t, "death-K", plants[o].stage, plants[o].age))
-                    	end
-		    	deleteat!(plants, o)                                     
-
-                        # update control of while-loop  
-                        o_cell = find(x -> x.id == dying.id, plants_sp)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
-                    	deleteat!(plants_sp, o_cell)
-                        dying_plants = filter(x -> x.stage == dying_stage, plants_sp)
-		      	
-                    end
-		end
-		# update control of while-loop
-       		biomass_plants = filter(x -> x.stage in ("j", "a"), plants)
-            end
-end
-end
+        else # unity test
+            error("Biomass production over K in the landscape, but can't detect in which grid-cells this is happening.") # if production > K, it has to be detected at the grid-cell level.
+        end
+    end
 
 #check-point
 open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
