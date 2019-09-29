@@ -134,7 +134,7 @@ function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::In
 	    minvalue = 1e-7 # Distribution.Uniform requires max > min
 
 	    newplant = Plant(hex(id_counter),
-			      rand(["a" "j" "e"]),
+			      rand(["a" "j" "s"]),
 			      (XYs[i,1],XYs[i,2]),
 			      s,
 			      sppref.kernel[s],
@@ -157,7 +157,7 @@ function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::In
 			      false)
             
             ## initial biomass
-	    if newplant.stage == "e"
+	    if newplant.stage == "s"
 		newplant.mass["veg"] = newplant.seedmass
 		newplant.age = 1
 	    elseif newplant.stage in ["j"]
@@ -362,7 +362,7 @@ function mkoffspring!(plants::Array{Organisms.Plant,1}, t::Int64, settings::Dict
 
     offspring = Plant[]
     non0sd = 1e-7
-    embryo_counter = 0
+    seed_counter = 0
 
     # Separate sexually and asexually reproducing (mated status can change during the simulation and this would generate more clones)
     ferts = filter(x -> x.mated == true, plants)
@@ -404,92 +404,92 @@ function mkoffspring!(plants::Array{Organisms.Plant,1}, t::Int64, settings::Dict
 
 		    id_counter += 1
 
-		    embryo = deepcopy(plants[s])
-		    embryo_counter += 1
+		    seed = deepcopy(plants[s])
+		    seed_counter += 1
 
 		    # unity test
-		    for f in fieldnames(embryo)
-			if typeof(getfield(embryo, f)) in [Int64 Float64]
-			    if getfield(embryo, f) < 0 || getfield(embryo, f) == Inf
-				error(f, " has value: ", getfield(embryo, f), "Ind: ", embryo.id, "sp: ", embryo.sp)
+		    for f in fieldnames(seed)
+			if typeof(getfield(seed, f)) in [Int64 Float64]
+			    if getfield(seed, f) < 0 || getfield(seed, f) == Inf
+				error(f, " has value: ", getfield(seed, f), "Ind: ", seed.id, "sp: ", seed.sp)
 			    end
 			end
 		    end
 
                     # State variables
-		    embryo.id = hex(id_counter)
-		    embryo.mass = Dict("veg" => embryo.seedmass,
+		    seed.id = hex(id_counter)
+		    seed.mass = Dict("veg" => seed.seedmass,
 				       "repr" => 0.0)
-                    embryo.stage = "e"
-                    embryo.age = 0
-                    embryo.mated = false
+                    seed.stage = "s"
+                    seed.age = 0
+                    seed.mated = false
 
                     # Trait microevolution
                     # --------------------
-		    #embryo.seedmass += rand(Distributions.Normal(0, abs(plants[s].seedmass-conspp.seedmass+non0sd)/6))[1]
-                    embryo.maxmass += rand(Distributions.Normal(0, abs(plants[s].maxmass-conspp.maxmass+non0sd)/6))[1]
-		    embryo.span += Int(round(rand(Distributions.Normal(0, abs(plants[s].span-conspp.span+non0sd)/6))[1], RoundUp))
-		    embryo.firstflower += Int(round(rand(Distributions.Normal(0, abs(plants[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
-		    embryo.floron += Int(round(rand(Distributions.Normal(0, abs(plants[s].floron-conspp.floron+non0sd)/6))[1],RoundUp))
-		    embryo.floroff += Int(round(rand(Distributions.Normal(0, abs(plants[s].floroff-conspp.floroff+non0sd)/6))[1],RoundUp))
-		    embryo.seednumber += Int(round(rand(Distributions.Normal(0, abs(plants[s].seednumber-conspp.seednumber+non0sd)/6))[1], RoundUp))
-		    embryo.seedon += Int(round(rand(Distributions.Normal(0, abs(plants[s].seedon-conspp.seedon+non0sd)/6))[1],RoundUp))
-		    embryo.seedoff += Int(round(rand(Distributions.Normal(0, abs(plants[s].seedoff-conspp.seedoff+non0sd)/6))[1],RoundUp))
-		    embryo.bankduration += Int(round(rand(Distributions.Normal(0, abs(plants[s].bankduration-conspp.bankduration+non0sd)/6))[1],RoundUp))
+		    #seed.seedmass += rand(Distributions.Normal(0, abs(plants[s].seedmass-conspp.seedmass+non0sd)/6))[1]
+                    seed.maxmass += rand(Distributions.Normal(0, abs(plants[s].maxmass-conspp.maxmass+non0sd)/6))[1]
+		    seed.span += Int(round(rand(Distributions.Normal(0, abs(plants[s].span-conspp.span+non0sd)/6))[1], RoundUp))
+		    seed.firstflower += Int(round(rand(Distributions.Normal(0, abs(plants[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
+		    seed.floron += Int(round(rand(Distributions.Normal(0, abs(plants[s].floron-conspp.floron+non0sd)/6))[1],RoundUp))
+		    seed.floroff += Int(round(rand(Distributions.Normal(0, abs(plants[s].floroff-conspp.floroff+non0sd)/6))[1],RoundUp))
+		    seed.seednumber += Int(round(rand(Distributions.Normal(0, abs(plants[s].seednumber-conspp.seednumber+non0sd)/6))[1], RoundUp))
+		    seed.seedon += Int(round(rand(Distributions.Normal(0, abs(plants[s].seedon-conspp.seedon+non0sd)/6))[1],RoundUp))
+		    seed.seedoff += Int(round(rand(Distributions.Normal(0, abs(plants[s].seedoff-conspp.seedoff+non0sd)/6))[1],RoundUp))
+		    seed.bankduration += Int(round(rand(Distributions.Normal(0, abs(plants[s].bankduration-conspp.bankduration+non0sd)/6))[1],RoundUp))
 
 		    # constrain microevolution: avoid trait changes that generate negative values (and also values that irrealistically high)
 
-                    #if (embryo.seedmass < traitranges.seedmass[embryo.sp][1] || embryo.seedmass > traitranges.seedmass[embryo.sp][end])
-		    #   embryo.seedmass < traitranges.seedmass[embryo.sp][1] ? embryo.seedmass = traitranges.seedmass[embryo.sp][1] :
-		    #   embryo.seedmass = traitranges.seedmass[embryo.sp][end]
+                    #if (seed.seedmass < traitranges.seedmass[seed.sp][1] || seed.seedmass > traitranges.seedmass[seed.sp][end])
+		    #   seed.seedmass < traitranges.seedmass[seed.sp][1] ? seed.seedmass = traitranges.seedmass[seed.sp][1] :
+		    #   seed.seedmass = traitranges.seedmass[seed.sp][end]
 		    #end
 
-		    if (embryo.maxmass < traitranges.maxmass[embryo.sp][1] || embryo.maxmass > traitranges.maxmass[embryo.sp][end])
-			embryo.maxmass < traitranges.maxmass[embryo.sp][1] ? embryo.maxmass = traitranges.maxmass[embryo.sp][1] :
-			    embryo.maxmass = traitranges.maxmass[embryo.sp][end]
+		    if (seed.maxmass < traitranges.maxmass[seed.sp][1] || seed.maxmass > traitranges.maxmass[seed.sp][end])
+			seed.maxmass < traitranges.maxmass[seed.sp][1] ? seed.maxmass = traitranges.maxmass[seed.sp][1] :
+			    seed.maxmass = traitranges.maxmass[seed.sp][end]
 		    end
 
-		    if (embryo.span < traitranges.span[embryo.sp][1] || embryo.span > traitranges.span[embryo.sp][end])
-			embryo.span < traitranges.span[embryo.sp][1] ? embryo.span = traitranges.span[embryo.sp][1] :
-			    embryo.span = traitranges.span[embryo.sp][end]
+		    if (seed.span < traitranges.span[seed.sp][1] || seed.span > traitranges.span[seed.sp][end])
+			seed.span < traitranges.span[seed.sp][1] ? seed.span = traitranges.span[seed.sp][1] :
+			    seed.span = traitranges.span[seed.sp][end]
 		    end
 
-		    if (embryo.firstflower < traitranges.firstflower[embryo.sp][1] || embryo.firstflower > traitranges.firstflower[embryo.sp][end])
-			embryo.firstflower < traitranges.firstflower[embryo.sp][1] ? embryo.firstflower = traitranges.firstflower[embryo.sp][1] :
-			    embryo.firstflower = traitranges.firstflower[embryo.sp][end]
+		    if (seed.firstflower < traitranges.firstflower[seed.sp][1] || seed.firstflower > traitranges.firstflower[seed.sp][end])
+			seed.firstflower < traitranges.firstflower[seed.sp][1] ? seed.firstflower = traitranges.firstflower[seed.sp][1] :
+			    seed.firstflower = traitranges.firstflower[seed.sp][end]
 		    end
 
-		    if (embryo.floron < traitranges.floron[embryo.sp][1] || embryo.floron > traitranges.floron[embryo.sp][end])
-			embryo.floron < traitranges.floron[embryo.sp][1] ? embryo.floron = traitranges.floron[embryo.sp][1] :
-			    embryo.floron = traitranges.floron[embryo.sp][end]
+		    if (seed.floron < traitranges.floron[seed.sp][1] || seed.floron > traitranges.floron[seed.sp][end])
+			seed.floron < traitranges.floron[seed.sp][1] ? seed.floron = traitranges.floron[seed.sp][1] :
+			    seed.floron = traitranges.floron[seed.sp][end]
 		    end
 
-		    if (embryo.floroff < traitranges.floroff[embryo.sp][1] || embryo.floroff > traitranges.floroff[embryo.sp][end])
-			embryo.floroff < traitranges.floroff[embryo.sp][1] ? embryo.floroff = traitranges.floroff[embryo.sp][1] :
-			    embryo.floroff = traitranges.floroff[embryo.sp][end]
+		    if (seed.floroff < traitranges.floroff[seed.sp][1] || seed.floroff > traitranges.floroff[seed.sp][end])
+			seed.floroff < traitranges.floroff[seed.sp][1] ? seed.floroff = traitranges.floroff[seed.sp][1] :
+			    seed.floroff = traitranges.floroff[seed.sp][end]
 		    end
 
-		    if (embryo.seednumber < traitranges.seednumber[embryo.sp][1] || embryo.seednumber > traitranges.seednumber[embryo.sp][end])
-			embryo.seednumber < traitranges.seednumber[embryo.sp][1] ? embryo.seednumber = traitranges.seednumber[embryo.sp][1] :
-			    embryo.seednumber = traitranges.seednumber[embryo.sp][end]
+		    if (seed.seednumber < traitranges.seednumber[seed.sp][1] || seed.seednumber > traitranges.seednumber[seed.sp][end])
+			seed.seednumber < traitranges.seednumber[seed.sp][1] ? seed.seednumber = traitranges.seednumber[seed.sp][1] :
+			    seed.seednumber = traitranges.seednumber[seed.sp][end]
 		    end
 
-		    if (embryo.seedon < traitranges.seedon[embryo.sp][1] || embryo.seedon > traitranges.seedon[embryo.sp][end])
-			embryo.seedon < traitranges.seedon[embryo.sp][1] ? embryo.seedon = traitranges.seedon[embryo.sp][1] :
-			    embryo.seedon = traitranges.seedon[embryo.sp][end]
+		    if (seed.seedon < traitranges.seedon[seed.sp][1] || seed.seedon > traitranges.seedon[seed.sp][end])
+			seed.seedon < traitranges.seedon[seed.sp][1] ? seed.seedon = traitranges.seedon[seed.sp][1] :
+			    seed.seedon = traitranges.seedon[seed.sp][end]
 		    end
 
-		    if (embryo.seedoff < traitranges.seedoff[embryo.sp][1] || embryo.seedoff > traitranges.seedoff[embryo.sp][end])
-			embryo.seedoff < traitranges.seedoff[embryo.sp][1] ? embryo.seedoff = traitranges.seedoff[embryo.sp][1] :
-			    embryo.seedoff = traitranges.seedoff[embryo.sp][end]
+		    if (seed.seedoff < traitranges.seedoff[seed.sp][1] || seed.seedoff > traitranges.seedoff[seed.sp][end])
+			seed.seedoff < traitranges.seedoff[seed.sp][1] ? seed.seedoff = traitranges.seedoff[seed.sp][1] :
+			    seed.seedoff = traitranges.seedoff[seed.sp][end]
 		    end
 
-		    if (embryo.bankduration < traitranges.bankduration[embryo.sp][1] || embryo.bankduration > traitranges.bankduration[embryo.sp][end])
-			embryo.bankduration < traitranges.bankduration[embryo.sp][1] ? embryo.bankduration = traitranges.bankduration[embryo.sp][1] :
-			    embryo.bankduration = traitranges.bankduration[embryo.sp][end]
+		    if (seed.bankduration < traitranges.bankduration[seed.sp][1] || seed.bankduration > traitranges.bankduration[seed.sp][end])
+			seed.bankduration < traitranges.bankduration[seed.sp][1] ? seed.bankduration = traitranges.bankduration[seed.sp][1] :
+			    seed.bankduration = traitranges.bankduration[seed.sp][end]
 		    end
 
-push!(plants, embryo)
+push!(plants, seed)
 
 end
 plants[s].mated = false # after producing seeds in a week, the plant will only do it again in the next week if it gets pollinated again
@@ -499,7 +499,7 @@ end
 
 # output seeds per species (file is initialized in main.jl)
 open(abspath(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv")),"a") do seedfile
-    writedlm(seedfile, hcat(t, sp, "e", "sex", spoffspringcounter))
+    writedlm(seedfile, hcat(t, sp, "s", "sex", spoffspringcounter))
 end
 end
 
@@ -579,13 +579,13 @@ end
 
 """
     release!()
-Individuals being released in any given week are: in embryo stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
+Individuals being released in any given week are: in seed stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
 
 """
 
 function release!(plants::Array{Organisms.Plant,1}, t::Int, settings::Dict{String, Any},sppref::SppRef)
 
-    seedsi = find(x -> x.stage == "e" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, plants)
+    seedsi = find(x -> x.stage == "s" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, plants)
 
 end
 
@@ -672,7 +672,7 @@ Seed that have already been released (in the current time step, or previously - 
 function establish!(plants::Array{Organisms.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64)
     #REFERENCE: May et al. 2009
     
-    establishing = find(x -> x.stage == "e", plants)
+    establishing = find(x -> x.stage == "s", plants)
 
     # checkpoint
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
@@ -750,14 +750,14 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
     #check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
         writedlm(sim, hcat("# total: ", length(plants),
-		           "# seeds:", length(find(x -> x.stage == "e", plants)),
+		           "# seeds:", length(find(x -> x.stage == "s", plants)),
 		           "# juveniles:", length(find(x -> x.stage == "j", plants)),
 		           "# adults:", length(find(x -> x.stage == "a", plants)),
 		           "vegetative weighing:", sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))))
     end
 
     # old ones die
-    old = find( x -> ((x.stage == "a" && x.age >= x.span)), plants) #|| (x.stage == "e" && x.age >= x.bankduration)), plants)
+    old = find( x -> ((x.stage == "a" && x.age >= x.span)), plants) #|| (x.stage == "s" && x.age >= x.bankduration)), plants)
     deleteat!(plants, old)
 
     # check-point
@@ -767,7 +767,7 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
 
     # the rest of the individuals have a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
     if dying_stage == "a"
-        dying = find(x -> ((x.stage == "e" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), plants)
+        dying = find(x -> ((x.stage == "s" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), plants)
     else
         dying = find(x -> x.stage == dying_stage, plants) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
     end
@@ -775,7 +775,7 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
     for d in dying
 
         # seeds have higher mortality factor
-        if plants[d].stage == "e"
+        if plants[d].stage == "s"
 	    m_stage = seed_mfactor
         elseif plants[d].stage == "j"
 	    m_stage = juv_mfactor
@@ -830,7 +830,7 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
 
     #check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "e", plants)),
+	writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "s", plants)),
 		           "# juveniles:", length(find(x -> x.stage == "j", plants)),
 		           "# adults:", length(find(x -> x.stage == "a", plants)),
 		           " vegetative weighing:", sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))))
@@ -877,7 +877,7 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
                             length(filter(x -> x.stage == "a", samecell_sp)) == 0)
 			    error("Cell carrying capacity overboard, but no juveniles or adults of $sp were detected") 
 		        end
-			if(length(filter(x -> x.stage == "e", samecell_sp)) > 0)
+			if(length(filter(x -> x.stage == "s", samecell_sp)) > 0)
 			    error("Seeds being detected for density-dependent mortality")
 		 	end	
                         

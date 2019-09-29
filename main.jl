@@ -359,7 +359,7 @@ end
                 """
 function orgstable(plants::Array{Organisms.Plant,1}, t::Int64, settings::Dict{String,Any})
 
-    outplants = find(x -> (x.stage in ["j" "a"] || (x.stage == "e" && x.age > 1)), plants)
+    outplants = find(x -> (x.stage in ["j" "a"] || (x.stage == "s" && x.age > 1)), plants)
 
     # output header
     if t == 1
