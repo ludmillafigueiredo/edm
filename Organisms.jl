@@ -546,8 +546,7 @@ for sp in unique(getfield.(asexuals, :sp))
 		clone = deepcopy(clonetemplate)
 
                 # check if the new location is actually available before creating the clone
-		clone.location = (clonetemplate.location[1] + Int(round(rand(Distributions.Uniform(-1,1))[1])),
-				  clonetemplate.location[2] + Int(round(rand(Distributions.Uniform(-1,1))[1]))) # clones are spread in one of the neighboring cells - or in the same as the mother
+		# with cells at 1m2, clones stay in the same cell as the mother
                 if checkbounds(Bool, landavail, clone.location[1], clone.location[2])
 
                     id_counter += 1
