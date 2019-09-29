@@ -711,11 +711,11 @@ function simulate()
 
             # check-point
             open(abspath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim
-                println(sim, "WEEK $t")
+                println(sim, "\nWEEK $t")
 		println(sim, "Species richness: $(length(unique(map(x -> x.sp, plants))))")
             end
 	    
-	    println("WEEK $t")
+	    println("\nWEEK $t")
 	    println("Species richness: $(length(unique(map(x -> x.sp, plants))))")
 
             # IMPLEMENT LANDSCAPE DISTURBANCE
