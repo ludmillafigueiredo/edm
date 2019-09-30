@@ -24,7 +24,7 @@ lengthtocell(d)
 Converts distance values from m to cell size.
 """
 function lengthtocell(d::Float64)
-  celldist = round(Int64,((d.*100)./100), RoundNearestTiesAway)
+  celldist = round(Int64,d, RoundNearestTiesAway)
   return celldist
 end
 
