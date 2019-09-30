@@ -20,7 +20,7 @@ using RCall
 using Outputs
 
 # upload stage-specific mortality rates
-#include("metabolicrates.jl")
+#include("globalparameters_EDM.jl")
 
 #const Boltz = 1.38064852e-23 # Alternatively:
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2

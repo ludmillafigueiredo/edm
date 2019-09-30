@@ -742,11 +742,6 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
     Bm = 0
     b0mort = 0
 
-    # seeds have higher mortality factor
-    seed_mfactor = 15
-    juv_mfactor = 15
-    adult_mfactor = 15
-
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("# total: ", length(plants),
@@ -774,7 +769,7 @@ function survive!(plants::Array{Organisms.Plant,1}, t::Int, cK::Float64, K::Floa
 
     for d in dying
 
-        # seeds have higher mortality factor
+        # stages have different mortality factors
         if plants[d].stage == "s"
 	    m_stage = seed_mfactor
         elseif plants[d].stage == "j"
