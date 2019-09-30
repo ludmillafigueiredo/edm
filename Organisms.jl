@@ -199,14 +199,14 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
 	
 	B_grow = (b0grow*(plants[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))                                                           # only vegetative biomass fuels growth
 
-	if plants[o].stage == "j" || (plants[o].stage == "a" && 0.7*(plants[o].maxmass) <= plants[o].mass["veg"] < plants[o].maxmass) # juveniles and small adults grow vegetative biomass only
+	if plants[o].stage == "j"                                        # juveniles and small adults grow vegetative biomass only
             
 	    new_mass = B_grow*(plants[o].maxmass - plants[o].mass["veg"])
 	    plants[o].mass["veg"] += new_mass
 
         elseif (plants[o].stage == "a" &&
 	        (plants[o].floron <= rem(t,52) < plants[o].floroff) &&
-	        (sum(collect(values(plants[o].mass))) >= 0.5*(plants[o].maxmass)))                                                    # adults in their reprod. season, enough weight, invest in reproduction
+		plants[o].mass["veg"] >= 0.5*plants[o].maxmass)                                              # adults in their reprod. season invest in reproduction
 
             new_mass = B_grow*(plants[o].mass["veg"])
 
@@ -215,6 +215,9 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
 	    else
 		plants[o].mass["repr"] = new_mass #sowingmass
 	    end
+	elseif (plants[o].stage == "a" && 0.5*plants[o].maxmass < plants[o].mass["veg"] < plants[o].maxmass)
+	    new_mass = B_grow*(plants[o].maxmass - plants[o].mass["veg"])
+	    plants[o].mass["veg"] += new_mass
 
         end
 	
@@ -640,7 +643,7 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{Organisms.Plant
 	else # if the new location is in an unavailable habitat or outside the landscape, the seed dies
 
 	    push!(lost,d)
-	    # chekcpoint of life-history processes
+	    # check-point of life-history processes
 	    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
 		writedlm(sim, hcat(t, "lost in dispersal", plants[d].stage, plants[d].age))
 	    end
