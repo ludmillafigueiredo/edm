@@ -545,12 +545,6 @@ function updatefitness!(sppref::SppRef, mean_annual::Float64, max_fitness::Float
         sppref.fitness[sp] = absolute_fitness
     end
 
-    sum_fitness = sum(collect(values(sppref.fitness)))
-    
-    for sp in sppref.sp_id
-    	normalized_fitness = sppref.fitness[sp]/sum_fitness
-	sppref.fitness[sp] = normalized_fitness
-    end
 end
 
 
@@ -563,13 +557,6 @@ function updatefitness!(sppref::SppRef, mean_annual::Float64, max_fitness::Float
 
         absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
         sppref.fitness[sp] = absolute_fitness
-    end
-
-    sum_fitness = sum(collect(values(sppref.fitness)))
-    
-    for sp in sppref.sp_id
-    	normalized_fitness = sppref.fitness[sp]/sum_fitness
-	sppref.fitness[sp] = normalized_fitness
     end
 
     open(abspath(joinpath(settings["outputat"], settings["simID"], "spp_fitness.csv")),"a") do fitnessfile
