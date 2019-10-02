@@ -1,4 +1,3 @@
-
 """
 This module contains the data structures and functions to simulate plants, pollination regimes, and life cycle processes:
 - allocate!(): biomass growth and resource allocation
@@ -35,6 +34,9 @@ const λ_medium = 3
 const µ_long = 1000
 const λ_long = 100
 const Q = 5
+
+# upload glocal parameters
+include("globalparameters_EDM.jl")
 
 # Initial trait values is read from an input file and stored for reference in `sppref::SppRef`.
 mutable struct SppRef
