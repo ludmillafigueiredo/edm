@@ -161,10 +161,10 @@ function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::In
             ## initial biomass
 	    if newplant.stage == "s"
 		newplant.mass["veg"] = newplant.seedmass
-		newplant.age = 1
-	    elseif newplant.stage in ["j"]
+		newplant.age = newplant.seedon + 1
+	    elseif newplant.stage == "j"
 		newplant.mass["veg"] = newplant.seedmass
-		newplant.age = 4
+		newplant.age = newplant.seedon + 4
 	    elseif newplant.stage in ["a"]
 		newplant.mass["veg"] = newplant.maxmass * 0.75
 		newplant.age = newplant.firstflower
