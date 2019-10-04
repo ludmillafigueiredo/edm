@@ -60,7 +60,7 @@ mutable struct SppRef
     seednumber_max::Dict{String,Float64}
     seedon::Dict{String,Float64}
     seedoff::Dict{String,Float64}
-v    bankduration_min::Dict{String,Float64}
+    bankduration_min::Dict{String,Float64}
     bankduration_max::Dict{String,Float64}
     b0grow::Dict{String,Float64}
     b0germ::Dict{String,Float64}

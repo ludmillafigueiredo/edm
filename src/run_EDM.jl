@@ -61,7 +61,7 @@ function parse_commandline()
         arg_type = String
         default = "capacity"
 
-v        "--insect"
+        "--insect"
         help = "How to explicitly model insects:
                 pollination-independent reproduction \"indep\";
                 equal pollination loss for all species \"equal\"."
