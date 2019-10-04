@@ -36,7 +36,7 @@ const λ_long = 100
 const Q = 5
 
 # upload glocal parameters
-include("globalparameters_EDM.jl")
+include("constants_globalpars.jl")
 
 # Initial trait values is read from an input file and stored for reference in `sppref::SppRef`.
 mutable struct SppRef
