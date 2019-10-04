@@ -49,7 +49,7 @@ function parse_commandline()
         "--outputat"
         help = "Name of directory where output should be written ."
         arg_type = String
-        default = abspath(pwd(),"EDoutputs")
+        default = abspath(pwd(),"outputs")
 
         "--spinput"
         help = "Name of file with species list."
