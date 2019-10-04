@@ -60,8 +60,7 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
                                             col_double(), #b0grow
                                             col_double(), #b0germ
                                             col_double(), #b0mort
-                                            col_double(), #fitness
-					    col_integer(), #age
+                                            col_integer(), #age
                                             col_double(), #veg
                                             col_double(), #repr
                                             col_character())); #mated
@@ -118,7 +117,7 @@ orgreplicates <- function(parentsimID, repfolder, nreps){
 #' Extract and plot species-specific mean and sd biomass compartiments (these are means of each simulation' means   
 #' @param outdatalist
 #' @param plotit Boolean specifying whether graph shouuld be plotted or not
-stagemass <- function(orgs_complete_tab, stages = factor(c("a", "j", "e"))){
+stagemass <- function(orgs_complete_tab, stages = factor(c("a", "j", "s"))){
     
     ## get biomasses
     biomass_tab <- orgs_complete_tab%>%
@@ -516,7 +515,7 @@ traitchange  <- function(orgs_complete_tab, timesteps, species){
 
                                         # Plot trait variance over time
     traitsummary_tab  <- orgs_complete_tab%>%
-        select(-c(id, stage, kernel, clonality, age, xloc, yloc, veg, repr, mated, b0mort, b0germ, b0grow, fitness, repli))%>%
+        select(-c(id, stage, kernel, clonality, age, xloc, yloc, veg, repr, mated, b0mort, b0germ, b0grow, repli))%>%
         group_by(week, sp)%>%
         summarize_all(funs(mean = mean,
                            sd = sd))%>%
@@ -654,7 +653,7 @@ agetraits <- function(orgs_complete_tab){
 seeddynamics <- function(orgs_complete_tab, offspring_complete_tab){
 
 seeddyn_tab <- orgs_complete_tab%>%
-  filter(stage == "e")%>%
+  filter(stage == "s")%>%
   select(week, sp, stage, repli)%>%
   group_by(week, sp, stage, repli)%>%
   summarize(abundance = n())%>%
@@ -683,11 +682,11 @@ replicates$b -> offspring_complete_tab
 rm(replicates)
 
 ## Individual vegetative and reproductive biomasses of juveniles and adults (NOT seeds)
-mass <- stagemass(orgs_complete_tab,TRUE) # spp is an optional argument and stage is set to default
-mass$a -> vegmass_plot 
-mass$b -> repmass_plot 
-mass$c -> biomass_tab
-rm(mass)
+#mass <- stagemass(orgs_complete_tab,TRUE) # spp is an optional argument and stage is set to default
+#mass$a -> vegmass_plot 
+#mass$b -> repmass_plot 
+#mass$c -> biomass_tab
+#rm(mass)
 
 ## Species abundance variation
 abund <- popabund(orgs_complete_tab)
@@ -786,7 +785,7 @@ map(EDplots, ~ save_plot(filename = file.path(analysEDdir, paste(.x, ".png", sep
 traitvaluesdir <- file.path(analysEDdir, "traitvalues")
 dir.create(traitvaluesdir)
 
-for(sp in 1:length(unique(adultjuv_complete_tab$sp))){
+for(sp in 1:length(unique(orgs_complete_tab$sp))){
   for(trait in 1:length(traitdistributions_plots[[sp]])){
     distributions <- plot_grid(traitdistributions_plots[[sp]][[1]],
               traitdistributions_plots[[sp]][[2]],
@@ -801,7 +800,7 @@ for(sp in 1:length(unique(adultjuv_complete_tab$sp))){
               nrow = 2,
               ncol = 5)
       ggsave(file = file.path(traitvaluesdir,
-                              paste(unique(adultjuv_complete_tab$sp)[sp],"_dist.png", sep = "")),
+                              paste(unique(orgs_complete_tab$sp)[sp],"_dist.png", sep = "")),
              plot = distributions,
              device = "png",
              dpi = 300)
@@ -814,11 +813,11 @@ for(sp in 1:length(unique(adultjuv_complete_tab$sp))){
               traitts_plots[[sp]][[7]],
               traitts_plots[[sp]][[8]],
               traitts_plots[[sp]][[9]],
-              traitsts_plots[[sp]][[10]],
+              traitts_plots[[sp]][[10]],
               nrow = 2,
               ncol = 5)
       ggsave(file = file.path(traitvaluesdir,
-                              paste(unique(adultjuv_complete_tab$sp)[sp],"_ts.png", sep = "")),
+                              paste(unique(orgs_complete_tab$sp)[sp],"_ts.png", sep = "")),
              plot = ts,
              device = "png",
              dpi = 300)
