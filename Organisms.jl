@@ -430,15 +430,15 @@ function mkoffspring!(plants::Array{Organisms.Plant,1}, t::Int64, settings::Dict
                     # Trait microevolution
                     # --------------------
 		    #seed.seedmass += rand(Distributions.Normal(0, abs(plants[s].seedmass-conspp.seedmass+non0sd)/6))[1]
-                    seed.maxmass += rand(Distributions.Normal(0, abs(plants[s].maxmass-conspp.maxmass+non0sd)/6))[1]
-		    seed.span += Int(round(rand(Distributions.Normal(0, abs(plants[s].span-conspp.span+non0sd)/6))[1], RoundUp))
-		    seed.firstflower += Int(round(rand(Distributions.Normal(0, abs(plants[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
-		    seed.floron += Int(round(rand(Distributions.Normal(0, abs(plants[s].floron-conspp.floron+non0sd)/6))[1],RoundUp))
-		    seed.floroff += Int(round(rand(Distributions.Normal(0, abs(plants[s].floroff-conspp.floroff+non0sd)/6))[1],RoundUp))
-		    seed.seednumber += Int(round(rand(Distributions.Normal(0, abs(plants[s].seednumber-conspp.seednumber+non0sd)/6))[1], RoundUp))
-		    seed.seedon += Int(round(rand(Distributions.Normal(0, abs(plants[s].seedon-conspp.seedon+non0sd)/6))[1],RoundUp))
-		    seed.seedoff += Int(round(rand(Distributions.Normal(0, abs(plants[s].seedoff-conspp.seedoff+non0sd)/6))[1],RoundUp))
-		    seed.bankduration += Int(round(rand(Distributions.Normal(0, abs(plants[s].bankduration-conspp.bankduration+non0sd)/6))[1],RoundUp))
+                    seed.maxmass = (seed.maxmass+conspp.maxmass)/2+ rand(Distributions.Normal(0, abs(plants[s].maxmass-conspp.maxmass+non0sd)/6))[1]
+		    seed.span = Int(round((seed.span+conspp.span)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].span-conspp.span+non0sd)/6))[1], RoundUp))
+		    seed.firstflower = Int(round((seed.firstflower+conspp.firstflower)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
+		    seed.floron = Int(round((seed.floron+conspp.floron)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].floron-conspp.floron+non0sd)/6))[1],RoundUp))
+		    seed.floroff = Int(round((seed.floroff+conspp.floroff)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].floroff-conspp.floroff+non0sd)/6))[1],RoundUp))
+		    seed.seednumber = Int(round((seed.number+conspp.seednumber)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].seednumber-conspp.seednumber+non0sd)/6))[1], RoundUp))
+		    seed.seedon = Int(round((seed.seedon+conspp.seedon)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].seedon-conspp.seedon+non0sd)/6))[1],RoundUp))
+		    seed.seedoff = Int(round((seed.seedoff+conspp.seedoff)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].seedoff-conspp.seedoff+non0sd)/6))[1],RoundUp))
+		    seed.bankduration = Int(round((seed.bankduration+conspp.bankduration)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].bankduration-conspp.bankduration+non0sd)/6))[1],RoundUp))
 
 		    # constrain microevolution: avoid trait changes that generate negative values (and also values that irrealistically high)
 
