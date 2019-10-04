@@ -151,9 +151,9 @@ function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::In
 			      sppref.seedon[s],
 			      sppref.seedoff[s],
 			      Int(round(rand(Distributions.Uniform(sppref.bankduration_min[s],sppref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
-			      3206628344,
-			      100*141363714,
-			      7*159034178,
+			      sppref.b0grow[s],
+			      sppref.b0germ[s],
+			      sppref.b0mort[s],
 			      0, #age
 			      Dict("veg" => 0.0, "repr" => 0.0),
 			      false)
