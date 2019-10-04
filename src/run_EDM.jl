@@ -3,7 +3,7 @@
 # Get model directory and include it in Julia's loading path
 #
 #cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
-EDDir = pwd()
+EDDir = abspath(joinpath(pwd(), "src"))
 push!(LOAD_PATH,EDDir)
 
 # Load Julia & model packages

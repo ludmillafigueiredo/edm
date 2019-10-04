@@ -1,7 +1,7 @@
 """
 This module contains functions related to outputting raw results from the model, as well as default derived analysis.
 """
-module Outputs
+module outputs
 
 using RCall
 

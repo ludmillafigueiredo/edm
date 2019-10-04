@@ -1,4 +1,4 @@
-module auxfunctions.jl
+module auxfunctions
 
 """
 This module contains functions related to converting between input, model and output units and formats
