@@ -141,7 +141,7 @@ function read_landpars(settings::Dict{String,Any})
         @rput landbuffer
 
         # get patches/fragments areas and distances from shape/raster files
-        landconfig = rcopy(Array{Any}, R"landconfig.R")
+        landconfig = rcopy(Array{Any}, reval(abspath(joinpath(EDDir,"landconfig.R"))))
 
         # store them in landpars
         # no need to check for disturbance type because in the absence of disturbance-related files, R returns Nullable values
@@ -173,7 +173,7 @@ function read_landpars(settings::Dict{String,Any})
             @rput disturbland
 
             # get 0-1 habitat suitability matrices
-            landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
+            landconfig = rcopy(Array{Any}, reval(string("source(\"",abspath(joinpath(EDDir,"landconfig.R")),"\")")))
             @rget initialmatrix
             @rget disturbmatrix
 
@@ -196,7 +196,7 @@ function read_landpars(settings::Dict{String,Any})
             @rput disturbland
 
             # get suitability matrices from R
-            landconfig = rcopy(Array{Any}, R"source(\"landnlmconfig.R\")")
+            landconfig = rcopy(Array{Any}, reval(string("source(\"",abspath(joinpath(EDDir,"landnlmconfig.R")),"\")")))
             @rget initialmatrix
             @rget disturbmatrix
 
