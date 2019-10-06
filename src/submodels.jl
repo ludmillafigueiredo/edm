@@ -159,18 +159,20 @@ function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::In
 			      sppref.b0germ[s],
 			      sppref.b0mort[s],
 			      0, #age
-			      Dict("veg" => 0.0, "repr" => 0.0),
+			      Dict("leaves" => 0.0, "stem" = > 0.0, "repr" => 0.0, "root" => 0.0),
 			      false)
             
             ## initial biomass
 	    if newplant.stage == "s"
-		newplant.mass["veg"] = newplant.seedmass
+		newplant.mass["root"] = newplant.seedmass
 		newplant.age = newplant.seedon + 1
 	    elseif newplant.stage == "j"
-		newplant.mass["veg"] = newplant.seedmass
+		newplant.mass["root"] = newplant.seedmass
 		newplant.age = newplant.seedon + 4
 	    elseif newplant.stage in ["a"]
-		newplant.mass["veg"] = newplant.maxmass * 0.75
+		newplant.mass["leaves"] = newplant.maxmass^(3/4) * 0.75
+		newplant.mass["stem"] = newplant.maxmass * 0.75
+		newplant.mass["root"] = newplant.maxmass * 0.75
 		newplant.age = newplant.firstflower
 	    else
 		error("Check individual stages.")
@@ -202,29 +204,29 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
     for o in growing
 
         b0grow = plants[o].b0grow
+
+	current_vegmass = plants[o].mass["leaves"] + plants[o].mass["stem"] + plants[o].mass["root"]
 	
-	B_grow = (b0grow*(plants[o].mass["veg"])^(-1/4))*exp(-aE/(Boltz*T))                                                           # only vegetative biomass fuels growth
+	B_grow = b0grow*(current_vegmass)^(-1/4))*exp(-aE/(Boltz*T) # only vegetative biomass fuels growth
 
-	if plants[o].stage == "j"                                        # juveniles and small adults grow vegetative biomass only
-            
-	    new_mass = B_grow*(plants[o].maxmass - plants[o].mass["veg"])
-	    plants[o].mass["veg"] += new_mass
-
-        elseif (plants[o].stage == "a" &&
-	        (plants[o].floron <= rem(t,52) < plants[o].floroff) &&
-		plants[o].mass["veg"] >= 0.5*plants[o].maxmass)                                              # adults in their reprod. season invest in reproduction
-
-            new_mass = B_grow*(plants[o].mass["veg"])
+	new_mass = B_grow*(1 - current_vegmass/(2*plants[o].maxmass + plants[o].maxmass^(3/4)))*current_vegmass
+	
+	# adults in their reproductive season allocate to reproductive structures, instead of leaves and stem
+	
+	if (plants[o].stage == "a" &&                                   # adults in their reprod. season invest in reproduction
+           (plants[o].floron <= rem(t,52) < plants[o].floroff) &&
+            current_vegmass >= 0.5*(2*plants[o].maxmass+plants[o].maxmass^(3/4))                                                  
 
 	    if haskey(plants[o].mass,"repr")
-		plants[o].mass["repr"] += new_mass #sowingmass
-	    else
-		plants[o].mass["repr"] = new_mass #sowingmass
-	    end
-	elseif (plants[o].stage == "a" && 0.5*plants[o].maxmass < plants[o].mass["veg"] < plants[o].maxmass)
-	    new_mass = B_grow*(plants[o].maxmass - plants[o].mass["veg"])
-	    plants[o].mass["veg"] += new_mass
+         	plants[o].mass["repr"] += new_mass
+            else
+		plants[o].mass["repr"] = new_mass
+            end
 
+	else
+            plants[o].mass["leaves"] = (1/3)*new_mass
+	    plants[o].mass["stem"] = (1/3)*new_mass
+	    plants[o].mass["root"] = (1/3)*new_mass
         end
 	
     end
@@ -425,8 +427,8 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 
                     # State variables
 		    seed.id = hex(id_counter)
-		    seed.mass = Dict("veg" => seed.seedmass,
-				       "repr" => 0.0)
+		    seed.mass = Dict("root" => seed.seedmass/3,
+				     "repr" => 0.0)
                     seed.stage = "s"
                     seed.age = 0
                     seed.mated = false
@@ -539,15 +541,16 @@ for sp in unique(getfield.(asexuals, :sp))
 	    # limit offspring production to the maximal number of seeds the species can produce
 	    offs > plants[c].seednumber ? offs = plants[c].seednumber : offs
 
-	    # update reproductive mass
-	    plants[c].mass["repr"] -= (offs * plants[c].seedmass)
-
 	    # get a copy of the mother, which the clones will look like
 	    clonetemplate = deepcopy(plants[c])
 	    clonetemplate.stage = "j" #clones have already germinated
-	    clonetemplate.mass["veg"] = plants[c].maxmass*0.1
+	    clonetemplate.mass["leaves"] = (plants[c].maxmass*0.1)^(3/4)
+	    clonetemplate.mass["stem"] = plants[c].maxmass*0.1
+	    clonetemplate.mass["root"] = plants[c].maxmass*0.1
 	    clonetemplate.mass["repr"] = 0.0
 
+	    # update reproductive mass
+	    plants[c].mass["repr"] -= (offs * plants[c].seedmass)
 	    for o in offs
 
 		clone = deepcopy(clonetemplate)
@@ -691,7 +694,8 @@ function establish!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{Str
 
     for o in establishing
 	
-        Bg = plants[o].b0germ*(plants[o].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+        current_vegmass = plants[o].mass["leaves"] + plants[o].mass["stem"] + plants[o].mass["root"]
+	Bg = plants[o].b0germ*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T))
 	gprob = 1-exp(-Bg)
 	# test
 	open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
@@ -711,7 +715,7 @@ function establish!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{Str
 
 	if germ == true
 	    plants[o].stage = "j"
-	    plants[o].mass["veg"] = plants[o].seedmass
+	    plants[o].mass["root"] = plants[o].seedmass
 
 	    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
 		writedlm(sim, hcat(t, "germination", plants[o].stage, plants[o].age))
@@ -754,7 +758,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 		           "# seeds:", length(find(x -> x.stage == "s", plants)),
 		           "# juveniles:", length(find(x -> x.stage == "j", plants)),
 		           "# adults:", length(find(x -> x.stage == "a", plants)),
-		           "vegetative weighing:", sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))))
+		           "Above-ground vegetative weighing:", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
     end
 
     # old ones die
@@ -786,7 +790,8 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 	    error("Error with plant's stage assignment") 
         end
 
-        Bm = plants[d].b0mort*m_stage*(plants[d].mass["veg"]^(-1/4))*exp(-aE/(Boltz*T))
+        current_vegmass = plants[o].mass["leaves"] + plants[o].mass["stem"] + plants[o].mass["root"]
+	Bm = plants[d].b0mort*m_stage*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T))
         mprob = 1 - exp(-Bm)
 
         # unity test
@@ -826,7 +831,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	println(sim, "Production before density-dependent mortality: $(sum(vcat(map(x -> x.mass["veg"], plants), 0.00001)))g; K = $K")
+	println(sim, "Production before density-dependent mortality: $(sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001)))g; K = $K")
     end
 
     # check-point
@@ -834,12 +839,12 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 	writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "s", plants)),
 		           "# juveniles:", length(find(x -> x.stage == "j", plants)),
 		           "# adults:", length(find(x -> x.stage == "a", plants)),
-		           " vegetative weighing:", sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))))
+		           " Above-ground vegetative weighing:", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), 0.00001))))
     end
 
     biomass_plants = filter(x -> x.stage in ["j" "a"], plants) #biomass of both juveniles and adults is used as criteria, but only only stage dies at each timestep
 
-    if sum(vcat(map(x -> x.mass["veg"], biomass_plants), 0.00001)) > K
+    if sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), biomass_plants), 0.00001)) > K
 
         # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
 	locs = map(x -> x.location, biomass_plants)
@@ -859,7 +864,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 		#find plants that are in the same grid
 		samecell = filter(x -> x.location == loc, biomass_plants)
 
-		while sum(vcat(map(x -> x.mass["veg"], samecell),0.00001)) > cK
+		while sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), samecell),0.00001)) > cK
 
 		    # get fitness of all species that are in the cell
                     sppgrid_fitness = Dict(sp => sppref.fitness[sp] for sp in map(x -> x.sp, samecell))
@@ -884,11 +889,11 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
                         
                         dying_plants = filter(x -> x.stage == dying_stage, samecell_sp)
 
-                      	while (sum(vcat(map(x -> x.mass["veg"], samecell_sp), 0.00001)) > cK_sp && length(dying_plants) > 0)
+                      	while (sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), samecell_sp), 0.00001)) > cK_sp && length(dying_plants) > 0)
 
                             # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
-                            masses = map(x -> x.mass["veg"], dying_plants)
-		            dying = filter(x -> x.mass["veg"] == minimum(masses), dying_plants)[1] #but only one can be tracked down and killed at a time (not possible to order the `plants` array by any field value)
+                            masses = map(x -> (x.mass["leaves"]+x.mass["stem"]+x.mass["root"]), dying_plants)
+		            dying = filter(x -> (x.mass["leaves"]+x.mass["stem"]+x.mass["root"]) == minimum(masses), dying_plants)[1] #but only one can be tracked down and killed at a time (not possible to order the `plants` array by any field value)
 			    
                             o = find(x -> x.id == dying.id, plants)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()# check-point
  			    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
@@ -918,7 +923,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 
 # check-point
 open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-    println(sim, "Production after density-dependent mortality: $(sum(vcat(map(x -> x.mass["veg"], plants), 0.00001)))g; K = $K")
+    println(sim, "Above-ground biomass after density-dependent mortality: $(sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001)))g; K = $K")
 end
 
 ## Surviving ones get older: some of them were not filtered above, so the ageing up need to be done separately to include all
@@ -942,7 +947,7 @@ function shedd!(plants::Array{submodels.Plant,1}, sppref::SppRef, t::Int, settin
     flowering = find(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), plants) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
 
     for f in flowering
-	plants[f].mass["repr"] = 0
+	plants[f].mass["repr"] = 0.0
     end
 
     if (rem(t,52) == 51)
@@ -950,7 +955,9 @@ function shedd!(plants::Array{submodels.Plant,1}, sppref::SppRef, t::Int, settin
         adults = find(x -> (x.stage == "a"), plants)
 
 	for a in adults
-	    plants[a].mass["veg"] = 0.5*plants[a].mass["veg"]
+	    plants[a].mass["leaves"] = 0.0
+	    plants[a].mass["repr"] = 0.0
+	    plants[a].mass["stem"] => (0.5*plants[a].mass) ? plants[a].mass["stem"] = (0.5*plants[a].maxmass) : nothing
 	end
     end
 end
@@ -991,13 +998,14 @@ function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter:
 
         # check-point
         open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	    writedlm(sim, hcat("Biomass before mowing =", sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))))
+	    writedlm(sim, hcat("Above-ground biomass before mowing =", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
         end
         
         adults = find(x -> (x.stage == "a"), plants)
 
         for a in adults
-	    plants[a].mass["veg"] = 0.5*plants[a].mass["veg"]
+	    plants[a].mass["leaves"] => (0.5*plants[a].mass)^(3/4) ? plants[a].mass["leaves"] = (0.5*plants[a].maxmass) : nothing 
+	    plants[a].mass["stem"] => 0.5*plants[a].mass ? plants[a].mass["stem"] = (0.5*plants[a].maxmass) : nothing
 	    plants[a].mass["repr"] = 0
         end
 
@@ -1005,7 +1013,7 @@ function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter:
 
         # check-point
         open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	    writedlm(sim, hcat("Biomass after MOWING =", sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))))
+	    writedlm(sim, hcat("Biomass after MOWING =", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
         end
     end
     return management_counter

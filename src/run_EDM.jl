@@ -363,7 +363,7 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
     if t == 1
         header = hcat(["week"],
                       reshape(string.(fieldnames(Plant)[1:20]),1,:),
-                      ["veg" "repr"],
+                      ["leaves" "stem" "root" "repr"],
                       reshape(string.(fieldnames(Plant)[22:end]),1,:))
         open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
@@ -396,7 +396,9 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
                                       plants[o].b0germ,
                                       plants[o].b0mort,
                                       plants[o].age,
-                                      plants[o].mass["veg"],
+                                      plants[o].mass["leaves"],
+                                      plants[o].mass["stem"],
+                                      plants[o].mass["root"],
                                       plants[o].mass["repr"],
                                       plants[o].mated))
             end
@@ -731,7 +733,7 @@ function simulate()
             end
 
             # UPDATE CURRENT BIOMASS PRODUCTION
-            biomass_production = sum(vcat(map(x -> x.mass["veg"], plants), 0.00001))
+            biomass_production = sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))
             # check-point
             open(abspath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim
                 writedlm(sim, hcat("Biomass production:", biomass_production))
