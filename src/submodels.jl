@@ -159,7 +159,7 @@ function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::In
 			      sppref.b0germ[s],
 			      sppref.b0mort[s],
 			      0, #age
-			      Dict("leaves" => 0.0, "stem" = > 0.0, "repr" => 0.0, "root" => 0.0),
+			      Dict("leaves" => 0.0, "stem" => 0.0, "repr" => 0.0, "root" => 0.0),
 			      false)
             
             ## initial biomass
@@ -207,15 +207,15 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
 
 	current_vegmass = plants[o].mass["leaves"] + plants[o].mass["stem"] + plants[o].mass["root"]
 	
-	B_grow = b0grow*(current_vegmass)^(-1/4))*exp(-aE/(Boltz*T) # only vegetative biomass fuels growth
+	B_grow = b0grow*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T)) # only vegetative biomass fuels growth
 
-	new_mass = B_grow*(1 - current_vegmass/(2*plants[o].maxmass + plants[o].maxmass^(3/4)))*current_vegmass
+	new_mass = B_grow*((2*plants[o].maxmass + plants[o].maxmass^(3/4))-current_vegmass)
 	
 	# adults in their reproductive season allocate to reproductive structures, instead of leaves and stem
 	
 	if (plants[o].stage == "a" &&                                   # adults in their reprod. season invest in reproduction
            (plants[o].floron <= rem(t,52) < plants[o].floroff) &&
-            current_vegmass >= 0.5*(2*plants[o].maxmass+plants[o].maxmass^(3/4))                                                  
+            current_vegmass >= 0.5*(2*plants[o].maxmass+plants[o].maxmass^(3/4)))                                                  
 
 	    if haskey(plants[o].mass,"repr")
          	plants[o].mass["repr"] += new_mass
@@ -224,9 +224,9 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
             end
 
 	else
-            plants[o].mass["leaves"] = (1/3)*new_mass
-	    plants[o].mass["stem"] = (1/3)*new_mass
-	    plants[o].mass["root"] = (1/3)*new_mass
+            plants[o].mass["leaves"] += (1/3)*new_mass
+	    plants[o].mass["stem"] += (1/3)*new_mass
+	    plants[o].mass["root"] += (1/3)*new_mass
         end
 	
     end
@@ -441,7 +441,7 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 		    seed.firstflower = Int(round((seed.firstflower+conspp.firstflower)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
 		    seed.floron = Int(round((seed.floron+conspp.floron)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].floron-conspp.floron+non0sd)/6))[1],RoundUp))
 		    seed.floroff = Int(round((seed.floroff+conspp.floroff)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].floroff-conspp.floroff+non0sd)/6))[1],RoundUp))
-		    seed.seednumber = Int(round((seed.number+conspp.seednumber)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].seednumber-conspp.seednumber+non0sd)/6))[1], RoundUp))
+		    seed.seednumber = Int(round((seed.seednumber+conspp.seednumber)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].seednumber-conspp.seednumber+non0sd)/6))[1], RoundUp))
 		    seed.seedon = Int(round((seed.seedon+conspp.seedon)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].seedon-conspp.seedon+non0sd)/6))[1],RoundUp))
 		    seed.seedoff = Int(round((seed.seedoff+conspp.seedoff)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].seedoff-conspp.seedoff+non0sd)/6))[1],RoundUp))
 		    seed.bankduration = Int(round((seed.bankduration+conspp.bankduration)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].bankduration-conspp.bankduration+non0sd)/6))[1],RoundUp))
@@ -790,7 +790,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 	    error("Error with plant's stage assignment") 
         end
 
-        current_vegmass = plants[o].mass["leaves"] + plants[o].mass["stem"] + plants[o].mass["root"]
+        current_vegmass = plants[d].mass["leaves"] + plants[d].mass["stem"] + plants[d].mass["root"]
 	Bm = plants[d].b0mort*m_stage*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T))
         mprob = 1 - exp(-Bm)
 
@@ -839,7 +839,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 	writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "s", plants)),
 		           "# juveniles:", length(find(x -> x.stage == "j", plants)),
 		           "# adults:", length(find(x -> x.stage == "a", plants)),
-		           " Above-ground vegetative weighing:", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), 0.00001))))
+		           " Above-ground vegetative weighing:", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
     end
 
     biomass_plants = filter(x -> x.stage in ["j" "a"], plants) #biomass of both juveniles and adults is used as criteria, but only only stage dies at each timestep
@@ -957,7 +957,7 @@ function shedd!(plants::Array{submodels.Plant,1}, sppref::SppRef, t::Int, settin
 	for a in adults
 	    plants[a].mass["leaves"] = 0.0
 	    plants[a].mass["repr"] = 0.0
-	    plants[a].mass["stem"] => (0.5*plants[a].mass) ? plants[a].mass["stem"] = (0.5*plants[a].maxmass) : nothing
+	    plants[a].mass["stem"] >= (0.5*plants[a].maxmass) ? plants[a].mass["stem"] = (0.5*plants[a].maxmass) : nothing
 	end
     end
 end
@@ -1004,8 +1004,8 @@ function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter:
         adults = find(x -> (x.stage == "a"), plants)
 
         for a in adults
-	    plants[a].mass["leaves"] => (0.5*plants[a].mass)^(3/4) ? plants[a].mass["leaves"] = (0.5*plants[a].maxmass) : nothing 
-	    plants[a].mass["stem"] => 0.5*plants[a].mass ? plants[a].mass["stem"] = (0.5*plants[a].maxmass) : nothing
+	    plants[a].mass["leaves"] >= (0.5*plants[a].maxmass)^(3/4) ? plants[a].mass["leaves"] = (0.5*plants[a].maxmass) : nothing 
+	    plants[a].mass["stem"] >= 0.5*plants[a].maxmass ? plants[a].mass["stem"] = (0.5*plants[a].maxmass) : nothing
 	    plants[a].mass["repr"] = 0
         end
 
