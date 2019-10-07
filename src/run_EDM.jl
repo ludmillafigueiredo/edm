@@ -20,12 +20,7 @@ using auxfunctions
 using submodels
 using outputs
 
-#const Boltz = 1.38064852e-23 # Alternatively:
-const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
-#const aE = 1e-19
-const aE = 0.63
-global K = 0.0
-global cK = 0.0
+include("constants_globalpars.jl")
 
 function parse_commandline()
     sets = ArgParseSettings() #object that will be populated with the arguments by the macro
@@ -484,12 +479,12 @@ function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, 
         end
 
         # habitat area
-        habitatarea = 1 #length(find(x -> x == true, landavail))*10000 # cells area 100x100cm; habitatarea in cm²
-        totalarea = 1 # prod(size(landavail))
+        habitatarea = length(find(x -> x == true, landavail))  #number of habitat grid cels ggrid cells 
+        totalarea = prod(size(landavail)) # total number of grid cell. Habitat or not
 
         # K and grid-cell K
-        global K = 350.0 # xtons/ha = x.10-2g/1cm²
-        global cK = 350.0	 
+        global cK = 350.0
+	global K = cK*habitatarea # landscape K at 3.5 T/ha, i.e., 350g/m2
 
         open(abspath(joinpath(settings["outputat"],settings["simID"],"landlog.txt")),"a") do sim
             writedlm(sim,[t K cK habitatarea totalarea])
@@ -502,12 +497,12 @@ function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
 
     # habitat area
 
-    habitatarea = 1 #length(find(x -> x == true, landavail))*10000 # cells area 25x25cm; habitatarea in cm²
-    totalarea = 1 # prod(size(landavail))
+    habitatarea = length(find(x -> x == true, landavail))
+    totalarea = prod(size(landavail))
 
     # K and grid-cell K
-    global K = 350.0 #(3.5/100)*habitatarea # xtons/ha = x.10-2g/1cm²
-    globalcK = 350.0 #K/length(find(x -> x == true, landavail))
+    global cK = 350.0
+    global K = cK*habitatarea # landscape K at 3.5 T/ha, i.e., 350g/m2
 end
 
 
