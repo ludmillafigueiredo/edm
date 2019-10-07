@@ -25,17 +25,6 @@ using auxfunctions
 
 export SppRef, TraitRanges, Plant, initorgs, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, manage!, destroyorgs!, release!, LandPars, NeutralLandPars, landscape_init, updateenv!, destroyarea!, fragment!, disturbland!
 
-# Set up model constants
-const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
-const aE = 0.63 #0.65 - eV Brown & Sibly MTE book chap 2
-const µ_short = 1
-const λ_short = 0.2
-const µ_medium = 0.2
-const λ_medium = 3
-const µ_long = 1000
-const λ_long = 100
-const Q = 5
-
 # Data structures and submodels related to Plant entities
 # -------------------------------------------------------
 
