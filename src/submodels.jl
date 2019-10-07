@@ -530,45 +530,23 @@ for sp in unique(getfield.(asexuals, :sp))
     spclonescounter = 0
 
     for c in cloning
-	offs = div(0.5*plants[c].mass["repr"], plants[c].seedmass)
+    
+    if rand(Distributions.Binomial(1, 0.5)) == 1
+	# get a copy of the mother, which the clones will look like
+	clone = deepcopy(plants[c])
 
-	# unity test
-	if  plants[c].mass["repr"] <= 0
-	    error("Negative reproductive biomass") #because `offs` is an integer, reproductive biomass should not become negative
-	end
+	clone.stage = "j" #clones have already germinated
+	clone.mass["leaves"] = (plants[c].maxmass*0.1)^(3/4)
+	clone.mass["stem"] = plants[c].maxmass*0.1
+	clone.mass["root"] = plants[c].maxmass*0.1
+	clone.mass["repr"] = 0.0
 
-	if offs <= 0
-	    continue
-	else
-	    # limit offspring production to the maximal number of seeds the species can produce
-	    offs > plants[c].seednumber ? offs = plants[c].seednumber : offs
-
-	    # get a copy of the mother, which the clones will look like
-	    clonetemplate = deepcopy(plants[c])
-	    clonetemplate.stage = "j" #clones have already germinated
-	    clonetemplate.mass["leaves"] = (plants[c].maxmass*0.1)^(3/4)
-	    clonetemplate.mass["stem"] = plants[c].maxmass*0.1
-	    clonetemplate.mass["root"] = plants[c].maxmass*0.1
-	    clonetemplate.mass["repr"] = 0.0
-
-	    # update reproductive mass
-	    plants[c].mass["repr"] -= (offs * plants[c].seedmass)
-	    for o in offs
-
-		clone = deepcopy(clonetemplate)
-
-                # check if the new location is actually available before creating the clone
-		# with cells at 1m2, clones stay in the same cell as the mother
-                if checkbounds(Bool, landavail, clone.location[1], clone.location[2])
-
-                    id_counter += 1
-		    clone.id = hex(id_counter)
-
-		    push!(plants, clone)
-		    spclonescounter += 1
-		end
-	    end
-	end
+	id_counter += 1
+	clone.id = hex(id_counter)
+	push!(plants, clone)
+	spclonescounter += 1
+	
+    end
     end
 
     # output clones
