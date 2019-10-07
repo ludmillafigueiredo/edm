@@ -427,7 +427,9 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 
                     # State variables
 		    seed.id = hex(id_counter)
-		    seed.mass = Dict("root" => seed.seedmass/3,
+		    seed.mass = Dict("leaves" => 0.0,
+		                     "stem" => 0.0,
+				     "root" => seed.seedmass,
 				     "repr" => 0.0)
                     seed.stage = "s"
                     seed.age = 0
