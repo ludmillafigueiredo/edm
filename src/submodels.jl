@@ -131,8 +131,8 @@ function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::In
         end
 
 	# create random locations
-	XYs = hcat(rand(1:size(landavail,1), sp_abund),
-		   rand(1:size(landavail,2), sp_abund))
+	XYs = hcat(rand(1:1, sp_abund),
+		   rand(1:1, sp_abund))
 
 	for i in 1:sp_abund
 
@@ -594,37 +594,39 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{submodels.Plant
     justdispersed = 0
 
     for d in seedsi                    # only seeds that have been released can disperse
-	if plants[d].kernel == "short"
-	    µ, λ = [µ_short λ_short]
-	elseif plants[d].kernel == "medium"
-	    µ, λ = [µ_medium λ_medium]
-	elseif plants[d].kernel == "long"
-	    µ, λ = [µ_long λ_long]
-	elseif plants[d].kernel in ["medium-short", "short-medium"]
-	    µ, λ = rand([[µ_short λ_short],
-			 [µ_medium λ_medium]])
-	elseif plants[d].kernel in ["medium-long", "long-medium"]
-	    µ, λ = rand([[µ_long λ_long],
-			 [µ_medium λ_medium]])
-	elseif plants[d].kernel in ["long-short", "short-long"]
-	    µ, λ = rand([[µ_short λ_short],
-			 [µ_long λ_long]])
-	elseif plants[d].kernel == "any"
-	    µ,λ = rand([[µ_short λ_short],
-			[µ_medium λ_medium],
-			[µ_long λ_long]])
-	else
-	    error("Check dispersal kernel input for species $(plants[d].sp).")
-	end
+	#if plants[d].kernel == "short"
+	#    µ, λ = [µ_short λ_short]
+	#elseif plants[d].kernel == "medium"
+	#    µ, λ = [µ_medium λ_medium]
+	#elseif plants[d].kernel == "long"
+	#    µ, λ = [µ_long λ_long]
+	#elseif plants[d].kernel in ["medium-short", "short-medium"]
+	#    µ, λ = rand([[µ_short λ_short],
+	#		 [µ_medium λ_medium]])
+	#elseif plants[d].kernel in ["medium-long", "long-medium"]
+	#    µ, λ = rand([[µ_long λ_long],
+	#		 [µ_medium λ_medium]])
+	#elseif plants[d].kernel in ["long-short", "short-long"]
+	#    µ, λ = rand([[µ_short λ_short],
+	#		 [µ_long λ_long]])
+	#elseif plants[d].kernel == "any"
+	#    µ,λ = rand([[µ_short λ_short],
+	#		[µ_medium λ_medium],
+	#		[µ_long λ_long]])
+	#else
+	#    error("Check dispersal kernel input for species $(plants[d].sp).")
+	#end
 
-	dist = auxfunctions.lengthtocell(rand(Distributions.InverseGaussian(µ,λ),1)[1])
+	µ, λ = [µ_short λ_short]
+	
+	dist = auxfunctions.lengthtocell(4*(rand(Distributions.InverseGaussian(µ,λ),1)[1]))
 
 	# Find the cell to which it is dispersing
 	θ = rand(Distributions.Uniform(0,2),1)[1]*pi
 	xdest = plants[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
 	ydest = plants[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
 
-	if checkbounds(Bool, landavail, xdest, ydest) && landavail[xdest, ydest] == true  # Check if individual fall inside the habitat area, otherwise, discard it already
+	if (xdest, ydest) == (1,1) #checkbounds(Bool, landavail, xdest, ydest) && landavail[xdest, ydest] == true  # Check if individual fall inside the habitat area, otherwise, discard it already
                                                                                           # checking the suitability first would make more sense but cant be done if cell is out of bounds
 	    plants[d].location = (xdest,ydest)
 	    justdispersed += 1
