@@ -810,8 +810,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 
     biomass_plants = filter(x -> x.stage in ["j" "a"], plants) #biomass of both juveniles and adults is used as criteria, but only only stage dies at each timestep
 
-    if sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), biomass_plants), 0.00001)) > K
-
+    
         # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
 	locs = map(x -> x.location, biomass_plants)
 	fullcells_indxs = find(nonunique(DataFrame(hcat(locs))))
@@ -881,10 +880,6 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 		    
                 end
             end
-	    
-        else # unity test
-            error("Biomass production over K in the landscape, but can't detect in which grid-cells this is happening.") # if production > K, it has to be detected at the grid-cell level.
-        end
     end
 
 # check-point
