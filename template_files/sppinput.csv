@@ -1,4 +1,4 @@
-kernel,clonality,seedmass,maxmass,span_min,span_max,firstflower_min,firstflower_max,bankduration_max,bankduration_min,seednumber_min,seednumber_max,b0grow,b0germ,b0mort,floron,floroff,seedon,seedoff,temp_opt,temp_tol,abund,sp_id
+kernel,clonality,seedmass,compartsize,span_min,span_max,firstflower_min,firstflower_max,bankduration_max,bankduration_min,seednumber_min,seednumber_max,b0grow,b0germ,b0mort,floron,floroff,seedon,seedoff,temp_opt,temp_tol,abund,sp_id
 any,TRUE,0.0003,2,1019.2834157615,1478.5259511073,18.7727733217,105.5958802141,120.4934639764,7.1107120121,47.5,1800,8306096743,141363714.221475,1113239249.49412,23,44,43,47,285.6251028807,9.5666666667,45,p-1
 long-short,TRUE,0.001,5,817.7692115878,1109.0634739186,105.5958802141,105.5958802141,385.780391125,3.8755406702,11.625,2675,11223199206,141363714.221475,1113239249.49412,23,31,30,34,280.6411157025,9.1166666667,41,p-2
 any,TRUE,0.001,5,1560,1560,105.5958802141,105.5958802141,149.4582510553,3.8755406702,16.5,16.5,11223199206,141363714.221475,1113239249.49412,23,40,39,43,280.4204781705,8.95,65,p-3
