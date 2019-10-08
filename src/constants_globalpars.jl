@@ -20,5 +20,7 @@ const Q = 5
 global K = Float64
 global cK = Float64
 
+# Probability of management
+global manage_prob = 1.0
 
 
