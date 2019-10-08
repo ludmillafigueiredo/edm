@@ -35,7 +35,6 @@ export SppRef, TraitRanges, Plant, initplants, develop!, allocate!, mate!, mkoff
 # Initial trait values is read from an input file and stored for reference in `sppref::SppRef`.
 mutable struct SppRef
     sp_id::Array{String, 1}
-    abund::Dict{String,Int}
     kernel::Dict{String,String}
     clonality::Dict{String,Bool}
     seedmass::Dict{String,Float64}
@@ -955,7 +954,7 @@ Mowing happens at most once a year, between August and September.
 """
 function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
 
-    if management_counter < 1 || 1 == rand(Distributions.Bernoulli(0.5))
+    if management_counter < 1 || 1 == rand(Distributions.Bernoulli(manage_prob))
 
         # check-point
         open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
@@ -963,9 +962,9 @@ function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter:
         end
         
         mowed = find(x -> (x.stage in ["j" "a"] &&
-                           (x.mass["leaves"] >= (x.compartsize)^(3/4) || x.mass["stem"] >= 0.5*plants[a].compartsize)), plants)
+                           (x.mass["leaves"] >= (x.compartsize)^(3/4) || x.mass["stem"] >= 0.5*x.compartsize)), plants)
 
-        for m in adults
+        for m in mowed
 	    plants[m].mass["leaves"] >= (0.5*plants[m].compartsize)^(3/4) ? plants[m].mass["leaves"] = (0.5*plants[m].compartsize) : nothing 
 	    plants[m].mass["stem"] >= 0.5*plants[m].compartsize ? plants[m].mass["stem"] = (0.5*plants[m].compartsize) : nothing
 	    plants[m].mass["repr"] = 0
