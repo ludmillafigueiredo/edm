@@ -10,6 +10,12 @@ This module contains the data structures and functions to simulate plants, polli
 - shedd!(): decrease of reproductive biomass at the end of reproductive season, or winter die-back
 - manage!(): decrease of vegetative and reproductive biomass due to mowing
 
+Is also contains the data structures and functions for setting up initial environmental conditions, the simulation grid,  and changing it when necessary.
+- LandPars and NeutralLandPars: store landscape dimensions, temperature time-series and time(s) of disturbance
+- landscape_init(): create the initial simulation grid
+- updateenv!(): update weekly temperature and annual mean 
+- destroyarea!(): make contiguous area of landscape unsuitable for occupation
+- fragment!(): make non-contiguous area of landscape unsuitable for occupation
 """
 module submodels
 
@@ -27,7 +33,7 @@ using auxfunctions
 include("constants_globalpars.jl")
 
 # Functions and Types that are defined in this module
-export SppRef, TraitRanges, Plant, initplants, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, manage!, destroyorgs!, getreleases, LandPars, NeutralLandPars, landscape_init, updateenv!, destroyarea!, fragment!, disturbland!
+export SppRef, TraitRanges, Plant, initplants, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, manage!, destroyorgs!, getreleases, LandPars, NeutralLandPars, landscape_init, updateenv!, destroyarea!, fragment!
 
 # Data structures and submodels related to Plant entities
 # -------------------------------------------------------
