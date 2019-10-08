@@ -3,7 +3,8 @@
 # Metabolic theory
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 const aE = 0.63 #-eV Brown & Sibly MTE book chap 2
-# hese factors adapt the base mortality rates to the developmental stage of the individual. They were defined through a study of the rates yielded by the metabolic theory for species in the Goettingen list
+const tK = 273.15 # °C to K converter
+# These factors adapt the base mortality rates to the developmental stage of the individual. They were defined through a study of the rates yielded by the metabolic theory for species in the Goettingen list
 global seed_mfactor = 15
 global juv_mfactor = 15
 global adult_mfactor = 15

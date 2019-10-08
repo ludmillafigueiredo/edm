@@ -4,32 +4,33 @@ This module contains the data structures and functions to simulate plants, polli
 - develop!(): maturation of juveniles that have reached their respective age of first flowering
 - mate!(): pollination
 - mkoffsrping!(): seed/clone production
-- release!(): find seeds that can be dispersed
+- getreleases(): find seeds that can be dispersed
 - disperse!(): set new locations for seeds being dispersed
 - establish!(): see if seeds manage to germinate in current location
 - shedd!(): decrease of reproductive biomass at the end of reproductive season, or winter die-back
 - manage!(): decrease of vegetative and reproductive biomass due to mowing
 
-Plants have the same attributes, whose specific values differ according to functional groups (or not?). They interact when in the vicinity of each other (this might be detected over a certain distance or not - change the range of search).
 """
-
 module submodels
 
+#Load Julia packages
 using Distributions
 using DataFrames
 using JuliaDB
 using DataValues
 using StatsBase
-
+# Load EDM modules
 using auxfunctions
 
-export SppRef, TraitRanges, Plant, initorgs, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, manage!, destroyorgs!, release!, LandPars, NeutralLandPars, landscape_init, updateenv!, destroyarea!, fragment!, disturbland!
+# Load constants and global parameters
+# upload global parameters
+include("constants_globalpars.jl")
+
+# Functions and Types that are defined in this module
+export SppRef, TraitRanges, Plant, initplants, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, manage!, destroyorgs!, getreleases, LandPars, NeutralLandPars, landscape_init, updateenv!, destroyarea!, fragment!, disturbland!
 
 # Data structures and submodels related to Plant entities
 # -------------------------------------------------------
-
-# upload global parameters
-include("constants_globalpars.jl")
 
 # Initial trait values is read from an input file and stored for reference in `sppref::SppRef`.
 mutable struct SppRef
@@ -38,7 +39,7 @@ mutable struct SppRef
     kernel::Dict{String,String}
     clonality::Dict{String,Bool}
     seedmass::Dict{String,Float64}
-    maxmass::Dict{String,Float64}
+    compartsize::Dict{String,Float64}
     span_min::Dict{String,Float64}
     span_max::Dict{String,Float64}
     firstflower_min::Dict{String,Float64}
@@ -62,7 +63,7 @@ end
 # Minimal and maximal trait values, which control microevolution, are stored in `traitranges::TraitRanges`
 mutable struct TraitRanges
     seedmass::Dict{String,Array{Float64,1}}
-    maxmass::Dict{String,Array{Float64,1}}
+    compartsize::Dict{String,Array{Float64,1}}
     span::Dict{String,Array{Int64,1}}
     firstflower::Dict{String,Array{Int64,1}}
     floron::Dict{String,Array{Int64,1}}
@@ -83,7 +84,7 @@ mutable struct Plant
     clonality::Bool
     #### Evolvable traits ####
     seedmass::Float64
-    maxmass::Float64
+    compartsize::Float64
     span::Int64
     firstflower::Int64
     floron::Int64
@@ -102,27 +103,29 @@ mutable struct Plant
 end
 
 """
-initorgs(landavail, sppref,id_counter)
+    initplants(landavail, sppref,id_counter)
 
-Initializes the organisms characterized in the input info stored in `sppref` and distributes them in the available landscape `landavail`. Stores theindividuals in the `orgs` array, which holds all organisms being simulated at any given time.
-
+Initialize the organisms with trait values stored in `sppref` and distributes them in the suitable grid-cells in the landscape `landavail`.
+Store the individuals in the `plants` array, which holds all plants simulated at any given time.
 """
-function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::Int, settings::Dict{String, Any}, K::Float64)
+function initplants(landavail::BitArray{N} where N, sppref::SppRef, id_counter::Int, settings::Dict{String, Any}, K::Float64)
 
     plants = Plant[]
 
-    for s in sppref.sp_id # all fragments are populated from the same species pool
+    for s in sppref.sp_id
 
-        sp_abund = Int(round(((sppref.fitness[s]/sum(collect(values(sppref.fitness))))*K)/mean([sppref.seedmass[s],sppref.maxmass[s]]), RoundUp))
+        # Niche partitioning: Upon initialization, each species total biomass equals K*fitness_relative, where fitness_relative is the species fitness values relative to the sum of others
+        # The initial abundance is number of medium-sized individuals (50% of maximal biomass) that would sum up to the biomass. 
+        sp_abund = Int(round(((sppref.fitness[s]/sum(collect(values(sppref.fitness))))*K)/(0.5*(2*sppref.compartsize[s]+sppref.compartsize[s])), RoundUp))
 	# check-point
 	open(abspath(joinpath(settings["outputat"], string(settings["simID"], "initialabundances.txt"))),"a") do sim
 	    println(sim, "Initial abundance of $s: $sp_abund")
         end
 
 	# create random locations
-	XYs = hcat(rand(1:1, sp_abund),
-		   rand(1:1, sp_abund))
-
+	 XYs = hcat(rand(1:size(landavail,1), sp_abund),
+                    rand(1:size(landavail,2), sp_abund))
+        
 	for i in 1:sp_abund
 
 	    id_counter += 1 # update individual counter
@@ -135,7 +138,7 @@ function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::In
 			      sppref.kernel[s],
 			      sppref.clonality[s],
 			      sppref.seedmass[s],
-			      sppref.maxmass[s], #maxmass
+			      sppref.compartsize[s], #compartsize
 			      Int(round(rand(Distributions.Uniform(sppref.span_min[s], sppref.span_max[s] + minvalue),1)[1], RoundUp)),
 			      Int(round(rand(Distributions.Uniform(sppref.firstflower_min[s], sppref.firstflower_max[s] + minvalue),1)[1], RoundUp)),
 			      sppref.floron[s],
@@ -159,9 +162,9 @@ function initorgs(landavail::BitArray{N} where N, sppref::SppRef, id_counter::In
 		newplant.mass["root"] = newplant.seedmass
 		newplant.age = newplant.seedon + 4
 	    elseif newplant.stage in ["a"]
-		newplant.mass["leaves"] = newplant.maxmass^(3/4) * 0.75
-		newplant.mass["stem"] = newplant.maxmass * 0.75
-		newplant.mass["root"] = newplant.maxmass * 0.75
+		newplant.mass["leaves"] = newplant.compartsize^(3/4) * 0.75
+		newplant.mass["stem"] = newplant.compartsize * 0.75
+		newplant.mass["root"] = newplant.compartsize * 0.75
 		newplant.age = newplant.firstflower
 	    else
 		error("Check individual stages.")
@@ -179,8 +182,6 @@ end
 
 """
     allocate!(orgs, t, aE, Boltz, setting, sppref, T)
-Calculates biomass gain according to the metabolic theory (`aE`, `Boltz` and `T` are necessary then). According to the week being simulated, `t` and the current state of the individual growing ( the biomass gained is
-
 """
 function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
     # check-point
@@ -198,13 +199,13 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
 	
 	B_grow = b0grow*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T)) # only vegetative biomass fuels growth
 
-	new_mass = B_grow*((2*plants[o].maxmass + plants[o].maxmass^(3/4))-current_vegmass)
+	new_mass = B_grow*((2*plants[o].compartsize + plants[o].compartsize^(3/4))-current_vegmass)
 	
-	# adults in their reproductive season allocate to reproductive structures, instead of leaves and stem
-	
-	if (plants[o].stage == "a" &&                                   # adults in their reprod. season invest in reproduction
-           (plants[o].floron <= rem(t,52) < plants[o].floroff) &&
-            current_vegmass >= 0.5*(2*plants[o].maxmass+plants[o].maxmass^(3/4)))                                                  
+	# adults of a minimal sie in their reproductive season allocate to reproductive structures, instead of leaves and stem
+        # otherwise, growth is equally divided between all vegetative structures
+        if (plants[o].stage == "a" &&
+            (plants[o].floron <= rem(t,52) < plants[o].floroff) &&
+            current_vegmass >= 0.5*(2*plants[o].compartsize+plants[o].compartsize^(3/4)))                                                  
 
 	    if haskey(plants[o].mass,"repr")
          	plants[o].mass["repr"] += new_mass
@@ -230,11 +231,10 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
 end
 
 """
-    develop!()
-Controls individual juvenile maturation.
-
+    develop!(plants, settings, t)
+Juveniles in `plants` older than their age of first flowering at time `t` become adults.
 """
-function develop!(plants::Array{submodels.Plant,1}, sppref::SppRef, settings::Dict{String, Any}, t::Int)
+function develop!(plants::Array{submodels.Plant,1}, settings::Dict{String, Any}, t::Int)
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("Maturation..."))
@@ -256,10 +256,8 @@ function develop!(plants::Array{submodels.Plant,1}, sppref::SppRef, settings::Di
 end
 
 """
-    mate!()
-Calculate proportion of insects that reproduced (encounter?) and mark that proportion of the population with the `mated` label.
-- visited: reduction in pollination service
-
+    mate!(plants, t, setting, scen, tdist, remaining)
+Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
 """
 function mate!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
 
@@ -348,8 +346,7 @@ end
 
 """
     mkoffspring!()
-After mating happened (marked in `reped`), calculate the amount of offspring
-
+After mating happened (marked in `reped`), calculate the amount of offspring each individual produces, both sexually and assexually.
 """
 function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{String, Any},sppref::SppRef, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::submodels.TraitRanges)
 
@@ -427,7 +424,7 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
                     # Trait microevolution
                     # --------------------
 		    #seed.seedmass += rand(Distributions.Normal(0, abs(plants[s].seedmass-conspp.seedmass+non0sd)/6))[1]
-                    seed.maxmass = (seed.maxmass+conspp.maxmass)/2+ rand(Distributions.Normal(0, abs(plants[s].maxmass-conspp.maxmass+non0sd)/6))[1]
+                    seed.compartsize = (seed.compartsize+conspp.compartsize)/2+ rand(Distributions.Normal(0, abs(plants[s].compartsize-conspp.compartsize+non0sd)/6))[1]
 		    seed.span = Int(round((seed.span+conspp.span)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].span-conspp.span+non0sd)/6))[1], RoundUp))
 		    seed.firstflower = Int(round((seed.firstflower+conspp.firstflower)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
 		    seed.floron = Int(round((seed.floron+conspp.floron)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].floron-conspp.floron+non0sd)/6))[1],RoundUp))
@@ -444,9 +441,9 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 		    #   seed.seedmass = traitranges.seedmass[seed.sp][end]
 		    #end
 
-		    if (seed.maxmass < traitranges.maxmass[seed.sp][1] || seed.maxmass > traitranges.maxmass[seed.sp][end])
-			seed.maxmass < traitranges.maxmass[seed.sp][1] ? seed.maxmass = traitranges.maxmass[seed.sp][1] :
-			    seed.maxmass = traitranges.maxmass[seed.sp][end]
+		    if (seed.compartsize < traitranges.compartsize[seed.sp][1] || seed.compartsize > traitranges.compartsize[seed.sp][end])
+			seed.compartsize < traitranges.compartsize[seed.sp][1] ? seed.compartsize = traitranges.compartsize[seed.sp][1] :
+			    seed.compartsize = traitranges.compartsize[seed.sp][end]
 		    end
 
 		    if (seed.span < traitranges.span[seed.sp][1] || seed.span > traitranges.span[seed.sp][end])
@@ -525,9 +522,9 @@ for sp in unique(getfield.(asexuals, :sp))
 	clone = deepcopy(plants[c])
 
 	clone.stage = "j" #clones have already germinated
-	clone.mass["leaves"] = (plants[c].maxmass*0.1)^(3/4)
-	clone.mass["stem"] = plants[c].maxmass*0.1
-	clone.mass["root"] = plants[c].maxmass*0.1
+	clone.mass["leaves"] = (plants[c].compartsize*0.1)^(3/4)
+	clone.mass["stem"] = plants[c].compartsize*0.1
+	clone.mass["root"] = plants[c].compartsize*0.1
 	clone.mass["repr"] = 0.0
 
 	id_counter += 1
@@ -549,19 +546,16 @@ open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),
     writedlm(sim, hcat("Total number of individuals after ASEX:", length(plants)))
 end
 
-
 return id_counter
 
 end
 
 
 """
-    release!()
-Individuals being released in any given week are: in seed stage (=seed= & in their seed release period (seedon <= t <= seedoff for the species)
-
+    getreleases(plants, t)
+Retrieve indexes of seeds that are still at the mother plant who have entered their sowing season at time `t`.
 """
-
-function release!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any},sppref::SppRef)
+function getreleases(plants::Array{submodels.Plant,1}, t::Int)
 
     seedsi = find(x -> x.stage == "s" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, plants)
 
@@ -582,40 +576,39 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{submodels.Plant
     lost = Int64[]
     justdispersed = 0
 
-    for d in seedsi                    # only seeds that have been released can disperse
-	#if plants[d].kernel == "short"
-	#    µ, λ = [µ_short λ_short]
-	#elseif plants[d].kernel == "medium"
-	#    µ, λ = [µ_medium λ_medium]
-	#elseif plants[d].kernel == "long"
-	#    µ, λ = [µ_long λ_long]
-	#elseif plants[d].kernel in ["medium-short", "short-medium"]
-	#    µ, λ = rand([[µ_short λ_short],
-	#		 [µ_medium λ_medium]])
-	#elseif plants[d].kernel in ["medium-long", "long-medium"]
-	#    µ, λ = rand([[µ_long λ_long],
-	#		 [µ_medium λ_medium]])
-	#elseif plants[d].kernel in ["long-short", "short-long"]
-	#    µ, λ = rand([[µ_short λ_short],
-	#		 [µ_long λ_long]])
-	#elseif plants[d].kernel == "any"
-	#    µ,λ = rand([[µ_short λ_short],
-	#		[µ_medium λ_medium],
-	#		[µ_long λ_long]])
-	#else
-	#    error("Check dispersal kernel input for species $(plants[d].sp).")
-	#end
+    for d in seedsi # only seeds that have been released can disperse
 
-	µ, λ = [µ_short λ_short]
+        # a
+        if plants[d].kernel == "short"
+	    dist = auxfunctions.lengthtocell(4*(rand(Distributions.InverseGaussian(µ_short, λ_short),1)[1])) 
+	elseif plants[d].kernel == "medium"
+	    dist = auxfunctions.lengthtocell(1000*(rand(Distributions.InverseGaussian(µ_medium, λ_medium),1)[1])) 
+	elseif plants[d].kernel == "long"
+	    dist = auxfunctions.lengthtocell(rand(Distributions.InverseGaussian(µ_long, λ_long),1)[1]) 
+	elseif plants[d].kernel in ["medium-short", "short-medium"]
+	    dist = rand([auxfunctions.lengthtocell(4*(rand(Distributions.InverseGaussian(µ_short, λ_short),1)[1])),
+			 auxfunctions.lengthtocell(1000*(rand(Distributions.InverseGaussian(µ_medium, λ_medium),1)[1]))])
+	elseif plants[d].kernel in ["medium-long", "long-medium"]
+	    dist = rand([auxfunctions.lengthtocell(rand(Distributions.InverseGaussian(µ_long, λ_long),1)[1]),
+			 auxfunctions.lengthtocell(1000*(rand(Distributions.InverseGaussian(µ_medium, λ_medium),1)[1]))])
+	elseif plants[d].kernel in ["long-short", "short-long"]
+	    dist = rand([auxfunctions.lengthtocell(4*(rand(Distributions.InverseGaussian(µ_short, λ_short),1)[1])),
+			 auxfunctions.lengthtocell(rand(Distributions.InverseGaussian(µ_long, λ_long),1)[1])])
+	elseif plants[d].kernel == "any"
+	    dist = rand([auxfunctions.lengthtocell(4*(rand(Distributions.InverseGaussian(µ_short, λ_short),1)[1])),
+			auxfunctions.lengthtocell(1000*(rand(Distributions.InverseGaussian(µ_medium, λ_medium),1)[1])),
+			auxfunctions.lengthtocell(rand(Distributions.InverseGaussian(µ_long, λ_long),1)[1])])
+	else
+            # unity test
+	    error("Check dispersal kernel input for species $(plants[d].sp).")
+	end    
 	
-	dist = auxfunctions.lengthtocell(4*(rand(Distributions.InverseGaussian(µ,λ),1)[1]))
-
 	# Find the cell to which it is dispersing
 	θ = rand(Distributions.Uniform(0,2),1)[1]*pi
 	xdest = plants[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
 	ydest = plants[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
 
-	if (xdest, ydest) == (1,1) #checkbounds(Bool, landavail, xdest, ydest) && landavail[xdest, ydest] == true  # Check if individual fall inside the habitat area, otherwise, discard it already
+	if checkbounds(Bool, landavail, xdest, ydest) && landavail[xdest, ydest] == true  # Check if individual fall inside the habitat area, otherwise, discard it already
                                                                                           # checking the suitability first would make more sense but cant be done if cell is out of bounds
 	    plants[d].location = (xdest,ydest)
 	    justdispersed += 1
@@ -646,7 +639,7 @@ end
 
 """
     establish!
-Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish.# only after release seed can establish. Part of the establishment actually accounts for the seed falling in an available cell. This is done in the dispersal() function, to avoid computing this function for individuals that should die anyway. When they land in such place, they have a chance of germinating (become seedlings - `j` - simulated by `germinate!`). Seeds that don't germinate stay in the seedbank, while the ones that are older than one year are eliminated.
+Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish in the grid-cell they are in. Germinated seeds mature to juveniles immediately. Seeds that don't germinate stay in the seedbank.
 
 """
 function establish!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64)
@@ -673,6 +666,7 @@ function establish!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{Str
 	    writedlm(sim, hcat(plants[o].stage, plants[o].age, Bg, gprob, "germination"))
 	end
 
+        # probability of germinating
 	if gprob < 0
 	    error("gprob < 0")
 	elseif gprob > 1
@@ -698,10 +692,11 @@ function establish!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{Str
 end
 
 """
-    survive!(orgs, landscape)
-Organism survival depends on total biomass, according to MTE rate. However, the proportionality constants (b_0) used depend on the cause of mortality: competition-related, where
-plants in nogrwth are subjected to two probability rates
-
+    survive!(plants, t, cK, K, settings, sppref, landavail, biomass_production, dying_stage)
+Plants density-independent mortality is calculated according to the metabolic theory.
+Density-dependent mortality is calculated for cells with biomass over the grid-cell carrying capacity `cK`. It kills smaller individuals until the biomass of the grid-cell is above `cK` again.
+Density-dependent mortality is not calculated for seeds. Their density-dependent mortality is calculated alongside adults just for convenience.
+Both types of mortalities of adults and juveniles are calculated separately (as set by `dying_stage`). 
 """
 function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, sppref::SppRef, landavail::BitArray{2},T, biomass_production::Float64, dying_stage::String)
 
@@ -928,7 +923,7 @@ function shedd!(plants::Array{submodels.Plant,1}, sppref::SppRef, t::Int, settin
 	for a in adults
 	    plants[a].mass["leaves"] = 0.0
 	    plants[a].mass["repr"] = 0.0
-	    plants[a].mass["stem"] >= (0.5*plants[a].maxmass) ? plants[a].mass["stem"] = (0.5*plants[a].maxmass) : nothing
+	    plants[a].mass["stem"] >= (0.5*plants[a].compartsize) ? plants[a].mass["stem"] = (0.5*plants[a].compartsize) : nothing
 	end
     end
 end
@@ -960,8 +955,8 @@ end
 
 """
     manage!()
-Plants loose 20% of vegetative biomass and all of the reproductive biomass due to mowing. Mowing happens at most 3 times a year, between July and August.
-
+Juvenile and adult that are big enough, i.e., above-ground compartments have more than 50% its maximum value, have these compartments reduced to 50% of their biomass. 
+Mowing happens at most once a year, between August and September.
 """
 function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
 
@@ -972,12 +967,13 @@ function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter:
 	    writedlm(sim, hcat("Above-ground biomass before mowing =", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
         end
         
-        adults = find(x -> (x.stage == "a"), plants)
+        mowed = find(x -> (x.stage in ["j" "a"] &&
+                           (x.mass["leaves"] >= (x.compartsize)^(3/4) || x.mass["stem"] >= 0.5*plants[a].compartsize)), plants)
 
-        for a in adults
-	    plants[a].mass["leaves"] >= (0.5*plants[a].maxmass)^(3/4) ? plants[a].mass["leaves"] = (0.5*plants[a].maxmass) : nothing 
-	    plants[a].mass["stem"] >= 0.5*plants[a].maxmass ? plants[a].mass["stem"] = (0.5*plants[a].maxmass) : nothing
-	    plants[a].mass["repr"] = 0
+        for m in adults
+	    plants[m].mass["leaves"] >= (0.5*plants[m].compartsize)^(3/4) ? plants[m].mass["leaves"] = (0.5*plants[m].compartsize) : nothing 
+	    plants[m].mass["stem"] >= 0.5*plants[m].compartsize ? plants[m].mass["stem"] = (0.5*plants[m].compartsize) : nothing
+	    plants[m].mass["repr"] = 0
         end
 
         management_counter += 1
@@ -990,54 +986,8 @@ function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter:
     return management_counter
 end
 
-"""
-    pollination!()
-Simulates plant-insect encounters and effective pollen transfer.
-
-"""
-#TODO find a not too cumbersome way of modelling pollen transfer: draw from Poisot's probability
-
-# """
-#     mate!()
-# Insects reproduce if another one is found in the immediate vicinity.
-# """
-# function mate!(plant::Plantanism)
-#     x, y, frag = plant.location #another plant of same sp should match the locations of focus
-#     sp = plant.sp
-#
-#     # 1. check in the location field of plants array:
-#     # 1.a inside same frag, look for locaions inside the squared area.
-#     # 2. when matching, differentiate between autotrphsa and the rest
-#     if plant.stage == "a"
-#
-#         for o in 1:length(plants) #look for partners
-#             #TODO optimize indexation of field location in arrray
-#             #TODO memory-wise, is it better to put all ifs together?
-#             # 1:1 sex-ratio,
-#             if frag == plants[o].location[3]
-#                 if plants[o].location[1:2] in collect(Iterators.product(x-1:x+1,y-1:y+1))
-#                     # check sp, self and already reproduced
-#                     # if (sp == plants[o].sp && !(Base.isequal(plant, plants[o])) && plant.repr == false && plants[o].repr = false)
-#                     #     #TODO add stochasticity
-#                     #     plant.repr = true
-#                     #     plants[o].repr = true
-#                     #
-#                     #     parents_genes = [plant.genotype, plants[o].repr]
-#                     # end
-#                 end
-#             end
-#         end
-#
-#     else
-#         continue
-#     end
-#     return parents_genes #TODO check if it conflicts with modifying plants
-# end
-
-# Data structures and submodels related to the Land entity
-# -------------------------------------------------------
-
-const tK = 273.15 # °C to K converter
+# Data structures and submodel functions related to the Land entity
+# -----------------------------------------------------------------
 
 #Store simulation parameters referent to the landscape
 mutable struct LandPars
@@ -1061,9 +1011,9 @@ mutable struct NeutralLandPars
     disturbland
     meantempts::Array{Float64,1}
 end
-#############
-# Functions #
-#############
+
+# Functions
+# ---------
 """
     landscape_init()
 Create the initial landscape structure.
