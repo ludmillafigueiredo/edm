@@ -40,30 +40,32 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
         
         ## get raw outputs
         outraw <- read_tsv(file.path(repli, "orgsweekly.txt"), col_names = TRUE,
-                           col_types = list(col_integer(), #week
-                                            col_character(), #id
-                                            col_character(), #stage
-                                            col_character(), #location
-                                            col_character(), #sp
-                                            col_character(), #kernel
-                                            col_character(), #clonality
-                                            col_double(), #seedmass   
-                                            col_double(), #maxmass
-                                            col_integer(), #span
-                                            col_integer(), #firstflower
-                                            col_integer(), #floron
-                                            col_integer(), #floroff
-                                            col_integer(), #seednumber
-                                            col_integer(), #seedon
-                                            col_integer(), #seedoff
-                                            col_integer(), #bankduration
-                                            col_double(), #b0grow
-                                            col_double(), #b0germ
-                                            col_double(), #b0mort
-                                            col_integer(), #age
-                                            col_double(), #veg
-                                            col_double(), #repr
-                                            col_character())); #mated
+                           col_types = cols(week = col_integer(),
+                                            id = col_character(),
+                                            stage = col_character(),
+                                            location = col_character(),
+                                            sp = col_character(),
+                                            kernel = col_character(),
+                                            clonality = col_character(),
+                                            seedmass = col_double(),
+                                            compartsize = col_double(),
+                                            span = col_integer(),
+                                            firstflower = col_integer(),
+                                            floron = col_integer(),
+                                            floroff = col_integer(),
+                                            seednumber = col_integer(),
+                                            seedon = col_integer(),
+                                            seedoff = col_integer(),
+                                            bankduration = col_integer(),
+                                            b0grow = col_double(),
+                                            b0germ = col_double(),
+                                            b0mort = col_double(),
+                                            age = col_integer(),
+                                            leaves = col_double(),
+                                            stem = col_double(),
+					    root = col_double(),
+                                            repr = col_double(),
+                                            mated = col_character()));
         ## clean it
         ## take parentheses out of location column ("()")
         loc <- gsub("[\\(|\\)]", "", outraw$location)
@@ -114,26 +116,36 @@ orgreplicates <- function(parentsimID, repfolder, nreps){
     return(list(a = orgs_complete_tab, b = offspring_complete_tab))
 }
 
-#' Extract and plot species-specific mean and sd biomass compartiments (these are means of each simulation' means   
+#' Extract and plot species-specific mean and sd of biomass compartments of juveniles and adults.
 #' @param outdatalist
 #' @param plotit Boolean specifying whether graph shouuld be plotted or not
 stagemass <- function(orgs_complete_tab, stages = factor(c("a", "j", "s"))){
     
     ## get biomasses
     biomass_tab <- orgs_complete_tab%>%
-        select(week, id, stage, sp, veg, repr, repli)%>%
+        select(week, id, stage, sp, leaves, stem, root, repr, repli)%>%
+	filter(stage %in% c("j", "a")%>%
         group_by(week, stage, sp, repli)%>%
         summarize(repli_mean_reprmass = mean(repr, na.rm = TRUE),
-                  repli_mean_vegmass = mean(veg, na.rm = TRUE))%>%
+                  repli_mean_leavesmass = mean(leaves, na.rm = TRUE),
+		  repli_mean_stemmass = mean(stem, na.rm = TRUE),
+		  repli_mean_rootmass = mean(root, na.rm = TRUE))%>%
         ungroup()%>%
         group_by(week, stage, sp)%>%
         summarize(mean_reprmass = mean(repli_mean_reprmass, na.rm = TRUE),
-                  mean_vegmass = mean(repli_mean_vegmass, na.rm = TRUE),
+                  mean_leavesmass = mean(repli_mean_leavesmass, na.rm = TRUE),
+		  mean_stemmass = mean(repli_mean_stemmass, na.rm = TRUE),
+		  mean_rootmass = mean(repli_mean_rootmass, na.rm = TRUE),
                   sd_reprmass = sd(repli_mean_reprmass, na.rm = TRUE),
-                  sd_vegmass = sd(repli_mean_vegmass, na.rm = TRUE))%>%
+                  sd_leavesmass = sd(repli_mean_leavesmass, na.rm = TRUE),
+		  sd_stemmass = sd(repli_mean_stemmass, na.rm = TRUE),
+		  sd_rootmass = sd(repli_mean_rootreprmass, na.rm = TRUE),)%>%
         ungroup()
-    
-    ## Filter all adult individuals and use colours to distinguish the lines representing each individual
+
+    biomass_tablong <- biomass_tab%>%
+        gather()
+
+    # Plot biomass in compartments
     vegmass_plottED <- ggplot(filter(biomass_tab, stage %in% stages),
                               aes(x=week, y= mean_vegmass, group = factor(stage), color = factor(stage)))+
         geom_line(position = position_dodge(0.1)) +
@@ -154,7 +166,6 @@ stagemass <- function(orgs_complete_tab, stages = factor(c("a", "j", "s"))){
        		unit = "cm",
        		dpi = 300)
 
-    
     repmass_plottED <- ggplot(filter(biomass_tab, stage == "a"),
     		       	      aes(x=week, y= mean_reprmass, group = factor(sp)))+
         geom_line(position = position_dodge(0.1)) +
