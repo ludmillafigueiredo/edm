@@ -1,2 +1,0 @@
-"sp_id","kernel","kernel_sd","e_mu","e_sd","b0g","b0g_sd","b0em","b0em_sd","b0am","b0am_sd","b0jg","b0jg_sd","b0ag","b0ag_sd","sestra","dyad","floron","floron_sd","floroff","floroff_sd","seedon","seedon_sd","seedoff","seedoff_sd","max_mass","min_mass","min_mass_sd","max_span","max_span_sd","mass_mu","mass_sd","abund"
-"p-1","a",0.1,0.001,140,1.5029e+11,1.5029e+13,1.5029e+11,1.5029e+13,4752700000,4.7527e+11,6702600000,6.7026e+11,33513000,3351300000,0,0,12,24,1,12,12,37,1,5,0,0.1,0.5,1,50,0,1e-04,20
