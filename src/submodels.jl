@@ -35,7 +35,6 @@ export SppRef, TraitRanges, Plant, initplants, develop!, allocate!, mate!, mkoff
 # Initial trait values is read from an input file and stored for reference in `sppref::SppRef`.
 mutable struct SppRef
     sp_id::Array{String, 1}
-    abund::Dict{String,Int}
     kernel::Dict{String,String}
     clonality::Dict{String,Bool}
     seedmass::Dict{String,Float64}
