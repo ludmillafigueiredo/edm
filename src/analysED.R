@@ -121,70 +121,106 @@ orgreplicates <- function(parentsimID, repfolder, nreps){
 #' @param plotit Boolean specifying whether graph shouuld be plotted or not
 stagemass <- function(orgs_complete_tab, stages = factor(c("a", "j", "s"))){
     
-    ## get biomasses
-    biomass_tab <- orgs_complete_tab%>%
+    ## get biomasses allocated to each compartment
+  # summary within replicates
+    biomass_tabrepli <- orgs_complete_tab%>%
         select(week, id, stage, sp, leaves, stem, root, repr, repli)%>%
-	filter(stage %in% c("j", "a")%>%
+      filter(stage %in% c("j", "a"))%>%
         group_by(week, stage, sp, repli)%>%
-        summarize(repli_mean_reprmass = mean(repr, na.rm = TRUE),
-                  repli_mean_leavesmass = mean(leaves, na.rm = TRUE),
-		  repli_mean_stemmass = mean(stem, na.rm = TRUE),
-		  repli_mean_rootmass = mean(root, na.rm = TRUE))%>%
-        ungroup()%>%
-        group_by(week, stage, sp)%>%
-        summarize(mean_reprmass = mean(repli_mean_reprmass, na.rm = TRUE),
-                  mean_leavesmass = mean(repli_mean_leavesmass, na.rm = TRUE),
-		  mean_stemmass = mean(repli_mean_stemmass, na.rm = TRUE),
-		  mean_rootmass = mean(repli_mean_rootmass, na.rm = TRUE),
-                  sd_reprmass = sd(repli_mean_reprmass, na.rm = TRUE),
-                  sd_leavesmass = sd(repli_mean_leavesmass, na.rm = TRUE),
-		  sd_stemmass = sd(repli_mean_stemmass, na.rm = TRUE),
-		  sd_rootmass = sd(repli_mean_rootreprmass, na.rm = TRUE),)%>%
+        summarize(mean_reprmass = mean(repr),
+                  mean_leavesmass = mean(leaves),
+                  mean_stemmass = mean(stem),
+                  mean_rootmass = mean(root),
+                  sd_reprmass = sd(repr),
+                  sd_leavesmass = sd(leaves),
+                  sd_stemmass = sd(stem),
+                  rootmass = sd(root))%>%
         ungroup()
-
-    biomass_tablong <- biomass_tab%>%
-        gather()
+    # summary through replicates
+    biomass_tab <- orgs_complete_tab%>%
+      select(week, id, stage, sp, leaves, stem, root, repr)%>%
+      filter(stage %in% c("j", "a"))%>%
+      group_by(week, stage, sp)%>%
+      summarize(mean_repr = mean(repr),
+                mean_leaves = mean(leaves),
+                mean_stem = mean(stem),
+                mean_root = mean(root),
+                sd_repr = sd(repr),
+                sd_leaves = sd(leaves),
+                sd_stem = sd(stem),
+                sd_root = sd(root))%>%
+      ungroup()
+    
 
     # Plot biomass in compartments
-    vegmass_plottED <- ggplot(filter(biomass_tab, stage %in% stages),
-                              aes(x=week, y= mean_vegmass, group = factor(stage), color = factor(stage)))+
-        geom_line(position = position_dodge(0.1)) +
-        geom_point(position = position_dodge(0.1))+
-        geom_errorbar(aes(min = mean_vegmass - sd_vegmass,
-                          max = mean_vegmass + sd_vegmass),
-                      stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
-        facet_wrap(~sp, ncol =4)+
-        labs(x = "Week", y = "Compartiment biomass (g)",
-             title = "Weekly vegetative biomass")+
-        scale_color_viridis(discrete = TRUE)+
-        theme(legend.position = "none")
-
-	ggsave(filename = file.path("vegmass_plot.png"),
-       		plot = vegmass_plottED,
-       		width = 30,
-       		height = 60,
-       		unit = "cm",
-       		dpi = 300)
-
-    repmass_plottED <- ggplot(filter(biomass_tab, stage == "a"),
-    		       	      aes(x=week, y= mean_reprmass, group = factor(sp)))+
-        geom_line(position = position_dodge(0.1)) +
-        geom_point(position = position_dodge(0.1))+
-        geom_errorbar(aes(min = mean_reprmass - sd_reprmass,
-                          max = mean_reprmass + sd_reprmass),
-                      stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
-        labs(x = "Week", y = "Reproductive biomass (g)",
-             title = "Weekly reproductive biomass")+
-        facet_wrap(~sp, ncol = 4)+
-        scale_color_viridis(discrete = TRUE)+
-        theme(legend.position = "none")	
-
-    ggsave(filename = file.path(getwd(), "repmass_plot.png"),
-               plot = repmass_plottED,
-               width = 30,
-               height = 60,
-               unit = "cm",
-               dpi = 300)    
+    leaves_plot <- biomass_tab%>%
+      dplyr::select(week, stage, sp, ends_with("leaves"))%>%
+      ggplot(aes(x = week, y = mean_leaves, group = factor(sp), colour = factor(sp)))+
+      geom_line(position = position_dodge(0.1)) +
+      geom_point(position = position_dodge(0.1), size = 0.3)+
+      geom_errorbar(aes(min = mean_leaves - sd_leaves,
+                        max = mean_leaves + sd_leaves),
+                    stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
+      facet_wrap(~stage, ncol = 2)+ labs(title = "Biomass allocated to leaves")+
+      theme(legend.position = "none")
+    
+    stem_plot <- biomass_tab%>%
+      dplyr::select(week, stage, sp, ends_with("stem"))%>%
+      ggplot(aes(x = week, y = mean_stem, group = factor(sp), colour = factor(sp)))+
+      geom_line(position = position_dodge(0.1)) +
+      geom_point(position = position_dodge(0.1), size = 0.3)+
+      geom_errorbar(aes(min = mean_stem - sd_stem,
+                        max = mean_stem + sd_stem),
+                    stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
+      facet_wrap(~stage, ncol = 2)+
+      labs(title = "Biomass allocated to stem")+
+      theme(legend.position = "none")
+    
+    root_plot <- biomass_tab%>%
+      dplyr::select(week, stage, sp, ends_with("root"))%>%
+      ggplot(aes(x = week, y = mean_root, group = factor(sp), colour = factor(sp)))+
+      geom_line(position = position_dodge(0.1)) +
+      geom_point(position = position_dodge(0.1), size = 0.3)+
+      geom_errorbar(aes(min = mean_root - sd_root,
+                        max = mean_root + sd_root),
+                    stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
+      facet_wrap(~stage, ncol = 2)+
+      labs(title = "Biomass allocated to root")+
+      theme(legend.position = "none") 
+    
+    repr_plot <- biomass_tab%>%
+      filter(stage == "a")%>%
+      dplyr::select(week, stage, sp, ends_with("repr"))%>%
+      ggplot(aes(x = week, y = mean_repr, group = factor(sp), colour = factor(sp)))+
+      geom_line(position = position_dodge(0.1)) +
+      geom_point(position = position_dodge(0.1), size = 0.3)+
+      geom_errorbar(aes(min = mean_repr - sd_repr,
+                        max = mean_repr + sd_repr),
+                    stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
+      labs(title = "Biomass allocated to reproductive structures")+
+      theme(legend.position = "none")
+    
+    # Total biomass growth curve
+    growthcurve_tab <- orgs_complete_tab%>%
+      select(week, id, stage, sp, leaves, stem, root, repr)%>%
+      filter(stage %in% c("j", "a"))%>%
+      group_by(week, stage, sp, id)%>%
+      summarize(total = sum(leaves, stem, root, repr))
+    
+    growthcurve_plot <- growthcurve_tab%>%
+      ggplot(aes(x = week, y = total, group = factor(id), colour = factor(id)))+
+      geom_line(position = position_dodge(0.1)) +
+      geom_point(position = position_dodge(0.1), size = 0.3)+
+      facet_wrap(~stage, ncol = 2)+
+      scale_colour_viridis(discrete=TRUE)+
+      labs(title = "Growth curve of individuals")+
+      theme(legend.position = "none")
+    
+    biomass_plots <- plot_grid(leaves_plot, 
+                              stem_plot, 
+                              root_plot, 
+                              repr_plot, 
+                              ncol = 2, nrow = 2)
 
     return(list(a = vegmass_plottED, b = repmass_plottED, c = biomass_tab))
 }
