@@ -962,9 +962,9 @@ function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter:
         end
         
         mowed = find(x -> (x.stage in ["j" "a"] &&
-                           (x.mass["leaves"] >= (x.compartsize)^(3/4) || x.mass["stem"] >= 0.5*plants[a].compartsize)), plants)
+                           (x.mass["leaves"] >= (x.compartsize)^(3/4) || x.mass["stem"] >= 0.5*x.compartsize)), plants)
 
-        for m in adults
+        for m in mowed
 	    plants[m].mass["leaves"] >= (0.5*plants[m].compartsize)^(3/4) ? plants[m].mass["leaves"] = (0.5*plants[m].compartsize) : nothing 
 	    plants[m].mass["stem"] >= 0.5*plants[m].compartsize ? plants[m].mass["stem"] = (0.5*plants[m].compartsize) : nothing
 	    plants[m].mass["repr"] = 0
