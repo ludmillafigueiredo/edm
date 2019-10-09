@@ -481,26 +481,34 @@ groupdyn <- function(orgs_complete_tab, singlestages){
 production <- function(orgs_complete_tab){
   
   production_tab <- orgs_complete_tab%>%
-    select(week,veg,repr,repli)%>%
-    group_by(week, repli)%>%
-    summarize(production = sum(veg,repr)/(10^3))%>%
+    select(week, leaves, stem, root, repr, repli)%>%
+    mutate(production = sum(leaves,stem, root, repr)/(10^3))%>%
     ungroup()%>%
     group_by(week)%>%
-    summarize(mean_prod = mean(production, na.rm = TRUE),
-              sd_prod = sd(production, na.rm = TRUE))%>%
+    summarize(prod_mean = mean(production),
+              prod_sd = sd(production))%>%
     ungroup()
   
-  production_plot<- ggplot(production_tab, aes(x= week, y = mean_prod))+
-    geom_errorbar(aes(ymin = mean_prod - sd_prod,
-                      ymax = mean_prod + sd_prod),
-                  stat = "identity", position = position_dodge(0.01), colour = "gray50", width = 0.01)+
+  production_replitab <- orgs_complete_tab%>%
+    select(week, leaves, stem, root, repr,repli)%>%
+    mutate(production = sum(leaves,stem, root, repr)/(10^3))%>%
+    ungroup()%>%
+    group_by(week, repli)%>%
+    summarize(prod_mean = mean(production))%>%
+    ungroup()
+  
+  production_plot <- ggplot(production_tab, aes(x= week, y = prod_mean))+
+    geom_errorbar(aes(ymin = prod_mean - prod_sd,
+                      ymax = prod_mean + prod_sd),
+                  stat = "identity", position = position_dodge(0.01), 
+                  colour = "gray50", width = 0.01)+
     geom_point()+
     geom_line()+
     labs(x = "Week",
          y = "Biomass production (kg)")+
     scale_color_viridis(discrete = TRUE)
   
-  return(production_plot)
+  return(list(a = production_tab, b = production_replitab, c = production_plot))
 }
 
 #' Analysis of change in trait values distribution
@@ -770,7 +778,10 @@ groups$e -> groupweight_plot
 rm(groups)
 
 ## Biomass production
-production_plot <- production(orgs_complete_tab)
+prod <- production(orgs_complete_tab)
+prod$a -> production_tab
+prod$b -> production_replitab
+prod$c -> production_plot
 
 ## Trait change
 ### trait values
