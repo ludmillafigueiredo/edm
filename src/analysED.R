@@ -63,7 +63,7 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
                                             age = col_integer(),
                                             leaves = col_double(),
                                             stem = col_double(),
-					    root = col_double(),
+                                            root = col_double(),
                                             repr = col_double(),
                                             mated = col_character()));
         ## clean it
@@ -119,7 +119,7 @@ orgreplicates <- function(parentsimID, repfolder, nreps){
 #' Extract and plot species-specific mean and sd of biomass compartments of juveniles and adults.
 #' @param outdatalist
 #' @param plotit Boolean specifying whether graph shouuld be plotted or not
-stagemass <- function(orgs_complete_tab, stages = factor(c("a", "j", "s"))){
+biomass_allocation <- function(orgs_complete_tab, stages = factor(c("a", "j", "s"))){
     
     ## get biomasses allocated to each compartment
   # summary within replicates
@@ -200,7 +200,14 @@ stagemass <- function(orgs_complete_tab, stages = factor(c("a", "j", "s"))){
       labs(title = "Biomass allocated to reproductive structures")+
       theme(legend.position = "none")
     
+    biomass_plot <- plot_grid(leaves_plot, 
+                              stem_plot, 
+                              root_plot, 
+                              repr_plot, 
+                              ncol = 2, nrow = 2)
+    
     # Total biomass growth curve
+    # -------------------------#
     growthcurve_tab <- orgs_complete_tab%>%
       select(week, id, stage, sp, leaves, stem, root, repr)%>%
       filter(stage %in% c("j", "a"))%>%
@@ -215,14 +222,10 @@ stagemass <- function(orgs_complete_tab, stages = factor(c("a", "j", "s"))){
       scale_colour_viridis(discrete=TRUE)+
       labs(title = "Growth curve of individuals")+
       theme(legend.position = "none")
-    
-    biomass_plots <- plot_grid(leaves_plot, 
-                              stem_plot, 
-                              root_plot, 
-                              repr_plot, 
-                              ncol = 2, nrow = 2)
 
-    return(list(a = vegmass_plottED, b = repmass_plottED, c = biomass_tab))
+    return(list(a = leaves_plot, b = stem_plot, c = repr_plot, d = root_plot,
+                e = biomass_plot, f = growthcurve_plot,
+                g = biomass_tabrepli, h = biomass_tab, i = growthcurve_tab))
 }
 
 #' Extract and plot population abundances
@@ -716,9 +719,10 @@ seeddyn_plot <- ggplot(seeddyn_tab, aes(x = week, y = abundance))+
 
   return(list(a = seeddyn_tab, b = seeddyn_plot))
 }
-############################################################################
-##                         Organize analysis output                       ##
-############################################################################
+
+
+####                                    Save analysis                               ####
+# -------------------------------------------------------------------------------------#
 
 cleanoutput <- getoutput(parentsimID, repfolder, nreps, outputsdir = outputsdir, EDdir = EDdir)  
 
@@ -729,11 +733,17 @@ replicates$b -> offspring_complete_tab
 rm(replicates)
 
 ## Individual vegetative and reproductive biomasses of juveniles and adults (NOT seeds)
-#mass <- stagemass(orgs_complete_tab,TRUE) # spp is an optional argument and stage is set to default
-#mass$a -> vegmass_plot 
-#mass$b -> repmass_plot 
-#mass$c -> biomass_tab
-#rm(mass)
+biomass <- stagemass(orgs_complete_tab,TRUE) # spp is an optional argument and stage is set to default
+biomass$a -> leaves_plot 
+biomass$b -> stem_plot 
+biomass$c -> repr_plot
+biomass$d -> root_plot
+biomass$e -> biomass_plot
+biomass$f -> growthcurve_plot
+biomass$g -> biomass_tabrepli
+biomass$h -> biomass_tab
+biomass$i -> growthcurve_tab
+rm(biomass)
 
 ## Species abundance variation
 abund <- popabund(orgs_complete_tab)
