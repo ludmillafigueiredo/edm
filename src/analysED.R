@@ -382,29 +382,33 @@ spprichness <- function(orgs_complete_tab, pop_tab, parentsimID, disturbance,tdi
 #' Calculate species relative abundance and plot species rank-abundance at a given time-step
 rankabund <- function(pop_tab, timesteps){
   
-  relabund_tab <- pop_tab%>%
+  rltvabund_tab <- pop_tab%>%
     filter(week %in% timesteps)%>%
-    group_by(week, sp, repli)%>%
+    group_by(week, sp)%>%
     summarize(abundance = n())%>%
     ungroup()%>%
     group_by(sp, week)%>%
-    summarize(mean_abundance = mean(abundance, na.rm = TRUE))%>%
+    summarize(mean_abundance = mean(abundance))%>%
     ungroup()%>%
     group_by(week)%>%
-    mutate(relabund = mean_abundance/sum(mean_abundance))
+    mutate(total_abund = sum(mean_abundance),
+           rltv_abund = mean_abundance/total_abund)
   
   plot_rankabund <- function(timestep){
-    ggplot(filter(relabund_tab, week %in% timestep),
-           aes(x = reorder(sp, -relabund), y = relabund))+
+    ggplot(filter(rltvabund_tab, week %in% timestep),
+           aes(x = reorder(sp, -rltv_abund), y = rltv_abund))+
       geom_bar(stat = "identity")+
       scale_color_viridis(discrete = TRUE)+
       theme(axis.text.x = element_text(angle = 50, size = 10, vjust = 0.5))
   }
   
-  rankabunds <- timesteps%>%
+  rankabund_plots <- timesteps%>%
     map(. %>% plot_rankabund)
   
-  return(list(a = relabund_tab, b = rankabunds))
+  rankabund_plot <- plot_grid(plotlist = rankabund_plots, 
+                              labels = paste("week", timesteps, sep = " "))
+  
+  return(list(a = relabund_tab, b = rankabund_plots, c = rankabund_plot))
 }
 
 #' Population structure by group size
@@ -746,7 +750,8 @@ timesteps <- factor(c(min(pop_tab$week), max(pop_tab$week))) #provided or not, m
 ## Species rank-abundance 
 rank <- rankabund(pop_tab, timesteps)
 rank$a -> relabund_tab
-rank$b -> rankabunds
+rank$b -> rankabund_plots
+rank$c -> rankabund_plot
 rm(rank)
 
 ## Population structure by group size
