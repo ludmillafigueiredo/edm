@@ -316,22 +316,21 @@ popstruct <- function(pop_tab, offspring_complete_tab, parentsimID){
 }
 
 #' Calculate mean species richness from replicates and per group of size
-richness <- function(orgs_complete_tab, pop_tab, parentsimID, disturbance,tdist){
+spprichness <- function(orgs_complete_tab, pop_tab, parentsimID, disturbance,tdist){
   
   ## extract richness from output
   spprichness_tab <- pop_tab%>%
-    group_by(week, repli)%>%
-    summarize(richness = length(unique(sp)))%>%
-    ungroup()%>%
+    select(week, sp, repli)%>%
     group_by(week)%>%
-    summarize(mean_richness = mean(richness),
+    summarize(richness = length(unique(sp)),
+              mean_richness = mean(richness),
               sd_richness = sd(richness))%>%
     ungroup()
   
   ## create plots
   ## identify when disturbance happens, if it does
   if(disturbance == "none" && missing(tdist)){
-    spprichness_plottED <- ggplot(spprichness_tab,
+    spprichness_plot <- ggplot(spprichness_tab,
                                   aes(x = week, y = mean_richness))+
       geom_errorbar(aes(ymin = mean_richness - sd_richness,
                         ymax = mean_richness + sd_richness),
@@ -350,9 +349,9 @@ richness <- function(orgs_complete_tab, pop_tab, parentsimID, disturbance,tdist)
       text <- "Pollination loss"
     }
     ## TODO: annotate it
-    ##my_grob <- grobTree(textGrob(text, x = 0.5, y = 0.9, hjust = 0, 
+    ## my_grob <- grobTree(textGrob(text, x = 0.5, y = 0.9, hjust = 0, 
     ##                             gp = gpar(fontsize = 10, fontface = "italic")))
-    spprichness_plottED <- ggplot(spprichness_tab, aes(x = week, y = mean_richness))+
+    spprichness_plot <- ggplot(spprichness_tab, aes(x = week, y = mean_richness))+
       geom_errorbar(aes(ymin = mean_richness - sd_richness,
                         ymax = mean_richness + sd_richness),
                     stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
@@ -371,11 +370,12 @@ richness <- function(orgs_complete_tab, pop_tab, parentsimID, disturbance,tdist)
     group_by(week, seedmass)%>%
     summarize(richness = length(unique(sp)))%>%
     ungroup()
-  groupspprichness_plottED <- ggplot(data = groupspprichness_tab, aes(x = week, y = richness))+
+  groupspprichness_plot <- ggplot(data = groupspprichness_tab, aes(x = week, y = richness))+
     facet_wrap(~seedmass, scales = "free_y", ncol = 1)+
     geom_line()
   
-  return(list(a = spprichness_tab, b = spprichness_plottED, c = groupspprichness_tab, d = groupspprichness_plottED))
+  return(list(a = spprichness_tab, b = groupspprichness_tab, 
+              c = spprichness_plot, d = groupspprichness_plot))
   
 }
 
@@ -724,7 +724,7 @@ abund$c -> abund_plot
 rm(abund)
 
 ## Population structure variation
-population <- popstruct(pop_tab, offspring_complete_tab, parentsimID) #specifying species is optional
+population <- popstruct(pop_tab, offspring_complete_tab, parentsimID) # specifying species is optional
 population$a -> absstruct_tab
 population$b -> rltvstruct_tab
 population$c -> absstruct_plot
@@ -732,12 +732,12 @@ population$d -> rltvstruct_plot
 rm(population)
 
 ## Species richness
-##rich <- richness(pop_tab, parentsimID, disturbance) # tdist is optional
-##rich$a -> spprichness_tab 
-##rich$b -> spprichness_plot
-#rich$c -> groupspprichness_tab 
-#rich$d -> groupspprichness_plot
-#rm(rich)
+spprich <- spprichness(orgs_complete_tab, pop_tab, parentsimID, disturbance) # tdist is optional
+spprich$a -> spprichness_tab
+spprich$b -> spprichness_plot
+spprich$c -> groupspprichness_tab 
+spprich$d -> groupspprichness_plot
+rm(spprich)
 
 ## Set up time-steps for which to output derived analysis
 #if(!("timesteps" %in% ls())){timesteps <- c(min(pop_tab$week), max(pop_tab$week))}
