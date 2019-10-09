@@ -522,7 +522,7 @@ traitchange  <- function(orgs_complete_tab, timesteps, species){
   
   #Plot trait distribution for the species, at different time steps
   traitvalue_tab <- orgs_complete_tab%>%
-    select(-c(kernel, clonality, age, xloc, yloc, veg, repr, mated))
+    select(-c(kernel, clonality, age, xloc, yloc, leaves, stem, root, repr, mated))
   
   traitvalue4dist <- gather(traitvalue_tab%>%
                               filter(week %in% timesteps),
@@ -543,7 +543,9 @@ traitchange  <- function(orgs_complete_tab, timesteps, species){
                        nrow = length(unique(timesteps)),
                        scales = "free_y")+
             background_grid(major = "xy", minor = "none")+
-            scale_color_viridis(discrete = TRUE))
+            scale_color_viridis(discrete = TRUE)+
+            theme(axis.title = element_text(size=9),
+                  axis.text = element_text(size=9)))
     
     return(traitplot)
   }
@@ -553,7 +555,8 @@ traitchange  <- function(orgs_complete_tab, timesteps, species){
   
   # Plot trait variance over time
   traitsummary_tab  <- orgs_complete_tab%>%
-    select(-c(id, stage, kernel, clonality, age, xloc, yloc, veg, repr, mated, b0mort, b0germ, b0grow, repli))%>%
+    select(-c(id, stage, kernel, clonality, age, xloc, yloc, 
+              leaves, stem, root, repr, mated, b0mort, b0germ, b0grow, repli))%>%
     group_by(week, sp)%>%
     summarize_all(funs(mean = mean,
                        sd = sd))%>%
@@ -584,7 +587,9 @@ traitchange  <- function(orgs_complete_tab, timesteps, species){
                               ymax = trait_mean+trait_sd),
                           colour = "gray", alpha = 0.2)+
             scale_color_viridis(discrete = TRUE)+
-            labs(title = as.character(unique(.x$trait_metric))))
+            labs(title = as.character(unique(.x$trait_metric)))+
+            theme(axis.title = element_text(size=9),
+                  axis.text = element_text(size=9)))
     
     return(traitplot)
   }
@@ -854,8 +859,11 @@ for(sp in 1:length(unique(orgs_complete_tab$sp))){
     ggsave(file = file.path(traitvaluesdir,
                             paste(unique(orgs_complete_tab$sp)[sp],"_dist.png", sep = "")),
            plot = distributions,
-           device = "png",
-           dpi = 300)
+           dpi = 300,
+           height = 30,
+           width = 40,
+           units = "cm")
+    
     ts <- plot_grid(traitts_plots[[sp]][[1]],
                     traitts_plots[[sp]][[2]],
                     traitts_plots[[sp]][[3]],
@@ -870,8 +878,10 @@ for(sp in 1:length(unique(orgs_complete_tab$sp))){
                     ncol = 5)
     ggsave(file = file.path(traitvaluesdir,
                             paste(unique(orgs_complete_tab$sp)[sp],"_ts.png", sep = "")),
-           plot = ts,
-           device = "png",
-           dpi = 300)
+              plot = ts,
+              dpi = 300,
+              height = 30,
+              width = 40,
+              units = "cm")
   }
 }
