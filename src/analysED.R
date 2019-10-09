@@ -412,11 +412,12 @@ rankabund <- function(pop_tab, timesteps){
 }
 
 #' Population structure by group size
+#' Plot dynamics of population and total biomass growth per group of size, not species
 groupdyn <- function(orgs_complete_tab, singlestages){
   
   ## create table
   grouppop_tab <- orgs_complete_tab%>%
-    group_by(week, sp, seedmass, stage, repli)%>%
+    group_by(week, sp, seedmass, stage)%>%
     summarize(abundance = n())%>%
     ungroup()%>%
     bind_rows(., select(offspring_complete_tab, -mode))%>% # merge seed info
@@ -428,46 +429,51 @@ groupdyn <- function(orgs_complete_tab, singlestages){
               sd_abundance = sd(abundance))%>%
     ungroup()
   
-  ## create plots 
-  ## filter data, if necessary
-  if (missing(singlestages)){
-    popdata_to_plot <- grouppop_tab
-    weightdata_to_plot <- orgs_complete_tab
-  }else{
-    popdata_to_plot <- grouppop_tab %>%
-      filter(stage %in% singlestages)
-    weightdata_to_plot <- orgs_complete_tab%>%
-      filter(stage %in% singlestages)
-  }
-  ## plot it
-  grouppop_plot <- ggplot(data = popdata_to_plot,
+  groupweight_tab <- orgs_complete_tab%>%
+    select(week, id, stage, seedmass, sp, leaves, stem, root, repr)%>%
+    mutate(total = leaves + stem + root + repr)%>%
+    group_by(week, stage, seedmass)%>%
+    summarize(totalmass_mean = mean(total),
+              totalmass_sd = sd(total))%>%
+    ungroup()
+  
+  # intra-replicate summary
+  groupweight_replitab <- orgs_complete_tab%>%
+    select(week, id, stage, seedmass, sp, leaves, stem, root, repr, repli)%>%
+    mutate(total = leaves + stem + root + repr)%>%
+    group_by(week, stage, seedmass, repli)%>%
+    summarize(totalmass_mean = mean(total),
+              totalmass_sd = sd(total))%>%
+    ungroup()
+  
+  ## population dynamic
+  grouppop_plot <- ggplot(data = grouppop_tab,
                           aes(x = week, y = mean_abundance, colour = stage))+
     geom_errorbar(aes(ymin = mean_abundance - sd_abundance,
                       ymax = mean_abundance + sd_abundance),
-                  stat = "identity", position = position_dodge(0.1), colour = "gray50", width = 0.01)+
+                  stat = "identity", position = position_dodge(0.1), 
+                  colour = "gray50", width = 0.01)+
     geom_line()+
     geom_point()+
-    facet_wrap(~seedmass, ncol = 1, nrow = 3)+
+    facet_wrap(~seedmass, ncol = 1)+
     labs(title = "Population structure per group size")+
     scale_color_viridis(discrete = TRUE)
   
   ## plot weigh variation
-  groupweight_plot <- ggplot(data = weightdata_to_plot%>%
-                               group_by(week, seedmass, stage, repli)%>%
-                               summarize(repli_mean_weight = mean(veg, na.rm = TRUE))%>%
-                               ungroup()%>%
-                               group_by(week, seedmass, stage)%>%
-                               summarize(mean_weight = mean(repli_mean_weight, na.rm = TRUE), 
-                                         sd_weight = sd(repli_mean_weight, na.rm = TRUE)),
-                             aes(x = week, y = mean_weight, colour = stage))+
-    geom_errorbar(aes(ymin = mean_weight-sd_weight, ymax = mean_weight + sd_weight), 
-                  colour = "black", width=.01, position = position_dodge(0.1))+
+  groupweight_plot <- ggplot(groupweight_tab,
+                             aes(x = week, y = totalmass_mean, colour = stage))+
+    geom_errorbar(aes(ymin = totalmass_mean -totalmass_sd, 
+                      ymax = totalmass_mean + totalmass_sd), 
+                  colour = "black", width = .01, position = position_dodge(0.1))+
     geom_line(position = position_dodge(0.1))+
-    geom_point(position = position_dodge(0.1))+
-    scale_color_viridis(discrete = TRUE)+
-    facet_wrap(~seedmass, ncol = 1, nrow = 3)
+    geom_point(position = position_dodge(0.1), size = 0.3)+
+    facet_wrap(~seedmass, ncol = 1)+
+    labs(title = "Total biomass per group size")+
+    scale_color_viridis(discrete = TRUE)
   
-  return(list(a = grouppop_tab, b = grouppop_plot, c = groupweight_plot))
+  
+  return(list(a = grouppop_tab, b = groupweight_tab, c = groupweight_replitab,
+              d = grouppop_plot, e = groupweight_plot))
   
 }
 
@@ -757,8 +763,10 @@ rm(rank)
 ## Population structure by group size
 groups <- groupdyn(orgs_complete_tab) #specifying singlestages is optional
 groups$a -> grouppop_tab
-groups$b -> grouppop_plot
-groups$c -> groupweight_plot
+groups$b -> groupweight_tab
+groups$c -> groupweight_replitab
+groups$d -> grouppop_plot
+groups$e -> groupweight_plot
 rm(groups)
 
 ## Biomass production
