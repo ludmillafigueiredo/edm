@@ -1,32 +1,23 @@
 #!/usr/bin/env julia
 
-# Get model directory and include it in Julia's loading path
-#
-#cd("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/") # Only in ATOM
-EDDir = abspath(joinpath(pwd(), "src"))
+EDDir = joinpath(pwd(), "src") # TODO test without pwd()
 push!(LOAD_PATH,EDDir)
 
-# Load Julia packages
 using ArgParse
 using Distributions
-using JuliaDB #for in/outputs
+using JuliaDB
 using CSV #TODO replace JuliaDB with it?
 using DataFrames
 using DataValues
 using RCall
-
-# Load EDM modules
 using auxfunctions
 using submodels
 using outputs
 
-# Load constants and global parameters
 include("constants_globalpars.jl")
 
-# Create command line
 function parse_commandline()
     sets = ArgParseSettings() #object that will be populated with the arguments by the macro
-
     @add_arg_table sets begin
         "--simID"
         help = "Name of the folder where outputs will be stored."
@@ -46,29 +37,29 @@ function parse_commandline()
         "--outputat"
         help = "Name of directory where output should be written ."
         arg_type = String
-        default = abspath(pwd(),"outputs")
+        default = "outputs"
 
         "--spinput"
         help = "Name of file with species list."
         arg_type = String
-        default = abspath(pwd(),"inputs/species.csv")
+        default = joinpath("inputs", "species.csv")
 
         "--insect"
         help = "How to explicitly model insects:
                 pollination-independent reproduction \"indep\";
                 equal pollination loss for all species \"equal\"."
         arg_type = String
-        default = abspath(pwd(),"inputs/insects.csv")
+        default = joinpath("inputs", "insects.csv")
 
         "--landbuffer"
         help = "Buffer shape file or file containing its area"
         arg_type = String
-        default = abspath(pwd(),"inputs/landbuffer.jl") # "inputs/landbuffer.shp"
+        default = joinpath("inputs", "landbuffer.jl")
 
         "--initialland"
         help = "Name of file with landscape size values: areas of fragments, mean (and s.d.) temperature."
         arg_type = String
-        default = abspath(pwd(),"inputs/initialland.jl") #"inputs/initialland.shp"
+        default = joinpath("inputs","initialland.jl")
 
         "--disturbtype"
         help = "Type of environmental disturbance to be implemented: habitat area loss \"loss\", habitat fragmentation \"frag\" or temperature change \"temp\""
@@ -83,7 +74,7 @@ function parse_commandline()
         "--disturbland"
         help = "Either a shape file (if \`landmode\`)"
         arg_type = Any
-        default = nothing 
+        default = nothing
 
         "--timesteps"
         help = "Duration of simulation in weeks."
@@ -98,23 +89,21 @@ function parse_commandline()
         "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
-        default = abspath(pwd(),"inputs/temp1917_2017.csv")
+        default = joinpath("inputs", "temp1917_2017.csv")
 
         "--timemsg"
         help = "Output timing to terminal, as well as checkpoint"
         arg_type = Bool
         default = false
     end
-    return parse_args(sets) # returning a dictionnary of strings is useful because they can passed as keywords to Julia function
+    return parse_args(sets)
 end
 
 
 """
     read_landin(settings)
 Read, derive and store values related to the environmental conditions: temperature, landscape size, availability, and changes thereof.
- 
 """
-
 function read_landpars(settings::Dict{String,Any})
     # Temperature time-series
     temp_tsinput = loadtable(settings["temp_ts"])
@@ -133,7 +122,7 @@ function read_landpars(settings::Dict{String,Any})
         @rput landbuffer
 
         # get patches/fragments areas and distances from shape/raster files
-        landconfig = rcopy(Array{Any}, reval(abspath(joinpath(EDDir,"landconfig.R"))))
+        landconfig = rcopy(Array{Any}, reval(joinpath(EDDir,"landconfig.R")))
         # store them in landpars
         # in the absence of disturbance-related files, R returns Nullable values
         landpars = submodels.LandPars(landconfig[[1]],
@@ -147,7 +136,7 @@ function read_landpars(settings::Dict{String,Any})
                                      select(temp_tsinput,:meantemp))
 
     elseif settings["landmode"] == "artif" # simulation arena is built from a neutral landscape
-        
+
         if settings["disturbtype"] in ["frag" "loss"]
 
             # send file names to R
@@ -163,7 +152,7 @@ function read_landpars(settings::Dict{String,Any})
             @rput disturbland
 
             # get 0-1 habitat suitability matrices
-            landconfig = rcopy(Array{Any}, reval(string("source(\"",abspath(joinpath(EDDir,"landconfig.R")),"\")")))
+            landconfig = rcopy(Array{Any}, reval(string("source(\"",joinpath(EDDir,"landconfig.R"),"\")")))
             @rget initialmatrix
             @rget disturbmatrix
 
@@ -186,7 +175,7 @@ function read_landpars(settings::Dict{String,Any})
             @rput disturbland
 
             # get suitability matrices from R
-            landconfig = rcopy(Array{Any}, reval(string("source(\"",abspath(joinpath(EDDir,"landnlmconfig.R")),"\")")))
+            landconfig = rcopy(Array{Any}, reval(string("source(\"",joinpath(EDDir,"landnlmconfig.R"),"\")")))
             @rget initialmatrix
             @rget disturbmatrix
 
@@ -197,19 +186,15 @@ function read_landpars(settings::Dict{String,Any})
     else
         error("Please choose a mode of landscape simulation.")
     end
-
     return landpars
-
 end
 
 """
     read_spinput(settings)
 Reads in species trait values (min. and max. values for the evolvable ones). Stores them in `sppref`, a structure with parameters as Dictionnary fields, where species names are the keys to the parameter values.
 """
-
 function read_spinput(settings::Dict{String,Any})
 
-    #spinputtbl = loadtable(abspath(pwd(),"inputs/species.csv"))
     spinputtbl = loadtable(settings["spinput"])
 
     sppref = submodels.SppRef(Array(rows(spinputtbl,:sp_id)),
@@ -287,7 +272,6 @@ Values are store in an object of type TraitRanges, where each field is a Diction
 """
 function define_traitranges(settings::Dict{String,Any})
 
-    #spinputtbl = loadtable(abspath(pwd(),"inputs/species.csv"))
     spinputtbl = loadtable(settings["spinput"])
 
     traitranges = TraitRanges(
@@ -320,11 +304,8 @@ function define_traitranges(settings::Dict{String,Any})
              for i in 1:length(rows(spinputtbl,:sp_id))),
         Dict(rows(spinputtbl,:sp_id)[i] =>
              [Int(round(rows(spinputtbl,:bankduration_min)[i], RoundDown)), Int(round(rows(spinputtbl,:bankduration_max)[i], RoundUp))]
-             for i in 1:length(rows(spinputtbl,:sp_id)))
-    )
-
+             for i in 1:length(rows(spinputtbl,:sp_id))))
     return traitranges
-
 end
 
 """
@@ -334,11 +315,9 @@ Reads how insects are going to be implicitly simulated.
 function implicit_insect(settings::Dict{String,Any})
 
     insectsinput = loadtable(settings["insect"])
-
     interaction = select(insectsinput, :interaction)[1] # type of interaction which is affected
     scen = select(insectsinput, :scen)[1] # pollination scenario
     remaining = select(insectsinput, :remaining) # proportion of pollination service loss
-
     return interaction, scen, remaining
 end
 
@@ -356,7 +335,7 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
                       reshape(string.(fieldnames(Plant)[1:20]),1,:),
                       ["leaves" "stem" "root" "repr"],
                       reshape(string.(fieldnames(Plant)[22:end]),1,:))
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "w") do output
+        open(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt"), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
     end
@@ -365,7 +344,7 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
     if t == 1 || rem(t,settings["tout"]) == 0
 
         for o in outplants
-            open(abspath(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt")), "a") do output
+            open(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt"), "a") do output
                 writedlm(output, hcat(t,
                                       plants[o].id,
                                       plants[o].stage,
@@ -404,14 +383,12 @@ Store parameters necessary to implement disturbance.
 function loaddisturbance(settings)
 
     tdist = nothing
-    # read in the disturbance file, if not done so yet
 
     # select file according to keyword: loss, frag, temp
     if settings["disturbtype"] != "none"
         if settings["disturbtype"] in ["loss" "frag"]
 
             tdist = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64))[:td]
-
             return tdist
 
         elseif settings["disturbtype"] == "poll"
@@ -446,9 +423,7 @@ function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::B
     end
 
     submodels.destroyorgs!(plants, landavail, settings)
-
     return landscape,landavail
-
 end
 
 """
@@ -484,7 +459,7 @@ function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, 
     if t in criticalts
         # output message
         if t == 1
-            open(abspath(joinpath(settings["outputat"],settings["simID"],"landlog.txt")),"w") do sim
+            open(joinpath(settings["outputat"],settings["simID"],"landlog.txt"),"w") do sim
                 println(sim, "week\tK\tcK\thabitatarea\ttotalarea")
             end
         end
@@ -495,9 +470,9 @@ function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, 
 
         # K and grid-cell K
         global cK = 350.0
-	global K = cK*habitatarea # landscape K at 3.5 T/ha, i.e., 350g/m2
+	    global K = cK*habitatarea # landscape K at 3.5 T/ha, i.e., 350g/m2
 
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"landlog.txt")),"a") do sim
+        open(joinpath(settings["outputat"],settings["simID"],"landlog.txt"),"a") do sim
             writedlm(sim,[t K cK habitatarea totalarea])
         end
     end
@@ -513,25 +488,21 @@ Calculate the fitness value according to a Gauss function:
 
 and store the value in a dictionnary holding the species performance at a given time step.
 It runs at initialization, to set up niche partitioning. It used the  with mean temperature for the year `mean_annual` calculated before hand
- 
+
 # Arguments
 - `mean_annual`: mean annual temperature for the following year. `x` in the Gaussian function takes its value.
 - `maximal fitness::Float64=1.0`: parameter `a`, the height of the curve's peak.
 - `mean_opt::Float64`: parameter `b` is the position of the center of the peak.
 - `std_tol::Float64`: parameter `c` is the standard deviation,
 """
-
 function updatefitness!(sppref::SppRef, mean_annual::Float64, max_fitness::Float64)
-
     for sp in sppref.sp_id
-
         mean_opt = sppref.temp_opt[sp]
         std_tol = sppref.temp_tol[sp]
 
         absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
         sppref.fitness[sp] = absolute_fitness
     end
-
 end
 
 """
@@ -543,16 +514,14 @@ Calculate the fitness value according to a Gauss function:
 
 and store the value in a dictionnary holding the species performance at a given time step.
 Fitness is updated every begining of the year, with mean temperature for the year `mean_annual` calculated before hand.
- 
+
 # Arguments
 - `mean_annual`: mean annual temperature for the following year. `x` in the Gaussian function takes its value.
 - `maximal fitness::Float64=1.0`: parameter `a`, the height of the curve's peak.
 - `mean_opt::Float64`: parameter `b` is the position of the center of the peak.
 - `std_tol::Float64`: parameter `c` is the standard deviation,
 """
-
 function updatefitness!(sppref::SppRef, mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Dict{String, Any})
-
     for sp in sppref.sp_id
 
         mean_opt = sppref.temp_opt[sp]
@@ -561,85 +530,59 @@ function updatefitness!(sppref::SppRef, mean_annual::Float64, max_fitness::Float
         absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
         sppref.fitness[sp] = absolute_fitness
     end
-
-    open(abspath(joinpath(settings["outputat"], settings["simID"], "spp_fitness.csv")),"a") do fitnessfile
+    open(joinpath(settings["outputat"], settings["simID"], "spp_fitness.csv"),"a") do fitnessfile
     	writedlm(fitnessfile, hcat(t, sp, get(sppref.fitness, sp, "NA")) for sp in collect(keys(sppref.fitness)))
     end
 end
 
-
 """
     simulate!()
-Run all functions 
+Run all functions
 """
 function simulate()
 
-    # INITIALIZATION
-    #################
+    #TODO put init into its own function
 
-    # Read in command line arguments
     settings = parse_commandline()
-
-    # unity test
     println(keys(settings))
 
-    # Load disturbance parameters, if necessary
     tdist = nothing
     if settings["disturbtype"] != "none"
         tdist = loaddisturbance(settings)
     end
     println(tdist)
 
-    # Store landscape configuration
     landpars = read_landpars(settings)
-
-    # unity test
-    println("Land init stored in object of type $(typeof(landpars))")
-
-    # Store species information
     sppref = read_spinput(settings)
-    ## unity test
-    println("Sp info stored in object of type $(typeof(sppref))")
     traitranges = define_traitranges(settings)
-    ## unity test
-    println("Sp ranges stored in object of type $(typeof(traitranges))")
-
-    # Set insects implicit simulation
     interaction, scen, remaining = implicit_insect(settings)
-
-    # Create landscape
     mylandscape, landavail = submodels.landscape_init(landpars)
-    # unity test
-    println("Landscape initialized: type $(typeof(mylandscape))")
-
-    # Initialize individual tagger: It tags all individuals ever created. It does not change if individuals die, so there is no risk of re-use of a tag.
-    id_counter = 0
-
-    # Initialize management counter
-    management_counter = 0
-
-    # Initialize abundances according to species fitness
+    plants, id_counter = initplants(landavail, sppref, id_counter, settings, K)
     updateK!(landavail, settings, 1)
     T, mean_annual = updateenv!(1, landpars)
     updatefitness!(sppref, mean_annual, 1.0)
 
-    # Create initial individuals
-    plants, id_counter = initplants(landavail, sppref, id_counter, settings, K)
+    id_counter = 0
+    management_counter = 0
 
+    # check-points
+    println("Land init stored in object of type $(typeof(landpars))")
+    println("Sp info stored in object of type $(typeof(sppref))")
+    println("Sp ranges stored in object of type $(typeof(traitranges))")
+    println("Landscape initialized: type $(typeof(mylandscape))")
     println("Plants initialized: type $(typeof(plants))")
-
-    cd(pwd())
-
     println("Starting simulation")
 
     # ORGANIZE OUTPUT FOLDERS
     #########################
 
+    srand(settings["rseed"])
+
     results_folder = string()
+
     for rep in 1:settings["nreps"]
 
-        srand(settings["rseed"])
-
+        #TODO
         if settings["nreps"] == 1
             simresults_folder = joinpath(settings["outputat"], settings["simID"])
             results_folder = simresults_folder
@@ -656,7 +599,7 @@ function simulate()
         end
 
         # OUTPUT SIMULATION SETTINGS
-        open(abspath(joinpath(simresults_folder, "simsettings.jl")),"w") do ID
+        open(joinpath(simresults_folder, "simsettings.jl"),"w") do ID
             println(ID, "tdist = ", tdist)
             println(ID, "landpars = ", typeof(landpars), "\ninitial = ", typeof(landpars.initialland), "\ndisturb = ", typeof(landpars.disturbland))
             println(ID, "interaction = ", interaction)
@@ -666,45 +609,44 @@ function simulate()
         end
 
         # INITIALIZE FILE TO LOG SIMULATION PROGRESS
-        open(abspath(joinpath(simresults_folder, "checkpoint.txt")),"w") do sim
+        open(joinpath(simresults_folder, "checkpoint.txt"),"w") do sim
             println(sim,string("Simulation: ",settings["simID"],now()))
         end
 
         # INITIALIZE FILE TO LOG LIFE-HISTORY EVENTS
-        open(abspath(joinpath(simresults_folder, "eventslog.txt")),"w") do sim
+        open(joinpath(simresults_folder, "eventslog.txt"),"w") do sim
             writedlm(sim, hcat("week", "event", "stage", "age"))
         end
 
         # INITIALIZE FILE TO LOG METABOLIC RATES
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
+        open(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt"),"a") do sim
 
             writedlm(sim, hcat("stage", "age", "rate", "probability", "event"))
 
         end
 
         # INITIALIZE FILE TO LOG SEED PRODUCTION
-        open(abspath(simresults_folder, "offspringproduction.csv"),"w") do seedfile
+        open(joinpath(simresults_folder, "offspringproduction.csv"),"w") do seedfile
             writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
         end
 
-	# INITIALIZE FILE TO LOG SPECIES FITNESS
-        open(abspath(simresults_folder, "spp_fitness.csv"),"w") do fitnessfile
+	    # INITIALIZE FILE TO LOG SPECIES FITNESS
+        open(joinpath(simresults_folder, "spp_fitness.csv"),"w") do fitnessfile
             writedlm(fitnessfile, hcat("week", "sp", "fitness"))
         end
 
         # MODEL RUN
         ############
-
         for t in 1:settings["timesteps"]
 
             # check-point
-            open(abspath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim
+            open(joinpath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim
                 println(sim, "\nWEEK $t")
-		println(sim, "Species richness: $(length(unique(map(x -> x.sp, plants))))")
+		        println(sim, "Species richness: $(length(unique(map(x -> x.sp, plants))))")
             end
 
-	    println("\nWEEK $t")
-	    println("Species richness: $(length(unique(map(x -> x.sp, plants))))")
+	        println("\nWEEK $t")
+	        println("Species richness: $(length(unique(map(x -> x.sp, plants))))")
 
             # APPLY LANDSCAPE DISTURBANCE
             if settings["disturbtype"] in ["frag" "loss"] && t in tdist
@@ -712,58 +654,39 @@ function simulate()
             end
             updateK!(landavail, settings, t, tdist)
 
-	    # UPDATE CURRENT TEMPERATURE
-	    if rem(t, 52) == 1
+	        if rem(t, 52) == 1
                 T, mean_annual = updateenv!(t, landpars)
-	    else
-	        T = updateenv!(t, landpars)
-	    end
+	        else
+	            T = updateenv!(t, landpars)
+	        end
 
-            # UPDATE SPECIES FITNESS
             updatefitness!(sppref, mean_annual, 1.0, t, settings)
 
-            # OUTPUT: First thing, to see how community is initialized
             orgstable(plants,t,settings)
 
-            # MANAGEMENT: it happens at least once every year, annually
-            if ((31 < rem(t,52) < 39) && management_counter < 1) #mowing cannot happen before the 1st of July
+            if ((31 < rem(t,52) < 39) && management_counter < 1)
                 management_counter = manage!(plants, t, management_counter, settings)
             end
 
-            # UPDATE CURRENT BIOMASS PRODUCTION
             biomass_production = sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))
-            # check-point
-            open(abspath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim
+            open(joinpath(simresults_folder, "checkpoint.txt"),"a") do sim
                 writedlm(sim, hcat("Biomass production:", biomass_production))
             end
 
-            # LIFE CYCLE
             allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "a")
-
             survive!(plants, t, cK, K, settings, sppref, landavail, T, biomass_production, "a")
-
-	    allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
-
+	        allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
             survive!(plants, t, cK, K, settings, sppref, landavail, T, biomass_production, "j")
-
             develop!(plants, settings, t)
-
             mate!(plants, t, settings, scen, tdist, remaining)
-
             id_counter = mkoffspring!(plants, t, settings, sppref, id_counter, landavail, T, traitranges)
-
             seedsi = getreleases(plants, t)
-            
             disperse!(landavail, seedsi, plants, t, settings, sppref, landpars, tdist)
-
             establish!(plants, t, settings, sppref, T, biomass_production, K)
-
             shedd!(plants, sppref, t, settings)
         end
-end
-
-return settings, results_folder
-
+    end
+    return settings, results_folder
 end
 
 # run simulation
