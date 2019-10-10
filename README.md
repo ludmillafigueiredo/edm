@@ -11,7 +11,12 @@
 `template_files`: examples of how input files should look like
 
 `EDM_ODD.pdf`: model description
-
+---
 # Style guide
-Blocks of code are separated by: `# -------------------`
-`pseudo:` or `#TODO` identifies sections of pseudo code. not informative
+Blocks of code Julia are separated by: `# -------------------`
+Sections of R code code are names with:
+```
+#### Title ####
+# -------------# # this just makes it look cute
+```
+`pseudo:` or `#TODO` identifies sections of pseudo code. Not supposed to be infromative messages on the current status of the code
