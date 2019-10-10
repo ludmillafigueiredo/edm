@@ -14,7 +14,7 @@ library(gganimate); #sudo apt-get install cargo install.packages("gifski")
 library(cowplot);
 
 ## Set directories
-source("dirnames_ludmilla.R")
+source("dirnames_setup.R")
 
 # Set up directory and environement to store analysis
 analysEDdir <- file.path(outputsdir, paste(parentsimID, "analysED", sep = "_"))
