@@ -408,7 +408,7 @@ rankabund <- function(pop_tab, timesteps){
   rankabund_plot <- plot_grid(plotlist = rankabund_plots, 
                               labels = paste("week", timesteps, sep = " "))
   
-  return(list(a = relabund_tab, b = rankabund_plots, c = rankabund_plot))
+  return(list(a = rltvabund_tab, b = rankabund_plots, c = rankabund_plot))
 }
 
 #' Population structure by group size
@@ -726,7 +726,7 @@ replicates$b -> offspring_complete_tab
 rm(replicates)
 
 ## Individual vegetative and reproductive biomasses of juveniles and adults (NOT seeds)
-biomass <- stagemass(orgs_complete_tab,TRUE) # spp is an optional argument and stage is set to default
+biomass <- biomass_allocation(orgs_complete_tab,TRUE) # spp is an optional argument and stage is set to default
 biomass$a -> biomass_tabrepli
 biomass$b -> biomass_tab
 biomass$c -> growthcurve_tab
@@ -768,7 +768,7 @@ timesteps <- factor(c(min(pop_tab$week), max(pop_tab$week))) #provided or not, m
 
 ## Species rank-abundance 
 rank <- rankabund(pop_tab, timesteps)
-rank$a -> relabund_tab
+rank$a -> rltvabund_tab
 rank$b -> rankabund_plots
 rank$c -> rankabund_plot
 rm(rank)
@@ -819,21 +819,20 @@ seeddyn$a -> seeddyn_tab
 seeddyn$b -> seeddyn_plot
 
 ## Save bundle of tabs and plots as RData
-EDtabs <- objects(name = environment(), all.names = FALSE, pattern = "_tab$")
+EDtabs <- objects(name = environment(), all.names = FALSE, pattern = "tab$")
 save(list = EDtabs, file = file.path(analysEDdir,
                                      paste(parentsimID, "_tabs.RData", sep = "")))
 
-EDplots <- objects(name = environment(), all.names = FALSE, pattern = "_plot$")
+EDplots <- objects(name = environment(), all.names = FALSE, pattern = "plot$")
 save(list = EDplots, file = file.path(analysEDdir,
                                       paste(parentsimID, "_plots.RData", sep = "")))
 
 ## Rank-abundance plots are in a list
-save(rankabunds, file = file.path(analysEDdir,
+save(rankabund_plots, file = file.path(analysEDdir,
                                   paste(parentsimID, "rankabunds", ".RData", sep = "")))
 
 ## Save lists with plots of trait distribution and values over time
-traitplots <- objects(name = environment(), all.names = FALSE, pattern = "_plots$")
-save(list = traitplots, file = file.path(analysEDdir,
+save(list = list(traitdistributions_plots, traitts_plots), file = file.path(analysEDdir,
                                          paste(parentsimID, "traitsdistributions", ".RData", sep = "")))
 
 ## Plot all graphs
