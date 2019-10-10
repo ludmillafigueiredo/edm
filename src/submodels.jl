@@ -10,7 +10,7 @@ This module contains the data structures and functions to simulate plants, polli
 - shedd!(): decrease of reproductive biomass at the end of reproductive season, or winter die-back
 - manage!(): decrease of vegetative and reproductive biomass due to mowing
 
-Is also contains the data structures and functions for setting up initial environmental conditions, the simulation grid,  and changing it when necessary.
+It also contains the data structures and functions for setting up initial environmental conditions, the simulation grid,  and changing it when necessary.
 - LandPars and NeutralLandPars: store landscape dimensions, temperature time-series and time(s) of disturbance
 - landscape_init(): create the initial simulation grid
 - updateenv!(): update weekly temperature and annual mean 
@@ -245,16 +245,14 @@ function develop!(plants::Array{submodels.Plant,1}, settings::Dict{String, Any},
         writedlm(sim, hcat("Maturation..."))
     end
 
-    juvs = find(x->x.stage == "j",plants)
+    # find indexes of individuals that are ready to become adults
+    juvs = find(x->x.stage == "j" && x.age >= x.firstflower,plants)
 
     for j in juvs
-	if  plants[j].age >= plants[j].firstflower
-	    plants[j].stage = "a"
-
-	    # test
-	    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-		writedlm(sim, hcat(t, "maturation", plants[j].stage, plants[j].age))
-	    end
+	plants[j].stage = "a"
+        # check-point
+	open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
+	    writedlm(sim, hcat(t, "maturation", plants[j].stage, plants[j].age))
 	end
     end
 
