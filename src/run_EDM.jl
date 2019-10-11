@@ -11,6 +11,7 @@ using DataFrames
 using DataValues
 using RCall
 using auxfunctions
+using entities
 using submodels
 using outputs
 

@@ -2,6 +2,8 @@
 This module contains data structures used to represent entities in the model and to store values somehow related to them
 """
 
+module entities
+
 export SppRef, TraitRanges, Plant, LandPars, NeutralLandPars
 
 # Data structures and submodel functions related to the Plant entity
@@ -100,4 +102,5 @@ mutable struct NeutralLandPars
     initialland::Array{Int64,2}
     disturbland
     meantempts::Array{Float64,1}
+end
 end
