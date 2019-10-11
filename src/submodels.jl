@@ -29,7 +29,7 @@ using entities
 
 include("constants_globalpars.jl")
 
-export initplants, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedd!, manage!, destroyorgs!, getreleases, landscape_init, updateenv!, destroyarea!, fragment!
+export initplants, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedflower!, winter_dieback!, manage!, destroyorgs!, getreleases, landscape_init, updateenv!, destroyarea!, fragment!
 
 """
     initplants(landavail, sppref,id_counter)
@@ -779,31 +779,38 @@ end
 end
 
 """
-    shedd!()
-Plants loose their reproductive biomasses at the end of the reproductive season and 50% of biomass during winter.
+    shedflower!(plants, sppref, t, settings)
+Plants loose their reproductive biomasses at the end of the reproductive season
+ and 50% of biomass during winter.
 
 """
-function shedd!(plants::Array{submodels.Plant,1}, sppref::SppRef, t::Int, settings::Dict{String,Any})
+function shedflower!(plants::Array{submodels.Plant,1}, sppref::SppRef, t::Int, settings::Dict{String,Any})
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("SHEDDING reproductive biomass/ WInter-die back"))
     end
 
-    flowering = find(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), plants) #indexing a string returns a Char type, not String. Therefore, p must be Char ('').
-
+    flowering = find(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), plants)
+    
     for f in flowering
 	plants[f].mass["repr"] = 0.0
     end
+    
+end
 
-    if (rem(t,52) == 51)
+"""
+    winter_dieback!(plants, t)
+In the last week of the year, all adult `plants` loose all of the biomass allocated to `leaves`
+and reproductive (`repr`) structures. Biomass allocated to `stem` is decreased by a half, if not 
+already at that value.
+"""
+function winter_dieback!(plants::Array{submodels.Plant,1}, t::Int)
+    adults = find(x -> (x.stage == "a"), plants)
 
-        adults = find(x -> (x.stage == "a"), plants)
-
-	for a in adults
-	    plants[a].mass["leaves"] = 0.0
-	    plants[a].mass["repr"] = 0.0
-	    plants[a].mass["stem"] >= (0.5*plants[a].compartsize) ? plants[a].mass["stem"] = (0.5*plants[a].compartsize) : nothing
-	end
+    for a in adults
+        plants[a].mass["leaves"] = 0.0
+	plants[a].mass["repr"] = 0.0
+	plants[a].mass["stem"] >= (0.5*plants[a].compartsize) ? plants[a].mass["stem"] = (0.5*plants[a].compartsize) : nothing
     end
 end
 

@@ -678,7 +678,10 @@ function simulate()
             seedsi = getreleases(plants, t)
             disperse!(landavail, seedsi, plants, t, settings, sppref, landpars, tdist)
             establish!(plants, t, settings, sppref, T, biomass_production, K)
-            shedd!(plants, sppref, t, settings)
+            shedflower!(plants, sppref, t, settings)
+	    if (rem(t,52) == 51)
+	       winter_dieback!(plants, t)
+	    end
         end
     end
     return settings, results_folder
