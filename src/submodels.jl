@@ -271,21 +271,30 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 
     # Separate sexually and asexually reproducing (mated status can change during the simulation and this would generate more clones)
     ferts = filter(x -> x.mated == true, plants)
-    asexuals = filter(x -> x.mated == false && x.clonality == true && x.mass["repr"] > x.seedmass, plants)
+    # check-point
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+   	 println(sim, "Number of ferts $(length(ferts)) in $(length(plants)) plants")
+    end
 
+    asexuals = filter(x -> x.mated == false && x.clonality == true && x.mass["repr"] > x.seedmass, plants)
+    
     # Sexuallly produced offspring
     # ----------------------------
-    for sp in unique(getfield.(ferts, :sp))
+    for sp in unique(map(x -> x.sp, ferts))
 
-	sowing = find(x -> x.sp == sp || x.id in unique(getfield.(ferts, :id)), plants)
-
+	sowing = find(x -> x.sp == sp && x.id in map(x -> x.id, ferts), plants)
+	# check-point
+    	open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+	    println(sim, "Number of sowing: $(length(sowing))")
+        end
+	    
 	spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
 
 	for s in sowing
 
 	    seedmass = plants[s].seedmass
 	    offs = div(ALLOC_SEED*plants[s].mass["repr"], seedmass)
-
+	    
 	    if offs <= 0
 		continue
 	    else
