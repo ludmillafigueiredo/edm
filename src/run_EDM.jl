@@ -427,18 +427,15 @@ function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::B
 end
 
 """
-    updateK!(landavail, settings, t)
+    initK(landavail, settings, t)
 Calculate the carrying capacity of the landscape (`K`) and of each gridcell (`cK`) at initialization.
 `K` is used to initialize the species with abundances corresponding to a niche partitioning model.
 """
-function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
-    # habitat area
+function initK(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
     habitatarea = length(find(x -> x == true, landavail))
     totalarea = prod(size(landavail))
-
-    # K and grid-cell K
-    global cK = 350.0
-    global K = cK*habitatarea # landscape K at 3.5 T/ha, i.e., 350g/m2
+    K = cK*habitatarea
+    return K
 end
 
 """
@@ -446,7 +443,7 @@ end
 Update the carrying capacity of the landscape (`K`) and of each gridcell (`cK`).
 It is called during initialization (`t` = 1)  and is called again if landscape is disturbed (at `tdist`; `criticalts` keeps track of the updates and outputs the new values).
 """
-function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
+function updateK!(K::Float64, landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
 
     criticalts = Array{Int64,N} where N
     # check on which timesteps to write land dims (ifelse() does not work)
@@ -468,15 +465,12 @@ function updateK!(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, 
         habitatarea = length(find(x -> x == true, landavail))  #number of habitat grid cels ggrid cells
         totalarea = prod(size(landavail)) # total number of grid cell. Habitat or not
 
-        # K and grid-cell K
-        global cK = 350.0
-	    global K = cK*habitatarea # landscape K at 3.5 T/ha, i.e., 350g/m2
-
+	K = cK*habitatarea
         open(joinpath(settings["outputat"],settings["simID"],"landlog.txt"),"a") do sim
             writedlm(sim,[t K cK habitatarea totalarea])
         end
     end
-
+    return K
 end
 
 """
@@ -558,7 +552,7 @@ function simulate()
     interaction, scen, remaining = implicit_insect(settings)
     mylandscape, landavail = submodels.landscape_init(landpars)
     plants, id_counter = initplants(landavail, sppref, id_counter, settings, K)
-    updateK!(landavail, settings, 1)
+    K = initK(landavail, settings, 1)
     T, mean_annual = updateenv!(1, landpars)
     updatefitness!(sppref, mean_annual, 1.0)
 
@@ -652,7 +646,7 @@ function simulate()
             if settings["disturbtype"] in ["frag" "loss"] && t in tdist
                 landscape, landavail = disturb!(mylandscape,landavail,plants,t,settings,landpars,tdist)
             end
-            updateK!(landavail, settings, t, tdist)
+            updateK!(K, landavail, settings, t, tdist)
 
 	        if rem(t, 52) == 1
                 T, mean_annual = updateenv!(t, landpars)
@@ -669,13 +663,13 @@ function simulate()
             end
 
             biomass_production = sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))
-            open(joinpath(simresults_folder, "checkpoint.txt"),"a") do sim
+           open(joinpath(simresults_folder, "checkpoint.txt"),"a") do sim
                 writedlm(sim, hcat("Biomass production:", biomass_production))
             end
 
             allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "a")
             survive!(plants, t, cK, K, settings, sppref, landavail, T, biomass_production, "a")
-	        allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
+	    allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
             survive!(plants, t, cK, K, settings, sppref, landavail, T, biomass_production, "j")
             develop!(plants, settings, t)
             mate!(plants, t, settings, scen, tdist, remaining)
