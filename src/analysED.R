@@ -832,8 +832,9 @@ save(rankabund_plots, file = file.path(analysEDdir,
                                   paste(parentsimID, "rankabunds", ".RData", sep = "")))
 
 ## Save lists with plots of trait distribution and values over time
-save(list = list(traitdistributions_plots, traitts_plots), file = file.path(analysEDdir,
-                                         paste(parentsimID, "traitsdistributions", ".RData", sep = "")))
+traits_plots <- objects(name = environment(), all.names = FALSE, pattern = "plots$")
+save(list = traits_plots, file = file.path(analysEDdir,
+                                            paste(parentsimID, "traitsdistributions", ".RData", sep = "")))
 
 ## Plot all graphs
 map(EDplots, ~ save_plot(filename = file.path(analysEDdir, paste(.x, ".png", sep ="")), plot = get(.x)))
