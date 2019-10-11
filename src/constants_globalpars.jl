@@ -6,8 +6,11 @@ const aE = 0.63 #-eV Brown & Sibly MTE book chap 2
 const tK = 273.15 # °C to K converter
 # These factors adapt the base mortality rates to the developmental stage of the individual. They were defined through a study of the rates yielded by the metabolic theory for species in the Goettingen list
 const seed_mfactor = 15
-const juv_mfactor = 15
-const adult_mfactor = 15
+const juv_mfactor = 1
+const adult_mfactor = 1
+
+# proportion of reproductive mass allocated to seed production
+const ALLOC_SEED = 0.05
 
 # Dispersal kernels
 const µ_short = 1

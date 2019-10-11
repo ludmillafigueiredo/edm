@@ -284,7 +284,7 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 	for s in sowing
 
 	    seedmass = plants[s].seedmass
-	    offs = div(0.5*plants[s].mass["repr"], seedmass)
+	    offs = div(ALLOC_SEED*plants[s].mass["repr"], seedmass)
 
 	    if offs <= 0
 		continue
