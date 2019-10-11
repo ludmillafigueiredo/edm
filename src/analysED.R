@@ -218,7 +218,7 @@ biomass_allocation <- function(orgs_complete_tab, stages = factor(c("a", "j", "s
     ggplot(aes(x = week, y = total, group = factor(id), colour = factor(id)))+
     geom_line(position = position_dodge(0.1)) +
     geom_point(position = position_dodge(0.1), size = 0.3)+
-    facet_wrap(~stage, ncol = 2)+
+    facet_wrap(~stage, ncol = 1)+
     scale_colour_viridis(discrete=TRUE)+
     labs(title = "Growth curve of individuals")+
     theme(legend.position = "none")
