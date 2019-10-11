@@ -27,7 +27,7 @@ function analysED(settings, results_folder)
     @rput outputsdir
 
     # run analysis
-    R"source(\"analysED.R\")"
+    R"source(\"src/analysED.R\")"
 
 end
 
