@@ -547,19 +547,19 @@ function simulate()
     end
     println(tdist)
 
+    id_counter = 0
+    management_counter = 0
+
     landpars = read_landpars(settings)
     sppref = read_spinput(settings)
     traitranges = define_traitranges(settings)
     interaction, scen, remaining = implicit_insect(settings)
     mylandscape, landavail = submodels.landscape_init(landpars)
-    plants, id_counter = initplants(landavail, sppref, id_counter, settings, K)
     K = initK(landavail, settings, 1)
     T, mean_annual = updateenv!(1, landpars)
     updatefitness!(sppref, mean_annual, 1.0)
-
-    id_counter = 0
-    management_counter = 0
-
+    plants, id_counter = initplants(landavail, sppref, id_counter, settings, K)
+    
     # check-points
     println("Land init stored in object of type $(typeof(landpars))")
     println("Sp info stored in object of type $(typeof(sppref))")
