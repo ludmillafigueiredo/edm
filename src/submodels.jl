@@ -477,7 +477,7 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{submodels.Plant
     end
 
     lost = Int64[]
-    justdispersed = 0
+    justdispersed = String[]
 
     for d in seedsi # only seeds that have been released can disperse
 
@@ -513,7 +513,8 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{submodels.Plant
 	if checkbounds(Bool, landavail, xdest, ydest) && landavail[xdest, ydest] == true  # Check if individual fall inside the habitat area, otherwise, discard it already
                                                                                           # checking the suitability first would make more sense but cant be done if cell is out of bounds
 	    plants[d].location = (xdest,ydest)
-	    justdispersed += 1
+	    #indexes change when inds get deleted. ID is the only trustworthy way to find them
+	    push!(justdispersed, plants[d].id)
 
 	else # if the new location is in an unavailable habitat or outside the landscape, the seed dies
 
@@ -525,13 +526,16 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{submodels.Plant
 	end
     end
 
+    # update who actually dispersed
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-	println(sim, "Number of dispersing: $justdispersed")
+	println(sim, "Number of dispersing: $(length(justdispersed))")
     end
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	writedlm(sim, hcat("Lost in dispersal:", length(lost)))
     end
     deleteat!(plants,lost)
+
+    return justdispersed
 end
 
 """
@@ -539,9 +543,9 @@ end
 Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish in the grid-cell they are in. Germinated seeds mature to juveniles immediately. Seeds that don't germinate stay in the seedbank.
 
 """
-function establish!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64)
+function establish!(justdispersed, plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64)
 
-    establishing = find(x -> x.stage == "s", plants)
+    establishing = find(x -> (x.id in justdispersed || (x.stage == "s" && x.age >= 1)), plants)
 
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	writedlm(sim, hcat("Seeds trying to ESTABLISH:", length(establishing)))
@@ -771,9 +775,14 @@ open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),
     println(sim, "Above-ground biomass after density-dependent mortality: $(sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001)))g; K = $K")
 end
 
-## Surviving ones get older: some of them were not filtered above, so the ageing up need to be done separately to include all
-for o in 1:length(plants)
-    plants[o].age += 1
+## Surviving ones get older: refilter, because some plants got deleted
+if dying_stage == "a"
+        surviving = find(x -> ((x.stage == "s" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), plants)
+    else
+        surviving = find(x -> x.stage == dying_stage, plants) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
+    end
+for s in surviving
+    plants[s].age += 1
 end
 
 end
