@@ -8,7 +8,9 @@ library(viridis);
 library(grid);
 library(gridExtra);
 library(FactoMineR);
-library(factoextra); #might require mvtnorm 1.0-6, which does not require R 3.5: devtools::install_version("mvtnorm", version = "1.0-6", repos = "http://cran.us.r-project.org")
+library(factoextra); #might require mvtnorm 1.0-6, which does not require R 3.5
+		     #devtools::install_version("mvtnorm", version = "1.0-6",
+		     #                          repos = "http://cran.us.r-project.org")
 library(corrplot);
 library(gganimate); #sudo apt-get install cargo install.packages("gifski")
 library(cowplot);
@@ -21,8 +23,8 @@ analysEDdir <- file.path(outputsdir, paste(parentsimID, "analysED", sep = "_"))
 dir.create(analysEDdir)
 
 ## Set theme and colours
-theme_set(theme_minimal())
-## scale_color_viridis(discrete = TRUE, option = "magma)
+source("src/theme_edm.R")
+theme_set(theme_edm())
 
 ## Default values for analysis
 
@@ -76,7 +78,8 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
     outdata <- bind_cols(select(outraw, -location), loc)
     rm(loc)
     ## write single files in its folders
-    write.csv(outdata, file.path(repli, paste(parentsimID, "indout.csv", sep = "")), row.names = FALSE)
+    write.csv(outdata,
+	      file.path(repli, paste(parentsimID, "indout.csv", sep = "")), row.names = FALSE)
     ## append to replicates list
     ##outdatalist <- c(outdatalist, 
     ##outdata)
@@ -85,7 +88,8 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
 }
 
 #' Assemble output files of replicates and identify them
-#' Output on juvenile and adult individuals are kept separate because they offspring contains weekly abundances of each species, whereas the juv/adult output is individual-based.
+#' Output on juvenile and adult individuals are kept separate because the offspring
+#' contains weekly abundances of each species, whereas the juv/adult output is individual-based.
 #' @param parentsimID simulation ID
 #' @param nreps number of replicates, which identify the folders containing results
 orgreplicates <- function(parentsimID, repfolder, nreps){
@@ -97,9 +101,12 @@ orgreplicates <- function(parentsimID, repfolder, nreps){
     sim <- paste(parentsimID, i, sep = "_")
     folder <- repfolder[i]
     ## read outputs of juv/adults and of offspring
-    outdatasim <- read.csv(file.path(folder, paste(parentsimID, "indout.csv", sep = "")), header = TRUE)%>%
-      mutate(repli = as.factor(rep(sim, nrow(.)))) #include a replication column, to identify replicates
-    offspringsim <- read.table(file.path(folder, "offspringproduction.csv"), header = TRUE, sep = "\t")%>%
+    outdatasim <- read.csv(file.path(folder, paste(parentsimID, "indout.csv", sep = "")),
+    	       	           header = TRUE)%>%
+      #include a replication column, to identify replicates
+      mutate(repli = as.factor(rep(sim, nrow(.))))
+    offspringsim <- read.table(file.path(folder, "offspringproduction.csv"),
+    		    	       header = TRUE, sep = "\t")%>%
       mutate(repli = as.factor(rep(sim, nrow(.))))
     
     ## fill in cleanoutput object (necessary step because of bind_rows)
@@ -116,7 +123,8 @@ orgreplicates <- function(parentsimID, repfolder, nreps){
   return(list(a = orgs_complete_tab, b = offspring_complete_tab))
 }
 
-#' Extract and plot species-specific mean and sd of biomass compartments of juveniles and adults.
+#' Extract and plot species-specific mean and sd
+#' of biomass compartments of juveniles and adults.
 #' @param outdatalist
 #' @param plotit Boolean specifying whether graph shouuld be plotted or not
 biomass_allocation <- function(orgs_complete_tab, stages = factor(c("a", "j", "s"))){
@@ -151,54 +159,52 @@ biomass_allocation <- function(orgs_complete_tab, stages = factor(c("a", "j", "s
               sd_root = sd(root))%>%
     ungroup()
   
-  
   # Plot biomass in compartments
+  # TODO: Factorize it, but beware of the compartment specific column names.
+  # ends_with() does not seem to work inside aes
   leaves_plot <- biomass_tab%>%
     dplyr::select(week, stage, sp, ends_with("leaves"))%>%
     ggplot(aes(x = week, y = mean_leaves, group = factor(sp), colour = factor(sp)))+
-    geom_line(position = position_dodge(0.1)) +
-    geom_point(position = position_dodge(0.1), size = 0.3)+
     geom_errorbar(aes(min = mean_leaves - sd_leaves,
                       max = mean_leaves + sd_leaves),
-                  stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
-    facet_wrap(~stage, ncol = 2)+ labs(title = "Biomass allocated to leaves")+
-    theme(legend.position = "none")
+                  stat = "identity")+
+    geom_line() +
+    geom_point()+
+    facet_wrap(~stage, ncol = 2)+
+    labs(title = "Biomass allocated to leaves")
   
   stem_plot <- biomass_tab%>%
     dplyr::select(week, stage, sp, ends_with("stem"))%>%
     ggplot(aes(x = week, y = mean_stem, group = factor(sp), colour = factor(sp)))+
-    geom_line(position = position_dodge(0.1)) +
-    geom_point(position = position_dodge(0.1), size = 0.3)+
     geom_errorbar(aes(min = mean_stem - sd_stem,
                       max = mean_stem + sd_stem),
-                  stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
+                  stat = "identity")+
+    geom_line() +
+    geom_point()+
     facet_wrap(~stage, ncol = 2)+
-    labs(title = "Biomass allocated to stem")+
-    theme(legend.position = "none")
+    labs(title = "Biomass allocated to stem")
   
   root_plot <- biomass_tab%>%
     dplyr::select(week, stage, sp, ends_with("root"))%>%
     ggplot(aes(x = week, y = mean_root, group = factor(sp), colour = factor(sp)))+
-    geom_line(position = position_dodge(0.1)) +
-    geom_point(position = position_dodge(0.1), size = 0.3)+
     geom_errorbar(aes(min = mean_root - sd_root,
                       max = mean_root + sd_root),
-                  stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
+                  stat = "identity")+
+    geom_line() +
+    geom_point()+
     facet_wrap(~stage, ncol = 2)+
-    labs(title = "Biomass allocated to root")+
-    theme(legend.position = "none") 
+    labs(title = "Biomass allocated to root")
   
   repr_plot <- biomass_tab%>%
     filter(stage == "a")%>%
     dplyr::select(week, stage, sp, ends_with("repr"))%>%
     ggplot(aes(x = week, y = mean_repr, group = factor(sp), colour = factor(sp)))+
-    geom_line(position = position_dodge(0.1)) +
-    geom_point(position = position_dodge(0.1), size = 0.3)+
     geom_errorbar(aes(min = mean_repr - sd_repr,
                       max = mean_repr + sd_repr),
-                  stat = "identity", colour = "gray50", width = 0.01, position = position_dodge(0.1))+
-    labs(title = "Biomass allocated to reproductive structures")+
-    theme(legend.position = "none")
+                  stat = "identity")+
+    geom_line() +
+    geom_point()+
+    labs(title = "Biomass allocated to reproductive structures")
   
   biomass_plot <- plot_grid(leaves_plot, 
                             stem_plot, 
@@ -214,18 +220,16 @@ biomass_allocation <- function(orgs_complete_tab, stages = factor(c("a", "j", "s
     group_by(week, stage, sp, id)%>%
     summarize(total = sum(leaves, stem, root, repr))
   
-  growthcurve_plot <- growthcurve_tab%>%
+  growthcurve <- growthcurve_tab%>%
     ggplot(aes(x = week, y = total, group = factor(id), colour = factor(id)))+
-    geom_line(position = position_dodge(0.1)) +
-    geom_point(position = position_dodge(0.1), size = 0.3)+
+    geom_line() +
+    geom_point()+
     facet_wrap(~stage, ncol = 1)+
-    scale_colour_viridis(discrete=TRUE)+
-    labs(title = "Growth curve of individuals")+
-    theme(legend.position = "none")
+    labs(title = "Growth curve of individuals")
   
   return(list(a = biomass_tabrepli, b = biomass_tab, c = growthcurve_tab,
               d = leaves_plot, e = stem_plot, f = repr_plot, g = root_plot,
-              h = biomass_plot, i = growthcurve_plot))
+              h = biomass_plot, i = growthcurve))
 }
 
 #' Extract and plot population abundances
@@ -247,15 +251,15 @@ popabund <- function(orgs_complete_tab){
     ungroup()
   
   abund_plot <- ggplot(spabund_tab, 
-                          aes(x = week, y = mean_abundance, group = sp, color = factor(sp)))+
-    geom_errorbar(aes(ymin = mean_abundance - sd_abundance, ymax= mean_abundance + sd_abundance), 
-                  stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
-    geom_line(position=position_dodge(0.1))+
-    geom_point(position=position_dodge(0.1))+
+                          aes(x = week, y = mean_abundance,
+			      group = sp, color = factor(sp)))+
+    geom_errorbar(aes(ymin = mean_abundance - sd_abundance,
+    		      ymax= mean_abundance + sd_abundance), 
+                  stat = "identity")+
+    geom_line()+
+    geom_point()+
     labs(x = "Year", y = "Abundance (mean +- sd)",
-         title = "Species abundance variation")+
-    scale_color_viridis(discrete = TRUE)+
-    theme(legend.position = "none")
+         title = "Species abundance variation")
   
   return(list(a = pop_tab, b = spabund_tab, c = abund_plot))
 }
@@ -291,15 +295,12 @@ popstruct <- function(pop_tab, offspring_complete_tab, parentsimID){
                              aes(x = week, y = mean_abundance, color = factor(stage)))+
     geom_errorbar(aes(ymin = mean_abundance - sd_abundance,
                       ymax = mean_abundance + sd_abundance),
-                  stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
+                  stat = "identity")+
     geom_line()+
     geom_point()+
     labs(x = "Week", y = "Abundance",
          title = "Population structure")+
-    ##scale_color_discrete("Stages:", labels = c("Adults", "Seeds", "Juveniles"))+
-    facet_wrap(~sp, ncol = 4, scale = "free_y")+
-    scale_color_viridis(discrete = TRUE)+
-    theme(legend.position = "bottom")
+    facet_wrap(~sp, ncol = 4, scale = "free_y")
   
   rltvstruct_plot <- ggplot(rltvstruct_tab,
                             aes(x = week, y = rltv_abund, color = as.factor(stage)))+
@@ -307,9 +308,7 @@ popstruct <- function(pop_tab, offspring_complete_tab, parentsimID){
     geom_point()+
     labs(x = "Week", y = "Relative abundace",
          title = "Population structure")+
-    facet_wrap(~sp, ncol = 4)+
-    scale_color_viridis(discrete = TRUE)+
-    theme(legend.position = "bottom")
+    facet_wrap(~sp, ncol = 4)
 
   return(list(a = absltstruct_tab, b = rltvstruct_tab,
               c = absltstruct_plot, d = rltvstruct_plot))
@@ -334,10 +333,9 @@ spprichness <- function(orgs_complete_tab, pop_tab, parentsimID, disturbance,tdi
                                   aes(x = week, y = mean_richness))+
       geom_errorbar(aes(ymin = mean_richness - sd_richness,
                         ymax = mean_richness + sd_richness),
-                    stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
+                    stat = "identity")+
       geom_line(color = "dodgerblue2", size = 1.25)+
-      geom_point()+
-      scale_color_viridis(discrete = TRUE)
+      geom_point()
     
   }else{
     
@@ -354,13 +352,11 @@ spprichness <- function(orgs_complete_tab, pop_tab, parentsimID, disturbance,tdi
     spprichness_plot <- ggplot(spprichness_tab, aes(x = week, y = mean_richness))+
       geom_errorbar(aes(ymin = mean_richness - sd_richness,
                         ymax = mean_richness + sd_richness),
-                    stat = "identity", colour = "gray50", width=.01, position=position_dodge(0.1))+
+                    stat = "identity")+
       geom_line(size = 1.25)+
       geom_point()+
       geom_vline(xintercept = tdist, linetype = 2, color = "red")+
-      labs(x = "Time", y = "Spp. richness")+
-      scale_color_viridis(discrete = TRUE)
-    ##annotation_custom(my_grob)+
+      labs(x = "Time", y = "Spp. richness")
   }
   
   ## richness per group of size
@@ -398,7 +394,6 @@ rankabund <- function(pop_tab, timesteps){
     ggplot(filter(rltvabund_tab, week %in% timestep),
            aes(x = reorder(sp, -rltv_abund), y = rltv_abund))+
       geom_bar(stat = "identity")+
-      scale_color_viridis(discrete = TRUE)+
       theme(axis.text.x = element_text(angle = 50, size = 10, vjust = 0.5))
   }
   
@@ -451,30 +446,24 @@ groupdyn <- function(orgs_complete_tab, singlestages){
                           aes(x = week, y = mean_abundance, colour = stage))+
     geom_errorbar(aes(ymin = mean_abundance - sd_abundance,
                       ymax = mean_abundance + sd_abundance),
-                  stat = "identity", position = position_dodge(0.1), 
-                  colour = "gray50", width = 0.01)+
+                  stat = "identity")+
     geom_line()+
     geom_point()+
     facet_wrap(~seedmass, ncol = 1)+
-    labs(title = "Population structure per group size")+
-    scale_color_viridis(discrete = TRUE)
+    labs(title = "Population structure per group size")
   
   ## plot weigh variation
   groupweight_plot <- ggplot(groupweight_tab,
                              aes(x = week, y = totalmass_mean, colour = stage))+
     geom_errorbar(aes(ymin = totalmass_mean -totalmass_sd, 
-                      ymax = totalmass_mean + totalmass_sd), 
-                  colour = "black", width = .01, position = position_dodge(0.1))+
-    geom_line(position = position_dodge(0.1))+
-    geom_point(position = position_dodge(0.1), size = 0.3)+
+                      ymax = totalmass_mean + totalmass_sd))+
+    geom_line()+
+    geom_point()+
     facet_wrap(~seedmass, ncol = 1)+
-    labs(title = "Total biomass per group size")+
-    scale_color_viridis(discrete = TRUE)
-  
+    labs(title = "Total biomass per group size")
   
   return(list(a = grouppop_tab, b = groupweight_tab, c = groupweight_replitab,
               d = grouppop_plot, e = groupweight_plot))
-  
 }
 
 #' Calculate biomass production
@@ -500,13 +489,11 @@ production <- function(orgs_complete_tab){
   production_plot <- ggplot(production_tab, aes(x= week, y = prod_mean))+
     geom_errorbar(aes(ymin = prod_mean - prod_sd,
                       ymax = prod_mean + prod_sd),
-                  stat = "identity", position = position_dodge(0.01), 
-                  colour = "gray50", width = 0.01)+
+                  stat = "identity")+
     geom_point()+
     geom_line()+
     labs(x = "Week",
-         y = "Biomass production (kg)")+
-    scale_color_viridis(discrete = TRUE)
+         y = "Biomass production (kg)")
   
   return(list(a = production_tab, b = production_replitab, c = production_plot))
 }
@@ -537,15 +524,11 @@ traitchange  <- function(orgs_complete_tab, timesteps, species){
       map(~ ggplot(.x%>%filter(sp %in% spp),
                    aes(x = sp, y = value))+
             geom_violin()+
-            ##geom_dotplot(color = "grey31", fill = "white", alpha = 0.8)+
             geom_boxplot(width = 0.2)+
             facet_wrap(c("week", "trait"), #facet_grid cannot free y axis
                        nrow = length(unique(timesteps)),
                        scales = "free_y")+
-            background_grid(major = "xy", minor = "none")+
-            scale_color_viridis(discrete = TRUE)+
-            theme(axis.title = element_text(size=9),
-                  axis.text = element_text(size=9)))
+            background_grid(major = "xy", minor = "none"))
     
     return(traitplot)
   }
@@ -584,12 +567,8 @@ traitchange  <- function(orgs_complete_tab, timesteps, species){
             geom_line()+
             geom_point(size = 0.5)+
             geom_errorbar(aes(ymin = trait_mean-trait_sd, 
-                              ymax = trait_mean+trait_sd),
-                          colour = "gray", alpha = 0.2)+
-            scale_color_viridis(discrete = TRUE)+
-            labs(title = as.character(unique(.x$trait_metric)))+
-            theme(axis.title = element_text(size=9),
-                  axis.text = element_text(size=9)))
+                              ymax = trait_mean+trait_sd), alpha = 0.2)+
+            labs(title = as.character(unique(.x$trait_metric))))
     
     return(traitplot)
   }
@@ -597,7 +576,8 @@ traitchange  <- function(orgs_complete_tab, timesteps, species){
   traitts_plots <- species%>%
     map(. %>% plottrait)    
   
-  return(list(a = traitvalue_tab, b = traitdistribution_plots, c = traitsummary_tab, d = traitts_plots))
+  return(list(a = traitvalue_tab, b = traitdistribution_plots,
+              c = traitsummary_tab, d = traitts_plots))
 }
 
 #' Analysis of change in trait space
@@ -628,10 +608,13 @@ traitspacechange  <- function(traitsdistributions_tab, timesteps){
                                   geom.ind = "point", # show points only (but not "text")
                                   pointshape = 21,
                                   pointsize = 2.5,
-                                  fill.ind = factor(select(filter(traitsdistributions_tab, week %in% timesteps), week)), # color by time
+                                  fill.ind = factor(select(filter(traitsdistributions_tab,
+					            week %in% timesteps), week)), # color by time
                                   col.ind = "black",
                                   ##addEllipses = TRUE, # Concentration ellipse,
-                                  col.var = factor(c("size", "reprd", "reprd", "reprd", "reprd", "reprd", "span", "metab", "metab", "metab","reprd", "size")),
+                                  col.var = factor(c("size", "reprd", "reprd", "reprd", "reprd",
+				  	    	     "reprd", "span", "metab", "metab", "metab",
+						     "reprd", "size")),
                                   repel = TRUE,
                                   legend.title = list(fill = "Time-step", color = "Traits"))
   
@@ -649,8 +632,7 @@ lifehistory <- function(outputsdir){
     summarize(total = n())%>%
     ggplot(aes(x = week, y = total, color = event))+
     geom_line()+
-    facet_wrap(~stage, ncol = 1, scales = "free_y")+
-    scale_color_viridis(discrete = TRUE)
+    facet_wrap(~stage, ncol = 1, scales = "free_y")
   
   metabolic_tab <- read_tsv(file.path(outputsdir, "metaboliclog.txt"), col_names = TRUE)
   metabolic_summary_tab <- metabolic_tab%>%
@@ -660,7 +642,8 @@ lifehistory <- function(outputsdir){
     summarize(mean = mean(value),
               sd = sd(value))
   
-  return(list(a = lifeevents_tab, b = lifeevents_plot, c = metabolic_tab, d = metabolic_summary_tab))
+  return(list(a = lifeevents_tab, b = lifeevents_plot,
+  	      c = metabolic_tab, d = metabolic_summary_tab))
 }
 
 #' Age distribution of stages
@@ -677,14 +660,12 @@ agetraits <- function(orgs_complete_tab){
               sd_firstflower = sd(firstflower))%>%
     ungroup()%>%
     ggplot(aes(x=week, y=mean_age, colour=stage))+
-    geom_line()+
     geom_errorbar(aes(ymin=mean_age-sd_age, ymax=mean_age+sd_age))+
+    geom_line()+
     geom_hline(aes(yintercept = mean_span), colour = "grey", alpha = 0.1)+
     geom_hline(aes(yintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
     geom_vline(aes(xintercept = mean_span), colour = "grey", alpha = 0.1)+
-    geom_vline(aes(xintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
-    scale_color_viridis(discrete = TRUE)+
-    theme(legend.position = "bottom")
+    geom_vline(aes(xintercept = mean_firstflower), colour = "gold", alpha = 0.1)
   
   return(meanage_plot)
 }
@@ -705,11 +686,9 @@ seeddynamics <- function(orgs_complete_tab, offspring_complete_tab){
     bind_rows(select(offspring_complete_tab, -mode))
   
   seeddyn_plot <- ggplot(seeddyn_tab, aes(x = week, y = abundance))+
-    geom_point(size = 0.5)+
     geom_line(aes(group = sp, colour = stage))+
-    scale_colour_viridis(discrete = TRUE)+
-    theme(legend.position = "bottom")
-  
+    geom_point()
+    
   return(list(a = seeddyn_tab, b = seeddyn_plot))
 }
 
@@ -717,7 +696,8 @@ seeddynamics <- function(orgs_complete_tab, offspring_complete_tab){
 ####                                    Save analysis                               ####
 # -------------------------------------------------------------------------------------#
 
-cleanoutput <- getoutput(parentsimID, repfolder, nreps, outputsdir = outputsdir, EDdir = EDdir)  
+cleanoutput <- getoutput(parentsimID, repfolder, nreps,
+	       	         outputsdir = outputsdir, EDdir = EDdir)  
 
 ## Identify replicates
 replicates <- orgreplicates(parentsimID, repfolder, nreps)
@@ -725,8 +705,8 @@ replicates$a -> orgs_complete_tab
 replicates$b -> offspring_complete_tab
 rm(replicates)
 
-## Individual vegetative and reproductive biomasses of juveniles and adults (NOT seeds)
-biomass <- biomass_allocation(orgs_complete_tab,TRUE) # spp is an optional argument and stage is set to default
+## Individual vegetative and reproductive biomasses of juveniles and adults
+biomass <- biomass_allocation(orgs_complete_tab)
 biomass$a -> biomass_tabrepli
 biomass$b -> biomass_tab
 biomass$c -> growthcurve_tab
@@ -735,8 +715,7 @@ biomass$e -> stem_plot
 biomass$f -> repr_plot
 biomass$g -> root_plot
 biomass$h -> biomass_plot
-biomass$i -> growthcurve_plot
-
+biomass$i -> growthcurve
 rm(biomass)
 
 ## Species abundance variation
@@ -787,6 +766,7 @@ prod <- production(orgs_complete_tab)
 prod$a -> production_tab
 prod$b -> production_replitab
 prod$c -> production_plot
+rm(prod)
 
 ## Trait change
 ### trait values
@@ -809,6 +789,7 @@ lifehistory$a -> events_tab
 lifehistory$b -> events_plot
 lifehistory$c -> metabolic_tab
 lifehistory$d -> metabolic_summary_tab
+rm(lifehistory)
 
 ## Age traits
 meanage_plot <- agetraits(orgs_complete_tab)
@@ -817,6 +798,7 @@ meanage_plot <- agetraits(orgs_complete_tab)
 seeddyn <- seeddynamics(orgs_complete_tab, offspring_complete_tab)
 seeddyn$a -> seeddyn_tab
 seeddyn$b -> seeddyn_plot
+rm(seeddyn)
 
 ## Save bundle of tabs and plots as RData
 EDtabs <- objects(name = environment(), all.names = FALSE, pattern = "tab$")
@@ -827,6 +809,10 @@ EDplots <- objects(name = environment(), all.names = FALSE, pattern = "plot$")
 save(list = EDplots, file = file.path(analysEDdir,
                                       paste(parentsimID, "_plots.RData", sep = "")))
 
+## Growth curve is rather heavy, dont save an image for it
+save(growthcurve, file = file.path(analysEDdir,
+                                  paste("growthcurve", ".RData", sep = "")))
+
 ## Rank-abundance plots are in a list
 save(rankabund_plots, file = file.path(analysEDdir,
                                   paste(parentsimID, "rankabunds", ".RData", sep = "")))
@@ -834,10 +820,8 @@ save(rankabund_plots, file = file.path(analysEDdir,
 ## Save lists with plots of trait distribution and values over time
 traits_plots <- objects(name = environment(), all.names = FALSE, pattern = "plots$")
 save(list = traits_plots, file = file.path(analysEDdir,
-                                            paste(parentsimID, "traitsdistributions", ".RData", sep = "")))
-
-## Plot all graphs
-map(EDplots, ~ save_plot(filename = file.path(analysEDdir, paste(.x, ".png", sep ="")), plot = get(.x)))
+                                            paste(parentsimID, "traitsdistributions",
+					          ".RData", sep = "")))
 
 traitvaluesdir <- file.path(analysEDdir, "traitvalues")
 dir.create(traitvaluesdir)
@@ -885,3 +869,7 @@ for(sp in 1:length(unique(orgs_complete_tab$sp))){
               units = "cm")
   }
 }
+
+## Plot all graphs
+map(EDplots, ~ save_plot(filename = file.path(analysEDdir, paste(.x, ".png", sep ="")),
+	       	         plot = get(.x)))
