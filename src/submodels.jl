@@ -193,19 +193,23 @@ function mate!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, 
         # --------------------------------------------------
         if scen in ["indep" "equal"]
 
-	    occupiedflwrs = rand(Distributions.Uniform(1e-4, 1e-2),1)[1]                                 # base number of pollinated flowes
-	    defaultnpoll = rand(Distributions.Binomial(Int(ceil(length(ready) * occupiedflwrs)),0.5))[1]
+	    npoll_default = rand(Distributions.Binomial(Int(ceil(length(ready) * VISITED_DEFAULT)), 0.6))[1]
 
 	    # Determine number of individuals that get pollinated (species is not relevant)
 	    if scen == "indep"
-		npoll = defaultnpoll # Fishman & Hadany's proportion of visited flowers
+		npoll = npoll_default # Fishman & Hadany's proportion of visited flowers
 		println("Scenario of INDEP pollination loss")
+		# check-point
+		open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        	    println(sim, "Number of pollinated: $npoll")
+    		end
+
 	    elseif scen == "equal" #all species lose pollination randomly (not species-specific)
 		println("Scenario of EQUAL pollination loss")
 		if t in tdist                                                          # calculate the amount of loss for the specified times
-		    npoll = Int(ceil(defaultnpoll * remaining[find(tdist == [t])[1]]))
+		    npoll = Int(ceil(npoll_default * remaining[find(tdist == [t])[1]]))
 		else
-		    npoll = defaultnpoll
+		    npoll = npoll_default
 		end
 	    end
 
@@ -620,7 +624,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
     end
 
     # old ones die
-    old = find( x -> ((x.stage == "a" && x.age >= x.span)), plants) #|| (x.stage == "s" && x.age >= x.bankduration)), plants)
+    old = find( x -> ((x.stage == "a" && x.age >= x.span) || (x.stage == "s" && x.age >= x.bankduration)), plants)
     deleteat!(plants, old)
 
     # check-point

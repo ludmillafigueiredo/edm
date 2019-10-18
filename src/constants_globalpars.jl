@@ -11,6 +11,8 @@ const adult_mfactor = 1
 
 # proportion of reproductive mass allocated to seed production
 const ALLOC_SEED = 0.05
+# default proportion of visited plants
+const VISITED_DEFAULT = 1
 
 # Dispersal kernels
 const µ_short = 1
