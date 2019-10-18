@@ -328,8 +328,6 @@ Saves a long format table with the organisms field informations.
 """
 function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{String,Any})
 
-    outplants = find(x -> (x.stage in ["j" "a"] || (x.stage == "s" && x.age > 1)), plants)
-
     # output header
     if t == 1
         header = hcat(["week"],
@@ -344,7 +342,7 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
     # output plants info
     if t == 1 || rem(t,settings["tout"]) == 0
 
-        for o in outplants
+        for o in 1:length(plants)
             open(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt"), "a") do output
                 writedlm(output, hcat(t,
                                       plants[o].id,
