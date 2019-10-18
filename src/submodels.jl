@@ -178,7 +178,7 @@ end
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
 """
 function mate!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
-	# check-point
+    # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Pollination ..."))
     end
@@ -696,76 +696,102 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 		           " Above-ground vegetative weighing:", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
     end
 
-    biomass_plants = filter(x -> x.stage in ["j" "a"], plants) #biomass of both juveniles and adults is used as criteria, but only only stage dies at each timestep
+    # biomass of both juveniles and adults is used as criteria for production > K
+    # but only only stage dies at each timestep
+    biomass_plants = filter(x -> x.stage in ["j" "a"], plants) 
 
-
-        # separate location coordinates and find all individuals that are in the same location as others (by compaing their locations with nonunique(only possible row-wise, not between tuples. This is the only way to get their indexes
+        # get coordinates of all occupied cells
 	locs = map(x -> x.location, biomass_plants)
 	fullcells_indxs = find(nonunique(DataFrame(hcat(locs))))
 
-        # mortality intra grid cell first
-	if length(fullcells_indxs) > 0
+        if length(fullcells_indxs) > 0
 
             # check-point
             open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	        println(sim, "number of occupied cells: $(length(unique(locs[fullcells_indxs])))")
+	        println(sim, "Number of shared cells: $(length(unique(locs[fullcells_indxs])))")
             end
 
-	    # loop through each grid cell, looking for the ones with biomass production over the cell carrying-capacity
 	    for loc in unique(locs[fullcells_indxs])
 
 		#find plants that are in the same grid
-		samecell = filter(x -> x.location == loc, biomass_plants)
+		plants_samecell = filter(x -> x.location == loc, biomass_plants)
 
-		while sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), samecell),0.00001)) > cK
+		while sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants_samecell),0.00001)) > cK
 
+		# check-point
+            	open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+	            println(sim, "Biomass in samecell $loc  with $(length(plants_samecell)) inds BEFORE dens-dep mort: 
+		                  $(sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants_samecell),0.00001)))")
+            	end
+		
 		    # get fitness of all species that are in the cell
-                    sppgrid_fitness = Dict(sp => sppref.fitness[sp] for sp in map(x -> x.sp, samecell))
-                    # calculate the relative fitness, in relation to the other ones
+                    sppgrid_fitness = Dict(sp => sppref.fitness[sp] for sp in map(x -> x.sp, plants_samecell))
 
-		    # the species in the dictionnaries are over their respective cell carrying capacity, i.e., individuals must die. Therefore, loop through all species in the dictionary, killing accordingly.
+		    # check-point
+            	    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+	                 println(sim, "Sps sharing cell: $(keys(sppgrid_fitness)).")
+            	    end
+		    
+		    # the species in the dictionnaries are over their respective cell
+		    # carrying capacity, i.e., individuals must die. Therefore,
+		    # loop through all species in the dictionary, killing accordingly.
+
 		    for sp in keys(sppgrid_fitness)
 
                        	cK_sp = cK * (sppgrid_fitness[sp]/sum(collect(values(sppgrid_fitness))))
-			# check-point
 
-                        samecell_sp = filter(x -> x.sp == sp, samecell)
-
-                        # unity test
-                        if (length(filter(x -> x.stage == "j", samecell_sp)) == 0 &&
-                            length(filter(x -> x.stage == "a", samecell_sp)) == 0)
+			# get individuals of sp in the current cell
+                        plantssp_samecell = filter(x -> x.sp == sp, plants_samecell)
+			    
+                        # unit test
+                        if (length(filter(x -> x.stage == "j", plantssp_samecell)) == 0 &&
+                            length(filter(x -> x.stage == "a", plantssp_samecell)) == 0)
 			    error("Cell carrying capacity overboard, but no juveniles or adults of $sp were detected")
 		        end
-			if(length(filter(x -> x.stage == "s", samecell_sp)) > 0)
+			if(length(filter(x -> x.stage == "s", plantssp_samecell)) > 0)
 			    error("Seeds being detected for density-dependent mortality")
 		 	end
 
-                        dying_plants = filter(x -> x.stage == dying_stage, samecell_sp)
+                        dying_plants = filter(x -> x.stage == dying_stage, plantssp_samecell)
 
-                      	while (sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), samecell_sp), 0.00001)) > cK_sp && length(dying_plants) > 0)
+                      	while (sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plantssp_samecell), 0.00001)) > cK_sp && length(dying_plants) > 0)
 
+			    # check-point
+            		    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+	            	        println(sim, "Killing $sp inside grid-cell.")
+            		    end
+			    
                             # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
                             masses = map(x -> (x.mass["leaves"]+x.mass["stem"]+x.mass["root"]), dying_plants)
-		            dying = filter(x -> (x.mass["leaves"]+x.mass["stem"]+x.mass["root"]) == minimum(masses), dying_plants)[1] #but only one can be tracked down and killed at a time (not possible to order the `plants` array by any field value)
+		            dying = filter(x -> (x.mass["leaves"]+x.mass["stem"]+x.mass["root"]) == minimum(masses),
+			    	    	   dying_plants)[1] #only one can be tracked down and killed at a time
+					   		    #it is not possible to order `plants` by any field value
 
-                            o = find(x -> x.id == dying.id, plants)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()# check-point
+                            o = find(x -> x.id == dying.id, plants)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
+
+			    # check-point
  			    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
 		                writedlm(sim, hcat(t, "death-K-gridcell", plants[o].stage, plants[o].age))
                     	    end
-		    	    deleteat!(plants, o)
+
+			    deleteat!(plants, o)
 
 			    # update control of while-loop
-                            o_cell = find(x -> x.id == dying.id, samecell_sp)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
-                    	    deleteat!(samecell_sp, o_cell)
-                            dying_plants = filter(x -> x.stage == dying_stage, samecell_sp)
+                            o_cell = find(x -> x.id == dying.id, plantssp_samecell)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
+                    	    deleteat!(plantssp_samecell, o_cell)
+                            dying_plants = filter(x -> x.stage == dying_stage, plantssp_samecell)
 
                         end
                     end
 
 		    # update of control of while-loop
 		    biomass_plants = filter(x -> x.stage in ("j", "a"), plants)
-       		    samecell = filter(x -> x.location == loc, biomass_plants)
-
+       		    plants_samecell = filter(x -> x.location == loc, biomass_plants)
+		    # check-point
+            	    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+	                 println(sim, "Biomass in samecell $loc with $(length(plants_samecell)) inds AFTER dens-dep mort: 
+		                  $(sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants_samecell),0.00001)))")
+                    end
                 end
             end
     end
