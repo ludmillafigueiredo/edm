@@ -75,7 +75,7 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
     loc <- as.data.frame(matrix(unlist(str_split(loc, ",")), ncol = 2, byrow = T))
     names(loc) = c("xloc", "yloc")
     ## complete and clean table
-    outdata <- bind_cols(select(outraw, -location), loc)
+    outdata <- bind_cols(dplyr::select(outraw, -location), loc)
     rm(loc)
     ## write single files in its folders
     write.csv(outdata,
