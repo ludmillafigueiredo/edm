@@ -21,9 +21,9 @@ module submodels
 
 using Distributions
 using DataFrames
-using JuliaDB
 using DataValues
 using StatsBase
+using DelimitedFiles
 using auxfunctions
 using entities
 
@@ -111,10 +111,10 @@ end
 function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any},sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        writedlm(sim, hcat("Growth of", growing_stage))
+        println(sim, "Growth of $growing_stage")
     end
 
-    growing = find(x->x.stage == growing_stage,plants)
+    growing = findall(x->x.stage == growing_stage,plants)
 
     for o in growing
 
@@ -144,7 +144,7 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
         end
     end
     # unit test
-    masserror = find(x -> sum(collect(values(x.mass))) <= 0, plants)
+    masserror = findall(x -> sum(collect(values(x.mass))) <= 0, plants)
     if length(masserror) > 0
         println("Plant: plants[masserror[1]]")
 	error("Zero or negative values of biomass detected.")
@@ -158,11 +158,11 @@ Juveniles in `plants` older than their age of first flowering at time `t` become
 function develop!(plants::Array{submodels.Plant,1}, settings::Dict{String, Any}, t::Int)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        writedlm(sim, hcat("Maturation..."))
+        println(sim, "Maturation...")
     end
 
     # find indexes of individuals that are ready to become adults
-    juvs = find(x->x.stage == "j" && x.age >= x.firstflower,plants)
+    juvs = findall(x->x.stage == "j" && x.age >= x.firstflower,plants)
 
     for j in juvs
 	plants[j].stage = "a"
@@ -180,10 +180,10 @@ Calculate proportion of `plants` that reproduced at time `t`, acording to pollin
 function mate!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        writedlm(sim, hcat("Pollination ..."))
+        println(sim, "Pollination ...")
     end
 
-    ready = find(x-> x.stage == "a" && x.mass["repr"] > x.seedmass, plants)
+    ready = findall(x-> x.stage == "a" && x.mass["repr"] > x.seedmass, plants)
     pollinated = []
     npoll = 0
 
@@ -207,7 +207,7 @@ function mate!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, 
 	    elseif scen == "equal" #all species lose pollination randomly (not species-specific)
 		println("Scenario of EQUAL pollination loss")
 		if t in tdist                                                          # calculate the amount of loss for the specified times
-		    npoll = Int(ceil(npoll_default * remaining[find(tdist == [t])[1]]))
+		    npoll = Int(ceil(npoll_default * remaining[findall(tdist == [t])[1]]))
 		else
 		    npoll = npoll_default
 		end
@@ -266,7 +266,7 @@ After mating happened (marked in `reped`), calculate the amount of offspring eac
 function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{String, Any},sppref::SppRef, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::submodels.TraitRanges)
 	# check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-	writedlm(sim, hcat("Total number of individuals before REPRODUCTION:", length(plants)))
+	println(sim, "Total number of individuals before REPRODUCTION: $length(plants)")
     end
 
     offspring = Plant[]
@@ -286,7 +286,7 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
     # ----------------------------
     for sp in unique(map(x -> x.sp, ferts))
 
-	sowing = find(x -> x.sp == sp && x.id in map(x -> x.id, ferts), plants)
+	sowing = findall(x -> x.sp == sp && x.id in map(x -> x.id, ferts), plants)
 	# check-point
     	open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	    println(sim, "Number of sowing: $(length(sowing))")
@@ -427,7 +427,7 @@ end
 # ----------------------------
 for sp in unique(getfield.(asexuals, :sp))
 
-    cloning = find(x -> x.sp == sp && x.id in unique(getfield.(asexuals, :id)) , plants) # find mothers cloning
+    cloning = findall(x -> x.sp == sp && x.id in unique(getfield.(asexuals, :id)) , plants) # find mothers cloning
 
     # start production counting
     spclonescounter = 0
@@ -466,7 +466,7 @@ end
 Retrieve indexes of seeds that are still at the mother plant who have entered their sowing season at time `t`.
 """
 function getreleases(plants::Array{submodels.Plant,1}, t::Int)
-    seedsi = find(x -> x.stage == "s" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, plants)
+    seedsi = findall(x -> x.stage == "s" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, plants)
 end
 
 """
@@ -549,7 +549,7 @@ Seed that have already been released (in the current time step, or previously - 
 """
 function establish!(justdispersed, plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64)
 
-    establishing = find(x -> (x.id in justdispersed || (x.stage == "s" && x.age >= 1)), plants)
+    establishing = findall(x -> (x.id in justdispersed || (x.stage == "s" && x.age >= 1)), plants)
 
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	writedlm(sim, hcat("Seeds trying to ESTABLISH:", length(establishing)))
@@ -617,14 +617,14 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("# total: ", length(plants),
-		           "# seeds:", length(find(x -> x.stage == "s", plants)),
-		           "# juveniles:", length(find(x -> x.stage == "j", plants)),
-		           "# adults:", length(find(x -> x.stage == "a", plants)),
+		           "# seeds:", length(findall(x -> x.stage == "s", plants)),
+		           "# juveniles:", length(findall(x -> x.stage == "j", plants)),
+		           "# adults:", length(findall(x -> x.stage == "a", plants)),
 		           "Above-ground vegetative weighing:", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
     end
 
     # old ones die
-    old = find( x -> ((x.stage == "a" && x.age >= x.span) || (x.stage == "s" && x.age >= x.bankduration)), plants)
+    old = findall( x -> ((x.stage == "a" && x.age >= x.span) || (x.stage == "s" && x.age >= x.bankduration)), plants)
     deleteat!(plants, old)
 
     # check-point
@@ -634,9 +634,9 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 
     # the rest of the individuals have a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
     if dying_stage == "a"
-        dying = find(x -> ((x.stage == "s" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), plants)
+        dying = findall(x -> ((x.stage == "s" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), plants)
     else
-        dying = find(x -> x.stage == dying_stage, plants) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
+        dying = findall(x -> x.stage == dying_stage, plants) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
     end
 
     for d in dying
@@ -694,9 +694,9 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	writedlm(sim, hcat("# seeds:", length(find(x -> x.stage == "s", plants)),
-		           "# juveniles:", length(find(x -> x.stage == "j", plants)),
-		           "# adults:", length(find(x -> x.stage == "a", plants)),
+	writedlm(sim, hcat("# seeds:", length(findall(x -> x.stage == "s", plants)),
+		           "# juveniles:", length(findall(x -> x.stage == "j", plants)),
+		           "# adults:", length(findall(x -> x.stage == "a", plants)),
 		           " Above-ground vegetative weighing:", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
     end
 
@@ -706,7 +706,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 
         # get coordinates of all occupied cells
 	locs = map(x -> x.location, biomass_plants)
-	fullcells_indxs = find(nonunique(DataFrame(hcat(locs))))
+	fullcells_indxs = findall(nonunique(DataFrame(hcat(locs))))
 
         if length(fullcells_indxs) > 0
 
@@ -771,7 +771,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 			    	    	   dying_plants)[1] #only one can be tracked down and killed at a time
 					   		    #it is not possible to order `plants` by any field value
 
-                            o = find(x -> x.id == dying.id, plants)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
+                            o = findall(x -> x.id == dying.id, plants)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by findall()
 
 			    # check-point
  			    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
@@ -781,7 +781,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 			    deleteat!(plants, o)
 
 			    # update control of while-loop
-                            o_cell = find(x -> x.id == dying.id, plantssp_samecell)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by find()
+                            o_cell = findall(x -> x.id == dying.id, plantssp_samecell)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by findall()
                     	    deleteat!(plantssp_samecell, o_cell)
                             dying_plants = filter(x -> x.stage == dying_stage, plantssp_samecell)
 
@@ -807,9 +807,9 @@ end
 
 ## Surviving ones get older: refilter, because some plants got deleted
 if dying_stage == "a"
-        surviving = find(x -> ((x.stage == "s" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), plants)
+        surviving = findall(x -> ((x.stage == "s" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), plants)
     else
-        surviving = find(x -> x.stage == dying_stage, plants) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
+        surviving = findall(x -> x.stage == dying_stage, plants) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
     end
 for s in surviving
     plants[s].age += 1
@@ -829,7 +829,7 @@ function shedflower!(plants::Array{submodels.Plant,1}, sppref::SppRef, t::Int, s
         writedlm(sim, hcat("SHEDDING reproductive biomass/ WInter-die back"))
     end
 
-    flowering = find(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), plants)
+    flowering = findall(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), plants)
     
     for f in flowering
 	plants[f].mass["repr"] = 0.0
@@ -844,7 +844,7 @@ and reproductive (`repr`) structures. Biomass allocated to `stem` is decreased b
 already at that value.
 """
 function winter_dieback!(plants::Array{submodels.Plant,1}, t::Int)
-    adults = find(x -> (x.stage == "a"), plants)
+    adults = findall(x -> (x.stage == "a"), plants)
 
     for a in adults
         plants[a].mass["leaves"] = 0.0
@@ -884,7 +884,7 @@ function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter:
 	    writedlm(sim, hcat("Above-ground biomass before mowing =", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
         end
 
-        mowed = find(x -> (x.stage in ["j" "a"] &&
+        mowed = findall(x -> (x.stage in ["j" "a"] &&
                            (x.mass["leaves"] >= (x.compartsize)^(3/4) || x.mass["stem"] >= 0.5*x.compartsize)), plants)
 
         for m in mowed
@@ -983,7 +983,7 @@ function destroyarea!(landpars::LandPars, landavail::Array{Bool,2}, settings::Di
     if settings["landmode"] == "artif"
 	# DESTROY HABITAT
 	# index of the cells still availble:
-	available = find(x -> x == true, landavail)
+	available = findall(x -> x == true, landavail)
 	# number of cells to be destroyed:
 	loss = landpars.disturbarea/landpars.initialarea # just a proportion, unit doesn't matter
 	lostarea = round(Int,loss*length(available), RoundUp)
@@ -1029,9 +1029,9 @@ function destroyarea!(landpars::NeutralLandPars, landavail::BitArray{2}, setting
     if settings["landmode"] == "artif"
 	# DESTROY HABITAT
 	# index of the cells still availble:
-	available = find(x -> x == true, landavail)
+	available = findall(x -> x == true, landavail)
 	# number of cells to be destroyed:
-	loss = landpars.disturbland[:proportion][find(landpars.disturbland[:td]==[t])[1]]
+	loss = landpars.disturbland[:proportion][findall(landpars.disturbland[:td]==[t])[1]]
 	lostarea = round(Int,loss*length(available), RoundUp)
 
 	# Unity test
@@ -1081,7 +1081,7 @@ function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::D
 
     # Resettle the individuals in the new landscape:
     # list all indexes of old landscape
-    arrayidx = hcat(collect(ind2sub(landscape, find(x -> x == x, landscape)))...)
+    arrayidx = hcat(collect(ind2sub(landscape, findall(x -> x == x, landscape)))...)
     landscapeidx = [Tuple(arrayidx[x,:]) for x in 1:size(arrayidx, 1)]
     # create array to store the idx of the landscape cells that were not destroyed and sample old cells indexes to fill the new landscape
     remaincells = sample(landscapeidx, length(newlandscape); replace = false) # the size
@@ -1092,7 +1092,7 @@ function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::D
     # update their .location field
     newloc = []
     for o in plants
-	newloc <- idxholder[find(x->x == collect(plants[o].location), idxholder)]
+	newloc <- idxholder[findall(x->x == collect(plants[o].location), idxholder)]
 	plants[o].location = newloc
     end
 

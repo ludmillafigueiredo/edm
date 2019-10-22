@@ -5,11 +5,13 @@ push!(LOAD_PATH,EDDir)
 
 using ArgParse
 using Distributions
-using JuliaDB
 using CSV #TODO replace JuliaDB with it?
 using DataFrames
 using DataValues
 using RCall
+using Random
+using DelimitedFiles
+using Dates
 using auxfunctions
 using entities
 using submodels
@@ -107,7 +109,7 @@ Read, derive and store values related to the environmental conditions: temperatu
 """
 function read_landpars(settings::Dict{String,Any})
     # Temperature time-series
-    temp_tsinput = loadtable(settings["temp_ts"])
+    temp_tsinput = CSV.read(settings["temp_ts"])
 
     # Landscape is built differently, depending on the mode of simulation
     if settings["landmode"] == "real" # simulation arena is built based on raster files, which are analysed in R
@@ -134,7 +136,7 @@ function read_landpars(settings::Dict{String,Any})
                                      auxfunctions.areatocell(landconfig[[6]]),
                                      landconfig[[7]],
                                      landconfig[[8]],
-                                     select(temp_tsinput,:meantemp))
+                                     temp_tsinput[:,:meantemp])
 
     elseif settings["landmode"] == "artif" # simulation arena is built from a neutral landscape
 
@@ -161,11 +163,11 @@ function read_landpars(settings::Dict{String,Any})
             if disturbmatrix == "notfrag"
                 landpars = submodels.NeutralLandPars(Int.(initialmatrix),
                                                     disturbland,
-                                                    select(temp_tsinput,:meantemp))
+                                                    temp_tsinput[:,:meantemp])
             else
                 landpars = submodels.NeutralLandPars(Int.(initialmatrix),
                                                     Int.(disturbmatrix),
-                                                    select(temp_tsinput,:meantemp))
+                                                    temp_tsinput[:,:meantemp])
             end
             #TODO block above can handle pollination
         else
@@ -182,7 +184,7 @@ function read_landpars(settings::Dict{String,Any})
 
             landpars = submodels.NeutralLandPars(Int.(initialmatrix),
                                                 nothing,
-                                                select(temp_tsinput,:meantemp))
+                                                temp_tsinput[:,:meantemp])
         end
     else
         error("Please choose a mode of landscape simulation.")
@@ -196,73 +198,22 @@ Reads in species trait values (min. and max. values for the evolvable ones). Sto
 """
 function read_spinput(settings::Dict{String,Any})
 
-    spinputtbl = loadtable(settings["spinput"])
+    spinputtbl = CSV.read(settings["spinput"])
 
-    sppref = submodels.SppRef(Array(rows(spinputtbl,:sp_id)),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:kernel)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:clonality)[i] == "true" #translates R's true into Julia's TRUE
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:seedmass)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:compartsize)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:span_min)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:span_max)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:firstflower_min)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:firstflower_max)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:floron)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:floroff)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:seednumber_min)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:seednumber_max)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:seedon)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:seedoff)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:bankduration_min)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:bankduration_max)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:b0grow)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:b0germ)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:b0mort)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:temp_opt)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict(rows(spinputtbl,:sp_id)[i] =>
-                                   rows(spinputtbl,:temp_tol)[i]
-                                   for i in 1:length(rows(spinputtbl,:sp_id))),
-                              Dict())
+    sppref = SppRef()
+
+    # sp_id, clonality and fitness columns cannot be set as the rest
+    sppref.sp_id = spinputtbl[:, :sp_id]
+    sppref.clonality = Dict(spinputtbl[:, :sp_id][i] => spinputtbl[:, :clonality][i] == "true"
+		        	      		    for i in 1:length(spinputtbl[:, :sp_id]))
+    sppref.fitness = Dict()
+    
+    for field in fieldnames(SppRef)[3:end-1]
+    	setfield!(sppref, field,
+	          Dict(spinputtbl[:, :sp_id][i] => Float64(spinputtbl[:, field][i])
+		        	      		    for i in 1:length(spinputtbl[:, :sp_id])))
+    end
+    
     return sppref
 end
 
@@ -273,39 +224,39 @@ Values are store in an object of type TraitRanges, where each field is a Diction
 """
 function define_traitranges(settings::Dict{String,Any})
 
-    spinputtbl = loadtable(settings["spinput"])
+    spinputtbl = CSV.read(settings["spinput"])
 
     traitranges = TraitRanges(
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [rows(spinputtbl,:seedmass)[i], rows(spinputtbl,:seedmass)[i]]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [rows(spinputtbl,:compartsize)[i], rows(spinputtbl,:compartsize)[i]]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(rows(spinputtbl,:span_min)[i], RoundDown)), Int(round(rows(spinputtbl,:span_max)[i], RoundUp))]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(rows(spinputtbl,:firstflower_min)[i], RoundDown)), Int(round(rows(spinputtbl,:firstflower_max)[i], RoundUp))]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(rows(spinputtbl,:floron)[i], RoundDown)), Int(round(rows(spinputtbl,:floron)[i], RoundUp))]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(rows(spinputtbl,:floroff)[i], RoundDown)), Int(round(rows(spinputtbl,:floroff)[i], RoundUp))]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(rows(spinputtbl,:seednumber_min)[i], RoundDown)), Int(round(rows(spinputtbl,:seednumber_max)[i], RoundUp))]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(rows(spinputtbl,:seedon)[i], RoundDown)), Int(round(rows(spinputtbl,:seedon)[i], RoundUp))]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(rows(spinputtbl,:seedoff)[i], RoundDown)), Int(round(rows(spinputtbl,:seedoff)[i], RoundUp))]
-             for i in 1:length(rows(spinputtbl,:sp_id))),
-        Dict(rows(spinputtbl,:sp_id)[i] =>
-             [Int(round(rows(spinputtbl,:bankduration_min)[i], RoundDown)), Int(round(rows(spinputtbl,:bankduration_max)[i], RoundUp))]
-             for i in 1:length(rows(spinputtbl,:sp_id))))
+        Dict(spinputtbl[:,:sp_id][i] =>
+             [spinputtbl[:,:seedmass][i], spinputtbl[:,:seedmass][i]]
+             for i in 1:length(spinputtbl[:,:sp_id])),
+        Dict(spinputtbl[:,:sp_id][i] =>
+             [spinputtbl[:,:compartsize][i], spinputtbl[:,:compartsize][i]]
+             for i in 1:length(spinputtbl[:,:sp_id])),
+        Dict(spinputtbl[:,:sp_id][i] =>
+             [Int(round(spinputtbl[:,:span_min][i], RoundDown)), Int(round(spinputtbl[:,:span_max][i], RoundUp))]
+             for i in 1:length(spinputtbl[:,:sp_id])),
+        Dict(spinputtbl[:,:sp_id][i] =>
+             [Int(round(spinputtbl[:,:firstflower_min][i], RoundDown)), Int(round(spinputtbl[:,:firstflower_max][i], RoundUp))]
+             for i in 1:length(spinputtbl[:,:sp_id])),
+        Dict(spinputtbl[:,:sp_id][i] =>
+             [Int(round(spinputtbl[:,:floron][i], RoundDown)), Int(round(spinputtbl[:,:floron][i], RoundUp))]
+             for i in 1:length(spinputtbl[:,:sp_id])),
+        Dict(spinputtbl[:,:sp_id][i] =>
+             [Int(round(spinputtbl[:,:floroff][i], RoundDown)), Int(round(spinputtbl[:,:floroff][i], RoundUp))]
+             for i in 1:length(spinputtbl[:,:sp_id])),
+        Dict(spinputtbl[:,:sp_id][i] =>
+             [Int(round(spinputtbl[:,:seednumber_min][i], RoundDown)), Int(round(spinputtbl[:,:seednumber_max][i], RoundUp))]
+             for i in 1:length(spinputtbl[:,:sp_id])),
+        Dict(spinputtbl[:,:sp_id][i] =>
+             [Int(round(spinputtbl[:,:seedon][i], RoundDown)), Int(round(spinputtbl[:,:seedon][i], RoundUp))]
+             for i in 1:length(spinputtbl[:,:sp_id])),
+        Dict(spinputtbl[:,:sp_id][i] =>
+             [Int(round(spinputtbl[:,:seedoff][i], RoundDown)), Int(round(spinputtbl[:,:seedoff][i], RoundUp))]
+             for i in 1:length(spinputtbl[:,:sp_id])),
+        Dict(spinputtbl[:,:sp_id][i] =>
+             [Int(round(spinputtbl[:,:bankduration_min][i], RoundDown)), Int(round(spinputtbl[:,:bankduration_max][i], RoundUp))]
+             for i in 1:length(spinputtbl[:,:sp_id])))
     return traitranges
 end
 
@@ -315,10 +266,10 @@ Reads how insects are going to be implicitly simulated.
 """
 function implicit_insect(settings::Dict{String,Any})
 
-    insectsinput = loadtable(settings["insect"])
-    interaction = select(insectsinput, :interaction)[1] # type of interaction which is affected
-    scen = select(insectsinput, :scen)[1] # pollination scenario
-    remaining = select(insectsinput, :remaining) # proportion of pollination service loss
+    insectsinput = CSV.read(settings["insect"])
+    interaction = insectsinput[:, :interaction][1] # type of interaction which is affected
+    scen = insectsinput[:, :scen][1] # pollination scenario
+    remaining = insectsinput[:, :remaining] # proportion of pollination service loss
     return interaction, scen, remaining
 end
 
@@ -331,9 +282,9 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
     # output header
     if t == 1
         header = hcat(["week"],
-                      reshape(string.(fieldnames(Plant)[1:20]),1,:),
+                      reshape(collect(string.(fieldnames(Plant)[1:20])),1,:),
                       ["leaves" "stem" "root" "repr"],
-                      reshape(string.(fieldnames(Plant)[22:end]),1,:))
+                      reshape(collect(string.(fieldnames(Plant)[22:end])),1,:))
         open(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt"), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
@@ -391,7 +342,7 @@ function loaddisturbance(settings)
             return tdist
 
         elseif settings["disturbtype"] == "poll"
-            tdist = select(loadtable(settings["insect"]), :td)
+            tdist = CSV.read(settings["insect"])[:, :td]
             println("Pollination loss is simulated according to parameters in the \'insects\' file.")
             return tdist
 
@@ -543,7 +494,7 @@ function simulate()
     if settings["disturbtype"] != "none"
         tdist = loaddisturbance(settings)
     end
-    println(tdist)
+    show(tdist)
 
     id_counter = 0
     management_counter = 0

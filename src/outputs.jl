@@ -11,7 +11,6 @@ export analysED
 analsyED()
 Run R script of analysis after the model finishes the simulation
 """
-
 function analysED(settings, results_folder)
 
     parentsimID = settings["simID"]

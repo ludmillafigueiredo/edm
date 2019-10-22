@@ -12,7 +12,6 @@ gridsizes(realxlen, realylen)
 Convert fragments real length values give in `realxlen` and `realylen` from m to the equivalent number of grid cell lengths.
 1 m = 100 cm, 3 cm of cell side size
 """
-
 function gridsizes(realxlen::Array{Float64,1}, realylen::Array{Float64,1})
   xlength = round(Int64,((realxlen.*100)./100), RoundNearestTiesAway)
   ylength = round(Int64,((realylen.*100)./100), RoundNearestTiesAway)

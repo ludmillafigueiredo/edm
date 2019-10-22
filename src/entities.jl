@@ -40,8 +40,8 @@ end
 # Initial trait values is read from an input file and stored for reference in `sppref::SppRef`.
 mutable struct SppRef
     sp_id::Array{String, 1}
-    kernel::Dict{String,String}
     clonality::Dict{String,Bool}
+    kernel::Dict{String,String}
     seedmass::Dict{String,Float64}
     compartsize::Dict{String,Float64}
     span_min::Dict{String,Float64}
@@ -64,6 +64,30 @@ mutable struct SppRef
     fitness::Dict{String, Float64}
 end
 
+SppRef() = SppRef(String[],
+	          Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict())
+
 # Minimal and maximal trait values, which control microevolution, are stored in `traitranges::TraitRanges`
 mutable struct TraitRanges
     seedmass::Dict{String,Array{Float64,1}}
@@ -77,6 +101,17 @@ mutable struct TraitRanges
     seedoff::Dict{String,Array{Int64,1}}
     bankduration::Dict{String,Array{Int64,1}}
 end
+
+TraitRanges() = TraitRanges(Dict(),
+		            Dict(),
+			    Dict(),
+			    Dict(),
+			    Dict(),
+			    Dict(),
+			    Dict(),
+			    Dict(),
+			    Dict(),
+			    Dict())
 
 # Data structures and submodel functions related to the Land entity
 # -----------------------------------------------------------------
