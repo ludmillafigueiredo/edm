@@ -326,7 +326,7 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 		    seed_counter += 1
 
 		    # unity test
-		    for f in fieldnames(seed)
+		    for f in fieldnames(typeof(seed))
 			if typeof(getfield(seed, f)) in [Int64 Float64]
 			    if getfield(seed, f) < 0 || getfield(seed, f) == Inf
 				error(f, " has value: ", getfield(seed, f), "Ind: ", seed.id, "sp: ", seed.sp)

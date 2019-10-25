@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+#!/Usr/bin/env julia
 
 EDDir = joinpath(pwd(), "src") # TODO test without pwd()
 push!(LOAD_PATH,EDDir)
@@ -209,8 +209,9 @@ function read_spinput(settings::Dict{String,Any})
     sppref.kernel = Dict(spinputtbl[:, :sp_id][i] => spinputtbl[:, :kernel][i]
 		        	      		    for i in 1:length(spinputtbl[:, :sp_id]))
     sppref.fitness = Dict()
-    
-    for field in fieldnames(SppRef)[4:end-1]
+
+    println(fieldnames(typeof(sppref))[4:end-1])
+    for field in fieldnames(typeof(sppref))[4:end-1]
     	setfield!(sppref, field,
 	          Dict(spinputtbl[:, :sp_id][i] => Float64(spinputtbl[:, field][i])
 		        	      		    for i in 1:length(spinputtbl[:, :sp_id])))
@@ -284,9 +285,9 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
     # output header
     if t == 1
         header = hcat(["week"],
-                      reshape(collect(string.(fieldnames(Plant)[1:20])),1,:),
+                      reshape(collect(string.(fieldnames(typeof(Plant))[1:20])),1,:),
                       ["leaves" "stem" "root" "repr"],
-                      reshape(collect(string.(fieldnames(Plant)[22:end])),1,:))
+                      reshape(collect(string.(fieldnames(typeof(Plant))[22:end])),1,:))
         open(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt"), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
