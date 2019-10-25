@@ -206,9 +206,11 @@ function read_spinput(settings::Dict{String,Any})
     sppref.sp_id = spinputtbl[:, :sp_id]
     sppref.clonality = Dict(spinputtbl[:, :sp_id][i] => spinputtbl[:, :clonality][i] == "true"
 		        	      		    for i in 1:length(spinputtbl[:, :sp_id]))
+    sppref.kernel = Dict(spinputtbl[:, :sp_id][i] => spinputtbl[:, :kernel][i]
+		        	      		    for i in 1:length(spinputtbl[:, :sp_id]))
     sppref.fitness = Dict()
     
-    for field in fieldnames(SppRef)[3:end-1]
+    for field in fieldnames(SppRef)[4:end-1]
     	setfield!(sppref, field,
 	          Dict(spinputtbl[:, :sp_id][i] => Float64(spinputtbl[:, field][i])
 		        	      		    for i in 1:length(spinputtbl[:, :sp_id])))
@@ -382,7 +384,7 @@ Calculate the carrying capacity of the landscape (`K`) and of each gridcell (`cK
 `K` is used to initialize the species with abundances corresponding to a niche partitioning model.
 """
 function initK(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
-    habitatarea = length(find(x -> x == true, landavail))
+    habitatarea = length(findall(x -> x == true, landavail))
     totalarea = prod(size(landavail))
     K = cK*habitatarea
     return K
@@ -412,7 +414,7 @@ function updateK!(K::Float64, landavail::BitArray{2}, settings::Dict{String,Any}
         end
 
         # habitat area
-        habitatarea = length(find(x -> x == true, landavail))  #number of habitat grid cels ggrid cells
+        habitatarea = length(findall(x -> x == true, landavail))  #number of habitat grid cels ggrid cells
         totalarea = prod(size(landavail)) # total number of grid cell. Habitat or not
 
 	K = cK*habitatarea
@@ -494,7 +496,7 @@ function simulate()
     if settings["disturbtype"] != "none"
         tdist = loaddisturbance(settings)
     end
-    show(tdist)
+    repr(tdist)
 
     id_counter = 0
     management_counter = 0
@@ -520,7 +522,7 @@ function simulate()
     # ORGANIZE OUTPUT FOLDERS
     #########################
 
-    srand(settings["rseed"])
+    Random.seed!(settings["rseed"])
 
     results_folder = string()
 
@@ -544,12 +546,12 @@ function simulate()
 
         # OUTPUT SIMULATION SETTINGS
         open(joinpath(simresults_folder, "simsettings.jl"),"w") do ID
-            println(ID, "tdist = ", tdist)
-            println(ID, "landpars = ", typeof(landpars), "\ninitial = ", typeof(landpars.initialland), "\ndisturb = ", typeof(landpars.disturbland))
-            println(ID, "interaction = ", interaction)
-            println(ID, "scen = ", scen)
-            println(ID, "remaining = ", remaining)
-            println(ID, "commandsettings = ", settings)
+            println(ID, "tdist = $(repr(tdist))")
+            println(ID, "landpars = $(repr(typeof(landpars))) \ninitial = $(repr(typeof(landpars.initialland))) \ndisturb = $(repr(typeof(landpars.disturbland)))")
+            println(ID, "interaction = $(repr(interaction))")
+            println(ID, "scen = $(repr(scen))")
+            println(ID, "remaining = $(repr(remaining))")
+            println(ID, "commandsettings = $(repr(settings))")
         end
 
         # INITIALIZE FILE TO LOG SIMULATION PROGRESS
@@ -563,10 +565,8 @@ function simulate()
         end
 
         # INITIALIZE FILE TO LOG METABOLIC RATES
-        open(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt"),"a") do sim
-
+        open(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt"),"w") do sim
             writedlm(sim, hcat("stage", "age", "rate", "probability", "event"))
-
         end
 
         # INITIALIZE FILE TO LOG SEED PRODUCTION

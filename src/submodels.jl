@@ -59,7 +59,7 @@ function initplants(landavail::BitArray{N} where N, sppref::SppRef, id_counter::
 	    id_counter += 1 # update individual counter
 	    minvalue = 1e-7 # Distribution.Uniform requires max > min
 
-	    newplant = Plant(hex(id_counter),
+	    newplant = Plant(string(id_counter, base=16),
 			      rand(["a" "j" "s"]),
 			      (XYs[i,1],XYs[i,2]),
 			      s,
@@ -335,7 +335,7 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 		    end
 
                     # State variables
-		    seed.id = hex(id_counter)
+		    seed.id = string(id_counter, base = 16)
 		    seed.mass = Dict("leaves" => 0.0,
 		                     "stem" => 0.0,
 				     "root" => seed.seedmass,
@@ -963,7 +963,7 @@ function updateenv!(t::Int64, landpars::NeutralLandPars)
 
     T = landpars.meantempts[t] + tK
     if rem(t, 52) == 1
-	mean_annual = mean(landpars.meantempts[t:(t+51)] + tK)
+	mean_annual = mean(broadcast(+, tK, landpars.meantempts[t:(t+51)]))
 	#unity test
 	println("Temperature for week $t: $T")
 	println("Mean for the year of week $t: $mean_annual")

@@ -1,3 +1,4 @@
+require(sp)
 require(dplyr)
 require(tidyr)
 require(gstat)

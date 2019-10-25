@@ -1,7 +1,8 @@
-library(raster)
-library(NLMR)
-library(landscapetools)
-library(landscapemetrics)
+require(sp)
+require(raster)
+require(NLMR)
+require(landscapetools)
+require(landscapemetrics)
 
 # 1. Read raster of initial landscape as matrix (Julia processes matrices, not raster)
 initialmatrix <- raster::as.matrix(raster(file.path(initialland)))
