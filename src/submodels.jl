@@ -543,49 +543,58 @@ function disperse!(landavail::BitArray{2}, seedsi, plants::Array{submodels.Plant
 end
 
 """
+"""
+function factorized_seedproc(process::String, processing_plants::Array{submodels.Plant,1}, B::Float64, sp::String, plants::Array{submodels.Plant,1})
+
+	prob = 1-exp(-B)
+
+	# unit test
+	if prob < 0
+	    error("$process probability < 0")
+	elseif prob > 1
+	    error("$process probability > 1")
+	end
+
+	processing_sp = filter(x -> x.sp == sp, processing_plants)
+	n_procs = rand(Distributions.Binomial(length(processing_sp), prob))[1]
+
+	ids_procs = sample(getfield.(processing_sp, :id), n_procs)
+	idxs_procs = findall(x -> x.id in ids_procs, plants)
+
+	return idxs_procs
+end
+
+"""
     establish!
 Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish in the grid-cell they are in. Germinated seeds mature to juveniles immediately. Seeds that don't germinate stay in the seedbank.
 
 """
 function establish!(justdispersed, plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64)
 
-    establishing = findall(x -> (x.id in justdispersed || (x.stage == "s" && x.age >= 1)), plants)
+    lost = Int64[]
+    Bg = 0
+    prob_g = 0
 
+    establishing = filter(x -> (x.id in justdispersed || (x.stage == "s" && x.age >= 1)), plants)
+    # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	writedlm(sim, hcat("Seeds trying to ESTABLISH:", length(establishing)))
     end
+    
+    for sp in unique(getfield.(establishing, :sp))
 
-    lost = Int64[]
-    Bm = 0
-    gprob = 0
+    	Bg = sppref.b0germ[sp]*(sppref.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
 
-    for o in establishing
-        current_vegmass = plants[o].mass["leaves"] + plants[o].mass["stem"] + plants[o].mass["root"]
-	Bg = plants[o].b0germ*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T))
-	gprob = 1-exp(-Bg)
-	# test
-	open(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt"),"a") do sim
-	    writedlm(sim, hcat(plants[o].stage, plants[o].age, Bg, gprob, "germination"))
-	end
-
-	if gprob < 0
-	    error("gprob < 0")
-	elseif gprob > 1
-	    error("gprob > 1")
-	end
-
-	germ = false
-	if 1 == rand(Distributions.Bernoulli(gprob))
-	    germ = true
-	end
-
-	if germ == true
-	    plants[o].stage = "j"
-	    plants[o].mass["root"] = plants[o].seedmass
+	germs = factorized_seedproc("germination", establishing, Bg, sp, plants)
+	
+	for g in germs
+        
+	    plants[g].stage = "j"
+	    plants[g].mass["root"] = plants[g].seedmass
 	    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-		writedlm(sim, hcat(t, "germination", plants[o].stage, plants[o].age))
+	        writedlm(sim, hcat(t, "germination", plants[g].stage, plants[g].age))
 	    end
-	end
+        end
     end
 end
 
@@ -595,12 +604,40 @@ Plants density-independent mortality is calculated according to the metabolic th
 Density-dependent mortality is calculated for cells with biomass over the grid-cell carrying capacity `cK`. It kills smaller individuals until the biomass of the grid-cell is above `cK` again.
 Density-dependent mortality is not calculated for seeds. Their density-dependent mortality is calculated alongside adults just for convenience.
 Both types of mortalities of adults and juveniles are calculated separately (as set by `dying_stage`).
+    survive!(plants, t, settings, sppref)
+Calculate seed mortality, factorized for all seeds of a same species.
 """
+function survive!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T)
+    #check-point
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+            writedlm(sim, hcat("Running MORTALITY: ADULTS"))
+    end
+
+    old = findall(x -> (x.stage == "s" && x.age >= x.bankduration), plants)
+    deleteat!(plants, old)
+
+    # check-point
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        writedlm(sim, hcat("Seeds dead on seed-bank:", length(old)))
+    end
+
+    dying = filter(x -> (x.stage == "s" && (rem(t,52) > x.seedoff || x.age > x.seedoff)), plants)
+    
+    for sp in unique(getfield.(dying, :sp))
+
+    	Bm = seed_mfactor*sppref.b0mort[sp]*(sppref.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
+
+	morts = factorized_seedproc("mortality", dying, Bm, sp, plants)
+	deleteat!(plants, morts)
+    end
+    
+end
+
 function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, sppref::SppRef, landavail::BitArray{2},T, biomass_production::Float64, dying_stage::String)
 
     if dying_stage == "a"
         open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-            writedlm(sim, hcat("Running MORTALITY: ADULTS & SEEDS"))
+            writedlm(sim, hcat("Running MORTALITY: ADULTS"))
         end
     elseif dying_stage == "j"
         open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
@@ -624,7 +661,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
     end
 
     # old ones die
-    old = findall( x -> ((x.stage == "a" && x.age >= x.span) || (x.stage == "s" && x.age >= x.bankduration)), plants)
+    old = findall( x -> (x.stage == dying_stage && x.age >= x.span), plants)
     deleteat!(plants, old)
 
     # check-point
@@ -633,17 +670,12 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
     end
 
     # the rest of the individuals have a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
-    if dying_stage == "a"
-        dying = findall(x -> ((x.stage == "s" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), plants)
-    else
-        dying = findall(x -> x.stage == dying_stage, plants) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
-    end
 
+    dying = findall(x -> x.stage == dying_stage, plants) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
+    
     for d in dying
         # stages have different mortality factors
-        if plants[d].stage == "s"
-	    m_stage = seed_mfactor
-        elseif plants[d].stage == "j"
+        if plants[d].stage == "j"
 	    m_stage = juv_mfactor
         elseif plants[d].stage == "a"
 	    m_stage = adult_mfactor

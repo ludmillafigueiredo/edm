@@ -282,6 +282,9 @@ Saves a long format table with the organisms field informations.
 """
 function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{String,Any})
 
+    # only info on juveniles and adults is output
+    juvs_adlts = findall(x -> x.stage in ["j", "a"], plants)
+    
     # output header
     if t == 1
         header = hcat(["week"],
@@ -296,7 +299,7 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
     # output plants info
     if t == 1 || rem(t,settings["tout"]) == 0
 
-        for o in 1:length(plants)
+        for o in 1:length(juvs_adlts)
             open(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt"), "a") do output
                 writedlm(output, hcat(t,
                                       plants[o].id,
@@ -618,17 +621,28 @@ function simulate()
                 writedlm(sim, hcat("Biomass production:", biomass_production))
             end
 
+	    survive!(plants, t, settings, sppref, T)
+	    
             allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "a")
             survive!(plants, t, cK, K, settings, sppref, landavail, T, biomass_production, "a")
+
 	    allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
             survive!(plants, t, cK, K, settings, sppref, landavail, T, biomass_production, "j")
-            develop!(plants, settings, t)
-            mate!(plants, t, settings, scen, tdist, remaining)
-            id_counter = mkoffspring!(plants, t, settings, sppref, id_counter, landavail, T, traitranges)
-            seedsi = getreleases(plants, t)
-            justdispersed = disperse!(landavail, seedsi, plants, t, settings, sppref, landpars, tdist)
-            establish!(justdispersed, plants, t, settings, sppref, T, biomass_production, K)
-            shedflower!(plants, sppref, t, settings)
+
+	    develop!(plants, settings, t)
+
+	    mate!(plants, t, settings, scen, tdist, remaining)
+
+	    id_counter = mkoffspring!(plants, t, settings, sppref, id_counter, landavail, T, traitranges)
+
+	    seedsi = getreleases(plants, t)
+
+	    justdispersed = disperse!(landavail, seedsi, plants, t, settings, sppref, landpars, tdist)
+
+	    establish!(justdispersed, plants, t, settings, sppref, T, biomass_production, K)
+
+	    shedflower!(plants, sppref, t, settings)
+
 	    if (rem(t,52) == 51)
 	       winter_dieback!(plants, t)
 	    end
