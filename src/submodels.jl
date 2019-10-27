@@ -110,11 +110,14 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
         println(sim, "Growth of $growing_stage")
     end
 
-    growing = findall(x->x.stage == growing_stage,plants)
-
-    for o in growing
-
-        b0grow = sppref.b0grow[plants[o].sp]
+    growing = filter(x-> x.stage == growing_stage,plants)
+	
+    for sp in unique(getfield.(growing, :sp))
+    
+    	growing_sp = findall(x -> x.id in getfield.(growing, :id), plants)
+    	b0grow = sppref.b0grow[sp]
+	
+    for o in growing_sp
 
 	current_vegmass = plants[o].mass["leaves"] + plants[o].mass["stem"] + plants[o].mass["root"]
 
@@ -138,6 +141,7 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
 	    plants[o].mass["stem"] += (1/3)*new_mass
 	    plants[o].mass["root"] += (1/3)*new_mass
         end
+    end
     end
     # unit test
     masserror = findall(x -> sum(collect(values(x.mass))) <= 0, plants)
@@ -659,9 +663,13 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 
     # the rest of the individuals have a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
 
-    dying = findall(x -> x.stage == dying_stage, plants) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
+    dying = filter(x -> x.stage == dying_stage, plants)
     
-    for d in dying
+    for sp in unique(getfield.(dying, :sp))
+    	dying_sp = findall(x -> x.id in getfield.(dying, :sp), plants)
+    	b0mort = sppref.b0mort[sp]
+
+	for d in dying_sp
         # stages have different mortality factors
         if plants[d].stage == "j"
 	    m_stage = juv_mfactor
@@ -672,7 +680,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
         end
 
         current_vegmass = plants[d].mass["leaves"] + plants[d].mass["stem"] + plants[d].mass["root"]
-		Bm = sppref.b0mort[plants[d].sp]*m_stage*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T))
+		Bm = b0mort*m_stage*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T))
         mprob = 1 - exp(-Bm)
 
         # unit test
@@ -693,7 +701,10 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
 	        writedlm(sim, hcat(plants[d].stage, plants[d].age, Bm, mprob, "death"))
 	    end
         end
+    	end
+    
     end
+
     deleteat!(plants, deaths) #delete the ones that are already dying due to mortality rate, so that they won't cramp up density-dependent mortality
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
@@ -703,10 +714,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
     # Density-dependent mortality
     # ---------------------------
     deaths = Int64[] # reset before calculating density-dependent mortality
-    Bm = 0
-    mprob = 0
-    b0mort = 0
-
+    
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
 	println(sim, "Production before density-dependent mortality: $(sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001)))g; K = $K")
