@@ -284,9 +284,9 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
     
     # Sexuallly produced offspring
     # ----------------------------
-    for sp in unique(map(x -> x.sp, ferts))
+    for sp in unique(getfield.(ferts, :sp))
 
-	sowing = findall(x -> x.sp == sp && x.id in map(x -> x.id, ferts), plants)
+	sowing = findall(x -> x.sp == sp && x.id in getfield.(ferts, :id), plants)
 	# check-point
     	open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	    println(sim, "Number of sowing: $(length(sowing))")
@@ -737,7 +737,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
     biomass_plants = filter(x -> x.stage in ["j" "a"], plants) 
 
         # get coordinates of all occupied cells
-	locs = map(x -> x.location, biomass_plants)
+	locs = getfield.(biomass_plants, :location)
 	fullcells_indxs = findall(nonunique(DataFrame(hcat(locs))))
 
         if length(fullcells_indxs) > 0
@@ -761,7 +761,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
             	end
 		
 		    # get fitness of all species that are in the cell
-                    sppgrid_fitness = Dict(sp => sppref.fitness[sp] for sp in map(x -> x.sp, plants_samecell))
+                    sppgrid_fitness = Dict(sp => sppref.fitness[sp] for sp in unique(getfield.(plants_samecell, :sp)))
 
 		    # check-point
             	    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim

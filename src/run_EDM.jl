@@ -590,11 +590,11 @@ function simulate()
             # check-point
             open(joinpath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim
                 println(sim, "\nWEEK $t")
-		        println(sim, "Species richness: $(length(unique(map(x -> x.sp, plants))))")
+		        println(sim, "Species richness: $(length(unique(getfield.(plants, :sp))))")
             end
 
 	        println("\nWEEK $t")
-	        println("Species richness: $(length(unique(map(x -> x.sp, plants))))")
+	        println("Species richness: $(length(unique(getfield.(plants, :sp))))")
 
             # APPLY LANDSCAPE DISTURBANCE
             if settings["disturbtype"] in ["frag" "loss"] && t in tdist
