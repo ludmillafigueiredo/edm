@@ -291,7 +291,7 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
                       reshape(collect(string.(fieldnames(typeof(Plant))[1:20])),1,:),
                       ["leaves" "stem" "root" "repr"],
                       reshape(collect(string.(fieldnames(typeof(Plant))[22:end])),1,:))
-        open(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt"), "w") do output
+        open(joinpath(settings["outputat"],settings["simID"],"statevars_ind.txt"), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
     end
@@ -300,7 +300,7 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
     if t == 1 || rem(t,settings["tout"]) == 0
 
         for o in 1:length(juvs_adlts)
-            open(joinpath(settings["outputat"],settings["simID"],"orgsweekly.txt"), "a") do output
+            open(joinpath(settings["outputat"],settings["simID"],"statevars_ind.txt"), "a") do output
                 writedlm(output, hcat(t,
                                       plants[o].id,
                                       plants[o].stage,

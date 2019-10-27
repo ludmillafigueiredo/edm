@@ -41,7 +41,7 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
   for(repli in repfolder){
     
     ## get raw outputs
-    outraw <- read_tsv(file.path(repli, "orgsweekly.txt"), col_names = TRUE,
+    outraw <- read_tsv(file.path(repli, "statevars_ind.txt"), col_names = TRUE,
                        col_types = cols(week = col_integer(),
                                         id = col_character(),
                                         stage = col_character(),
