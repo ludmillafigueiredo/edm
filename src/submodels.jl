@@ -65,7 +65,6 @@ function initplants(landavail::BitArray{N} where N, sppref::SppRef, id_counter::
 			      s,
 			      sppref.kernel[s],
 			      sppref.clonality[s],
-			      sppref.seedmass[s],
 			      sppref.compartsize[s], #compartsize
 			      Int(round(rand(Distributions.Uniform(sppref.span_min[s], sppref.span_max[s] + minvalue),1)[1], RoundUp)),
 			      Int(round(rand(Distributions.Uniform(sppref.firstflower_min[s], sppref.firstflower_max[s] + minvalue),1)[1], RoundUp)),
@@ -75,19 +74,16 @@ function initplants(landavail::BitArray{N} where N, sppref::SppRef, id_counter::
 			      sppref.seedon[s],
 			      sppref.seedoff[s],
 			      Int(round(rand(Distributions.Uniform(sppref.bankduration_min[s],sppref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
-			      sppref.b0grow[s],
-			      sppref.b0germ[s],
-			      sppref.b0mort[s],
 			      0, #age
 			      Dict("leaves" => 0.0, "stem" => 0.0, "repr" => 0.0, "root" => 0.0),
 			      false)
 
             ## initial biomass
 	    if newplant.stage == "s"
-		newplant.mass["root"] = newplant.seedmass
+		newplant.mass["root"] = sppref.seedmass[newplant.sp]
 		newplant.age = newplant.seedon + 1
 	    elseif newplant.stage == "j"
-		newplant.mass["root"] = newplant.seedmass
+		newplant.mass["root"] = sppref.seedmass[newplant.sp]
 		newplant.age = newplant.seedon + 4
 	    elseif newplant.stage in ["a"]
 		newplant.mass["leaves"] = newplant.compartsize^(3/4) * 0.75
@@ -118,7 +114,7 @@ function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64
 
     for o in growing
 
-        b0grow = plants[o].b0grow
+        b0grow = sppref.b0grow[plants[o].sp]
 
 	current_vegmass = plants[o].mass["leaves"] + plants[o].mass["stem"] + plants[o].mass["root"]
 
@@ -177,13 +173,13 @@ end
     mate!(plants, t, setting, scen, tdist, remaining)
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
 """
-function mate!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
+function mate!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining, sppref::SppRef)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Pollination ...")
     end
 
-    ready = findall(x-> x.stage == "a" && x.mass["repr"] > x.seedmass, plants)
+    ready = findall(x-> x.stage == "a" && x.mass["repr"] > sppref.seedmass[x.sp], plants)
     pollinated = []
     npoll = 0
 
@@ -280,23 +276,23 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
    	 println(sim, "Number of ferts $(length(ferts)) in $(length(plants)) plants")
     end
 
-    asexuals = filter(x -> x.mated == false && x.clonality == true && x.mass["repr"] > x.seedmass, plants)
+    asexuals = filter(x -> x.mated == false && x.clonality == true && x.mass["repr"] > sppref.seedmass[x.sp], plants)
     
     # Sexuallly produced offspring
     # ----------------------------
     for sp in unique(getfield.(ferts, :sp))
 
+    	seedmass = sppref.seedmass[sp]
+	spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
+	
 	sowing = findall(x -> x.sp == sp && x.id in getfield.(ferts, :id), plants)
 	# check-point
     	open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	    println(sim, "Number of sowing: $(length(sowing))")
         end
-	    
-	spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
 
 	for s in sowing
-
-	    seedmass = plants[s].seedmass
+	
 	    offs = div(ALLOC_SEED*plants[s].mass["repr"], seedmass)
 	    
 	    if offs <= 0
@@ -338,7 +334,7 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 		    seed.id = string(id_counter, base = 16)
 		    seed.mass = Dict("leaves" => 0.0,
 		                     "stem" => 0.0,
-				     "root" => seed.seedmass,
+				     "root" => seedmass,
 				     "repr" => 0.0)
                     seed.stage = "s"
                     seed.age = 0
@@ -346,9 +342,7 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 
                     # Trait microevolution
                     # --------------------
-		    #seed.seedmass += rand(Distributions.Normal(0, abs(plants[s].seedmass-conspp.seedmass+non0sd)/6))[1]
-			#TODO use fieldnames to loop through  species properties (necessary in other places in the code)
-            seed.compartsize = (seed.compartsize+conspp.compartsize)/2+ rand(Distributions.Normal(0, abs(plants[s].compartsize-conspp.compartsize+non0sd)/6))[1]
+		    seed.compartsize = (seed.compartsize+conspp.compartsize)/2+ rand(Distributions.Normal(0, abs(plants[s].compartsize-conspp.compartsize+non0sd)/6))[1]
 		    seed.span = Int(round((seed.span+conspp.span)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].span-conspp.span+non0sd)/6))[1], RoundUp))
 		    seed.firstflower = Int(round((seed.firstflower+conspp.firstflower)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].firstflower-conspp.firstflower+non0sd)/6))[1], RoundUp))
 		    seed.floron = Int(round((seed.floron+conspp.floron)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].floron-conspp.floron+non0sd)/6))[1],RoundUp))
@@ -359,11 +353,6 @@ function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict
 		    seed.bankduration = Int(round((seed.bankduration+conspp.bankduration)/2, RoundUp)) + Int(round(rand(Distributions.Normal(0, abs(plants[s].bankduration-conspp.bankduration+non0sd)/6))[1],RoundUp))
 
 		    # constrain microevolution: avoid trait changes that generate negative values (and also values that irrealistically high)
-
-                    #if (seed.seedmass < traitranges.seedmass[seed.sp][1] || seed.seedmass > traitranges.seedmass[seed.sp][end])
-		    #   seed.seedmass < traitranges.seedmass[seed.sp][1] ? seed.seedmass = traitranges.seedmass[seed.sp][1] :
-		    #   seed.seedmass = traitranges.seedmass[seed.sp][end]
-		    #end
 
 		    if (seed.compartsize < traitranges.compartsize[seed.sp][1] || seed.compartsize > traitranges.compartsize[seed.sp][end])
 			seed.compartsize < traitranges.compartsize[seed.sp][1] ? seed.compartsize = traitranges.compartsize[seed.sp][1] :
@@ -590,7 +579,6 @@ function establish!(justdispersed, plants::Array{submodels.Plant,1}, t::Int, set
 	for g in germs
         
 	    plants[g].stage = "j"
-	    plants[g].mass["root"] = plants[g].seedmass
 	    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
 	        writedlm(sim, hcat(t, "germination", plants[g].stage, plants[g].age))
 	    end
@@ -684,7 +672,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Floa
         end
 
         current_vegmass = plants[d].mass["leaves"] + plants[d].mass["stem"] + plants[d].mass["root"]
-		Bm = plants[d].b0mort*m_stage*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T))
+		Bm = sppref.b0mort[plants[d].sp]*m_stage*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T))
         mprob = 1 - exp(-Bm)
 
         # unit test

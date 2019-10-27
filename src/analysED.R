@@ -35,7 +35,8 @@ theme_set(theme_edm())
 #' @param outputsdir The path to the outputs folder, if not default
 #' @param EDdir The path to EDM, if not default
 getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.path("~/model")){
-  
+
+  spp_input <- read.csv(file.path(outputsdir, parentsimID, "sppref.csv"), col_names=TRUE)
   ## initiliaze list to contain outputs 
   ##outdatalist <- list()
   for(repli in repfolder){
@@ -49,7 +50,6 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
                                         sp = col_character(),
                                         kernel = col_character(),
                                         clonality = col_character(),
-                                        seedmass = col_double(),
                                         compartsize = col_double(),
                                         span = col_integer(),
                                         firstflower = col_integer(),
@@ -59,9 +59,6 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
                                         seedon = col_integer(),
                                         seedoff = col_integer(),
                                         bankduration = col_integer(),
-                                        b0grow = col_double(),
-                                        b0germ = col_double(),
-                                        b0mort = col_double(),
                                         age = col_integer(),
                                         leaves = col_double(),
                                         stem = col_double(),
@@ -77,6 +74,9 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
     ## complete and clean table
     outdata <- bind_cols(dplyr::select(outraw, -location), loc)
     rm(loc)
+    ## add colum containing values of seedmass
+    outdat <- outdata%>%
+    	   mutate(seedmas = )
     ## write single files in its folders
     write.csv(outdata,
 	      file.path(repli, paste(parentsimID, "indout.csv", sep = "")), row.names = FALSE)

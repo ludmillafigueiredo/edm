@@ -18,7 +18,6 @@ mutable struct Plant
     kernel::String
     clonality::Bool
     #### Evolvable traits ####
-    seedmass::Float64
     compartsize::Float64
     span::Int64
     firstflower::Int64
@@ -28,9 +27,6 @@ mutable struct Plant
     seedon::Int64
     seedoff::Int64
     bankduration::Int64
-    b0grow::Float64
-    b0germ::Float64
-    b0mort::Float64
     #### State variables ####
     age::Int64 # control death when older than max. lifespan
     mass::Dict{String, Float64}
@@ -90,7 +86,6 @@ SppRef() = SppRef(String[],
 
 # Minimal and maximal trait values, which control microevolution, are stored in `traitranges::TraitRanges`
 mutable struct TraitRanges
-    seedmass::Dict{String,Array{Float64,1}}
     compartsize::Dict{String,Array{Float64,1}}
     span::Dict{String,Array{Int64,1}}
     firstflower::Dict{String,Array{Int64,1}}

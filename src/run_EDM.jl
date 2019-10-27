@@ -231,9 +231,6 @@ function define_traitranges(settings::Dict{String,Any})
 
     traitranges = TraitRanges(
         Dict(spinputtbl[:,:sp_id][i] =>
-             [spinputtbl[:,:seedmass][i], spinputtbl[:,:seedmass][i]]
-             for i in 1:length(spinputtbl[:,:sp_id])),
-        Dict(spinputtbl[:,:sp_id][i] =>
              [spinputtbl[:,:compartsize][i], spinputtbl[:,:compartsize][i]]
              for i in 1:length(spinputtbl[:,:sp_id])),
         Dict(spinputtbl[:,:sp_id][i] =>
@@ -308,7 +305,6 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
                                       plants[o].sp,
                                       plants[o].kernel,
                                       plants[o].clonality,
-                                      plants[o].seedmass,
                                       plants[o].compartsize,
                                       plants[o].span,
                                       plants[o].firstflower,
@@ -318,9 +314,6 @@ function orgstable(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{St
                                       plants[o].seedon,
                                       plants[o].seedoff,
                                       plants[o].bankduration,
-                                      plants[o].b0grow,
-                                      plants[o].b0germ,
-                                      plants[o].b0mort,
                                       plants[o].age,
                                       plants[o].mass["leaves"],
                                       plants[o].mass["stem"],
@@ -514,7 +507,7 @@ function simulate()
     T, mean_annual = updateenv!(1, landpars)
     updatefitness!(sppref, mean_annual, 1.0)
     plants, id_counter = initplants(landavail, sppref, id_counter, settings, K)
-    
+
     # check-points
     println("Land init stored in object of type $(typeof(landpars))")
     println("Sp info stored in object of type $(typeof(sppref))")
@@ -617,7 +610,7 @@ function simulate()
             end
 
             biomass_production = sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))
-           open(joinpath(simresults_folder, "checkpoint.txt"),"a") do sim
+            open(joinpath(simresults_folder, "checkpoint.txt"),"a") do sim
                 writedlm(sim, hcat("Biomass production:", biomass_production))
             end
 
@@ -631,7 +624,7 @@ function simulate()
 
 	    develop!(plants, settings, t)
 
-	    mate!(plants, t, settings, scen, tdist, remaining)
+	    mate!(plants, t, settings, scen, tdist, remaining, sppref)
 
 	    id_counter = mkoffspring!(plants, t, settings, sppref, id_counter, landavail, T, traitranges)
 
@@ -648,6 +641,19 @@ function simulate()
 	    end
         end
     end
+
+# printout sppref
+open("sppref.csv", "w") do ref
+    writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")
+end
+    
+for sp in sppref.sp_id
+    sp_ref = reshape(collect(map(x -> getfield(sppref, x)[sp], fieldnames(SppRef)[2:end])), 1, :)
+    open("sppref.csv", "a") do ref
+        writedlm(ref, [sp sp_ref], ",")
+    end
+end
+
     return settings, results_folder
 end
 
