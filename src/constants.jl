@@ -1,6 +1,3 @@
-# Set up model constants
-# ----------------------
-# Metabolic theory
 const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 const aE = 0.63 #-eV Brown & Sibly MTE book chap 2
 const tK = 273.15 # °C to K converter
@@ -15,16 +12,12 @@ const ALLOC_SEED = 0.05
 const VISITED_DEFAULT = 1
 
 # Dispersal kernels
-const µ_short = 1
-const λ_short = 0.2
-const µ_medium = 0.2
-const λ_medium = 3
-const µ_long = 1000
-const λ_long = 100
+const dispersal_pars = Dict("short" => (mu = 1, lambda = 0.2, factor = 4),
+	       	      "medium" => (mu = 0.2, lambda = 3, factor = 1000),
+		      "long" => (mu = 1000, lambda = 100, factor = 1))
+
 const Q = 5
 const cK = 350.0
 
 # Probability of management
 const manage_prob = 1.0
-
-
