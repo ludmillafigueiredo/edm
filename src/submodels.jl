@@ -1,105 +1,8 @@
-"""
-This module contains the data structures and functions to simulate plants, pollination regimes, and life cycle processes:
-- allocate!(): biomass growth and resource allocation
-- develop!(): maturation of juveniles that have reached their respective age of first flowering
-- mate!(): pollination
-- mkoffsrping!(): seed/clone production
-- getreleases(): find seeds that can be dispersed
-- disperse!(): set new locations for seeds being dispersed
-- establish!(): see if seeds manage to germinate in current location
-- shedd!(): decrease of reproductive biomass at the end of reproductive season, or winter die-back
-- manage!(): decrease of vegetative and reproductive biomass due to mowing
-
-It also contains the data structures and functions for setting up initial environmental conditions, the simulation grid,  and changing it when necessary.
-- LandPars and NeutralLandPars: store landscape dimensions, temperature time-series and time(s) of disturbance
-- landscape_init(): create the initial simulation grid
-- updateenv!(): update weekly temperature and annual mean
-- destroyarea!(): make contiguous area of landscape unsuitable for occupation
-- fragment!(): make non-contiguous area of landscape unsuitable for occupation
-"""
-module submodels
-
 using Distributions
 using DataFrames
 using DataValues
 using StatsBase
 using DelimitedFiles
-using auxfunctions
-using entities
-
-include("constants_globalpars.jl")
-
-export initplants, develop!, allocate!, mate!, mkoffspring!, microevolution!, disperse!, germinate, establish!, survive!, shedflower!, winter_dieback!, manage!, destroyorgs!, getreleases, landscape_init, updateenv!, destroyarea!, fragment!
-
-"""
-    initplants(landavail, sppref,id_counter)
-
-Initialize the organisms with trait values stored in `sppref` and distributes them in the suitable grid-cells in the landscape `landavail`.
-Store the individuals in the `plants` array, which holds all plants simulated at any given time.
-"""
-function initplants(landavail::BitArray{N} where N, sppref::SppRef, id_counter::Int, settings::Dict{String, Any}, K::Float64)
-
-    plants = Plant[]
-
-    for s in sppref.sp_id
-
-        # Niche partitioning: Upon initialization, each species total biomass equals K*fitness_relative, where fitness_relative is the species fitness values relative to the sum of others
-        # The initial abundance is number of medium-sized individuals (50% of maximal biomass) that would sum up to the biomass.
-        sp_abund = Int(round(((sppref.fitness[s]/sum(collect(values(sppref.fitness))))*K)/(0.5*(2*sppref.compartsize[s]+sppref.compartsize[s])), RoundUp))
-
-		open(joinpath(settings["outputat"], string(settings["simID"], "initialabundances.txt")),"a") do sim
-	    println(sim, "Initial abundance of $s: $sp_abund")
-        end
-
-	 XYs = hcat(rand(1:size(landavail,1), sp_abund),
-                    rand(1:size(landavail,2), sp_abund))
-
-	for i in 1:sp_abund
-
-	    id_counter += 1 # update individual counter
-	    minvalue = 1e-7 # Distribution.Uniform requires max > min
-
-	    newplant = Plant(string(id_counter, base=16),
-			      rand(["a" "j" "s"]),
-			      (XYs[i,1],XYs[i,2]),
-			      s,
-			      sppref.kernel[s],
-			      sppref.clonality[s],
-			      sppref.compartsize[s], #compartsize
-			      Int(round(rand(Distributions.Uniform(sppref.span_min[s], sppref.span_max[s] + minvalue),1)[1], RoundUp)),
-			      Int(round(rand(Distributions.Uniform(sppref.firstflower_min[s], sppref.firstflower_max[s] + minvalue),1)[1], RoundUp)),
-			      sppref.floron[s],
-			      sppref.floroff[s],
-			      Int(round(rand(Distributions.Uniform(sppref.seednumber_min[s],sppref.seednumber_max[s] + minvalue),1)[1], RoundUp)),
-			      sppref.seedon[s],
-			      sppref.seedoff[s],
-			      Int(round(rand(Distributions.Uniform(sppref.bankduration_min[s],sppref.bankduration_max[s] + minvalue),1)[1], RoundUp)),
-			      0, #age
-			      Dict("leaves" => 0.0, "stem" => 0.0, "repr" => 0.0, "root" => 0.0),
-			      false)
-
-            ## initial biomass
-	    if newplant.stage == "s"
-		newplant.mass["root"] = sppref.seedmass[newplant.sp]
-		newplant.age = newplant.seedon + 1
-	    elseif newplant.stage == "j"
-		newplant.mass["root"] = sppref.seedmass[newplant.sp]
-		newplant.age = newplant.seedon + 4
-	    elseif newplant.stage in ["a"]
-		newplant.mass["leaves"] = newplant.compartsize^(3/4) * 0.75
-		newplant.mass["stem"] = newplant.compartsize * 0.75
-		newplant.mass["root"] = newplant.compartsize * 0.75
-		newplant.age = newplant.firstflower
-	    else
-		error("Check individual stages.")
-	    end
-
-	    push!(plants, newplant)
-
-	end
-    end
-    return plants, id_counter
-end
 
 """
     allocate!(orgs, t, aE, Boltz, setting, sppref, T)
@@ -155,7 +58,7 @@ end
     develop!(plants, settings, t)
 Juveniles in `plants` older than their age of first flowering at time `t` become adults.
 """
-function develop!(plants::Array{submodels.Plant,1}, settings::Dict{String, Any}, t::Int)
+function develop!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Maturation...")
@@ -177,7 +80,7 @@ end
     mate!(plants, t, setting, scen, tdist, remaining)
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
 """
-function mate!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining, sppref::SppRef)
+function mate!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining, sppref::SppRef)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Pollination ...")
@@ -263,7 +166,7 @@ end
     mkoffspring!()
 After mating happened (marked in `reped`), calculate the amount of offspring each individual produces, both sexually and assexually.
 """
-function mkoffspring!(plants::Array{submodels.Plant,1}, t::Int64, settings::Dict{String, Any},sppref::SppRef, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::submodels.TraitRanges)
+function mkoffspring!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any},sppref::SppRef, id_counter::Int, landavail::BitArray{2}, T::Float64, traitranges::TraitRanges)
 	# check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	println(sim, "Total number of individuals before REPRODUCTION: $length(plants)")
@@ -453,108 +356,67 @@ end
 return id_counter
 end
 
-
-"""
-    getreleases(plants, t)
-Retrieve indexes of seeds that are still at the mother plant who have entered their sowing season at time `t`.
-"""
-function getreleases(plants::Array{submodels.Plant,1}, t::Int)
-    seedsi = findall(x -> x.stage == "s" && x.age == 0 && x.seedon <= rem(t,52) < x.seedoff, plants)
-end
-
 """
     disperse!(landscape, plants, t, seetings, sppref,)
 Seeds are dispersed.
 
 """
-function disperse!(landavail::BitArray{2}, seedsi, plants::Array{submodels.Plant, 1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, landpars::Any, tdist::Any)#submodels.LandPars)}
+function disperse!(landavail::BitArray{2}, plants::Array{Plant, 1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, landpars::Any, tdist::Any)
 
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Dispersing ..."))
     end
 
-    lost = Int64[]
-    justdispersed = String[]
+    lost = 0
+    justdispersed = Plant[]
 
-    for d in seedsi # only seeds that have been released can disperse
+    #separating dispersing individuals facilitates indexing and assigning new field values
+    dispersing = filter(x -> x.stage == "s" &&
+    	       	 	x.age == 0 &&
+			x.seedon <= rem(t,52) < x.seedoff, plants)
+    filter!(x -> !(x.id in getfield.(dispersing, :id)), plants)
+    
+    for kernels in unique(getfield.(dispersing, :kernel))
 
-        if plants[d].kernel == "short"
-	    dist = auxfunctions.lengthtocell(4*(rand(Distributions.InverseGaussian(µ_short, λ_short),1)[1]))
-	elseif plants[d].kernel == "medium"
-	    dist = auxfunctions.lengthtocell(1000*(rand(Distributions.InverseGaussian(µ_medium, λ_medium),1)[1]))
-	elseif plants[d].kernel == "long"
-	    dist = auxfunctions.lengthtocell(rand(Distributions.InverseGaussian(µ_long, λ_long),1)[1])
-	elseif plants[d].kernel in ["medium-short", "short-medium"]
-	    dist = rand([auxfunctions.lengthtocell(4*(rand(Distributions.InverseGaussian(µ_short, λ_short),1)[1])),
-			 auxfunctions.lengthtocell(1000*(rand(Distributions.InverseGaussian(µ_medium, λ_medium),1)[1]))])
-	elseif plants[d].kernel in ["medium-long", "long-medium"]
-	    dist = rand([auxfunctions.lengthtocell(rand(Distributions.InverseGaussian(µ_long, λ_long),1)[1]),
-			 auxfunctions.lengthtocell(1000*(rand(Distributions.InverseGaussian(µ_medium, λ_medium),1)[1]))])
-	elseif plants[d].kernel in ["long-short", "short-long"]
-	    dist = rand([auxfunctions.lengthtocell(4*(rand(Distributions.InverseGaussian(µ_short, λ_short),1)[1])),
-			 auxfunctions.lengthtocell(rand(Distributions.InverseGaussian(µ_long, λ_long),1)[1])])
-	elseif plants[d].kernel == "any"
-	    dist = rand([auxfunctions.lengthtocell(4*(rand(Distributions.InverseGaussian(µ_short, λ_short),1)[1])),
-			auxfunctions.lengthtocell(1000*(rand(Distributions.InverseGaussian(µ_medium, λ_medium),1)[1])),
-			auxfunctions.lengthtocell(rand(Distributions.InverseGaussian(µ_long, λ_long),1)[1])])
-	else
-            # unity test
-	    error("Check dispersal kernel input for species $(plants[d].sp).")
-	end
+    	dispersing_kernel = filter(x -> x.kernel == kernels, dispersing)
+    	
+	locs=[(idx=index,loc=dispersing_kernel[index].location) for index in 1:length(dispersing_kernel)]
 
-	# Find the cell to which it is dispersing
-	θ = rand(Distributions.Uniform(0,2),1)[1]*pi
-	xdest = plants[d].location[1] + dist*round(Int64, cos(θ), RoundNearestTiesAway)
-	ydest = plants[d].location[2] + dist*round(Int64, sin(θ), RoundNearestTiesAway)
+        kernel = rand(split(kernels, "-") |> collect) #some have more than one kernel
+        dists = dispersal_pars[kernel].factor*
+	        rand(InverseGaussian(dispersal_pars[kernel].mu,dispersal_pars[kernel].lambda),length(locs))
+	thetas = rand(Uniform(0,2), length(locs))*pi
 
-	if checkbounds(Bool, landavail, xdest, ydest) && landavail[xdest, ydest] == true  # Check if individual fall inside the habitat area, otherwise, discard it already
-                                                                                          # checking the suitability first would make more sense but cant be done if cell is out of bounds
-	    plants[d].location = (xdest,ydest)
-	    #indexes change when inds get deleted. ID is the only trustworthy way to find them
-	    push!(justdispersed, plants[d].id)
+	newlocs = map(get_dest, locs, dists, thetas)
 
-	else # if the new location is in an unavailable habitat or outside the landscape, the seed dies
-
-	    push!(lost,d)
-	    # check-point of life-history processes
-	    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-		writedlm(sim, hcat(t, "lost in dispersal", plants[d].stage, plants[d].age))
+	lost_idxs = filter(x->x.suitable==false, newlocs) |> x->getfield.(x,:idx)
+	deleteat!(dispersing_kernel, lost_idxs)
+	filter!(x->x.suitable==true, newlocs)
+	
+	setproperty!.(dispersing_kernel, :location, getfield.(newlocs, :dest))
+	append!(justdispersed, dispersing_kernel)
+	
+	# check-point of life-history processes
+	open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+	    for i in length(lost_idxs)
+	        writedlm(sim, hcat(t, "lost in dispersal", "s", 0))
 	    end
 	end
-    end
 
+	lost+=length(lost_idxs)
+	
+    end
+    
     # update who actually dispersed
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-	println(sim, "Number of dispersing: $(length(justdispersed))")
+	println(sim, "Number of successfull dispersals: $(length(justdispersed))")
     end
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	writedlm(sim, hcat("Lost in dispersal:", length(lost)))
     end
-    deleteat!(plants,lost)
-
+    
     return justdispersed
-end
-
-"""
-"""
-function factorized_seedproc(process::String, processing_plants::Array{submodels.Plant,1}, B::Float64, sp::String, plants::Array{submodels.Plant,1})
-
-	prob = 1-exp(-B)
-
-	# unit test
-	if prob < 0
-	    error("$process probability < 0")
-	elseif prob > 1
-	    error("$process probability > 1")
-	end
-
-	processing_sp = filter(x -> x.sp == sp, processing_plants)
-	n_procs = rand(Distributions.Binomial(length(processing_sp), prob))[1]
-
-	ids_procs = sample(getfield.(processing_sp, :id), n_procs)
-	idxs_procs = findall(x -> x.id in ids_procs, plants)
-
-	return idxs_procs
+    
 end
 
 """
@@ -562,13 +424,14 @@ end
 Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish in the grid-cell they are in. Germinated seeds mature to juveniles immediately. Seeds that don't germinate stay in the seedbank.
 
 """
-function establish!(justdispersed, plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64)
+function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T::Float64, biomass_production::Float64, K::Float64)
 
     lost = Int64[]
     Bg = 0
     prob_g = 0
 
-    establishing = filter(x -> (x.id in justdispersed || (x.stage == "s" && x.age >= 1)), plants)
+    establishing = filter(x -> x.stage == "s" && x.age >= 1, plants) |> x -> append!(justdispersed, x) #some young seeds might still be on mother plant
+    filter!(x -> !(x.id in getfield.(establishing,:id)), plants)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	writedlm(sim, hcat("Seeds trying to ESTABLISH:", length(establishing)))
@@ -578,15 +441,12 @@ function establish!(justdispersed, plants::Array{submodels.Plant,1}, t::Int, set
 
     	Bg = sppref.b0germ[sp]*(sppref.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
 
-	germs = factorized_seedproc("germination", establishing, Bg, sp, plants)
-	
-	for g in germs
-        
-	    plants[g].stage = "j"
-	    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-	        writedlm(sim, hcat(t, "germination", plants[g].stage, plants[g].age))
-	    end
-        end
+	germinating_ids = factorized_seedproc("germination", establishing, Bg, sp, plants)
+
+	germinating = filter(x -> x.id in germinating_ids, establishing)
+	filter!(x -> !(x.id in germinating_ids), establishing)
+	setproperty!.(germinating, :stage, "j")
+	append!(plants, germinating)
     end
 end
 
@@ -599,7 +459,7 @@ Both types of mortalities of adults and juveniles are calculated separately (as 
     survive!(plants, t, settings, sppref)
 Calculate seed mortality, factorized for all seeds of a same species.
 """
-function survive!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T)
+function survive!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, sppref::SppRef, T)
     #check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
             writedlm(sim, hcat("Running MORTALITY: ADULTS"))
@@ -625,7 +485,7 @@ function survive!(plants::Array{submodels.Plant,1}, t::Int, settings::Dict{Strin
     
 end
 
-function survive!(plants::Array{submodels.Plant,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, sppref::SppRef, landavail::BitArray{2},T, biomass_production::Float64, dying_stage::String)
+function survive!(plants::Array{Plant,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any}, sppref::SppRef, landavail::BitArray{2},T, biomass_production::Float64, dying_stage::String)
 
     if dying_stage == "a"
         open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
@@ -851,7 +711,7 @@ Plants loose their reproductive biomasses at the end of the reproductive season
  and 50% of biomass during winter.
 
 """
-function shedflower!(plants::Array{submodels.Plant,1}, sppref::SppRef, t::Int, settings::Dict{String,Any})
+function shedflower!(plants::Array{Plant,1}, sppref::SppRef, t::Int, settings::Dict{String,Any})
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         writedlm(sim, hcat("SHEDDING reproductive biomass/ WInter-die back"))
@@ -871,7 +731,7 @@ In the last week of the year, all adult `plants` loose all of the biomass alloca
 and reproductive (`repr`) structures. Biomass allocated to `stem` is decreased by a half, if not 
 already at that value.
 """
-function winter_dieback!(plants::Array{submodels.Plant,1}, t::Int)
+function winter_dieback!(plants::Array{Plant,1}, t::Int)
     adults = findall(x -> (x.stage == "a"), plants)
 
     for a in adults
@@ -886,7 +746,7 @@ end
 Kill organisms that where in the lost habitat cells.
 
 """
-function destroyorgs!(plants::Array{submodels.Plant,1}, landavail::BitArray{2}, settings::Dict{String,Any})
+function destroyorgs!(plants::Array{Plant,1}, landavail::BitArray{2}, settings::Dict{String,Any})
     kills = []
     for o in 1:length(plants)
 	if landavail[plants[o].location...] == false
@@ -903,7 +763,7 @@ end
 Juvenile and adult that are big enough, i.e., above-ground compartments have more than 50% its maximum value, have these compartments reduced to 50% of their biomass.
 Mowing happens at most once a year, between August and September.
 """
-function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
+function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
 
     if management_counter < 1 || 1 == rand(Distributions.Bernoulli(manage_prob))
 
@@ -929,77 +789,6 @@ function manage!(plants::Array{submodels.Plant,1}, t::Int64, management_counter:
         end
     end
     return management_counter
-end
-
-"""
-    landscape_init()
-Create the initial landscape structure.
-"""
-function landscape_init(landpars::LandPars)
-
-    landscape = Array{Dict{String,Float64},2} #if created only inside the loop, remains a local variable
-
-    for p in collect(1:landpars.npatches)
-
-	patch = fill(Dict{String,Float64}(), landpars.plength[p],landpars.plength[p])
-
-	if p == 1
-	    landscape = patch #when empty, landscape cant cat with frag
-	else
-	    landscape = cat(3,landscape, patch)
-	end
-    end
-
-    landavail = fill(true,size(landscape))
-
-    return landscape, landavail
-end
-
-function landscape_init(landpars::NeutralLandPars)
-
-    # convert matrix to BitArray (smaller than Bool)
-    landavail = Bool.(landpars.initialland)
-
-    # create landscape with same dimensions
-    landscape = fill(Dict{String, Float64}(),
-		     size(landavail))
-
-    return landscape, landavail
-
-end
-
-"""
-    updateenv!(landscape,t)
-Update temperature and precipitation values according to the weekly input data (weekly means and ).
-"""
-function updateenv!(t::Int64, landpars::LandPars)
-
-    T = landpars.meantempts[t] + tK
-    if rem(t, 52) == 1
-	mean_annual = mean(landpars.meantempts[t:(t+51)] + tK)
-	#unity test
-	println("Temperature for week $t: $T")
-	println("Mean for the year of week $t: $mean_annual")
-
-	return T, mean_annual
-    else
-	return T
-    end
-end
-
-function updateenv!(t::Int64, landpars::NeutralLandPars)
-
-    T = landpars.meantempts[t] + tK
-    if rem(t, 52) == 1
-	mean_annual = mean(broadcast(+, tK, landpars.meantempts[t:(t+51)]))
-	#unity test
-	println("Temperature for week $t: $T")
-	println("Mean for the year of week $t: $mean_annual")
-
-	return T, mean_annual
-    else
-	return T
-    end
 end
 
 """
@@ -1033,21 +822,21 @@ function destroyarea!(landpars::LandPars, landavail::Array{Bool,2}, settings::Di
 
     elseif settings["landmode"] == "real"
 	# rebuild the landscape according to shape file
-	landscape = Array{Dict{String,Float64}, 2}
+	 landscape = Array{Dict{String,Float64}, 2}
 
 	for frag in collect(1:landpars.nfrags)
 
 	    fragment = fill(Dict{String,Float64}(), landpars.flength[frag],landpars.flength[frag])
 
 	    if frag == 1
-		landscape = fragment #when empty, landscape cant cat with frag
+		 landscape = fragment #when empty, landscape cant cat with frag
 	    else
-		landscape = cat(3,landscape, frag)
+		 landscape = cat(3,landscape, frag)
 	    end
 
 	end
 
-	landavail = fill(true,size(landscape))
+	 landavail = fill(true,size(landscape))
 
     end
 end
@@ -1069,7 +858,7 @@ function destroyarea!(landpars::NeutralLandPars, landavail::BitArray{2}, setting
 
 	# go through landscape indexes of the first n cells from the still available
 	for cell in available[1:lostarea]
-	    landavail[cell] = false # and destroy them
+	     landavail[cell] = false # and destroy them
 	end
 
 	#unity test
@@ -1081,17 +870,34 @@ function destroyarea!(landpars::NeutralLandPars, landavail::BitArray{2}, setting
 	#TODO probably unnecessary
     end
 
-    landscape = fill(Dict{String, Float64}(),
+     landscape = fill(Dict{String, Float64}(),
 		     size(landavail))
 
-    return landscape, landavail
 end
+
+"""
+    disturb!(landscape, landavail, plants, t, settings, landpars, tdist)
+Change landscape structure and metrics according to the simulation scenario (`loss`, habitat loss, or `frag`, fragmentation)
+"""
+function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{2}, plants::Array{Plant,1}, t::Int64, settings::Dict{String,Any}, landpars::NeutralLandPars, tdist::Any)
+
+    if settings["disturbtype"] == "loss"
+         landscape, landavail = destroyarea!(landpars, landavail, settings, t)
+    elseif settings["disturbtype"] == "frag"
+         landscape, landavail = fragment!(landscape, landavail, landpars, t, tdist)
+    end
+
+    destroyorgs!(plants, landavail, settings)
+
+    return landscape,landavail
+end
+
 
 """
     fragment!()
 This function is only called for simulating the fragmentation of an originally single landscape.
 """
-function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::Dict{String,Any}, landpars::LandPars, plants::Array{submodels.Plant,1})
+function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::Dict{String,Any}, landpars::LandPars, plants::Array{Plant,1})
 
     newlandscape = []
 
@@ -1124,8 +930,8 @@ function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::D
 	plants[o].location = newloc
     end
 
-    landscape = newlandscape
-    landavail = fill(true,size(landscape))
+     landscape = newlandscape
+     landavail = fill(true,size(landscape))
 
     return landscape, landavail
 
@@ -1135,19 +941,9 @@ end
 function fragment!(landscape::Array{Dict{String, Float64}, N} where N, landavail::BitArray{2}, landpars::NeutralLandPars, t::Int64, tdist::Any)
 
     # convert matrix to BitArray (smaller than Bool)
-    landavail = Bool.(landpars.disturbland)
+     landavail = Bool.(landpars.disturbland)
     # create landscape with same dimensions
-    landscape = fill(Dict{String, Float64}(),
+     landscape = fill(Dict{String, Float64}(),
 		     size(landavail))
 
-    return landscape, landavail
-end
-
-"""
-    disconnect!()
-Decreases the connectivity of an already fragmented landscape.
-"""
-function disconnect!()
-end
-
-end
+ end

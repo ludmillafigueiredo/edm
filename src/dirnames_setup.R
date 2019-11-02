@@ -10,7 +10,7 @@ if(Sys.info()["user"] == "ludmilla"){
   EDdocsdir <- file.path("/home/luf74xx/Dokumente/model_docs")
   traitsdir <- file.path(EDdocsdir,"functional_types")
 }
-inputsdir <- file.path(EDdir, "inputs")
+inputsdir <- file.path(EDdir, "test_inputs")
 
 if(nreps > 1 | missing(nreps)){
   repfolder <- paste(file.path(outputsdir, parentsimID), 1:nreps, sep = "_"); #parentsimID
