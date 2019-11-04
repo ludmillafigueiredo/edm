@@ -2,6 +2,89 @@
 
 using RCall
 
+function parse_commandline()
+    sets = ArgParseSettings() #object that will be populated with the arguments by the macro
+    @add_arg_table sets begin
+        "--simID"
+        help = "Name of the folder where outputs will be stored."
+        arg_type = String
+        default = "profiling"
+
+        "--nreps"
+        help = "Number of replicates."
+        arg_type = Int64
+        default = 1
+
+        "--rseed"
+        help = "Seed for RNG"
+        arg_type = Int
+        default = 100
+
+        "--outputat"
+        help = "Name of directory where output should be written ."
+        arg_type = String
+        default = "outputs"
+
+        "--spinput"
+        help = "Name of file with species list."
+        arg_type = String
+        default = joinpath("test_inputs", "weisssingles/weissplants_sppinput.csv")
+
+        "--insect"
+        help = "How to explicitly model insects:
+                pollination-independent reproduction \"indep\";
+                equal pollination loss for all species \"equal\"."
+        arg_type = String
+        default = joinpath("test_inputs", "insects_indep.csv")
+
+        "--initialland"
+        help = "Name of file with landscape size values: areas of fragments, mean (and s.d.) temperature."
+        arg_type = String
+        default = joinpath("test_inputs","control_49m2.grd")
+
+        "--disturbtype"
+        help = "Type of environmental disturbance to be implemented: habitat area loss \"loss\", habitat fragmentation \"frag\" or temperature change \"temp\""
+        arg_type = String
+        default = "none"
+
+        "--landmode"
+        help = "Choose between using shape files to simulate the landscape and its change (\"real\") or providing the dimensions of the landscape to be simualted (total area, habitat area, number of habitat patches and distances between patches - \"artificial\")."
+        arg_type = String
+        default = "artif"
+
+        "--landbuffer"
+        help = "Buffer shape file or file containing its area"
+        arg_type = String
+        default = joinpath("inputs", "landbuffer.jl")
+
+        "--disturbland"
+        help = "Either a shape file (if \`landmode\`)"
+        arg_type = Any
+        default = nothing
+
+        "--timesteps"
+        help = "Duration of simulation in weeks."
+        arg_type = Int
+        default = 5200
+
+        "--tout"
+        help = "Frequency of output (number of weeks)"
+        arg_type = Int
+        default = 12
+
+        "--temp_ts"
+        help = "Name of file with weekly temperature  and precipitation time series"
+        arg_type = String
+        default = joinpath("test_inputs", "temp1917_2017.csv")
+
+        "--timemsg"
+        help = "Output timing to terminal, as well as checkpoint"
+        arg_type = Bool
+        default = false
+    end
+    return parse_args(sets)
+end
+
 """
     read_landpars(settings)
 Read, derive and store values related to the environmental conditions: temperature, landscape size, availability, and changes thereof.
@@ -49,7 +132,7 @@ function read_landpars(settings::Dict{String,Any})
             if settings["disturbtype"] == "loss"
                 disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "proportion" => Float64))
             elseif settings["disturbtype"] == "frag"
-                disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("disturbland" => String))
+                disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "disturbland" => String))
             end
             @rput disturbland
 
@@ -86,7 +169,9 @@ function read_landpars(settings::Dict{String,Any})
                                                 temp_tsinput[:,:meantemp])
         end
     else
-        error("Please choose a mode of landscape simulation.")
+        error("Please inform how landscape should be simulated:\n
+               artificially created (artif)\n
+               built from .grd input files (real).")
     end
     return landpars
 end
