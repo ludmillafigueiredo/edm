@@ -52,13 +52,13 @@ end
 
 function output_sppref(sppref)
 	 	# printout sppref
-	open("sppref.csv", "w") do ref
+	open(joinpath(simresults_folder, "sppref.csv"), "w") do ref
             writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")
 	end
     
 	for sp in sppref.sp_id
     	    sp_ref = reshape(collect(map(x -> getfield(sppref, x)[sp], fieldnames(SppRef)[2:end])), 1, :)
-    	    open("sppref.csv", "a") do ref
+    	    open(joinpath(simresults_folder, "sppref.csv"), "a") do ref
                 writedlm(ref, [sp sp_ref], ",")
             end
 	end
