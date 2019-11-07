@@ -236,7 +236,7 @@ end
 
 """
 """
-function factorized_seedproc(process::String, processing_plants::Array{Plant,1}, B::Float64, sp::String, plants::Array{Plant,1})
+function vectorized_seedproc(process::String, processing_plants::Array{Plant,1}, B::Float64, sp::String, plants::Array{Plant,1})
 
 	prob = 1-exp(-B)
 
@@ -250,7 +250,29 @@ function factorized_seedproc(process::String, processing_plants::Array{Plant,1},
 	processing_sp = filter(x -> x.sp == sp, processing_plants)
 	n_procs = rand(Distributions.Binomial(length(processing_sp), prob))[1]
 
-	ids_procs = sample(getfield.(processing_sp, :id), n_procs)
+	ids_procs = sample(getfield.(processing_sp, :id), n_procs) 
 
 	return ids_procs
+end
+
+"""
+mort_prob(plant)
+Calculate mortality probability for a single plant
+"""
+function mort_prob(plant::Plant, T)
+    Bm = B0_MORT*(sum(values(plant.mass))^(-1/4))*exp(-aE/(Boltz*T))
+    mort_prob = 1-exp(-Bm)
+    return mort_prob
+end
+
+"""
+survival(dying)
+Calculate the 
+"""
+function survival(dying::Array{Plant, 1}, T)
+    deaths = map(x -> (id = x.id,
+                       death = rand(Bernoulli(mort_prob(x, T)))), dying)
+    dead_ids = getfield.(filter(x -> x.death == 1, deaths), :id)
+    living_ids = getfield.(filter(x -> x.death == 0, deaths), :id)
+    return dead_ids, living_ids 
 end

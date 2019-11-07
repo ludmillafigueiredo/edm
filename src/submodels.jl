@@ -438,252 +438,140 @@ Density-dependent mortality is calculated for cells with biomass over the grid-c
 Density-dependent mortality is not calculated for seeds. Their density-dependent mortality is calculated alongside adults just for convenience.
 Both types of mortalities of adults and juveniles are calculated separately (as set by `dying_stage`).
     survive!(plants, t, settings, SPP_REFERENCE)
-Calculate seed mortality, factorized for all seeds of a same species.
+Calculate seed mortality, vectorized for all seeds of a same species.
 """
-function survive!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  T)
-    #check-point
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-            writedlm(sim, hcat("Running MORTALITY: ADULTS"))
-    end
-
-    old = findall(x -> (x.stage == "s" && x.age >= x.bankduration), plants)
+function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int64, T::Float64)
+    old = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
     deleteat!(plants, old)
+    
+    dying = filter(x -> x.stage == "s", plants)
+    deaths = 0
+    
+    for sp in unique(getfield.(dying, :sp))
+    	Bm = SEED_MFACTOR*B0_MORT*(SPP_REFERENCE.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
+	death_idxs = vectorized_seedproc("mortality", dying, Bm, sp, plants) |>
+		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
+	deleteat!(plants, death_idxs)
+	deaths += length(death_idxs)
+    end
 
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        writedlm(sim, hcat("Seeds dead on seed-bank:", length(old)))
+        println(sim, "Seeds possibly dying: $(length(dying))")
+	println(sim, "Dead on seed-bank: $(length(old))")
+	println(sim, "Dead metabolic: $(length(deaths))")
     end
 
-    dying = filter(x -> (x.stage == "s" && (rem(t,52) > x.seedoff || x.age > x.seedoff)), plants)
-    
-    for sp in unique(getfield.(dying, :sp))
-
-    	Bm = seed_mfactor*SPP_REFERENCE.b0mort[sp]*(SPP_REFERENCE.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
-
-	morts = factorized_seedproc("mortality", dying, Bm, sp, plants)
-	deleteat!(plants, morts)
-    end
-    
 end
 
-function survive!(plants::Array{Plant,1}, t::Int, cK::Float64, K::Float64, settings::Dict{String, Any},  landavail::BitArray{2},T, biomass_production::Float64, dying_stage::String)
+"""
+die!()
 
-    if dying_stage == "a"
-        open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-            writedlm(sim, hcat("Running MORTALITY: ADULTS"))
-        end
-    elseif dying_stage == "j"
-        open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-            writedlm(sim, hcat("Running MORTALITY: JUVENILES"))
-        end
-    end
+"""
+function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, dying_stage::String)
 
-    # Density-independent mortality
-    # ------------------------------
-    deaths = Int64[]
-    mprob = 0
-    Bm = 0
-    b0mort = 0
-
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        writedlm(sim, hcat("# total: ", length(plants),
-		           "# seeds:", length(findall(x -> x.stage == "s", plants)),
-		           "# juveniles:", length(findall(x -> x.stage == "j", plants)),
-		           "# adults:", length(findall(x -> x.stage == "a", plants)),
-		           "Above-ground vegetative weighing:", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
-    end
-
-    # old ones die
     old = findall( x -> (x.stage == dying_stage && x.age >= x.span), plants)
     deleteat!(plants, old)
 
+    # the rest of the individuals have a metabolic probability of dying.
+    dying = filter(x -> x.stage == dying_stage, plants)
+    filter!(x -> x.stage != dying_stage, plants)
+
+    dead_ids, living_ids = survival(dying, T)
+    dead_idxs = findall(x -> x.id in dead_ids, plants)
+    deleteat!(plants, dead_idxs)
+    living = filter(x -> x.id in living_ids, dying)
+    append!(plants, living)
+    
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        writedlm(sim, hcat("Dying of age:", length(old)))
+        println(sim, "Density-independent mortality: $(length(dead_ids))")
+        println(sim, "$(uppercase(dying_stage)) dying of age: $(length(old))")
     end
 
-    # the rest of the individuals have a metabolic probability of dying. Seeds that are still in the mother plant cant die. If their release season is over, it is certain that they are not anymore, even if they have not germinated
-
-    dying = filter(x -> x.stage == dying_stage, plants)
     
-    for sp in unique(getfield.(dying, :sp))
-    	dying_sp = findall(x -> x.id in getfield.(dying, :sp), plants)
-    	b0mort = SPP_REFERENCE.b0mort[sp]
+end
 
-	for d in dying_sp
-        # stages have different mortality factors
-        if plants[d].stage == "j"
-	    m_stage = juv_mfactor
-        elseif plants[d].stage == "a"
-	    m_stage = adult_mfactor
-        else
-	    error("Error with plant's stage assignment")
-        end
-
-        current_vegmass = plants[d].mass["leaves"] + plants[d].mass["stem"] + plants[d].mass["root"]
-		Bm = b0mort*m_stage*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T))
-        mprob = 1 - exp(-Bm)
-
-        # unit test
-        if mprob < 0
-	    error("mprob < 0")
-	    #mprob = 0
-        elseif mprob > 1
-	    error("mprob > 1")
-        end
-
-        if 1 == rand(Distributions.Bernoulli(mprob))
-	    push!(deaths, d)
-	    # check-points of life history processes and metabolic rates
-	    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-	        writedlm(sim, hcat(t, "death", plants[d].stage, plants[d].age))
-	    end
-	    open(abspath(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt")),"a") do sim
-	        writedlm(sim, hcat(plants[d].stage, plants[d].age, Bm, mprob, "death"))
-	    end
-        end
-    	end
-    
-    end
-
-    deleteat!(plants, deaths) #delete the ones that are already dying due to mortality rate, so that they won't cramp up density-dependent mortality
-    # check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-        println(sim, "Density-independent mortality: ", length(deaths))
-    end
-
-    # Density-dependent mortality
-    # ---------------------------
-    deaths = Int64[] # reset before calculating density-dependent mortality
-    
-    # check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	println(sim, "Production before density-dependent mortality: $(sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001)))g; K = $K")
-    end
+function compete_die!(plants::Array{Plant,1}, t::Int, cK::Float64, settings::Dict{String, Any},  landavail::BitArray{2}, T, dying_stage::String)
 
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	writedlm(sim, hcat("# seeds:", length(findall(x -> x.stage == "s", plants)),
-		           "# juveniles:", length(findall(x -> x.stage == "j", plants)),
-		           "# adults:", length(findall(x -> x.stage == "a", plants)),
-		           " Above-ground vegetative weighing:", sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))))
+        println(sim, "Above-ground biomass after density-dependent mortality:\n$(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
+	filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
     end
-
-    # biomass of both juveniles and adults is used as criteria for production > K
+    # biomass of both juveniles and adults is used as criteria for check if  production > K
     # but only only stage dies at each timestep
-    biomass_plants = filter(x -> x.stage in ["j" "a"], plants) 
+    production_plants = filter(x -> x.stage in ["j" "a"], plants) 
 
-        # get coordinates of all occupied cells
-	locs = getfield.(biomass_plants, :location)
-	fullcells_indxs = findall(nonunique(DataFrame(hcat(locs))))
+    # get coordinates of all occupied cells
+    locs = getfield.(production_plants, :location)
+    fullcells_indxs = findall(nonunique(DataFrame(hcat(locs))))
 
-        if length(fullcells_indxs) > 0
+    if length(fullcells_indxs) > 0
 
-            # check-point
-            open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	        println(sim, "Number of shared cells: $(length(unique(locs[fullcells_indxs])))")
-            end
+       # check-point
+       open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+           println(sim, "Number of shared cells: $(length(unique(locs[fullcells_indxs])))")
+       end
 
 	    for loc in unique(locs[fullcells_indxs])
 
 		#find plants that are in the same grid
-		plants_samecell = filter(x -> x.location == loc, biomass_plants)
+		plants_cell = filter(x -> x.location == loc, production_plants)
 
-		while sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants_samecell),0.00001)) > cK
+		# get fitness of all species in the cell to simulate local competition
+                sppcell_fitness = Dict(sp => SPP_REFERENCE.fitness[sp]
+		    		      	   for sp in unique(getfield.(plants_cell, :sp)))
 
-		# check-point
-            	open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	            println(sim, "Biomass in samecell $loc  with $(length(plants_samecell)) inds BEFORE dens-dep mort: 
-		                  $(sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants_samecell),0.00001)))")
-            	end
-		
-		    # get fitness of all species that are in the cell
-                    sppgrid_fitness = Dict(sp => sppref.fitness[sp] for sp in unique(getfield.(plants_samecell, :sp)))
+		if sum(vcat(map(x->sum(values(x.mass))-x.mass["root"],plants_cell),NOT_0)) > cK
 
-		    # check-point
-            	    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	                 println(sim, "Sps sharing cell: $(keys(sppgrid_fitness)).")
-            	    end
-		    
-		    # the species in the dictionnaries are over their respective cell
-		    # carrying capacity, i.e., individuals must die. Therefore,
-		    # loop through all species in the dictionary, killing accordingly.
+		    for sp in keys(sppcell_fitness)
 
-		    for sp in keys(sppgrid_fitness)
+                       	cK_sp = cK * (sppcell_fitness[sp]/sum(collect(values(sppcell_fitness))))
 
-                       	cK_sp = cK * (sppgrid_fitness[sp]/sum(collect(values(sppgrid_fitness))))
+			prodplants_cell = filter(x -> x.stage in ["j", "a"] &&
+					  	      x.sp == sp &&
+						      x.location == loc,
+					  	 plants)
 
-			# get individuals of sp in the current cell
-                        plantssp_samecell = filter(x -> x.sp == sp, plants_samecell)
-			    
-                        # unit test
-                        if (length(filter(x -> x.stage == "j", plantssp_samecell)) == 0 &&
-                            length(filter(x -> x.stage == "a", plantssp_samecell)) == 0)
-			    error("Cell carrying capacity overboard, but no juveniles or adults of $sp were detected")
-		        end
-			if(length(filter(x -> x.stage == "s", plantssp_samecell)) > 0)
-			    error("Seeds being detected for density-dependent mortality")
-		 	end
+			prodsp_cell = sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],prodplants_cell),NOT_0))
+			
+			if prodsp_cell > cK_sp
 
-                        dying_plants = filter(x -> x.stage == dying_stage, plantssp_samecell)
+			   dying_plants = filter(x -> x.stage == dying_stage && x.sp == sp, plants_cell)
+			   # order inds so smaller can be killed first with pop!()
+                           dying_sorted = sort(dying_plants,
+					       by = x -> sum(values(x.mass)), rev = true)
 
-                      	while (sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plantssp_samecell), 0.00001)) > cK_sp && length(dying_plants) > 0)
+			   dying = Plant[]
+			   while (prodsp_cell > cK_sp && length(dying_sorted) > 0)
+			       # kill smallest
+			       push!(dying, pop!(dying_sorted))
 
-			    # check-point
-            		    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	            	        println(sim, "Killing $sp inside grid-cell.")
-            		    end
-			    
-                            # loop through smaller individuals (size instead of age, to keep things at a metabolic base)
-                            masses = map(x -> (x.mass["leaves"]+x.mass["stem"]+x.mass["root"]), dying_plants)
-		            dying = filter(x -> (x.mass["leaves"]+x.mass["stem"]+x.mass["root"]) == minimum(masses),
-			    	    	   dying_plants)[1] #only one can be tracked down and killed at a time
-					   		    #it is not possible to order `plants` by any field value
+			       #update controls of while loop
+			       prodplants_cell = filter(x -> x.stage in ["j", "a"] &&
+			       		       	 	     x.sp == sp &&
+							     x.location == loc,
+					  	        plants)
+			       prodsp_cell = sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],prodplants_cell),NOT_0))
+                           end
 
-                            o = findall(x -> x.id == dying.id, plants)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by findall()
-
-			    # check-point
- 			    open(abspath(joinpath(settings["outputat"],settings["simID"],"eventslog.txt")),"a") do sim
-		                writedlm(sim, hcat(t, "death-K-gridcell", plants[o].stage, plants[o].age))
-                    	    end
-
-			    deleteat!(plants, o)
-
-			    # update control of while-loop
-                            o_cell = findall(x -> x.id == dying.id, plantssp_samecell)[1] #selecting "first" element changes the format into Int64, instead of native Array format returned by findall()
-                    	    deleteat!(plantssp_samecell, o_cell)
-                            dying_plants = filter(x -> x.stage == dying_stage, plantssp_samecell)
+			   dying_idxs = findall(x -> x.id in getfield.(dying, :id), plants)
+			   deleteat!(plants, dying_idxs)
 
                         end
-                    end
 
-		    # update of control of while-loop
-		    biomass_plants = filter(x -> x.stage in ("j", "a"), plants)
-       		    plants_samecell = filter(x -> x.location == loc, biomass_plants)
-		    # check-point
-            	    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	                 println(sim, "Biomass in samecell $loc with $(length(plants_samecell)) inds AFTER dens-dep mort: 
-		                  $(sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants_samecell),0.00001)))")
                     end
                 end
             end
     end
 
-# check-point
-open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-    println(sim, "Above-ground biomass after density-dependent mortality: $(sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001)))g; K = $K")
-end
-
-## Surviving ones get older: refilter, because some plants got deleted
-if dying_stage == "a"
-        surviving = findall(x -> ((x.stage == "s" && (rem(t,52) > x.seedoff || x.age > x.seedoff)) || x.stage == dying_stage), plants)
-    else
-        surviving = findall(x -> x.stage == dying_stage, plants) # mortality function is run twice, focusing on juveniles or adults; it can only run once each, so seeds go with adults
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+        println(sim, "Above-ground biomass after density-dependent mortality:\n$(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
+	filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
     end
-for s in surviving
-    plants[s].age += 1
-end
-
+    
 end
 
 """

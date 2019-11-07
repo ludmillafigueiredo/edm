@@ -50,29 +50,34 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
                 writedlm(sim, hcat("Biomass production:", biomass_production))
             end
 
-	    survive!(plants, t, settings,  T)
-	    
-            allocate!(plants, t, aE, Boltz, settings,  T, biomass_production, K, "a")
-            survive!(plants, t, cK, K, settings,  landavail, T, biomass_production, "a")
+	    die_seeds!(plants, settings, T)
 
+	    # Adults growth and mortality
+            allocate!(plants, t, aE, Boltz, settings,  T, biomass_production, K, "a")
+            die!(plants, settings, T, "a")
+	    compete_die!(plants, t, cK, K, settings,  landavail, T, biomass_production, "a")
+	    
+	    # Juvenile growth and mortality 
 	    allocate!(plants, t, aE, Boltz, settings,  T, biomass_production, K, "j")
-            survive!(plants, t, cK, K, settings,  landavail, T, biomass_production, "j")
+            die!(plants, settings, T, "j")
+	    compete_die!(plants, t, cK, settings, landavail, T, "j")
+	    
+	    setfield!(plants, :age, +(1)) # surviving get older
 
 	    develop!(plants, settings, t)
 
 	    mate!(plants, t, settings, scen, tdist, remaining, sppref)
 
+	    # Offspring production
 	    id_counter = mkseeds!(plants, t, settings,  id_counter, landavail, T)
-
 	    id_counter = clone!(plants)
 
-	    # plant will only produce seeds again if it gets pollinated
-	    setfield!.(plants, :mated, false)
-	    
+	    setfield!.(plants, :mated, false) # plant only produces seeds again if it gets pollinated
+
 	    justdispersed = disperse!(landavail, plants, t, settings,  landpars, tdist)
 
 	    establish!(justdispersed, plants, t, settings,  T, biomass_production, K)
-
+	    
 	    shedflower!(plants, t, settings)
 
 	    if (rem(t,52) == 51)

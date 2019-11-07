@@ -2,9 +2,10 @@ const Boltz = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 const aE = 0.63 #-eV Brown & Sibly MTE book chap 2
 const tK = 273.15 # °C to K converter
 # These factors adapt the base mortality rates to the developmental stage of the individual. They were defined through a study of the rates yielded by the metabolic theory for species in the Goettingen list
-const seed_mfactor = 15
-const juv_mfactor = 1
-const adult_mfactor = 1
+const SEED_MFACTOR = 15
+
+const B0_GERM = 141363714.221475
+const B0_MORT = 1113239249.49412
 
 const EVOLVABLE_TRAITS = [:compartsize, :span, :firstflower, :floron, :floroff,
       		       	  :seednumber, :seedon, :seedoff, :bankduraiton]
