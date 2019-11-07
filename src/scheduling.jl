@@ -2,7 +2,7 @@
     simulate!()
 Run all functions
 """
-function run_scheduling(settings, tdist, id_counter, management_counter, landpars, sppref, traitranges, interaction, scen, remaining, K, T, mean_annual, plants)
+function run_scheduling(settings, tdist, id_counter, management_counter, landpars, interaction, scen, remaining, K, T, mean_annual, plants)
 
     Random.seed!(settings["rseed"])
     
@@ -37,7 +37,7 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
 	            T = setenv!(t, landpars)
 	        end
 
-            updatefitness!(sppref, mean_annual, 1.0, t, settings)
+            updatefitness!(mean_annual, 1.0, t, settings)
 
             write_output(plants,t,settings)
 
@@ -50,25 +50,30 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
                 writedlm(sim, hcat("Biomass production:", biomass_production))
             end
 
-	    survive!(plants, t, settings, sppref, T)
+	    survive!(plants, t, settings,  T)
 	    
-            allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "a")
-            survive!(plants, t, cK, K, settings, sppref, landavail, T, biomass_production, "a")
+            allocate!(plants, t, aE, Boltz, settings,  T, biomass_production, K, "a")
+            survive!(plants, t, cK, K, settings,  landavail, T, biomass_production, "a")
 
-	    allocate!(plants, t, aE, Boltz, settings, sppref, T, biomass_production, K, "j")
-            survive!(plants, t, cK, K, settings, sppref, landavail, T, biomass_production, "j")
+	    allocate!(plants, t, aE, Boltz, settings,  T, biomass_production, K, "j")
+            survive!(plants, t, cK, K, settings,  landavail, T, biomass_production, "j")
 
 	    develop!(plants, settings, t)
 
 	    mate!(plants, t, settings, scen, tdist, remaining, sppref)
 
-	    id_counter = mkoffspring!(plants, t, settings, sppref, id_counter, landavail, T, traitranges)
+	    id_counter = mkseeds!(plants, t, settings,  id_counter, landavail, T)
 
-	    justdispersed = disperse!(landavail, plants, t, settings, sppref, landpars, tdist)
+	    id_counter = clone!(plants)
 
-	    establish!(justdispersed, plants, t, settings, sppref, T, biomass_production, K)
+	    # plant will only produce seeds again if it gets pollinated
+	    setfield!.(plants, :mated, false)
+	    
+	    justdispersed = disperse!(landavail, plants, t, settings,  landpars, tdist)
 
-	    shedflower!(plants, sppref, t, settings)
+	    establish!(justdispersed, plants, t, settings,  T, biomass_production, K)
+
+	    shedflower!(plants, t, settings)
 
 	    if (rem(t,52) == 51)
 	       winter_dieback!(plants, t)

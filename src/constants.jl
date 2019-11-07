@@ -6,6 +6,14 @@ const seed_mfactor = 15
 const juv_mfactor = 1
 const adult_mfactor = 1
 
+const EVOLVABLE_TRAITS = [:compartsize, :span, :firstflower, :floron, :floroff,
+      		       	  :seednumber, :seedon, :seedoff, :bankduraiton]
+
+# SPP_REFERENCE and TRAIT RANGES are also contants, but are input-dependent.
+# Therefore, there are initialized in initialisation.jl.
+
+# minimal values to avoid errors in sum() and Normal()
+NOT_0 = 1e-7
 # proportion of reproductive mass allocated to seed production
 const ALLOC_SEED = 0.05
 # default proportion of visited plants

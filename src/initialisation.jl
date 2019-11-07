@@ -159,8 +159,8 @@ id_counter = 0
 management_counter = 0
 
 landpars = read_landpars(settings)
-sppref = read_spinput(settings)
-traitranges = define_traitranges(settings)
+const SPP_REFERENCE = read_spspinput(settings)
+const TRAIT_RANGES = define_traitranges(settings)
 interaction, scen, remaining = read_insects(settings)
 global mylandscape, landavail = init_landscape(landpars)
 K = init_K(landavail, settings, 1)
