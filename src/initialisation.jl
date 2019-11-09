@@ -141,6 +141,13 @@ function init_plants(landavail::BitArray{N} where N, SPP_REFERENCE::SppRef, id_c
 	    push!(plants, newplant)
 
 	end
+
+    open(joinpath(settings["outputat"], string(settings["simID"], "initialabundances.txt")),"a") do sim
+        println(sim, "Seeds of $s: $(length(findall(x -> x.sp == s && x.stage == "s", plants)))")
+	println(sim, "Juveniles of $s: $(length(findall(x -> x.sp == s && x.stage == "j", plants)))")
+	println(sim, "Adults of $s: $(length(findall(x -> x.sp == s && x.stage == "a", plants)))")
+    end
+	
     end
     return plants, id_counter
 end
