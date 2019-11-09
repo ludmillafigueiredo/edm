@@ -27,8 +27,10 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
 
             # APPLY LANDSCAPE DISTURBANCE
             if settings["disturbtype"] in ["frag" "loss"] && t in tdist
-                global mylandscape, landscape = disturb!(mylandscape,landavail,plants,t,settings,landpars,tdist)
+                global mylandscape, landscape = disturb!(mylandscape,landavail,plants,t,
+						         settings,landpars,tdist)
             end
+	    
             updateK!(K, landavail, settings, t, tdist)
 
 	        if rem(t, 52) == 1
