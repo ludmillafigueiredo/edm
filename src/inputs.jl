@@ -177,10 +177,10 @@ function read_landpars(settings::Dict{String,Any})
 end
 
 """
-    read_spinput(settings)
+    read_sppinput(settings)
 Reads in species trait values (min. and max. values for the evolvable ones). Stores them in `sppref`, a structure with parameters as Dictionnary fields, where species names are the keys to the parameter values.
 """
-function read_spinput(settings::Dict{String,Any})
+function read_sppinput(settings::Dict{String,Any})
 
     spinputtbl = CSV.read(settings["spinput"])
 
