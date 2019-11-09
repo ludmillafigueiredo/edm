@@ -45,35 +45,39 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
                 management_counter = manage!(plants, t, management_counter, settings)
             end
 
-            biomass_production = sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]), plants), 0.00001))
+            biomass_production = sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]),plants),NOT_0))
             open(joinpath(simresults_folder, "checkpoint.txt"),"a") do sim
-                writedlm(sim, hcat("Biomass production:", biomass_production))
+                println(sim, "Biomass production: $biomass_production")
             end
 
-	    die_seeds!(plants, settings, T)
+	    die_seeds!(plants, settings, t, T)
 
 	    # Adults growth and mortality
-            allocate!(plants, t, aE, Boltz, settings,  T, biomass_production, K, "a")
+            allocate!(plants, t, aE, Boltz, settings, T, biomass_production, K, "a")
             die!(plants, settings, T, "a")
-	    compete_die!(plants, t, cK, K, settings,  landavail, T, biomass_production, "a")
+	    compete_die!(plants, t, cK, settings, landavail, T, "a")
 	    
 	    # Juvenile growth and mortality 
-	    allocate!(plants, t, aE, Boltz, settings,  T, biomass_production, K, "j")
+	    allocate!(plants, t, aE, Boltz, settings, T, biomass_production, K, "j")
             die!(plants, settings, T, "j")
 	    compete_die!(plants, t, cK, settings, landavail, T, "j")
-	    
-	    setfield!(plants, :age, +(1)) # surviving get older
 
+	    # all individuals except seeds in flowers get older over time
+	    s_flower = filter(x -> x.stage == "s-in-flower", plants)
+	    filter!(x -> x.stage != "s-in-flower", plants)
+	    setfield!.(plants, :age, +(1)) # surviving get older
+	    append!(plants, s_flower)
+	    
 	    develop!(plants, settings, t)
 
-	    mate!(plants, t, settings, scen, tdist, remaining, sppref)
+	    mate!(plants, t, settings, scen, tdist, remaining)
 
 	    # Offspring production
-	    id_counter = mkseeds!(plants, t, settings,  id_counter, landavail, T)
-	    id_counter = clone!(plants)
+	    id_counter = mkseeds!(plants, settings, id_counter, T, t)
+	    id_counter = clone!(plants, settings, id_counter)
 
 	    setfield!.(plants, :mated, false) # plant only produces seeds again if it gets pollinated
-
+	    
 	    justdispersed = disperse!(landavail, plants, t, settings,  landpars, tdist)
 
 	    establish!(justdispersed, plants, t, settings,  T, biomass_production, K)
