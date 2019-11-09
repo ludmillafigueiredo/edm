@@ -86,7 +86,9 @@ function mate!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, scen
         println(sim, "Pollination ...")
     end
 
-    ready = findall(x-> x.stage == "a" && x.mass["repr"] > SPP_REFERENCE.seedmass[x.sp], plants)
+    ready = findall(x-> x.stage == "a" &&
+    	    	    x.mass["repr"] > SPP_REFERENCE.seedmass[x.sp],
+		    plants)
     pollinated = []
     npoll = 0
 
@@ -163,10 +165,38 @@ function mate!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, scen
 end
 
 """
+microevolve!()
+"""
+function microevolve!(seed::Plant, fert::Plant, partner::Plant)
+
+for trait in EVOLVABLE_TRAITS
+
+    # Calculate microevolution
+    # ------------------------
+    new_traitvalue = mean([getfield(seed, trait), getfield(partner, trait)]) +
+    		     rand(Normal(0, (abs(getfield(seed, trait)-getfield(partner, trait))+NOT_0)/6))[1]
+    if trait != :compartsize
+       new_traitvalue = Int(round(new_traitvalue, RoundUp))
+    end
+       
+    # Constrain microevolution
+    # ------------------------
+    if new_traitvalue < getfield(TRAIT_RANGES, trait)[seed.sp][1]
+       new_traitvalue = getfield(TRAIT_RANGES, trait)[seed.sp][1]
+    elseif new_traitvalue > getfield(TRAIT_RANGES, trait)[seed.sp][end]
+       new_traitvalue = getfield(TRAIT_RANGES, trait)[seed.sp][end]
+    end   
+
+    setfield!(seed, trait, new_traitvalue)
+
+end
+end
+
+"""
     mkseeds!()
 After mating happened (marked in `reped`), calculate the amount of offspring each individual produces, both sexually and assexually.
 """
-function mkseeds!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, id_counter::Int, landavail::BitArray{2}, T::Float64)
+function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counter::Int, T::Float64, t::Int64)
 
     # counters to keep track of offspring production
     seed_counter = 0
@@ -181,7 +211,7 @@ function mkseeds!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any},
     
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Total number of individuals before REPRODUCTION: $length(plants)")
+        println(sim, "Total number of individuals before REPRODUCTION: $(length(plants))")
    	println(sim,
 	"$(length(ferts)) fertilized in $(length(findall(x -> x.stage == "a", plants))) adults")
     end
@@ -201,9 +231,8 @@ function mkseeds!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any},
 	
 	    offs = div(ALLOC_SEED*plants[s].mass["repr"], seedmass)
 	    
-	    if offs <= 0
-		continue
-	    else
+	    if offs > 0
+		
 		# limit offspring production to the maximal number of seeds the species can produce
 		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
 
@@ -218,26 +247,16 @@ function mkseeds!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any},
                 for n in 1:offs
 
 		    id_counter += 1
-
 		    seed = deepcopy(plants[s])
 		    seed_counter += 1
-
-		    # unit test
-		    for f in fieldnames(typeof(seed))
-			if typeof(getfield(seed, f)) in [Int64 Float64]
-			    if getfield(seed, f) < 0 || getfield(seed, f) == Inf
-				error(f, " has value: ", getfield(seed, f), "Ind: ", seed.id, "sp: ", seed.sp)
-			    end
-			end
-		    end
-
-                    # reassign state variables that dont evolve
+		    
+		    # reassign state variables that dont evolve
 		    seed.id = string(id_counter, base = 16)
 		    seed.mass = Dict("leaves" => 0.0,
 		                     "stem" => 0.0,
 				     "root" => seedmass,
 				     "repr" => 0.0)
-                    seed.stage = "s"
+                    seed.stage = "s-in-flower"
                     seed.age = 0
                     seed.mated = false
 
@@ -263,39 +282,10 @@ function mkseeds!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any},
 end
 
 """
-microevolve!()
-"""
-function microevolve!(seed::Plant, fert::Plant, partner::Plant)
-
-for trait in EVOLVABLE_TRAITS
-
-    # Calculate microevolution
-    # ------------------------
-    new_traitvalue = mean([getfield(seed, trait), getfield(partner, trait)]) +
-    		     rand(Normal(0, (abs(getfield(seed, trait)-getfield(partner, trait))+NOT_0)/6)[1]
-    if trait == :compartsize
-       new_traitvalue = Int(round(new_traitvalue, RoundUp))
-    end
-       
-    # Constrain microevolution
-    # ------------------------
-    if new_traitvalue < getfield(TRAIT_RANGES, :trait)[seed.sp][1]
-       new_traitvalue = getfield(TRAIT_RANGES, :trait)[seed.sp][1]
-    end
-    if new_traitvalue > getfield(TRAIT_RANGES, :trait)[seed.sp][end]
-       new_traitvalue = getfield(TRAIT_RANGES, :trait)[seed.sp][end]
-    end   
-
-    setfield!(seed, trait, new_traitvalue)
-
-end
-end
-
-"""
 clone!()
 Asexual reproduction.
 """
-function clone!(plants)
+function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter::Int64)
 
     asexuals = filter(x -> x.mated == false && x.clonality == true && x.mass["repr"] > SPP_REFERENCE.seedmass[x.sp], plants)
 
@@ -340,9 +330,9 @@ end
 """
     disperse!(landscape, plants, t, seetings, SPP_REFERENCE,)
 Seeds are dispersed.
-
+`get_dest` is defined in `auxiliary.jl`
 """
-function disperse!(landavail::BitArray{2}, plants::Array{Plant, 1}, t::Int, settings::Dict{String, Any},  landpars::Any, tdist::Any)
+function disperse!(landavail::BitArray{2},plants::Array{Plant, 1},t::Int,settings::Dict{String, Any},landpars::Any, tdist::Any)
 
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Dispersing ..."))
