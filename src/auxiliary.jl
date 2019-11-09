@@ -168,17 +168,17 @@ Fitness is updated every begining of the year, with mean temperature for the yea
 - `mean_opt::Float64`: parameter `b` is the position of the center of the peak.
 - `std_tol::Float64`: parameter `c` is the standard deviation,
 """
-function updatefitness!(sppref::SppRef, mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Dict{String, Any})
-    for sp in sppref.sp_id
+function updatefitness!(mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Dict{String, Any})
+    for sp in SPP_REFERENCE.sp_id
 
-        mean_opt = sppref.temp_opt[sp]
-        std_tol = sppref.temp_tol[sp]
+        mean_opt = SPP_REFERENCE.temp_opt[sp]
+        std_tol = SPP_REFERENCE.temp_tol[sp]
 
         absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
-        sppref.fitness[sp] = absolute_fitness
+        SPP_REFERENCE.fitness[sp] = absolute_fitness
     end
     open(joinpath(settings["outputat"], settings["simID"], "spp_fitness.csv"),"a") do fitnessfile
-    	writedlm(fitnessfile, hcat(t, sp, get(sppref.fitness, sp, "NA")) for sp in collect(keys(sppref.fitness)))
+    	writedlm(fitnessfile, hcat(t, sp, get(SPP_REFERENCE.fitness, sp, "NA")) for sp in collect(keys(SPP_REFERENCE.fitness)))
     end
 end
 
