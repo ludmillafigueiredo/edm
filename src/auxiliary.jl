@@ -236,7 +236,7 @@ end
 
 """
 """
-function vectorized_seedproc(process::String, processing_plants::Array{Plant,1}, B::Float64, sp::String, plants::Array{Plant,1})
+function vectorized_seedproc(process::String, processing_sp::Array{Plant,1}, B::Float64)
 
 	prob = 1-exp(-B)
 
@@ -247,12 +247,12 @@ function vectorized_seedproc(process::String, processing_plants::Array{Plant,1},
 	    error("$process probability > 1")
 	end
 
-	processing_sp = filter(x -> x.sp == sp, processing_plants)
 	n_procs = rand(Distributions.Binomial(length(processing_sp), prob))[1]
 
 	ids_procs = sample(getfield.(processing_sp, :id), n_procs) 
 
-	return ids_procs
+	return ids_procs # return ids and not indexes because germination uses ids,
+	       		 # and mortality uses indexes
 end
 
 """

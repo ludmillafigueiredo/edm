@@ -440,8 +440,9 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
     deaths = 0
     
     for sp in unique(getfield.(dying, :sp))
+    	dying_sp = filter(x -> x.sp == "sp", plants)
     	Bm = SEED_MFACTOR*B0_MORT*(SPP_REFERENCE.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
-	death_idxs = vectorized_seedproc("mortality", dying, Bm, sp, plants) |>
+	death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |>
 		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
 	deleteat!(plants, death_idxs)
 	deaths += length(death_idxs)
