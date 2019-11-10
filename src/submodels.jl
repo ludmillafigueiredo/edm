@@ -393,32 +393,34 @@ end
 """
     establish!
 Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish in the grid-cell they are in. Germinated seeds mature to juveniles immediately. Seeds that don't germinate stay in the seedbank.
-
 """
 function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  T::Float64, biomass_production::Float64, K::Float64)
 
-    lost = Int64[]
-    Bg = 0
-    prob_g = 0
-
-    establishing = filter(x -> x.stage == "s" && x.age >= 1, plants) |> x -> append!(justdispersed, x) #some young seeds might still be on mother plant
+    # seeds that just dispersed try to establish and the ones that did not succeed previously
+    # will get a chance again.
+    establishing = filter(x -> x.stage == "s", plants) |> x -> append!(justdispersed, x)
     filter!(x -> !(x.id in getfield.(establishing,:id)), plants)
+    
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-	writedlm(sim, hcat("Seeds trying to ESTABLISH:", length(establishing)))
+	writedlm(sim, hcat("Seeds trying to establish:", length(establishing)))
     end
     
     for sp in unique(getfield.(establishing, :sp))
 
-    	Bg = SPP_REFERENCE.b0germ[sp]*(SPP_REFERENCE.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
-
-	germinating_ids = factorized_seedproc("germination", establishing, Bg, sp, plants)
-
-	germinating = filter(x -> x.id in germinating_ids, establishing)
+    	establishing_sp = filter(x->x.sp==sp, establishing)
+	filter!(x->x.sp!=sp, establishing)
+	
+    	Bg = B0_GERM*(SPP_REFERENCE.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
+	
+	germinated_ids = vectorized_seedproc("germination", establishing_sp, Bg)
+	germinated = filter(x -> x.id in germinated_ids, establishing_sp)
+	setproperty!.(germinated, :stage, "j")
+	append!(plants, germinated)
+	# update the seeds that did not germinate and will go back into the main vector
 	filter!(x -> !(x.id in germinating_ids), establishing)
-	setproperty!.(germinating, :stage, "j")
-	append!(plants, germinating)
     end
+    append!(plants, establishing)	
 end
 
 """
