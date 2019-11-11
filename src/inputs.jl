@@ -90,17 +90,18 @@ end
 Read, derive and store values related to the environmental conditions: temperature, landscape size, availability, and changes thereof.
 """
 function read_landpars(settings::Dict{String,Any})
+
     # Temperature time-series
     temp_tsinput = CSV.read(settings["temp_ts"])
 
     # Landscape is built differently, depending on the mode of simulation
-    if settings["landmode"] == "real" # simulation arena is built based on raster files, which are analysed in R
+    if settings["landmode"] == "real" # simulation arena is built from files, which are analysed in R
 
         # send file paths to R
         initialland = settings["initialland"]
         @rput initialland
         # disturbland file contains time of habitat destruction and the raster file representing it afterwards
-        disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "disturbland" => Any))[:disturbland]
+        disturbland = CSV.read(settings["disturbland"],header=true,types=Dict("td"=>Int64,"disturbland"=>Any))[:disturbland]
         @rput disturbland
         # buffer area
         landbuffer = settings["landbuffer"]
@@ -120,7 +121,7 @@ function read_landpars(settings::Dict{String,Any})
                                      landconfig[[8]],
                                      temp_tsinput[:,:meantemp])
 
-    elseif settings["landmode"] == "artif" # simulation arena is built from a neutral landscape
+    elseif settings["landmode"] == "artif"
 
         if settings["disturbtype"] in ["frag" "loss"]
 
@@ -137,22 +138,25 @@ function read_landpars(settings::Dict{String,Any})
             @rput disturbland
 
             # get 0-1 habitat suitability matrices
-            landconfig = rcopy(Array{Any}, reval(string("source(\"",joinpath(EDMdir,"landconfig.R"),"\")")))
+            landconfig = rcopy(Array{Any}, reval(string("source(\"",joinpath(EDMdir,"landnlmconfig.R"),"\")")))
             @rget initialmatrix
             @rget disturbmatrix
 
-            # if fragmentation is simulated, the file names are assgined to dist field, if area loss, the proportion holding columns, if none, default value nothing
+            # if fragmentation is simulated, the file names are assgined to dist field
+	    # if area loss is simulated, the proportion of loss, if none, default value nothing
             if disturbmatrix == "notfrag"
                 landpars = NeutralLandPars(Int.(initialmatrix),
-                                                    disturbland,
-                                                    temp_tsinput[:,:meantemp])
+					   disturbland[:,:proportion],
+					   temp_tsinput[:,:meantemp])
             else
                 landpars = NeutralLandPars(Int.(initialmatrix),
-                                                    Int.(disturbmatrix),
-                                                    temp_tsinput[:,:meantemp])
+				           Int.(disturbmatrix),
+					   temp_tsinput[:,:meantemp])
             end
             #TODO block above can handle pollination
+	    
         else
+	
             # send file names to R
             initialland = settings["initialland"]
             @rput initialland
