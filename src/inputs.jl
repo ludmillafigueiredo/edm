@@ -258,28 +258,20 @@ function read_insects(settings::Dict{String,Any})
 end
 
 """
-    loaddisturbance()
-Store parameters necessary to implement disturbance.
+    set_tdist()
+Set disturbance time(s).
 """
-function loaddisturbance(settings)
-
-    tdist = nothing
+function set_tdist(settings)
 
     # select file according to keyword: loss, frag, temp
-    if settings["disturbtype"] != "none"
-        if settings["disturbtype"] in ["loss" "frag"]
-
-            tdist = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64))[:td]
-            return tdist
-
+        if settings["disturbtype"] == "none"
+            tdist = nothing
+	elseif settings["disturbtype"] in ["loss" "frag"]
+            tdist = CSV.read(settings["disturbland"],header=true,types=Dict("td"=>Int64))[:td]
         elseif settings["disturbtype"] == "poll"
             tdist = CSV.read(settings["insect"])[:, :td]
-            println("Pollination loss is simulated according to parameters in the \'insects\' file.")
-            return tdist
-
         elseif settings["disturbtype"] == "temp"
             println("Temperature change is simulated with the temperature file provided.")
-
         else
             error("Please specify one of the disturbance scenarios with `--disturb`:
                 \n\'none\' if no disturbance should be simulated,
@@ -288,6 +280,6 @@ function loaddisturbance(settings)
                 \n\'temp\' for temperature change,
                 \n\'poll\' for pollination loss.")
         end
-    end
+	return tdist
 end
 

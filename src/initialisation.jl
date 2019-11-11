@@ -156,16 +156,12 @@ settings = parse_commandline()
 println(keys(settings))
 Random.seed!(settings["rseed"])
 
-tdist = nothing
-if settings["disturbtype"] != "none"
-    tdist = loaddisturbance(settings)
-end
-repr(tdist)
-
 id_counter = 0
 management_counter = 0
 
+tdist = set_dist(settings)
 landpars = read_landpars(settings)
+
 const SPP_REF = read_sppinput(settings)
 const TRAIT_RANGES = define_traitranges(settings)
 interaction, scen, remaining = read_insects(settings)
