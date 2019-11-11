@@ -55,12 +55,12 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
 	    die_seeds!(plants, settings, t, T)
 
 	    # Adults growth and mortality
-            allocate!(plants, t, aE, Boltz, settings, T, biomass_production, K, "a")
+            grow!(plants, t, aE, Boltz, settings, T, biomass_production, K, "a")
             die!(plants, settings, T, "a")
 	    compete_die!(plants, t, cK, settings, landavail, T, "a")
 	    
 	    # Juvenile growth and mortality 
-	    allocate!(plants, t, aE, Boltz, settings, T, biomass_production, K, "j")
+	    grow!(plants, t, aE, Boltz, settings, T, biomass_production, K, "j")
             die!(plants, settings, T, "j")
 	    compete_die!(plants, t, cK, settings, landavail, T, "j")
 

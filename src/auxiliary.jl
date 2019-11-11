@@ -276,3 +276,19 @@ function survival(dying::Array{Plant, 1}, T)
     living_ids = getfield.(filter(x -> x.death == 0, deaths), :id)
     return dead_ids, living_ids 
 end
+
+
+function grow_allocate!(plant, b0grow, flowering_ids)
+
+    B_grow = b0grow*((sum(values(plant.mass))-plant.mass["repr"])^(-1/4))*exp(-aE/(Boltz*T)) # only vegetative biomass fuels growth
+
+    new_mass = B_grow*((2*plant.compartsize + plant.compartsize^(3/4))-(sum(values(plant.mass))-plant.mass["repr"]))
+
+    if plant.id in flowering_ids
+       plant.mass["repr"] += new_mass
+    else
+       map(x -> plant.mass[x] += (1/3)*new_mass,
+       	   ["leaves", "stem", "root"])
+    end
+
+end

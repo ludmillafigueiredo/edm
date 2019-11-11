@@ -7,45 +7,40 @@ using DelimitedFiles
 """
     allocate!(orgs, t, aE, Boltz, setting, SPP_REFERENCE, T)
 """
-function allocate!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
+function grow!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
+
+    growing = filter(x-> x.stage == growing_stage, plants) 
+    filter(x-> x.stage != growing_stage, plants)
+
+    flowering_ids = filter(x -> x.stage == "a" &&
+    		    	        x.floron <= rem(t,52) < x.floroff &&
+				(sum(values(x.mass))-x.mass["repr"]) >=
+				0.5*(2*x.compartsize+x.compartsize^(3/4)),
+			   plants) |>
+	            x -> getfield.(x, :id)
+
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Growth of $growing_stage")
+        println(sim, "Growth of $(length(growing)) $(uppercase(growing_stage))")
+        println(sim, "Above-ground biomass before growth:\n$(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
+	filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
     end
-
-    growing = filter(x-> x.stage == growing_stage,plants)
 	
     for sp in unique(getfield.(growing, :sp))
     
-    	growing_sp = findall(x -> x.id in getfield.(growing, :id), plants)
     	b0grow = SPP_REFERENCE.b0grow[sp]
+    	growing_sp = filter(x->x.sp == sp, growing)
+	map(x -> grow_allocate!(x, b0grow, flowering_ids), growing_sp)
+	append!(plants, growing_sp)
 	
-    for o in growing_sp
-
-	current_vegmass = plants[o].mass["leaves"] + plants[o].mass["stem"] + plants[o].mass["root"]
-
-	B_grow = b0grow*(current_vegmass^(-1/4))*exp(-aE/(Boltz*T)) # only vegetative biomass fuels growth
-
-	new_mass = B_grow*((2*plants[o].compartsize + plants[o].compartsize^(3/4))-current_vegmass)
-
-	# adults of a minimal sie in their reproductive season allocate to reproductive structures, instead of leaves and stem
-        # otherwise, growth is equally divided between all vegetative structures
-        if (plants[o].stage == "a" &&
-            (plants[o].floron <= rem(t,52) < plants[o].floroff) &&
-            current_vegmass >= 0.5*(2*plants[o].compartsize+plants[o].compartsize^(3/4)))
-
-	    if haskey(plants[o].mass,"repr")
-         	plants[o].mass["repr"] += new_mass
-            else
-		plants[o].mass["repr"] = new_mass
-            end
-	else
-            plants[o].mass["leaves"] += (1/3)*new_mass
-	    plants[o].mass["stem"] += (1/3)*new_mass
-	    plants[o].mass["root"] += (1/3)*new_mass
-        end
     end
+
+    # check-point
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+        println(sim, "Above-ground biomass after growth:\n$(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
+	filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
     end
+    
     # unit test
     masserror = findall(x -> sum(collect(values(x.mass))) <= 0, plants)
     if length(masserror) > 0
