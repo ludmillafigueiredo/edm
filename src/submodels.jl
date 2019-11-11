@@ -82,7 +82,7 @@ function mate!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, scen
     end
 
     ready = findall(x-> x.stage == "a" &&
-    	    	    x.mass["repr"] > SPP_REFERENCE.seedmass[x.sp],
+    	    	    ALLOC_SEED*x.mass["repr"] > SPP_REFERENCE.seedmass[x.sp]*SPP_REFERENCE.seednumber_min[x.sp],
 		    plants)
     pollinated = []
     npoll = 0
