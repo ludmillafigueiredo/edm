@@ -87,9 +87,9 @@ function write_output(plants::Array{Plant,1}, t::Int64, settings::Dict{String,An
     # output header
     if t == 1
         header = hcat(["week"],
-                      reshape(collect(string.(fieldnames(typeof(Plant))[1:20])),1,:),
+                      reshape(collect(string.(fieldnames(Plant)[1:20])),1,:),
                       ["leaves" "stem" "root" "repr"],
-                      reshape(collect(string.(fieldnames(typeof(Plant))[22:end])),1,:))
+                      reshape(collect(string.(fieldnames(Plant)[22:end])),1,:))
         open(joinpath(settings["outputat"],settings["simID"],"statevars_ind.txt"), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
