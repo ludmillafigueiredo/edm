@@ -336,23 +336,30 @@ function disperse!(landavail::BitArray{2},plants::Array{Plant, 1},t::Int,setting
     lost = 0
     justdispersed = Plant[]
 
-    #separating dispersing individuals facilitates indexing and assigning new field values
-    dispersing = filter(x -> x.stage == "s" &&
-    	       	 	x.age == 0 &&
-			x.seedon <= rem(t,52) < x.seedoff, plants)
+    #separating dispersing individuals facilitates indexing and assigning new locations
+    dispersing = filter(x -> (x.stage == "s-in-flower" &&
+			x.seedon <= rem(t,52) < x.seedoff), plants)
+    n_dispersing = length(dispersing)
     filter!(x -> !(x.id in getfield.(dispersing, :id)), plants)
     
     for kernels in unique(getfield.(dispersing, :kernel))
 
     	dispersing_kernel = filter(x -> x.kernel == kernels, dispersing)
-    	
-	locs=[(idx=index,loc=dispersing_kernel[index].location) for index in 1:length(dispersing_kernel)]
 
-        kernel = rand(split(kernels, "-") |> collect) #some have more than one kernel
+	# use indexes of individuals inside the vector with the ones being currently dispersed
+	# facilitates keeping track of successes and losses in a vectorized manner.
+	locs=[(idx=index,loc=dispersing_kernel[index].location)
+	      for index in 1:length(dispersing_kernel)]
+
+	# some dispersal sydromes are composed of several kernels.
+	# one is randomly chosen for a particular instance of dispersal at time step.
+        kernel = rand(split(kernels, "-") |> collect)
+	
+	# vectorized dispersal requires parameters to be vectorized too 
         dists = dispersal_pars[kernel].factor*
-	        rand(InverseGaussian(dispersal_pars[kernel].mu,dispersal_pars[kernel].lambda),length(locs))
+	        rand(InverseGaussian(dispersal_pars[kernel].mu,dispersal_pars[kernel].lambda),
+		     length(locs))	     
 	thetas = rand(Uniform(0,2), length(locs))*pi
-
 	newlocs = map(get_dest, locs, dists, thetas)
 
 	lost_idxs = filter(x->x.suitable==false, newlocs) |> x->getfield.(x,:idx)
@@ -372,13 +379,21 @@ function disperse!(landavail::BitArray{2},plants::Array{Plant, 1},t::Int,setting
 	lost+=length(lost_idxs)
 	
     end
+
     
-    # update who actually dispersed
+    # for now, just change the stage: these seeds are no longer in a flower
+    # these individuals will be put back into the main vector `plants` after establishment (next)
+    setproperty!.(justdispersed, :stage, "s")
+ 
+    # check point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	println(sim, "Number of successfull dispersals: $(length(justdispersed))")
+    	println(sim, "Lost in dispersal: $lost")
     end
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-	writedlm(sim, hcat("Lost in dispersal:", length(lost)))
+
+    # unit test
+    if lost +  length(justdispersed) != n_dispersing
+       error("Number of successes and fails in dispersal do not match.")
     end
     
     return justdispersed
@@ -394,28 +409,45 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
     # seeds that just dispersed try to establish and the ones that did not succeed previously
     # will get a chance again.
     establishing = filter(x -> x.stage == "s", plants) |> x -> append!(justdispersed, x)
+    n_establishing = length(establishing)
     filter!(x -> !(x.id in getfield.(establishing,:id)), plants)
     
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
 	writedlm(sim, hcat("Seeds trying to establish:", length(establishing)))
     end
+
+    germinations = 0
+    non_germinations = 0
     
     for sp in unique(getfield.(establishing, :sp))
 
     	establishing_sp = filter(x->x.sp==sp, establishing)
-	filter!(x->x.sp!=sp, establishing)
-	
+		
     	Bg = B0_GERM*(SPP_REFERENCE.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
 	
 	germinated_ids = vectorized_seedproc("germination", establishing_sp, Bg)
 	germinated = filter(x -> x.id in germinated_ids, establishing_sp)
 	setproperty!.(germinated, :stage, "j")
 	append!(plants, germinated)
+	germinations += length(germinated)
 	# update the seeds that did not germinate and will go back into the main vector
-	filter!(x -> !(x.id in germinating_ids), establishing)
+	non_germinated = filter(x -> !(x.id in germinated_ids), establishing_sp)
+    	append!(plants, non_germinated)
+	non_germinations += length(non_germinated)
     end
-    append!(plants, establishing)	
+
+    # check-point: can probably go, becuase the unit test is enough
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+	println(sim, "Seeds failing to establish: $non_germinations")
+	println(sim, "Seeds germinating: $germinations")
+    end
+
+    # unit test
+    if germinations + non_germinations != n_establishing
+       error("Number of successes and fails in establishment do not match.")
+    end
+    
 end
 
 """
