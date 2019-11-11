@@ -136,7 +136,7 @@ function updateK!(K::Float64, landavail::BitArray{2}, settings::Dict{String,Any}
         # output message
         if t == 1
             open(joinpath(settings["outputat"],settings["simID"],"landlog.txt"),"w") do sim
-                println(sim, "week\tK\tcK\thabitatarea\ttotalarea")
+                println(sim, "week\T_K\tcK\thabitatarea\ttotalarea")
             end
         end
 
@@ -169,16 +169,16 @@ Fitness is updated every begining of the year, with mean temperature for the yea
 - `std_tol::Float64`: parameter `c` is the standard deviation,
 """
 function updatefitness!(mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Dict{String, Any})
-    for sp in SPP_REFERENCE.sp_id
+    for sp in SPP_REF.sp_id
 
-        mean_opt = SPP_REFERENCE.temp_opt[sp]
-        std_tol = SPP_REFERENCE.temp_tol[sp]
+        mean_opt = SPP_REF.temp_opt[sp]
+        std_tol = SPP_REF.temp_tol[sp]
 
         absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
-        SPP_REFERENCE.fitness[sp] = absolute_fitness
+        SPP_REF.fitness[sp] = absolute_fitness
     end
     open(joinpath(settings["outputat"], settings["simID"], "spp_fitness.csv"),"a") do fitnessfile
-    	writedlm(fitnessfile, hcat(t, sp, get(SPP_REFERENCE.fitness, sp, "NA")) for sp in collect(keys(SPP_REFERENCE.fitness)))
+    	writedlm(fitnessfile, hcat(t, sp, get(SPP_REF.fitness, sp, "NA")) for sp in collect(keys(SPP_REF.fitness)))
     end
 end
 
@@ -188,9 +188,9 @@ Update temperature and precipitation values according to the weekly input data (
 """
 function setenv!(t::Int64, landpars::LandPars)
 
-    T = landpars.meantempts[t] + tK
+    T = landpars.meantempts[t] + T_K
     if rem(t, 52) == 1
-	mean_annual = mean(landpars.meantempts[t:(t+51)] + tK)
+	mean_annual = mean(landpars.meantempts[t:(t+51)] + T_K)
 	#unity test
 	println("Temperature for week $t: $T")
 	println("Mean for the year of week $t: $mean_annual")
@@ -203,9 +203,9 @@ end
 
 function setenv!(t::Int64, landpars::NeutralLandPars)
 
-    T = landpars.meantempts[t] + tK
+    T = landpars.meantempts[t] + T_K
     if rem(t, 52) == 1
-	mean_annual = mean(broadcast(+, tK, landpars.meantempts[t:(t+51)]))
+	mean_annual = mean(broadcast(+, T_K, landpars.meantempts[t:(t+51)]))
 	#unity test
 	println("Temperature for week $t: $T")
 	println("Mean for the year of week $t: $mean_annual")
@@ -260,7 +260,7 @@ mort_prob(plant)
 Calculate mortality probability for a single plant
 """
 function mort_prob(plant::Plant, T)
-    Bm = B0_MORT*(sum(values(plant.mass))^(-1/4))*exp(-aE/(Boltz*T))
+    Bm = B0_MORT*(sum(values(plant.mass))^(-1/4))*exp(-A_E/(BOLTZ*T))
     mort_prob = 1-exp(-Bm)
     return mort_prob
 end
@@ -280,7 +280,7 @@ end
 
 function grow_allocate!(plant, b0grow, flowering_ids)
 
-    B_grow = b0grow*((sum(values(plant.mass))-plant.mass["repr"])^(-1/4))*exp(-aE/(Boltz*T)) # only vegetative biomass fuels growth
+    B_grow = b0grow*((sum(values(plant.mass))-plant.mass["repr"])^(-1/4))*exp(-A_E/(BOLTZ*T)) # only vegetative biomass fuels growth
 
     new_mass = B_grow*((2*plant.compartsize + plant.compartsize^(3/4))-(sum(values(plant.mass))-plant.mass["repr"]))
 

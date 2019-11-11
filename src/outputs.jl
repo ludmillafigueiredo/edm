@@ -50,15 +50,15 @@ function orga_outputs()
 	return simresults_folder, results_folder
 end
 
-function output_sppref(sppref)
-	 	# printout sppref
-	open(joinpath(simresults_folder, "sppref.csv"), "w") do ref
-            writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")
+function output_sppref(SPP_REF)
+	 	# printout SPP_REF
+	open(joinpath(simresults_folder, "SPP_REF.csv"), "w") do ref
+            writedlm(ref, reshape(collect(string.(fieldnames(SPP_REF))), 1,:), ",")
 	end
     
-	for sp in sppref.sp_id
-    	    sp_ref = reshape(collect(map(x -> getfield(sppref, x)[sp], fieldnames(SppRef)[2:end])), 1, :)
-    	    open(joinpath(simresults_folder, "sppref.csv"), "a") do ref
+	for sp in SPP_REF.sp_id
+    	    sp_ref = reshape(collect(map(x -> getfield(SPP_REF,x)[sp],fieldnames(SPP_REF)[2:end])),1,:)
+    	    open(joinpath(simresults_folder, "sppref_traitvalues.csv"), "a") do ref
                 writedlm(ref, [sp sp_ref], ",")
             end
 	end

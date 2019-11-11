@@ -5,9 +5,9 @@ using StatsBase
 using DelimitedFiles
 
 """
-    allocate!(orgs, t, aE, Boltz, setting, SPP_REFERENCE, T)
+    allocate!(orgs, t, setting, SPP_REF, T)
 """
-function grow!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64, settings::Dict{String, Any}, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
+function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
 
     growing = filter(x-> x.stage == growing_stage, plants) 
     filter(x-> x.stage != growing_stage, plants)
@@ -28,7 +28,7 @@ function grow!(plants::Array{Plant,1}, t::Int64, aE::Float64, Boltz::Float64, se
 	
     for sp in unique(getfield.(growing, :sp))
     
-    	b0grow = SPP_REFERENCE.b0grow[sp]
+    	b0grow = SPP_REF.b0grow[sp]
     	growing_sp = filter(x->x.sp == sp, growing)
 	map(x -> grow_allocate!(x, b0grow, flowering_ids), growing_sp)
 	append!(plants, growing_sp)
@@ -82,7 +82,7 @@ function mate!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, scen
     end
 
     ready = findall(x-> x.stage == "a" &&
-    	    	    ALLOC_SEED*x.mass["repr"] > SPP_REFERENCE.seedmass[x.sp]*SPP_REFERENCE.seednumber_min[x.sp],
+    	    	    ALLOC_SEED*x.mass["repr"] > SPP_REF.seedmass[x.sp]*SPP_REF.seednumber_min[x.sp],
 		    plants)
     pollinated = []
     npoll = 0
@@ -213,7 +213,7 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counte
     
     for sp in unique(getfield.(ferts, :sp))
 
-    	seedmass = SPP_REFERENCE.seedmass[sp]
+    	seedmass = SPP_REF.seedmass[sp]
 	spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
 	
 	ferts_sp = findall(x -> x.sp == sp && x.id in getfield.(ferts, :id), plants)
@@ -282,7 +282,7 @@ Asexual reproduction.
 """
 function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter::Int64)
 
-    asexuals = filter(x -> x.mated == false && x.clonality == true && x.mass["repr"] > SPP_REFERENCE.seedmass[x.sp], plants)
+    asexuals = filter(x -> x.mated == false && x.clonality == true && x.mass["repr"] > SPP_REF.seedmass[x.sp], plants)
 
     for sp in unique(getfield.(asexuals, :sp))
 
@@ -323,7 +323,7 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter
 end
 
 """
-    disperse!(landscape, plants, t, seetings, SPP_REFERENCE,)
+    disperse!(landscape, plants, t, seetings, SPP_REF,)
 Seeds are dispersed.
 `get_dest` is defined in `auxiliary.jl`
 """
@@ -356,8 +356,8 @@ function disperse!(landavail::BitArray{2},plants::Array{Plant, 1},t::Int,setting
         kernel = rand(split(kernels, "-") |> collect)
 	
 	# vectorized dispersal requires parameters to be vectorized too 
-        dists = dispersal_pars[kernel].factor*
-	        rand(InverseGaussian(dispersal_pars[kernel].mu,dispersal_pars[kernel].lambda),
+        dists = DISPERSAL_PARS[kernel].factor*
+	        rand(InverseGaussian(DISPERSAL_PARS[kernel].mu,DISPERSAL_PARS[kernel].lambda),
 		     length(locs))	     
 	thetas = rand(Uniform(0,2), length(locs))*pi
 	newlocs = map(get_dest, locs, dists, thetas)
@@ -424,7 +424,7 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
 
     	establishing_sp = filter(x->x.sp==sp, establishing)
 		
-    	Bg = B0_GERM*(SPP_REFERENCE.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
+    	Bg = B0_GERM*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
 	
 	germinated_ids = vectorized_seedproc("germination", establishing_sp, Bg)
 	germinated = filter(x -> x.id in germinated_ids, establishing_sp)
@@ -451,12 +451,11 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
 end
 
 """
-    survive!(plants, t, cK, K, settings, SPP_REFERENCE, landavail, biomass_production, dying_stage)
-Plants density-independent mortality is calculated according to the metabolic theory.
-Density-dependent mortality is calculated for cells with biomass over the grid-cell carrying capacity `cK`. It kills smaller individuals until the biomass of the grid-cell is above `cK` again.
+    Plants density-independent mortality is calculated according to the metabolic theory.
+Density-dependent mortality is calculated for cells with biomass over the grid-cell carrying capacity `C_K`. It kills smaller individuals until the biomass of the grid-cell is above `C_K` again.
 Density-dependent mortality is not calculated for seeds. Their density-dependent mortality is calculated alongside adults just for convenience.
 Both types of mortalities of adults and juveniles are calculated separately (as set by `dying_stage`).
-    survive!(plants, t, settings, SPP_REFERENCE)
+    survive!(plants, t, settings, SPP_REF)
 Calculate seed mortality, vectorized for all seeds of a same species.
 """
 function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int64, T::Float64)
@@ -468,7 +467,7 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
     
     for sp in unique(getfield.(dying, :sp))
     	dying_sp = filter(x -> x.sp == "sp", plants)
-    	Bm = SEED_MFACTOR*B0_MORT*(SPP_REFERENCE.seedmass[sp]^(-1/4))*exp(-aE/(Boltz*T))
+    	Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
 	death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |>
 		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
 	deleteat!(plants, death_idxs)
@@ -512,7 +511,7 @@ function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, 
     
 end
 
-function compete_die!(plants::Array{Plant,1}, t::Int, cK::Float64, settings::Dict{String, Any},  landavail::BitArray{2}, T, dying_stage::String)
+function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  landavail::BitArray{2}, T, dying_stage::String)
 
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
@@ -540,14 +539,14 @@ function compete_die!(plants::Array{Plant,1}, t::Int, cK::Float64, settings::Dic
 		plants_cell = filter(x -> x.location == loc, production_plants)
 
 		# get fitness of all species in the cell to simulate local competition
-                sppcell_fitness = Dict(sp => SPP_REFERENCE.fitness[sp]
+                sppcell_fitness = Dict(sp => SPP_REF.fitness[sp]
 		    		      	   for sp in unique(getfield.(plants_cell, :sp)))
 
-		if sum(vcat(map(x->sum(values(x.mass))-x.mass["root"],plants_cell),NOT_0)) > cK
+		if sum(vcat(map(x->sum(values(x.mass))-x.mass["root"],plants_cell),NOT_0)) > C_K
 
 		    for sp in keys(sppcell_fitness)
 
-                       	cK_sp = cK * (sppcell_fitness[sp]/sum(collect(values(sppcell_fitness))))
+                       	C_K_sp = C_K * (sppcell_fitness[sp]/sum(collect(values(sppcell_fitness))))
 
 			prodplants_cell = filter(x -> x.stage in ["j", "a"] &&
 					  	      x.sp == sp &&
@@ -556,7 +555,7 @@ function compete_die!(plants::Array{Plant,1}, t::Int, cK::Float64, settings::Dic
 
 			prodsp_cell = sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],prodplants_cell),NOT_0))
 			
-			if prodsp_cell > cK_sp
+			if prodsp_cell > C_K_sp
 
 			   dying_plants = filter(x -> x.stage == dying_stage && x.sp == sp, plants_cell)
 			   # order inds so smaller can be killed first with pop!()
@@ -564,7 +563,7 @@ function compete_die!(plants::Array{Plant,1}, t::Int, cK::Float64, settings::Dic
 					       by = x -> sum(values(x.mass)), rev = true)
 
 			   dying = Plant[]
-			   while (prodsp_cell > cK_sp && length(dying_sorted) > 0)
+			   while (prodsp_cell > C_K_sp && length(dying_sorted) > 0)
 			       # kill smallest
 			       push!(dying, pop!(dying_sorted))
 
@@ -595,7 +594,7 @@ function compete_die!(plants::Array{Plant,1}, t::Int, cK::Float64, settings::Dic
 end
 
 """
-    shedflower!(plants, SPP_REFERENCE, t, settings)
+    shedflower!(plants, SPP_REF, t, settings)
 Plants loose their reproductive biomasses at the end of the reproductive season
  and 50% of biomass during winter.
 
@@ -654,7 +653,7 @@ Mowing happens at most once a year, between August and September.
 """
 function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
 
-    if management_counter < 1 || 1 == rand(Distributions.Bernoulli(manage_prob))
+    if management_counter < 1 || 1 == rand(Distributions.Bernoulli(MANAGE_PROB))
 
         # check-point
         open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim

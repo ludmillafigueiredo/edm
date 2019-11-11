@@ -1,13 +1,13 @@
 
 """
     init_K(landavail, settings, t)
-Calculate the carrying capacity of the landscape (`K`) and of each gridcell (`cK`) at initialization.
+Calculate the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`) at initialization.
 `K` is used to initialize the species with abundances corresponding to a niche partitioning model.
 """
 function init_K(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
     habitatarea = length(findall(x -> x == true, landavail))
     totalarea = prod(size(landavail))
-    K = cK*habitatarea
+    K = C_K*habitatarea
     return K
 end
 
@@ -49,7 +49,7 @@ function init_landscape(landpars::NeutralLandPars)
 end
 
 """
-    updatefitness!(SPP_REFERENCE, mean_opt::Float64, std_tol::Float64, mean_annual::Float64, max_fitness::Float64)
+    updatefitness!(SPP_REF, mean_opt::Float64, std_tol::Float64, mean_annual::Float64, max_fitness::Float64)
 
 Calculate the fitness value according to a Gauss function:
 
@@ -64,32 +64,32 @@ It runs at initialization, to set up niche partitioning. It used the  with mean 
 - `mean_opt::Float64`: parameter `b` is the position of the center of the peak.
 - `std_tol::Float64`: parameter `c` is the standard deviation,
 """
-function init_fitness!(SPP_REFERENCE::SppRef, mean_annual::Float64, max_fitness::Float64)
-    for sp in SPP_REFERENCE.sp_id
-        mean_opt = SPP_REFERENCE.temp_opt[sp]
-        std_tol = SPP_REFERENCE.temp_tol[sp]
+function init_fitness!(SPP_REF::SppRef, mean_annual::Float64, max_fitness::Float64)
+    for sp in SPP_REF.sp_id
+        mean_opt = SPP_REF.temp_opt[sp]
+        std_tol = SPP_REF.temp_tol[sp]
 
         absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
-        SPP_REFERENCE.fitness[sp] = absolute_fitness
+        SPP_REF.fitness[sp] = absolute_fitness
     end
 end
 
 
 """
-    init_plants(landavail, SPP_REFERENCE,id_counter)
+    init_plants(landavail, SPP_REF,id_counter)
 
-Initialize the organisms with trait values stored in `SPP_REFERENCE` and distributes them in the suitable grid-cells in the landscape `landavail`.
+Initialize the organisms with trait values stored in `SPP_REF` and distributes them in the suitable grid-cells in the landscape `landavail`.
 Store the individuals in the `plants` array, which holds all plants simulated at any given time.
 """
-function init_plants(landavail::BitArray{N} where N, SPP_REFERENCE::SppRef, id_counter::Int, settings::Dict{String, Any}, K::Float64)
+function init_plants(landavail::BitArray{N} where N, SPP_REF::SppRef, id_counter::Int, settings::Dict{String, Any}, K::Float64)
 
     plants = Plant[]
 
-    for s in SPP_REFERENCE.sp_id
+    for s in SPP_REF.sp_id
 
         # Niche partitioning: Upon initialization, each species total biomass equals K*fitness_relative, where fitness_relative is the species fitness values relative to the sum of others
         # The initial abundance is number of medium-sized individuals (50% of maximal biomass) that would sum up to the biomass.
-        sp_abund = Int(round(((SPP_REFERENCE.fitness[s]/sum(collect(values(SPP_REFERENCE.fitness))))*K)/(0.5*(2*SPP_REFERENCE.compartsize[s]+SPP_REFERENCE.compartsize[s])), RoundUp))
+        sp_abund = Int(round(((SPP_REF.fitness[s]/sum(collect(values(SPP_REF.fitness))))*K)/(0.5*(2*SPP_REF.compartsize[s]+SPP_REF.compartsize[s])), RoundUp))
 
 	open(joinpath(settings["outputat"], string(settings["simID"], "initialabundances.txt")),"a") do sim
 	    println(sim, "Initial abundance of $s: $sp_abund")
@@ -107,27 +107,27 @@ function init_plants(landavail::BitArray{N} where N, SPP_REFERENCE::SppRef, id_c
 			      rand(["a" "j" "s"]),
 			      (XYs[i,1],XYs[i,2]),
 			      s,
-			      SPP_REFERENCE.kernel[s],
-			      SPP_REFERENCE.clonality[s],
-			      SPP_REFERENCE.compartsize[s], #compartsize
-			      Int(round(rand(Distributions.Uniform(SPP_REFERENCE.span_min[s], SPP_REFERENCE.span_max[s] + minvalue),1)[1], RoundUp)),
-			      Int(round(rand(Distributions.Uniform(SPP_REFERENCE.firstflower_min[s], SPP_REFERENCE.firstflower_max[s] + minvalue),1)[1], RoundUp)),
-			      SPP_REFERENCE.floron[s],
-			      SPP_REFERENCE.floroff[s],
-			      Int(round(rand(Distributions.Uniform(SPP_REFERENCE.seednumber_min[s],SPP_REFERENCE.seednumber_max[s] + minvalue),1)[1], RoundUp)),
-			      SPP_REFERENCE.seedon[s],
-			      SPP_REFERENCE.seedoff[s],
-			      Int(round(rand(Distributions.Uniform(SPP_REFERENCE.bankduration_min[s],SPP_REFERENCE.bankduration_max[s] + minvalue),1)[1], RoundUp)),
+			      SPP_REF.kernel[s],
+			      SPP_REF.clonality[s],
+			      SPP_REF.compartsize[s], #compartsize
+			      Int(round(rand(Distributions.Uniform(SPP_REF.span_min[s], SPP_REF.span_max[s] + minvalue),1)[1], RoundUp)),
+			      Int(round(rand(Distributions.Uniform(SPP_REF.firstflower_min[s], SPP_REF.firstflower_max[s] + minvalue),1)[1], RoundUp)),
+			      SPP_REF.floron[s],
+			      SPP_REF.floroff[s],
+			      Int(round(rand(Distributions.Uniform(SPP_REF.seednumber_min[s],SPP_REF.seednumber_max[s] + minvalue),1)[1], RoundUp)),
+			      SPP_REF.seedon[s],
+			      SPP_REF.seedoff[s],
+			      Int(round(rand(Distributions.Uniform(SPP_REF.bankduration_min[s],SPP_REF.bankduration_max[s] + minvalue),1)[1], RoundUp)),
 			      0, #age
 			      Dict("leaves" => 0.0, "stem" => 0.0, "repr" => 0.0, "root" => 0.0),
 			      false)
 
             ## initial biomass
 	    if newplant.stage == "s"
-		newplant.mass["root"] = SPP_REFERENCE.seedmass[newplant.sp]
+		newplant.mass["root"] = SPP_REF.seedmass[newplant.sp]
 		newplant.age = 1
 	    elseif newplant.stage == "j"
-		newplant.mass["root"] = SPP_REFERENCE.seedmass[newplant.sp]
+		newplant.mass["root"] = SPP_REF.seedmass[newplant.sp]
 		newplant.age = newplant.seedon + 4
 	    elseif newplant.stage in ["a"]
 		newplant.mass["leaves"] = newplant.compartsize^(3/4) * 0.75
@@ -166,14 +166,14 @@ id_counter = 0
 management_counter = 0
 
 landpars = read_landpars(settings)
-const SPP_REFERENCE = read_sppinput(settings)
+const SPP_REF = read_sppinput(settings)
 const TRAIT_RANGES = define_traitranges(settings)
 interaction, scen, remaining = read_insects(settings)
 global mylandscape, landavail = init_landscape(landpars)
 K = init_K(landavail, settings, 1)
 T, mean_annual = setenv!(1, landpars)
-init_fitness!(SPP_REFERENCE, mean_annual, 1.0)
-plants, id_counter = init_plants(landavail, SPP_REFERENCE, id_counter, settings, K)
+init_fitness!(SPP_REF, mean_annual, 1.0)
+plants, id_counter = init_plants(landavail, SPP_REF, id_counter, settings, K)
 
 #check-points
 println("Landscape initialized: type $(typeof(mylandscape))")

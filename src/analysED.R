@@ -35,7 +35,8 @@ theme_set(theme_edm())
 #' @param EDdir The path to EDM, if not default
 getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.path("~/model")){
 
-  spp_seedmass <- read_csv(file.path(outputsdir, "sppref.csv"), col_names=TRUE) %>% select(sp = sp_id, seedmass) 
+  spp_seedmass <- read_csv(file.path(outputsdir, "sppref_traitvalues.csv"), col_names=TRUE) %>% select(sp = sp_id, seedmass) 
+
   ## initiliaze list to contain outputs 
   ##outdatalist <- list()
   for(repli in repfolder){
