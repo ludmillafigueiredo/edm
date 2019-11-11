@@ -159,7 +159,7 @@ Random.seed!(settings["rseed"])
 id_counter = 0
 management_counter = 0
 
-tdist = set_dist(settings)
+tdist = set_tdist(settings)
 landpars = read_landpars(settings)
 
 const SPP_REF = read_sppinput(settings)

@@ -119,7 +119,7 @@ end
 
 """
     updateK!(landavail, settings, t, tdist)
-Update the carrying capacity of the landscape (`K`) and of each gridcell (`cK`).
+Update the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`).
 It is called during initialization (`t` = 1)  and is called again if landscape is disturbed (at `tdist`; `criticalts` keeps track of the updates and outputs the new values).
 """
 function updateK!(K::Float64, landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
@@ -129,14 +129,15 @@ function updateK!(K::Float64, landavail::BitArray{2}, settings::Dict{String,Any}
     if tdist == nothing
         criticalts = [1]
     else
-        criticalts = vcat(1, (tdist-1), tdist, (tdist+1))
+        criticalts = append!([1],
+		     unique(sort(vcat(broadcast(-, tdist, 1), broadcast(+, tdist, 1), tdist))))
     end
 
     if t in criticalts
         # output message
         if t == 1
             open(joinpath(settings["outputat"],settings["simID"],"landlog.txt"),"w") do sim
-                println(sim, "week\T_K\tcK\thabitatarea\ttotalarea")
+                println(sim, "week\tK\tC_K\thabitatarea\ttotalarea")
             end
         end
 
@@ -144,9 +145,9 @@ function updateK!(K::Float64, landavail::BitArray{2}, settings::Dict{String,Any}
         habitatarea = length(findall(x -> x == true, landavail))  #number of habitat grid cels ggrid cells
         totalarea = prod(size(landavail)) # total number of grid cell. Habitat or not
 
-	K = cK*habitatarea
+	K = C_K*habitatarea
         open(joinpath(settings["outputat"],settings["simID"],"landlog.txt"),"a") do sim
-            writedlm(sim,[t K cK habitatarea totalarea])
+            writedlm(sim,[t K C_K habitatarea totalarea])
         end
     end
     return K

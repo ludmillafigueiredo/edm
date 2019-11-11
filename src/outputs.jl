@@ -53,11 +53,11 @@ end
 function output_sppref(SPP_REF)
 	 	# printout SPP_REF
 	open(joinpath(simresults_folder, "SPP_REF.csv"), "w") do ref
-            writedlm(ref, reshape(collect(string.(fieldnames(SPP_REF))), 1,:), ",")
+            writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")
 	end
     
 	for sp in SPP_REF.sp_id
-    	    sp_ref = reshape(collect(map(x -> getfield(SPP_REF,x)[sp],fieldnames(SPP_REF)[2:end])),1,:)
+    	    sp_ref = reshape(collect(map(x -> getfield(SPP_REF,x)[sp],fieldnames(SppRef)[2:end])),1,:)
     	    open(joinpath(simresults_folder, "sppref_traitvalues.csv"), "a") do ref
                 writedlm(ref, [sp sp_ref], ",")
             end
