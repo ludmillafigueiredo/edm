@@ -10,7 +10,7 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
 
         global simresults_folder, results_folder = orga_outputs()
 	log_settings()
-	output_sppref(SPP_REFERENCE)
+	output_sppref(SPP_REF)
 	
         # RUN MODEL
         ############
