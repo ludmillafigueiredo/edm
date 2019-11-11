@@ -35,7 +35,7 @@ theme_set(theme_edm())
 #' @param EDdir The path to EDM, if not default
 getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.path("~/model")){
 
-  spp_input <- read_csv(file.path(outputsdir, parentsimID, "sppref.csv"), col_names=TRUE)
+  spp_seedmass <- read_csv(file.path(outputsdir, "sppref.csv"), col_names=TRUE) %>% select(sp = sp_id, seedmass) 
   ## initiliaze list to contain outputs 
   ##outdatalist <- list()
   for(repli in repfolder){
@@ -48,7 +48,7 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
                                         location = col_character(),
                                         sp = col_character(),
                                         kernel = col_character(),
-                                        clonality = col_character(),
+                                        clonality = col_logical(),
                                         compartsize = col_double(),
                                         span = col_integer(),
                                         firstflower = col_integer(),
@@ -63,7 +63,7 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
                                         stem = col_double(),
                                         root = col_double(),
                                         repr = col_double(),
-                                        mated = col_character()));
+                                        mated = col_logical()));
     ## clean it
     ## take parentheses out of location column ("()")
     loc <- gsub("[\\(|\\)]", "", outraw$location)
@@ -74,8 +74,7 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
     outdata <- bind_cols(dplyr::select(outraw, -location), loc)
     rm(loc)
     ## add colum containing values of seedmass
-    outdata <- outdata%>%
-        mutate(seedmas = )
+    outdata <- inner_join(outdata, spp_seedmass)
       
     ## write single files in its folders
     write.csv(outdata,
@@ -92,8 +91,8 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
 #' @param nreps number of replicates, which identify the folders containing results
 orgareplicates <- function(parentsimID, repfolder, nreps){
   
-  juvads_allreps <- data.frame()
-  seeds_allreps <- data.frame()
+  juvads_allreps_tab <- data.frame()
+  seeds_allreps_tab <- data.frame()
   
   for(i in 1:nreps) {
     sim <- paste(parentsimID, i, sep = "_")
@@ -102,34 +101,34 @@ orgareplicates <- function(parentsimID, repfolder, nreps){
     outdata_sim <- read_csv(file.path(folder, paste(parentsimID, "juvads_statevars.csv", sep = "_")),
     	       	           col_names = TRUE)%>%
         mutate(repli = as.factor(rep(sim, nrow(.))))
-    offspring_sim <- read.tsv(file.path(folder, "offspringproduction.csv"),
+    offspring_sim <- read_tsv(file.path(folder, "offspringproduction.csv"),
     		    	     col_names = TRUE)%>%
       mutate(repli = as.factor(rep(sim, nrow(.))))
     
     ## fill in cleanoutput object (necessary step because of bind_rows)
-    if(length(juvads_allreps) == 0){
-      juvads_allreps <- outdatasim
-      seeds_allreps <- offspringsim
+    if(length(juvads_allreps_tab) == 0){
+      juvads_allreps_tab <- outdata_sim
+      seeds_allreps_tab <- offspring_sim
     }else{
       ## identify the lines corresponding to it with its replicate ID
-      juvads_allreps <- bind_rows(juvads_allreps, outdata_sim, .id = "repli")
-      seeds_allreps <- bind_rows(seeds_allreps, offspringsim, .id = "repli")
+      juvads_allreps_tab <- bind_rows(juvads_allreps_tab, outdata_sim, .id = "repli")
+      seeds_allreps_tab <- bind_rows(seeds_allreps_tab, offspring_sim, .id = "repli")
     }
   }
-    seeds_allreps$week = factor(seeds_allreps_tab$week)
+    seeds_allreps_tab$week = factor(seeds_allreps_tab$week)
     
-  return(list(a = ja_allreps_tab, b = seeds_allreps_tab))
+  return(list(a = juvads_allreps_tab, b = seeds_allreps_tab))
 }
 
 #' Extract and plot species-specific mean and sd
 #' of biomass compartments of juveniles and adults.
 #' @param outdatalist
 #' @param plotit Boolean specifying whether graph shouuld be plotted or not
-biomass_allocation <- function(ja_allreps_tab, stages = factor(c("a", "j", "s"))){
+biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "s"))){
   
   ## get biomasses allocated to each compartment
   # summary within replicates
-  biomass_tabrepli <- ja_allreps_tab%>%
+  biomass_tabrepli <- juvads_allreps_tab%>%
     select(week, id, stage, sp, leaves, stem, root, repr, repli)%>%
     filter(stage %in% c("j", "a"))%>%
     group_by(week, stage, sp, repli)%>%
@@ -143,7 +142,7 @@ biomass_allocation <- function(ja_allreps_tab, stages = factor(c("a", "j", "s"))
               rootmass = sd(root))%>%
     ungroup()
   # summary through replicates
-  biomass_tab <- ja_allreps_tab%>%
+  biomass_tab <- juvads_allreps_tab%>%
     select(week, id, stage, sp, leaves, stem, root, repr)%>%
     filter(stage %in% c("j", "a"))%>%
     group_by(week, stage, sp)%>%
@@ -212,7 +211,7 @@ biomass_allocation <- function(ja_allreps_tab, stages = factor(c("a", "j", "s"))
   
   # Total biomass growth curve
   # -------------------------#
-  growthcurve_tab <- ja_allreps_tab%>%
+  growthcurve_tab <- juvads_allreps_tab%>%
     select(week, id, stage, sp, leaves, stem, root, repr)%>%
     filter(stage %in% c("j", "a"))%>%
     group_by(week, stage, sp, id)%>%
@@ -231,10 +230,10 @@ biomass_allocation <- function(ja_allreps_tab, stages = factor(c("a", "j", "s"))
 }
 
 #' Extract and plot population abundances
-popabund <- function(ja_allreps_tab){
+popabund <- function(juvads_allreps_tab){
   
   ## extract relevant variables
-  pop_tab <- ja_allreps_tab%>%
+  pop_tab <- juvads_allreps_tab%>%
     select(week,sp,stage,repli)%>%
     ungroup()
   
@@ -313,7 +312,7 @@ popstruct <- function(pop_tab, seeds_allreps_tab, parentsimID){
 }
 
 #' Calculate mean species richness from replicates and per group of size
-spprichness <- function(ja_allreps_tab, pop_tab, parentsimID, disturbance,tdist){
+spprichness <- function(juvads_allreps_tab, pop_tab, parentsimID, disturbance,tdist){
   
   ## extract richness from output
   spprichness_tab <- pop_tab%>%
@@ -358,7 +357,7 @@ spprichness <- function(ja_allreps_tab, pop_tab, parentsimID, disturbance,tdist)
   }
   
   ## richness per group of size
-  groupspprichness_tab  <- ja_allreps_tab%>%
+  groupspprichness_tab  <- juvads_allreps_tab%>%
     select(week, sp, seedmass)%>%
     ungroup()%>%
     group_by(week, seedmass)%>%
@@ -406,10 +405,10 @@ rankabund <- function(pop_tab, timesteps){
 
 #' Population structure by group size
 #' Plot dynamics of population and total biomass growth per group of size, not species
-groupdyn <- function(ja_allreps_tab, singlestages){
+groupdyn <- function(juvads_allreps_tab, singlestages){
   
   ## create table
-  grouppop_tab <- ja_allreps_tab%>%
+  grouppop_tab <- juvads_allreps_tab%>%
     group_by(week, sp, seedmass, stage)%>%
     summarize(abundance = n())%>%
     ungroup()%>%
@@ -422,7 +421,7 @@ groupdyn <- function(ja_allreps_tab, singlestages){
               sd_abundance = sd(abundance))%>%
     ungroup()
   
-  groupweight_tab <- ja_allreps_tab%>%
+  groupweight_tab <- juvads_allreps_tab%>%
     select(week, id, stage, seedmass, sp, leaves, stem, root, repr)%>%
     mutate(total = leaves + stem + root + repr)%>%
     group_by(week, stage, seedmass)%>%
@@ -431,7 +430,7 @@ groupdyn <- function(ja_allreps_tab, singlestages){
     ungroup()
   
   # intra-replicate summary
-  groupweight_replitab <- ja_allreps_tab%>%
+  groupweight_replitab <- juvads_allreps_tab%>%
     select(week, id, stage, seedmass, sp, leaves, stem, root, repr, repli)%>%
     mutate(total = leaves + stem + root + repr)%>%
     group_by(week, stage, seedmass, repli)%>%
@@ -465,9 +464,9 @@ groupdyn <- function(ja_allreps_tab, singlestages){
 }
 
 #' Calculate biomass production
-production <- function(ja_allreps_tab){
+production <- function(juvads_allreps_tab){
   
-  production_tab <- ja_allreps_tab%>%
+  production_tab <- juvads_allreps_tab%>%
     select(week, leaves, stem, root, repr, repli)%>%
     mutate(production = sum(leaves,stem, root, repr)/(10^3))%>%
     ungroup()%>%
@@ -476,7 +475,7 @@ production <- function(ja_allreps_tab){
               prod_sd = sd(production))%>%
     ungroup()
   
-  production_replitab <- ja_allreps_tab%>%
+  production_replitab <- juvads_allreps_tab%>%
     select(week, leaves, stem, root, repr,repli)%>%
     mutate(production = sum(leaves,stem, root, repr)/(10^3))%>%
     ungroup()%>%
@@ -498,15 +497,15 @@ production <- function(ja_allreps_tab){
 
 #' Analysis of change in trait values distribution
 
-traitchange  <- function(ja_allreps_tab, timesteps, species){
+traitchange  <- function(juvads_allreps_tab, timesteps, species){
   
   if(missing(species)){
-    species <- unique(ja_allreps_tab$sp)
+    species <- unique(juvads_allreps_tab$sp)
   }
   species <- factor(species)
   
   #Plot trait distribution for the species, at different time steps
-  traitvalue_tab <- ja_allreps_tab%>%
+  traitvalue_tab <- juvads_allreps_tab%>%
     select(-c(kernel, clonality, age, xloc, yloc, leaves, stem, root, repr, mated))
   
   traitvalue4dist <- gather(traitvalue_tab%>%
@@ -535,9 +534,9 @@ traitchange  <- function(ja_allreps_tab, timesteps, species){
     map(. %>% plotdist)
   
   # Plot trait variance over time
-  traitsummary_tab  <- ja_allreps_tab%>%
+  traitsummary_tab  <- juvads_allreps_tab%>%
     select(-c(id, stage, kernel, clonality, age, xloc, yloc, 
-              leaves, stem, root, repr, mated, b0mort, b0germ, b0grow, repli))%>%
+              leaves, stem, root, repr, mated, repli))%>%
     group_by(week, sp)%>%
     summarize_all(funs(mean = mean,
                        sd = sd))%>%
@@ -645,9 +644,9 @@ lifehistory <- function(outputsdir){
 }
 
 #' Age distribution of stages
-agetraits <- function(ja_allreps_tab){
+agetraits <- function(juvads_allreps_tab){
   
-  meanage_plot <- ja_allreps_tab%>%
+  meanage_plot <- juvads_allreps_tab%>%
     select(-repli)%>%
     group_by(week, sp, stage)%>%
     summarize(mean_age = mean(age),
@@ -672,9 +671,9 @@ agetraits <- function(ja_allreps_tab){
 ##scale_color_viridis(discrete = TRUE)
 
 #' Seed production and seed bank
-seeddynamics <- function(ja_allreps_tab, seeds_allreps_tab){
+seeddynamics <- function(juvads_allreps_tab, seeds_allreps_tab){
   
-  seeddyn_tab <- ja_allreps_tab%>%
+  seeddyn_tab <- juvads_allreps_tab%>%
     filter(stage == "s")%>%
     select(week, sp, stage, repli)%>%
     group_by(week, sp, stage, repli)%>%
@@ -699,12 +698,12 @@ cleanoutput <- getoutput(parentsimID, repfolder, nreps,
 
 ## Identify replicates
 replicates <- orgareplicates(parentsimID, repfolder, nreps)
-replicates$a -> ja_allreps_tab
+replicates$a -> juvads_allreps_tab
 replicates$b -> seeds_allreps_tab
 rm(replicates)
 
 ## Individual vegetative and reproductive biomasses of juveniles and adults
-biomass <- biomass_allocation(ja_allreps_tab)
+biomass <- biomass_allocation(juvads_allreps_tab)
 biomass$a -> biomass_tabrepli
 biomass$b -> biomass_tab
 biomass$c -> growthcurve_tab
@@ -717,7 +716,7 @@ biomass$i -> growthcurve
 rm(biomass)
 
 ## Species abundance variation
-abund <- popabund(ja_allreps_tab)
+abund <- popabund(juvads_allreps_tab)
 abund$a -> pop_tab
 abund$b -> spabund_tab
 abund$c -> abund_plot
@@ -732,7 +731,7 @@ population$d -> rltvstruct_plot
 rm(population)
 
 ## Species richness
-spprich <- spprichness(ja_allreps_tab, pop_tab, parentsimID, disturbance) # tdist is optional
+spprich <- spprichness(juvads_allreps_tab, pop_tab, parentsimID, disturbance) # tdist is optional
 spprich$a -> spprichness_tab
 spprich$b -> spprichness_plot
 spprich$c -> groupspprichness_tab 
@@ -751,7 +750,7 @@ rank$c -> rankabund_plot
 rm(rank)
 
 ## Population structure by group size
-groups <- groupdyn(ja_allreps_tab) #specifying singlestages is optional
+groups <- groupdyn(juvads_allreps_tab) #specifying singlestages is optional
 groups$a -> grouppop_tab
 groups$b -> groupweight_tab
 groups$c -> groupweight_replitab
@@ -760,7 +759,7 @@ groups$e -> groupweight_plot
 rm(groups)
 
 ## Biomass production
-prod <- production(ja_allreps_tab)
+prod <- production(juvads_allreps_tab)
 prod$a -> production_tab
 prod$b -> production_replitab
 prod$c -> production_plot
@@ -768,12 +767,12 @@ rm(prod)
 
 ## Trait change
 ### trait values
-traitschange <- traitchange(ja_allreps_tab, timesteps)
-traitschange$a -> traitvalues_tab
-traitschange$b -> traitdistributions_plots
-traitschange$c -> traitssummary_tab
-traitschange$d -> traitts_plots
-rm(traitschange)
+#traitschange <- traitchange(juvads_allreps_tab, timesteps)
+#traitschange$a -> traitvalues_tab
+#traitschange$b -> traitdistributions_plots
+#traitschange$c -> traitssummary_tab
+#traitschange$d -> traitts_plots
+#rm(traitschange)
 ### trait space
 ##traitspace <- traitspacechange(traitsdistributions_tab, timesteps)
 ##traitspace$a -> traitpcas
@@ -790,10 +789,10 @@ lifehistory$d -> metabolic_summary_tab
 rm(lifehistory)
 
 ## Age traits
-meanage_plot <- agetraits(ja_allreps_tab)
+meanage_plot <- agetraits(juvads_allreps_tab)
 
 ## Seed dynamics
-seeddyn <- seeddynamics(ja_allreps_tab, seeds_allreps_tab)
+seeddyn <- seeddynamics(juvads_allreps_tab, seeds_allreps_tab)
 seeddyn$a -> seeddyn_tab
 seeddyn$b -> seeddyn_plot
 rm(seeddyn)
@@ -821,53 +820,53 @@ save(list = traits_plots, file = file.path(analysEDdir,
                                             paste(parentsimID, "traitsdistributions",
 					          ".RData", sep = "")))
 
-traitvaluesdir <- file.path(analysEDdir, "traitvalues")
-dir.create(traitvaluesdir)
-
-for(sp in 1:length(unique(ja_allreps_tab$sp))){
-  for(trait in 1:length(traitdistributions_plots[[sp]])){
-    distributions <- plot_grid(traitdistributions_plots[[sp]][[1]],
-                               traitdistributions_plots[[sp]][[2]],
-                               traitdistributions_plots[[sp]][[3]],
-                               traitdistributions_plots[[sp]][[4]],
-                               traitdistributions_plots[[sp]][[5]],
-                               traitdistributions_plots[[sp]][[6]],
-                               traitdistributions_plots[[sp]][[7]],
-                               traitdistributions_plots[[sp]][[8]],
-                               traitdistributions_plots[[sp]][[9]],
-                               traitdistributions_plots[[sp]][[10]],
-                               nrow = 2,
-                               ncol = 5)
-    ggsave(file = file.path(traitvaluesdir,
-                            paste(unique(ja_allreps_tab$sp)[sp],"_dist.png", sep = "")),
-           plot = distributions,
-           dpi = 300,
-           height = 30,
-           width = 40,
-           units = "cm")
-    
-    ts <- plot_grid(traitts_plots[[sp]][[1]],
-                    traitts_plots[[sp]][[2]],
-                    traitts_plots[[sp]][[3]],
-                    traitts_plots[[sp]][[4]],
-                    traitts_plots[[sp]][[5]],
-                    traitts_plots[[sp]][[6]],
-                    traitts_plots[[sp]][[7]],
-                    traitts_plots[[sp]][[8]],
-                    traitts_plots[[sp]][[9]],
-                    traitts_plots[[sp]][[10]],
-                    nrow = 2,
-                    ncol = 5)
-    ggsave(file = file.path(traitvaluesdir,
-                            paste(unique(ja_allreps_tab$sp)[sp],"_ts.png", sep = "")),
-              plot = ts,
-              dpi = 300,
-              height = 30,
-              width = 40,
-              units = "cm")
-  }
-}
-
 ## Plot all graphs
 map(EDplots, ~ save_plot(filename = file.path(analysEDdir, paste(.x, ".png", sep ="")),
 	       	         plot = get(.x)))
+
+#traitvaluesdir <- file.path(analysEDdir, "traitvalues")
+#dir.create(traitvaluesdir)
+
+#for(sp in 1:length(unique(juvads_allreps_tab$sp))){
+#  for(trait in 1:length(traitdistributions_plots[[sp]])){
+#    distributions <- plot_grid(traitdistributions_plots[[sp]][[1]],
+#                               traitdistributions_plots[[sp]][[2]],
+#                               traitdistributions_plots[[sp]][[3]],
+#                               traitdistributions_plots[[sp]][[4]],
+#                               traitdistributions_plots[[sp]][[5]],
+#                               traitdistributions_plots[[sp]][[6]],
+#                               traitdistributions_plots[[sp]][[7]],
+#                               traitdistributions_plots[[sp]][[8]],
+#                               traitdistributions_plots[[sp]][[9]],
+#                               traitdistributions_plots[[sp]][[10]],
+#                               nrow = 2,
+#                               ncol = 5)
+#    ggsave(file = file.path(traitvaluesdir,
+#                            paste(unique(juvads_allreps_tab$sp)[sp],"_dist.png", sep = "")),
+#           plot = distributions,
+#           dpi = 300,
+#           height = 30,
+#           width = 40,
+#           units = "cm")
+#    
+#    ts <- plot_grid(traitts_plots[[sp]][[1]],
+#                   traitts_plots[[sp]][[2]],
+#                    traitts_plots[[sp]][[3]],
+#                    traitts_plots[[sp]][[4]],
+#                    traitts_plots[[sp]][[5]],
+#                    traitts_plots[[sp]][[6]],
+#                    traitts_plots[[sp]][[7]],
+#                    traitts_plots[[sp]][[8]],
+#                    traitts_plots[[sp]][[9]],
+#                    traitts_plots[[sp]][[10]],
+#                    nrow = 2,
+#                    ncol = 5)
+#    ggsave(file = file.path(traitvaluesdir,
+#                            paste(unique(juvads_allreps_tab$sp)[sp],"_ts.png", sep = "")),
+#              plot = ts,
+#              dpi = 300,
+#              height = 30,
+#              width = 40,
+#              units = "cm")
+#  }
+#}
