@@ -98,7 +98,7 @@ function write_output(plants::Array{Plant,1}, t::Int64, settings::Dict{String,An
     # output plants info
     if t == 1 || rem(t,settings["tout"]) == 0
 
-        for o in 1:length(juvs_adlts)
+        for o in juvs_adlts
             open(joinpath(settings["outputat"],settings["simID"],"statevars_ind.txt"), "a") do output
                 writedlm(output, hcat(t,
                                       plants[o].id,
