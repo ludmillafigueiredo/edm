@@ -230,6 +230,9 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counte
 		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
 
                 spoffspringcounter += offs
+		open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
+    	            writedlm(seedfile, hcat(t, sp, "s", "sex", spoffspringcounter))
+  	        end
 
 		# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
 		plants[s].mass["repr"] = 0
@@ -261,9 +264,6 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counte
 	    end
         end
 
-  	open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
-    	    writedlm(seedfile, hcat(t, sp, "s", "sex", spoffspringcounter))
-  	end
   end
 
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
@@ -642,6 +642,10 @@ function destroyorgs!(plants::Array{Plant,1}, landavail::BitArray{2}, settings::
     if length(kills) > 0 # trying to delete at index 0 generates an error
 	deleteat!(plants, kills)
     end
+    # check-point
+        open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+	    println(sim, "Killed $(length(kills))")
+        end
 end
 
 """
