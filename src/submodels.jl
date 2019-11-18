@@ -10,14 +10,17 @@ using DelimitedFiles
 function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
 
     growing = filter(x-> x.stage == growing_stage, plants) 
-    filter(x-> x.stage != growing_stage, plants)
+    filter!(x-> x.stage != growing_stage, plants)
 
     flowering_ids = filter(x -> x.stage == "a" &&
     		    	        x.floron <= rem(t,52) < x.floroff &&
 				(sum(values(x.mass))-x.mass["repr"]) >=
 				0.5*(2*x.compartsize+x.compartsize^(3/4)),
-			   plants) |>
+			   growing) |>
 	            x -> getfield.(x, :id)
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        println(sim, "Flowering: $flowering_ids")
+    end
 
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
