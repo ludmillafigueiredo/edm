@@ -63,15 +63,10 @@ function develop!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
     end
 
     # find indexes of individuals that are ready to become adults
-    juvs = findall(x->x.stage == "j" && x.age >= x.firstflower,plants)
-
-    for j in juvs
-	plants[j].stage = "a"
-        # check-point
-	open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-	    writedlm(sim, hcat(t, "maturation", plants[j].stage, plants[j].age))
-	end
-    end
+    juvs = filter(x->x.stage == "j" && x.age >= x.firstflower,plants)
+    filter!(x -> !(x.id in getfield.(juvs, :id)), plants)
+    setfield!.(juvs, :stage, "a")
+    append!(plants, juvs)
 end
 
 """
