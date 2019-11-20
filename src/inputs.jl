@@ -37,28 +37,18 @@ function parse_commandline()
         arg_type = String
         default = joinpath("test_inputs", "insects_indep.csv")
 
-        "--initialland"
+        "--initial_land"
         help = "Name of file with landscape size values: areas of fragments, mean (and s.d.) temperature."
         arg_type = String
         default = joinpath("test_inputs","control_49m2.grd")
 
-        "--disturbtype"
+        "--disturb_type"
         help = "Type of environmental disturbance to be implemented: habitat area loss \"loss\", habitat fragmentation \"frag\" or temperature change \"temp\""
         arg_type = String
         default = "none"
 
-        "--landmode"
-        help = "Choose between using shape files to simulate the landscape and its change (\"real\") or providing the dimensions of the landscape to be simualted (total area, habitat area, number of habitat patches and distances between patches - \"artificial\")."
-        arg_type = String
-        default = "artif"
-
-        "--landbuffer"
-        help = "Buffer shape file or file containing its area"
-        arg_type = String
-        default = joinpath("inputs", "landbuffer.jl")
-
-        "--disturbland"
-        help = "Either a shape file (if \`landmode\`)"
+        "--disturb_file"
+        help = "When simulating area loss, the path to a table with disturbance times (td) and proportions of loss of habitat area (template: habitatloss_template.csv). When simulating fragmentation, the path to a table with disturbance times (td) and proportions of loss of habitat area (template: habitatfrag_template.csv)"
         arg_type = Any
         default = nothing
 
@@ -86,98 +76,24 @@ function parse_commandline()
 end
 
 """
-    read_landpars(settings)
-Read, derive and store values related to the environmental conditions: temperature, landscape size, availability, and changes thereof.
+read_landpars
 """
-function read_landpars(settings::Dict{String,Any})
-
-    # Temperature time-series
-    temp_tsinput = CSV.read(settings["temp_ts"])
-
-    # Landscape is built differently, depending on the mode of simulation
-    if settings["landmode"] == "real" # simulation arena is built from files, which are analysed in R
-
-        # send file paths to R
-        initialland = settings["initialland"]
-        @rput initialland
-        # disturbland file contains time of habitat destruction and the raster file representing it afterwards
-        disturbland = CSV.read(settings["disturbland"],header=true,types=Dict("td"=>Int64,"disturbland"=>Any))[:disturbland]
-        @rput disturbland
-        # buffer area
-        landbuffer = settings["landbuffer"]
-        @rput landbuffer
-
-        # get patches/fragments areas and distances from shape/raster files
-        landconfig = rcopy(Array{Any}, reval(joinpath(EDMdir, "landconfig.R")))
-        # store them in landpars
-        # in the absence of disturbance-related files, R returns Nullable values
-        landpars = LandPars(landconfig[[1]],
-                                     areatocell(landconfig[[2]]),
-                                     landconfig[[3]],
-                                     landconfig[[4]],
-                                     landconfig[[5]],
-                                     areatocell(landconfig[[6]]),
-                                     landconfig[[7]],
-                                     landconfig[[8]],
-                                     temp_tsinput[:,:meantemp])
-
-    elseif settings["landmode"] == "artif"
-
-        if settings["disturbtype"] in ["frag" "loss"]
-
-            # send file names to R
-            initialland = settings["initialland"]
-            @rput initialland
-
-            disturbland = settings["disturbland"] #object has to be initialized
-            if settings["disturbtype"] == "loss"
-                disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "proportion" => Float64))
-            elseif settings["disturbtype"] == "frag"
-                disturbland = CSV.read(settings["disturbland"], header = true, types = Dict("td" => Int64, "disturbland" => String))
-            end
-            @rput disturbland
-
-            # get 0-1 habitat suitability matrices
-            landconfig = rcopy(Array{Any}, reval(string("source(\"",joinpath(EDMdir,"landnlmconfig.R"),"\")")))
-            @rget initialmatrix
-            @rget disturbmatrix
-
-            # if fragmentation is simulated, the file names are assgined to dist field
-	    # if area loss is simulated, the proportion of loss, if none, default value nothing
-            if disturbmatrix == "notfrag"
-                landpars = NeutralLandPars(Int.(initialmatrix),
-					   disturbland[:,:proportion],
-					   temp_tsinput[:,:meantemp])
-            else
-                landpars = NeutralLandPars(Int.(initialmatrix),
-				           Int.(disturbmatrix),
-					   temp_tsinput[:,:meantemp])
-            end
-            #TODO block above can handle pollination
+function read_landpars(settings)
 	    
+	if settings["disturb_type"] == "loss"
+                disturbance = CSV.read(settings["disturb_file"], header = true,
+			      	       types = Dict("td" => Int64, "proportion" => Float64))
+        elseif settings["disturb_type"] == "frag"
+                disturbance = CSV.read(settings["disturb_file"], header = true,
+			      	       types = Dict("td" => Int64, "disturb_file" => String))	    
         else
-	
-            # send file names to R
-            initialland = settings["initialland"]
-            @rput initialland
-            disturbland = settings["disturbland"]
-            @rput disturbland
+		disturbance = nothing
+	end
 
-            # get suitability matrices from R
-            landconfig = rcopy(Array{Any}, reval(string("source(\"",joinpath(EDMdir, "landnlmconfig.R"),"\")")))
-            @rget initialmatrix
-            @rget disturbmatrix
+	landpars = LandPars(settings["initial_land"], disturbance)
 
-            landpars = NeutralLandPars(Int.(initialmatrix),
-                                                nothing,
-                                                temp_tsinput[:,:meantemp])
-        end
-    else
-        error("Please inform how landscape should be simulated:\n
-               artificially created (artif)\n
-               built from .grd input files (real).")
-    end
     return landpars
+
 end
 
 """
@@ -268,13 +184,13 @@ Set disturbance time(s).
 function set_tdist(settings)
 
     # select file according to keyword: loss, frag, temp
-        if settings["disturbtype"] == "none"
+        if settings["disturb_type"] == "none"
             tdist = nothing
-	elseif settings["disturbtype"] in ["loss" "frag"]
-            tdist = CSV.read(settings["disturbland"],header=true,types=Dict("td"=>Int64))[:td]
-        elseif settings["disturbtype"] == "poll"
+	elseif settings["disturb_type"] in ["loss" "frag"]
+            tdist = CSV.read(settings["disturb_file"], header=true, types=Dict("td"=>Int64))[:td]
+        elseif settings["disturb_type"] == "poll"
             tdist = CSV.read(settings["insect"])[:, :td]
-        elseif settings["disturbtype"] == "temp"
+        elseif settings["disturb_type"] == "temp"
             println("Temperature change is simulated with the temperature file provided.")
         else
             error("Please specify one of the disturbance scenarios with `--disturb`:
@@ -284,6 +200,6 @@ function set_tdist(settings)
                 \n\'temp\' for temperature change,
                 \n\'poll\' for pollination loss.")
         end
+
 	return tdist
 end
-

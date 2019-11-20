@@ -118,11 +118,11 @@ function areatocell(area::Array{T,1} where {T<:Number})
 end
 
 """
-    updateK!(landavail, settings, t, tdist)
+    updateK!(landscape, settings, t, tdist)
 Update the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`).
 It is called during initialization (`t` = 1)  and is called again if landscape is disturbed (at `tdist`; `criticalts` keeps track of the updates and outputs the new values).
 """
-function updateK!(K::Float64, landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
+function updateK!(K::Float64, landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64, tdist::Any)
 
     criticalts = Array{Int64,N} where N
     # check on which timesteps to write land dims (ifelse() does not work)
@@ -142,8 +142,8 @@ function updateK!(K::Float64, landavail::BitArray{2}, settings::Dict{String,Any}
         end
 
         # habitat area
-        habitatarea = length(findall(x -> x == true, landavail))  #number of habitat grid cels ggrid cells
-        totalarea = prod(size(landavail)) # total number of grid cell. Habitat or not
+        habitatarea = length(findall(x -> x == true, landscape))  #number of habitat grid cels ggrid cells
+        totalarea = prod(size(landscape)) # total number of grid cell. Habitat or not
 
 	K = C_K*habitatarea
         open(joinpath(settings["outputat"],settings["simID"],"landlog.txt"),"a") do sim
@@ -184,37 +184,20 @@ function updatefitness!(mean_annual::Float64, max_fitness::Float64, t::Int64, se
 end
 
 """
-    updateenv!(landscape,t)
+    setenv!(landscape,t)
 Update temperature and precipitation values according to the weekly input data (weekly means and ).
 """
-function setenv!(t::Int64, landpars::LandPars)
+function setenv!(t::Int64, temp_ts)
 
-    T = landpars.meantempts[t] + T_K
+    T = temp_ts[t, :meantemp][1] + T_K
+    
     if rem(t, 52) == 1
-	mean_annual = mean(landpars.meantempts[t:(t+51)] + T_K)
-	#unity test
-	println("Temperature for week $t: $T")
-	println("Mean for the year of week $t: $mean_annual")
-
+	mean_annual = mean(temp_ts[t:(t+51), :meantemp] .+ T_K)
 	return T, mean_annual
     else
 	return T
     end
-end
-
-function setenv!(t::Int64, landpars::NeutralLandPars)
-
-    T = landpars.meantempts[t] + T_K
-    if rem(t, 52) == 1
-	mean_annual = mean(broadcast(+, T_K, landpars.meantempts[t:(t+51)]))
-	#unity test
-	println("Temperature for week $t: $T")
-	println("Mean for the year of week $t: $mean_annual")
-
-	return T, mean_annual
-    else
-	return T
-    end
+    
 end
 
 """
@@ -227,7 +210,7 @@ function get_dest(loc::NamedTuple{(:idx, :loc),Tuple{Int64,Tuple{Int64,Int64}}},
 
     xdest = loc.loc[1]+round(Int64, dist*cos(theta), RoundNearestTiesAway)
     ydest = loc.loc[2]+round(Int64, dist*sin(theta), RoundNearestTiesAway)
-    suitable = checkbounds(Bool, landavail, xdest, ydest) && landavail[xdest, ydest] == true
+    suitable = checkbounds(Bool, landscape, xdest, ydest) && landscape[xdest, ydest] == true
 	    
     newlocs = (idx = loc.idx, dest = (xdest, ydest), suitable = suitable)
 	    

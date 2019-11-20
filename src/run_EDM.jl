@@ -9,12 +9,13 @@ include("entities.jl")
 include("auxiliary.jl")
 include("inputs.jl")
 include("initialisation.jl")
-include("submodels.jl")
+include("submodels_lifecycle.jl")
+include("submodels_disturbance.jl")
 include("outputs.jl")
 include("scheduling.jl")
 
 # run simulation
-results_folder = run_scheduling(settings, tdist, id_counter, management_counter, landpars, interaction, scen, remaining, K, T, mean_annual, plants)
+results_folder = run_scheduling(settings, tdist, id_counter, management_counter, landpars, interaction, scen, remaining, K, T, mean_annual, plants, landscape)
 
 # analyse results
 analysED(settings, results_folder)

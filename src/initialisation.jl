@@ -1,12 +1,11 @@
-
 """
-    init_K(landavail, settings, t)
+    init_K(landscape, settings, t)
 Calculate the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`) at initialization.
 `K` is used to initialize the species with abundances corresponding to a niche partitioning model.
 """
-function init_K(landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
-    habitatarea = length(findall(x -> x == true, landavail))
-    totalarea = prod(size(landavail))
+function init_K(landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64)
+    habitatarea = length(findall(x -> x == true, landscape))
+    totalarea = prod(size(landscape))
     K = C_K*habitatarea
     return K
 end
@@ -17,35 +16,17 @@ Create the initial landscape structure.
 """
 function init_landscape(landpars::LandPars)
 
-    landscape = Array{Dict{String,Float64},2} #if created only inside the loop, remains a local variable
+     # process raster fies in R
+     initial_land = landpars.initial
+     @rput initial_land
+     R"source(\"src/init_landscape.R\")"
+     @rget initial_matrix
 
-    for p in collect(1:landpars.npatches)
+    # convert raster matrix to BitArray (smaller than Bool)
+    landscape = BitArray(initial_matrix)
 
-	patch = fill(Dict{String,Float64}(), landpars.plength[p],landpars.plength[p])
-
-	if p == 1
-	    landscape = patch #when empty, landscape cant cat with frag
-	else
-	    landscape = cat(3,landscape, patch)
-	end
-    end
-
-    landavail = fill(true,size(landscape))
-
-    return landscape, landavail
-end
-
-function init_landscape(landpars::NeutralLandPars)
-
-    # convert matrix to BitArray (smaller than Bool)
-    landavail = Bool.(landpars.initialland)
-
-    # create landscape with same dimensions
-    landscape = fill(Dict{String, Float64}(),
-		     size(landavail))
-
-    return landscape, landavail
-
+    return landscape
+    
 end
 
 """
@@ -76,12 +57,12 @@ end
 
 
 """
-    init_plants(landavail, SPP_REF,id_counter)
+    init_plants(landscape, SPP_REF,id_counter)
 
-Initialize the organisms with trait values stored in `SPP_REF` and distributes them in the suitable grid-cells in the landscape `landavail`.
+Initialize the organisms with trait values stored in `SPP_REF` and distributes them in the suitable grid-cells in the landscape `landscape`.
 Store the individuals in the `plants` array, which holds all plants simulated at any given time.
 """
-function init_plants(landavail::BitArray{N} where N, SPP_REF::SppRef, id_counter::Int, settings::Dict{String, Any}, K::Float64)
+function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, id_counter::Int, settings::Dict{String, Any}, K::Float64)
 
     plants = Plant[]
 
@@ -95,8 +76,8 @@ function init_plants(landavail::BitArray{N} where N, SPP_REF::SppRef, id_counter
 	    println(sim, "Initial abundance of $s: $sp_abund")
         end
 
-	XYs = hcat(rand(1:size(landavail,1), sp_abund),
-                    rand(1:size(landavail,2), sp_abund))
+	XYs = hcat(rand(1:size(landscape,1), sp_abund),
+                    rand(1:size(landscape,2), sp_abund))
 
 	for i in 1:sp_abund
 
@@ -159,20 +140,20 @@ Random.seed!(settings["rseed"])
 id_counter = 0
 management_counter = 0
 
-tdist = set_tdist(settings)
+# Temperature time-series
+temp_ts = CSV.read(settings["temp_ts"])
+
+# Landscape parameters
 landpars = read_landpars(settings)
+
+# Timestep(s) of disturbance
+tdist = set_tdist(settings)
 
 const SPP_REF = read_sppinput(settings)
 const TRAIT_RANGES = define_traitranges(settings)
 interaction, scen, remaining = read_insects(settings)
-global mylandscape, landavail = init_landscape(landpars)
-K = init_K(landavail, settings, 1)
-T, mean_annual = setenv!(1, landpars)
+landscape = init_landscape(landpars)
+K = init_K(landscape, settings, 1)
+T, mean_annual = setenv!(1, temp_ts)
 init_fitness!(SPP_REF, mean_annual, 1.0)
-plants, id_counter = init_plants(landavail, SPP_REF, id_counter, settings, K)
-
-#check-points
-println("Landscape initialized: type $(typeof(mylandscape))")
-println("Landscape is object of type $(typeof(landpars))")
-println("Plants initialized: type $(typeof(plants))")
-println("Starting simulation")
+plants, id_counter = init_plants(landscape, SPP_REF, id_counter, settings, K)

@@ -7,8 +7,8 @@
 --outputat "EDoutputs"\
 --spinput "inputs/weisssingles/weissplants_sppinput.csv"\
 --insect "inputs/insects_indep.csv"\
---initialland "inputs/control_4m2.grd"\
---disturbtype "none"\
+--initial_land "inputs/control_4m2.grd"\
+--disturb_type "none"\
 --landmode "artif"\
 --timesteps "5200"\
 --tout "4"\

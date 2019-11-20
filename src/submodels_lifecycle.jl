@@ -30,7 +30,6 @@ function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T:
     end
 	
     for sp in unique(getfield.(growing, :sp))
-    
     	b0grow = SPP_REF.b0grow[sp]
     	growing_sp = filter(x->x.sp == sp, growing)
 	map(x -> grow_allocate!(x, b0grow, flowering_ids), growing_sp)
@@ -325,7 +324,7 @@ end
 Seeds are dispersed.
 `get_dest` is defined in `auxiliary.jl`
 """
-function disperse!(landavail::BitArray{2},plants::Array{Plant, 1},t::Int,settings::Dict{String, Any},landpars::Any, tdist::Any)
+function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,settings::Dict{String, Any},landpars::Any, tdist::Any)
 
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Dispersing ..."))
@@ -509,7 +508,7 @@ function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, 
     
 end
 
-function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  landavail::BitArray{2}, T, dying_stage::String)
+function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  landscape::BitArray{2}, T, dying_stage::String)
 
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
@@ -628,27 +627,6 @@ function winter_dieback!(plants::Array{Plant,1}, t::Int)
 end
 
 """
-    destroyorgs!(plants)
-Kill organisms that where in the lost habitat cells.
-
-"""
-function destroyorgs!(plants::Array{Plant,1}, landavail::BitArray{2}, settings::Dict{String,Any})
-    kills = []
-    for o in 1:length(plants)
-	if landavail[plants[o].location...] == false
-	    push!(kills,o)
-	end
-    end
-    if length(kills) > 0 # trying to delete at index 0 generates an error
-	deleteat!(plants, kills)
-    end
-    # check-point
-        open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-	    println(sim, "Killed $(length(kills))")
-        end
-end
-
-"""
     manage!()
 Juvenile and adult that are big enough, i.e., above-ground compartments have more than 50% its maximum value, have these compartments reduced to 50% of their biomass.
 Mowing happens at most once a year, between August and September.
@@ -680,160 +658,3 @@ function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64, se
     end
     return management_counter
 end
-
-"""
-destroyarea!()
-Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
-"""
-function destroyarea!(landpars::LandPars, landavail::Array{Bool,2}, settings::Dict{String,Any}, t::Int64)
-
-    if settings["landmode"] == "artif"
-	# DESTROY HABITAT
-	# index of the cells still availble:
-	available = findall(x -> x == true, landavail)
-	# number of cells to be destroyed:
-	loss = landpars.disturbarea/landpars.initialarea # just a proportion, unit doesn't matter
-	lostarea = round(Int,loss*length(available), RoundUp)
-
-	# Unity test
-	if lostarea > length(available)
-	    error("Destroying more than the available area.")
-	end
-
-	# go through landscape indexes of the first n cells from the still available
-	for cell in available[1:lostarea]
-	    landavail[cell] = false # and destroy them
-	end
-
-	#unity test
-	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	    println(sim, "Number of destroyed cells: $lostarea")
-	end
-
-    elseif settings["landmode"] == "real"
-	# rebuild the landscape according to shape file
-	 landscape = Array{Dict{String,Float64}, 2}
-
-	for frag in collect(1:landpars.nfrags)
-
-	    fragment = fill(Dict{String,Float64}(), landpars.flength[frag],landpars.flength[frag])
-
-	    if frag == 1
-		 landscape = fragment #when empty, landscape cant cat with frag
-	    else
-		 landscape = cat(3,landscape, frag)
-	    end
-
-	end
-
-	 landavail = fill(true,size(landscape))
-
-    end
-end
-
-function destroyarea!(landpars::NeutralLandPars, landavail::BitArray{2}, settings::Dict{String,Any}, t::Int64)
-
-    if settings["landmode"] == "artif"
-	# DESTROY HABITAT
-	# index of the cells still availble:
-	available = findall(x -> x == true, landavail)
-	# number of cells to be destroyed:
-	loss = landpars.disturbland[:proportion][findall(landpars.disturbland[:td]==[t])[1]]
-	lostarea = round(Int,loss*length(available), RoundUp)
-
-	# Unity test
-	if lostarea > length(available)
-	    error("Destroying more than the available area.")
-	end
-
-	# go through landscape indexes of the first n cells from the still available
-	for cell in available[1:lostarea]
-	     landavail[cell] = false # and destroy them
-	end
-
-	#unity test
-	open(abspath(joinpath(settings["outputat"],settings["simID"],"simulog.txt")),"a") do sim
-	    println(sim, "Number of destroyed cells: $lostarea")
-	end
-
-    elseif settings["landmode"] == "real"
-	#TODO probably unnecessary
-    end
-
-     landscape = fill(Dict{String, Float64}(),
-		     size(landavail))
-
-end
-
-"""
-    disturb!(landscape, landavail, plants, t, settings, landpars, tdist)
-Change landscape structure and metrics according to the simulation scenario (`loss`, habitat loss, or `frag`, fragmentation)
-"""
-function disturb!(landscape::Array{Dict{String,Float64},N} where N, landavail::BitArray{2}, plants::Array{Plant,1}, t::Int64, settings::Dict{String,Any}, landpars::NeutralLandPars, tdist::Any)
-
-    if settings["disturbtype"] == "loss"
-         landscape, landavail = destroyarea!(landpars, landavail, settings, t)
-    elseif settings["disturbtype"] == "frag"
-         landscape, landavail = fragment!(landscape, landavail, landpars, t, tdist)
-    end
-
-    destroyorgs!(plants, landavail, settings)
-
-    return landscape,landavail
-end
-
-
-"""
-    fragment!()
-This function is only called for simulating the fragmentation of an originally single landscape.
-"""
-function fragment!(landscape::Array{Dict{String,Float64},N} where N, settings::Dict{String,Any}, landpars::LandPars, plants::Array{Plant,1})
-
-    newlandscape = []
-
-    # Built fragmented landscape
-    for frag in collect(1:landpars.nfrags)
-
-	fragment = fill(Dict{String,Float64}(), landpars.flength[frag],landpars.flength[frag])
-
-	if frag == 1
-	    newlandscape = fragment #when empty, landscape cant cat with frag
-	else
-	    newlandscape = cat(3, newlandscape, fragment)
-	end
-    end
-
-    # Resettle the individuals in the new landscape:
-    # list all indexes of old landscape
-    arrayidx = hcat(collect(ind2sub(landscape, findall(x -> x == x, landscape)))...)
-    landscapeidx = [Tuple(arrayidx[x,:]) for x in 1:size(arrayidx, 1)]
-    # create array to store the idx of the landscape cells that were not destroyed and sample old cells indexes to fill the new landscape
-    remaincells = sample(landscapeidx, length(newlandscape); replace = false) # the size
-    # reshap the cells in the same dimensions and sizes as the newlandscape, so the new indexes are correct
-    idxholder = reshape(remaincells, size(newlandscape))
-    # kill the organisms that have not remained in the new landscape configuration
-    filter!(x -> x.location in idxholder, plants)
-    # update their .location field
-    newloc = []
-    for o in plants
-	newloc <- idxholder[findall(x->x == collect(plants[o].location), idxholder)]
-	plants[o].location = newloc
-    end
-
-     landscape = newlandscape
-     landavail = fill(true,size(landscape))
-
-    return landscape, landavail
-
-end
-
-# method for 'continuous' landscape structure (not 3D)
-function fragment!(landscape::Array{Dict{String, Float64}, N} where N, landavail::BitArray{2}, landpars::NeutralLandPars, t::Int64, tdist::Any)
-
-    # convert matrix to BitArray (smaller than Bool)
-     landavail = Bool.(landpars.disturbland)
-    # create landscape with same dimensions
-     landscape = fill(Dict{String, Float64}(),
-		     size(landavail))
-
- end

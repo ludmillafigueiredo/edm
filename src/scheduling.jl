@@ -2,7 +2,7 @@
     simulate!()
 Run all functions
 """
-function run_scheduling(settings, tdist, id_counter, management_counter, landpars, interaction, scen, remaining, K, T, mean_annual, plants)
+function run_scheduling(settings, tdist, id_counter, management_counter, landpars, interaction, scen, remaining, K, T, mean_annual, plants,landscape)
 
     Random.seed!(settings["rseed"])
     
@@ -19,25 +19,29 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
             # check-point
             open(joinpath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim
                 println(sim, "\nWEEK $t")
-		        println(sim, "Species richness: $(length(unique(getfield.(plants, :sp))))")
+		println(sim, "Species richness: $(length(unique(getfield.(plants, :sp))))")
             end
 
 	        println("\nWEEK $t")
 	        println("Species richness: $(length(unique(getfield.(plants, :sp))))")
 
             # APPLY LANDSCAPE DISTURBANCE
-            if settings["disturbtype"] in ["frag" "loss"] && t in tdist
-                global mylandscape, landscape = disturb!(mylandscape,landavail,plants,t,
-						         settings,landpars,tdist)
+            if settings["disturb_type"] in ["frag" "loss"] && t in tdist
+                landscape = disturb!(landscape,plants,t,settings,landpars,tdist)
             end
 	    
-            updateK!(K, landavail, settings, t, tdist)
+            updateK!(K, landscape, settings, t, tdist)
 
-	        if rem(t, 52) == 1
-                T, mean_annual = setenv!(t, landpars)
-	        else
-	            T = setenv!(t, landpars)
-	        end
+	    if rem(t, 52) == 1
+                T, mean_annual = setenv!(t, temp_ts)
+	    else
+	        T = setenv!(t, temp_ts)
+	    end
+	    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+	        println(sim, "Temperature for week $t: $T")
+	        println(sim, "Mean for the year of week $t: $mean_annual")
+	    end
+	
 
             updatefitness!(mean_annual, 1.0, t, settings)
 
@@ -57,12 +61,12 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
 	    # Adults growth and mortality
             grow!(plants, t, settings, T, biomass_production, K, "a")
             die!(plants, settings, T, "a")
-	    compete_die!(plants, t, settings, landavail, T, "a")
+	    compete_die!(plants, t, settings, landscape, T, "a")
 	    
 	    # Juvenile growth and mortality 
 	    grow!(plants, t, settings, T, biomass_production, K, "j")
             die!(plants, settings, T, "j")
-	    compete_die!(plants, t, settings, landavail, T, "j")
+	    compete_die!(plants, t, settings, landscape, T, "j")
 
 	    # all individuals except seeds in flowers get older over time
 	    s_flower = filter(x -> x.stage == "s-in-flower", plants)
@@ -80,7 +84,7 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
 
 	    setfield!.(plants, :mated, false) # plant only produces seeds again if it gets pollinated
 	    
-	    justdispersed = disperse!(landavail, plants, t, settings,  landpars, tdist)
+	    justdispersed = disperse!(landscape, plants, t, settings,  landpars, tdist)
 
 	    establish!(justdispersed, plants, t, settings,  T, biomass_production, K)
 	    

@@ -1,6 +1,9 @@
 """
 This file contains data structures used to represent entities in the model and to store values somehow related to them
 """
+
+using DataFrames
+
 # Data structures and submodel functions related to the Plant entity
 # -----------------------------------------------------------------
 
@@ -31,25 +34,8 @@ end
 # Data structures and submodel functions related to the Land entity
 # -----------------------------------------------------------------
 
-#Store simulation parameters referent to the landscape
+#Store files describing the landscape
 mutable struct LandPars
-    # Original landscape parameters
-    npatches::Int # patches of habitat (fragments are after disturbance)
-    plength::Array{Int64,1}
-    initialarea::Int64
-    initialconnect::Any # might not be simulated.
-    # Disturbed landscape parameters
-    nfrags::Any # might not be simulated
-    flength::Any # might not be simulated
-    disturbarea::Any # might not be simulated
-    disturbconnect::Any # might not be simulated
-    # general
-    bufferarea::Any # might not be simulated
-    meantempts::Array{Float64,1} # all fragments get the same temperature
-end
-
-mutable struct NeutralLandPars
-    initialland::Array{Int64,2}
-    disturbland
-    meantempts::Array{Float64,1}
+    initial::String
+    disturbance::Any # it can be Nothing or a DataFrames.DataFrame
 end

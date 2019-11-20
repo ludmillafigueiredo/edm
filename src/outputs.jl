@@ -67,7 +67,7 @@ end
 function log_settings()
         open(joinpath(simresults_folder, "simsettings.jl"),"w") do ID
             println(ID, "tdist = $(repr(tdist))")
-            println(ID, "landpars = $(repr(typeof(landpars))) \ninitial = $(repr(typeof(landpars.initialland))) \ndisturb = $(repr(typeof(landpars.disturbland)))")
+            println(ID, "landpars = $(repr(typeof(landpars))) \ninitial = $(repr(typeof(landpars.initial))) \ndisturb = $(repr(typeof(landpars.disturbance)))")
             println(ID, "interaction = $(repr(interaction))")
             println(ID, "scen = $(repr(scen))")
             println(ID, "remaining = $(repr(remaining))")
@@ -139,7 +139,7 @@ function analysED(settings, results_folder)
     @rput EDdir
     nreps = settings["nreps"]
     @rput nreps
-    disturbance = settings["disturbtype"]
+    disturbance = settings["disturb_type"]
     @rput disturbance
 
     outputsdir = results_folder
