@@ -291,7 +291,7 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter
 	clone.mass["repr"] = 0.0
 
 	id_counter += 1
-	clone.id = hex(id_counter)
+	clone.id = string(id_counter, base=16)
 	push!(plants, clone)
 	spclonescounter += 1
        	end
