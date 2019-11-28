@@ -19,7 +19,7 @@ function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T:
 			   growing) |>
 	            x -> getfield.(x, :id)
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Flowering: $flowering_ids")
+        println(sim, "Flowering: $(length(flowering_ids))")
     end
 
     # check-point
