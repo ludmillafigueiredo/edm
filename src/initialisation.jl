@@ -46,7 +46,7 @@ It runs at initialization, to set up niche partitioning. It used the  with mean 
 - `std_tol::Float64`: parameter `c` is the standard deviation,
 """
 function init_fitness!(SPP_REF::SppRef, mean_annual::Float64, max_fitness::Float64)
-    for sp in SPP_REF.sp_id
+    for sp in SPP_REF.species
         mean_opt = SPP_REF.temp_opt[sp]
         std_tol = SPP_REF.temp_tol[sp]
 
@@ -66,7 +66,7 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, id_counter
 
     plants = Plant[]
 
-    for s in SPP_REF.sp_id
+    for s in SPP_REF.species
 
         # Niche partitioning: Upon initialization, each species total biomass equals K*fitness_relative, where fitness_relative is the species fitness values relative to the sum of others
         # The initial abundance is number of medium-sized individuals (50% of maximal biomass) that would sum up to the biomass.
@@ -90,6 +90,9 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, id_counter
 			      s,
 			      SPP_REF.kernel[s],
 			      SPP_REF.clonality[s],
+			      SPP_REF.pollen_vector[s],
+			      SPP_REF.self_failoutcross[s],
+			      SPP_REF.self_proba[s],
 			      SPP_REF.compartsize[s], #compartsize
 			      Int(round(rand(Distributions.Uniform(SPP_REF.span_min[s], SPP_REF.span_max[s] + minvalue),1)[1], RoundUp)),
 			      Int(round(rand(Distributions.Uniform(SPP_REF.firstflower_min[s], SPP_REF.firstflower_max[s] + minvalue),1)[1], RoundUp)),
@@ -151,7 +154,7 @@ tdist = set_tdist(settings)
 
 const SPP_REF = read_sppinput(settings)
 const TRAIT_RANGES = define_traitranges(settings)
-interaction, scen, remaining = read_insects(settings)
+poll_pars = read_pollination(settings)
 landscape = init_landscape(landpars)
 K = init_K(landscape, settings, 1)
 T, mean_annual = setenv!(1, temp_ts)

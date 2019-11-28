@@ -66,94 +66,84 @@ function develop!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
     filter!(x -> !(x.id in getfield.(juvs, :id)), plants)
     setfield!.(juvs, :stage, "a")
     append!(plants, juvs)
+    
 end
 
 """
-    mate!(plants, t, setting, scen, tdist, remaining)
+get_npoll
+Calculate the number of individuals that get pollinated under each regime of pollinatoin.
+Wind-pollinated species are not affected be pollination loss. Therefore, the number of pollinated individuals dependents only on the amount of flowering and on the default values of efficiency.
+Scenarios of rdm and equal pollination loss have the same calculation, but for equal, the number is calculated per species, whereas for rdm, its the total number.
+"""
+function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars::PollPars)
+
+    if pollen_vector == "wind"
+        npoll = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*WIND_DFLT)),WIND_EFFC))[1]
+    else
+	npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*VST_DFLT)),
+						 INSCT_EFFC))[1]
+	if poll_pars.scen == "indep"
+     	    npoll = npoll_dflt 
+	elseif poll_pars.scen in ["equal", "rdm"]
+	    npoll = Int(ceil(npoll_dflt * poll_pars.regime[poll_pars.regime.td .== t, :remaining][1]))
+	elseif poll_pars.scen == "spec"
+	    # pseudo
+	end
+    end
+
+    return npoll
+
+end
+
+"""
+pollinate!()
+Mark plants and having pollinated (mated = true)
+"""
+function pollinate!(poll_plants::Array{Plant,1}, plants::Array{Plant,1}, npoll::Int64)
+
+    pollinated = sample(poll_plants, npoll, replace = false, ordered = false)
+    setfield!.(pollinated, :mated, true)
+    non_pollinated = filter(x -> !(x.id in getfield.(pollinated,:id)), poll_plants)
+    append!(plants, append!(pollinated, non_pollinated))
+
+end
+
+"""
+    mate!(plants, t, settings)
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
 """
-function mate!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, scen::String, tdist::Any, remaining)
+function mate!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, poll_pars::PollPars)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Pollination ...")
     end
 
-    ready = findall(x-> x.stage == "a" &&
-    	    	    ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]x.seednumber,
-		    plants)
-    pollinated = []
-    npoll = 0
+    flowering = filter(x-> x.stage == "a" &&
+    	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]x.seednumber,
+		       plants)
 
-    if length(ready) > 0 # check if there is anyone flowering
+    if length(flowering) > 0 # check if there is anyone flowering
 
-        # Scenarios were pollination is not species-specific
-        # --------------------------------------------------
-        if scen in ["indep" "equal"]
+        # as with the other processes, it is easier to process plants separately from the main vector
+        filter!(x -> !(x.id in getfield.(flowering, :id)), plants)
 
-	    npoll_default = rand(Distributions.Binomial(Int(ceil(length(ready) * VISITED_DEFAULT)), 0.6))[1]
+	wind_plants = filter(x -> occursin("wind", x.pollen_vector), flowering)
+	npoll = get_npoll("wind", wind_plants, poll_pars)
+	pollinate!(wind_plants, plants, npoll)
 
-	    # Determine number of individuals that get pollinated (species is not relevant)
-	    if scen == "indep"
-		npoll = npoll_default # Fishman & Hadany's proportion of visited flowers
-		println("Scenario of INDEP pollination loss")
-		# check-point
-		open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        	    println(sim, "Number of pollinated: $npoll")
-    		end
+	insects_plants = filter(x -> occursin("insects", x.pollen_vector),
+	                                      flowering)
+	
+	if poll_pars.scen == "indep" || (poll_pars.scen in ["equal", "rdm", "spec"] && !(t in poll_pars.regime.td))
 
-	    elseif scen == "equal" #all species lose pollination randomly (not species-specific)
-		println("Scenario of EQUAL pollination loss")
-		if t in tdist                                                          # calculate the amount of loss for the specified times
-		    npoll = Int(ceil(npoll_default * remaining[findall(tdist == [t])[1]]))
-		else
-		    npoll = npoll_default
-		end
-	    end
-
-	    # unity test
-        if npoll < 0
-		error("Negative number of plants being pollinated.")
-	    end
-
-	    if npoll > 0       # check if any should actually be pollinated
-		# who are they
-		pollinated = sample(ready, npoll, replace = false, ordered = true)
-		# pollinate
-		for p in pollinated
-		    plants[p].mated = true
-		end
-	    end
-	elseif scen in ["rdm" "spec"] #not yet tested
-
-	    # determine which species will loose pollination
-	    if scen == "rdm"
-		# randomly pick plant species that will loose pollination (n = nspppoll) at a given timestep and find their number
-		# pseudo: rdmly pick species:
-		# pseudo: spppoll = unique(getfields(plants, :sp)) |> sample(, nspppoll)
-	    elseif scen == "spec" #not yet tested
-		# pseudo: from a list of loss pollinators, find the plant species (in the interaction matrix) that will loose pollination at a given timestep
-	    end
-
-	    # Species-specific pollination
-            # ----------------------------
-            # check if any should be pollinated
-	    if npoll == 0
-
-	    elseif npoll > 1
-		pollinated = sample(ready, npoll, replace = false, ordered = true)
-		for p in pollinated
-		    plants[p].mated = true
-		end
-	    else
-		error("Negative number of plants being pollinated.")
-	    end
+	    npoll = get_npoll("insects", insects_plants, poll_pars)
+	    pollinate!(insects_plants, plants, npoll)
+		
 	else
-	    error("Please chose a pollination scenario \"scen\" in insect.csv:
-                   - \"indep\": sexual reproduction happens independently of pollination
-                   - \"rmd\": random loss of pollinator species (complementary file should be provided, see model dodumentation)
-                   - \"spec\": specific loss of pollinator species (complementary files should be provided, see model documentation)")
+	    disturb_pollinate!(insects_plants, poll_pars, plants)
 	end
     end
+    
 end
 
 """
@@ -255,8 +245,9 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counte
                     seed.age = 0
                     seed.mated = false
 
-                    microevolve!(seed, plants[s], partner)
-
+		    if rand(Distributions.Binomial(1, 1 - plants[s].self_proba)) == 1
+                        microevolve!(seed, plants[s], partner)
+		    end
 		    push!(plants, seed)
 
 		end
@@ -277,9 +268,10 @@ end
 clone!()
 Asexual reproduction.
 """
-function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter::Int64)
+function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter::Int64, t::Int64)
 
-    asexuals = filter(x -> x.mated == false && x.clonality == true && x.mass["repr"] > SPP_REF.seedmass[x.sp], plants)
+    asexuals=filter(x -> x.mated==false && x.clonality==true && x.mass["repr"]>SPP_REF.seedmass[x.sp],
+                    plants)
 
     for sp in unique(getfield.(asexuals, :sp))
 

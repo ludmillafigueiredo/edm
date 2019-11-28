@@ -29,8 +29,8 @@ function parse_commandline()
         help = "Name of file with species list."
         arg_type = String
         default = joinpath("test_inputs", "weisssingles/weissplants_sppinput.csv")
-
-        "--insect"
+v
+        "--pollination"
         help = "How to explicitly model insects:
                 pollination-independent reproduction \"indep\";
                 equal pollination loss for all species \"equal\"."
@@ -106,19 +106,22 @@ function read_sppinput(settings::Dict{String,Any})
 
     sppref = SppRef()
 
-    # sp_id, clonality and fitness columns cannot be set as the rest
-    sppref.sp_id = spinputtbl[:, :sp_id]
-    sppref.clonality = Dict(spinputtbl[:, :sp_id][i] => spinputtbl[:, :clonality][i] == "true"
-		        	      		    for i in 1:length(spinputtbl[:, :sp_id]))
-    sppref.kernel = Dict(spinputtbl[:, :sp_id][i] => spinputtbl[:, :kernel][i]
-		        	      		    for i in 1:length(spinputtbl[:, :sp_id]))
+    # species, clonality and fitness columns cannot be set as the rest
+    sppref.species = spinputtbl[:, :species]
+    sppref.clonality = Dict(spinputtbl[:, :species][i] => spinputtbl[:, :clonality][i] == "TRUE"
+		        	      		    for i in 1:length(spinputtbl[:, :species]))
+    sppref.kernel = Dict(spinputtbl[:, :species][i] => spinputtbl[:, :kernel][i]
+		        	      		    for i in 1:length(spinputtbl[:, :species]))
+    sppref.pollen_vector = Dict(spinputtbl[:, :species][i] => spinputtbl[:, :pollen_vector][i]
+		        	      		    for i in 1:length(spinputtbl[:, :species]))
+    sppref.self_failoutcross = Dict(spinputtbl[:,:species][i] => spinputtbl[:,:self_failoutcross][i] == "TRUE"
+		        	      		    for i in 1:length(spinputtbl[:, :species]))
     sppref.fitness = Dict()
 
-    println(fieldnames(typeof(sppref))[4:end-1])
-    for field in fieldnames(typeof(sppref))[4:end-1]
+    for field in fieldnames(typeof(sppref))[6:end-1]
     	setfield!(sppref, field,
-	          Dict(spinputtbl[:, :sp_id][i] => Float64(spinputtbl[:, field][i])
-		        	      		    for i in 1:length(spinputtbl[:, :sp_id])))
+	          Dict(spinputtbl[:, :species][i] => Float64(spinputtbl[:, field][i])
+		        	      		    for i in 1:length(spinputtbl[:, :species])))
     end
     
     return sppref
@@ -134,47 +137,52 @@ function define_traitranges(settings::Dict{String,Any})
     spinputtbl = CSV.read(settings["spinput"])
 
     traitranges = TraitRanges(
-        Dict(spinputtbl[:,:sp_id][i] =>
+        Dict(spinputtbl[:,:species][i] =>
              [spinputtbl[:,:compartsize][i], spinputtbl[:,:compartsize][i]]
-             for i in 1:length(spinputtbl[:,:sp_id])),
-        Dict(spinputtbl[:,:sp_id][i] =>
+             for i in 1:length(spinputtbl[:,:species])),
+        Dict(spinputtbl[:,:species][i] =>
              [Int(round(spinputtbl[:,:span_min][i], RoundDown)), Int(round(spinputtbl[:,:span_max][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:sp_id])),
-        Dict(spinputtbl[:,:sp_id][i] =>
+             for i in 1:length(spinputtbl[:,:species])),
+        Dict(spinputtbl[:,:species][i] =>
              [Int(round(spinputtbl[:,:firstflower_min][i], RoundDown)), Int(round(spinputtbl[:,:firstflower_max][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:sp_id])),
-        Dict(spinputtbl[:,:sp_id][i] =>
+             for i in 1:length(spinputtbl[:,:species])),
+        Dict(spinputtbl[:,:species][i] =>
              [Int(round(spinputtbl[:,:floron][i], RoundDown)), Int(round(spinputtbl[:,:floron][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:sp_id])),
-        Dict(spinputtbl[:,:sp_id][i] =>
+             for i in 1:length(spinputtbl[:,:species])),
+        Dict(spinputtbl[:,:species][i] =>
              [Int(round(spinputtbl[:,:floroff][i], RoundDown)), Int(round(spinputtbl[:,:floroff][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:sp_id])),
-        Dict(spinputtbl[:,:sp_id][i] =>
+             for i in 1:length(spinputtbl[:,:species])),
+        Dict(spinputtbl[:,:species][i] =>
              [Int(round(spinputtbl[:,:seednumber_min][i], RoundDown)), Int(round(spinputtbl[:,:seednumber_max][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:sp_id])),
-        Dict(spinputtbl[:,:sp_id][i] =>
+             for i in 1:length(spinputtbl[:,:species])),
+        Dict(spinputtbl[:,:species][i] =>
              [Int(round(spinputtbl[:,:seedon][i], RoundDown)), Int(round(spinputtbl[:,:seedon][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:sp_id])),
-        Dict(spinputtbl[:,:sp_id][i] =>
+             for i in 1:length(spinputtbl[:,:species])),
+        Dict(spinputtbl[:,:species][i] =>
              [Int(round(spinputtbl[:,:seedoff][i], RoundDown)), Int(round(spinputtbl[:,:seedoff][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:sp_id])),
-        Dict(spinputtbl[:,:sp_id][i] =>
+             for i in 1:length(spinputtbl[:,:species])),
+        Dict(spinputtbl[:,:species][i] =>
              [Int(round(spinputtbl[:,:bankduration_min][i], RoundDown)), Int(round(spinputtbl[:,:bankduration_max][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:sp_id])))
+             for i in 1:length(spinputtbl[:,:species])))
     return traitranges
 end
 
 """
-    read_insects(settings)
+    read_pollination(settings)
 Reads how insects are going to be implicitly simulated.
 """
-function read_insects(settings::Dict{String,Any})
+function read_pollination(settings::Dict{String,Any})
 
-    insectsinput = CSV.read(settings["insect"])
-    interaction = insectsinput[:, :interaction][1] # type of interaction which is affected
-    scen = insectsinput[:, :scen][1] # pollination scenario
-    remaining = insectsinput[:, :remaining] # proportion of pollination service loss
-    return interaction, scen, remaining
+    include(settings["pollination"])
+
+    if pollination_scen == "indep"
+        poll_pars = PollPars(pollination_scen, nothing)
+    else
+	poll_pars = PollPars(pollination_scen, pollination_file)
+    end
+    
+    return poll_pars
+
 end
 
 """

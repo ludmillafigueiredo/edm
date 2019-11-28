@@ -15,7 +15,7 @@ include("outputs.jl")
 include("scheduling.jl")
 
 # run simulation
-results_folder = run_scheduling(settings, tdist, id_counter, management_counter, landpars, interaction, scen, remaining, K, T, mean_annual, plants, landscape)
+results_folder = run_scheduling(settings, tdist, id_counter, management_counter, landpars, poll_pars, K, T, mean_annual, plants, landscape)
 
 # analyse results
 analysED(settings, results_folder)

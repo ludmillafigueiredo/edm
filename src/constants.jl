@@ -20,7 +20,14 @@ const EVOLVABLE_TRAITS = [:compartsize, :span, :firstflower, :floron, :floroff,
 # proportion of reproductive mass allocated to seed production
 const ALLOC_SEED = 0.05
 # default proportion of visited plants
-const VISITED_DEFAULT = 1
+const VST_DFLT = 1
+# Efficiency of insect visit in pollination
+const INSCT_EFFC = 0.6
+# default proportion of plants pollinated by wind
+const WIND_DFLT = 1
+# Efficiency of wind pollination
+const WIND_EFFC = 0.6
+
 
 # Parameters of dispersal kernels
 # -------------------------------

@@ -56,7 +56,7 @@ function output_sppref(SPP_REF)
             writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")
 	end
     
-	for sp in SPP_REF.sp_id
+	for sp in SPP_REF.species
     	    sp_ref = reshape(collect(map(x -> getfield(SPP_REF,x)[sp],fieldnames(SppRef)[2:end])),1,:)
     	    open(joinpath(simresults_folder, "sppref_traitvalues.csv"), "a") do ref
                 writedlm(ref, [sp sp_ref], ",")
@@ -68,9 +68,6 @@ function log_settings()
         open(joinpath(simresults_folder, "simsettings.jl"),"w") do ID
             println(ID, "tdist = $(repr(tdist))")
             println(ID, "landpars = $(repr(typeof(landpars))) \ninitial = $(repr(typeof(landpars.initial))) \ndisturb = $(repr(typeof(landpars.disturbance)))")
-            println(ID, "interaction = $(repr(interaction))")
-            println(ID, "scen = $(repr(scen))")
-            println(ID, "remaining = $(repr(remaining))")
             println(ID, "commandsettings = $(repr(settings))")
         end
 end
@@ -87,9 +84,9 @@ function write_output(plants::Array{Plant,1}, t::Int64, settings::Dict{String,An
     # output header
     if t == 1
         header = hcat(["week"],
-                      reshape(collect(string.(fieldnames(Plant)[1:16])),1,:),
+                      reshape(collect(string.(fieldnames(Plant)[1:19])),1,:),
                       ["leaves" "stem" "root" "repr"],
-                      reshape(collect(string.(fieldnames(Plant)[18:end])),1,:))
+                      reshape(collect(string.(fieldnames(Plant)[21:end])),1,:))
         open(joinpath(settings["outputat"],settings["simID"],"statevars_ind.txt"), "w") do output
             writedlm(output, header) #reshape(header, 1, length(header)))
         end
@@ -107,6 +104,9 @@ function write_output(plants::Array{Plant,1}, t::Int64, settings::Dict{String,An
                                       plants[o].sp,
                                       plants[o].kernel,
                                       plants[o].clonality,
+				      plants[o].pollen_vector,
+				      plants[o].self_failoutcross,
+				      plants[o].self_proba,
                                       plants[o].compartsize,
                                       plants[o].span,
                                       plants[o].firstflower,

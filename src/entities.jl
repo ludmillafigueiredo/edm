@@ -15,6 +15,9 @@ mutable struct Plant
     sp::String #sp id, easier to read
     kernel::String
     clonality::Bool
+    pollen_vector::String
+    self_failoutcross::Bool
+    self_proba::Float64
     #### Evolvable traits ####
     compartsize::Float64
     span::Int64
@@ -31,8 +34,15 @@ mutable struct Plant
     mated::Bool
 end
 
-# Data structures and submodel functions related to the Land entity
-# -----------------------------------------------------------------
+# Data structure for storing pollination
+mutable struct PollPars
+    scen::String
+    regime::Any # it can be Nothing or a DataFrames.DataFrame
+end
+
+
+# Data structures related to the Land entity
+# ------------------------------------------
 
 #Store files describing the landscape
 mutable struct LandPars

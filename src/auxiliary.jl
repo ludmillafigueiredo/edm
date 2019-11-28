@@ -11,9 +11,12 @@ using Dates
 
 # Initial trait values is read from an input file and stored for reference in `sppref::SppRef`.
 mutable struct SppRef
-    sp_id::Array{String, 1}
+    species::Array{String, 1}
     clonality::Dict{String,Bool}
     kernel::Dict{String,String}
+    pollen_vector::Dict{String,String}
+    self_failoutcross::Dict{String,Bool}
+    self_proba::Dict{String,Float64}
     seedmass::Dict{String,Float64}
     compartsize::Dict{String,Float64}
     span_min::Dict{String,Float64}
@@ -38,6 +41,9 @@ end
 
 SppRef() = SppRef(String[],
 	          Dict(),
+		  Dict(),
+		  Dict(),
+		  Dict(),
 		  Dict(),
 		  Dict(),
 		  Dict(),
@@ -170,7 +176,7 @@ Fitness is updated every begining of the year, with mean temperature for the yea
 - `std_tol::Float64`: parameter `c` is the standard deviation,
 """
 function updatefitness!(mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Dict{String, Any})
-    for sp in SPP_REF.sp_id
+    for sp in SPP_REF.species
 
         mean_opt = SPP_REF.temp_opt[sp]
         std_tol = SPP_REF.temp_tol[sp]

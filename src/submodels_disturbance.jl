@@ -89,3 +89,39 @@ function destroyorgs!(plants::Array{Plant,1}, landscape::BitArray{2}, settings::
     end
     
 end
+
+"""
+disturb_pollinate!()
+Call the pollinate!() function for groups of individuals according to 
+"""
+function disturb_pollinate!(insects_plants::Array{Plant,1}, poll_pars::PollPars, plants::Array{Plant,1})
+
+    # check-point
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        println(sim, "Pollination disturbed by $poll_pars.scen ...")
+    end
+
+    if poll_pars.scen  == "equal" # all plants species are equally affected
+        for sp in unique(getfield.(insects_plants, :sp))
+    	    insects_plants_sp = filter(x -> x.sp == sp, insects_plants)
+	    filter!(x -> !(x.sp == sp), insects_plants)
+	    npoll = get_npoll(insects_plants_sp, poll_pars)
+	    if npoll > 0
+	        pollinate!(insects_plants_sp, plants, npoll)
+	    end
+	end
+    elseif poll_pars.scen == "rdm"
+    	npoll = get_npoll(insects_plants, poll_pars)
+	if npoll > 0
+	    pollinate!(insects_plants_sp, plants, npoll)
+	end
+    elseif poll_pars.scen == "spec"
+    else
+	    error("Please chose a pollination scenario \"scen\" in insect.csv:
+                   - \"indep\": sexual reproduction happens independently of pollination
+                   - \"rmd\": random loss of pollinator species 
+                   - \"spec\": specific loss of pollinator species")
+        
+    end
+    
+end

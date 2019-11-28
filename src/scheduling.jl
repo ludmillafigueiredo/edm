@@ -2,7 +2,7 @@
     simulate!()
 Run all functions
 """
-function run_scheduling(settings, tdist, id_counter, management_counter, landpars, interaction, scen, remaining, K, T, mean_annual, plants,landscape)
+function run_scheduling(settings, tdist, id_counter, management_counter, landpars, poll_pars, K, T, mean_annual, plants,landscape)
 
     Random.seed!(settings["rseed"])
     
@@ -76,11 +76,11 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
 	    
 	    develop!(plants, settings, t)
 
-	    mate!(plants, t, settings, scen, tdist, remaining)
+	    mate!(plants, t, settings, poll_pars::PollPars)
 
 	    # Offspring production
 	    id_counter = mkseeds!(plants, settings, id_counter, T, t)
-	    id_counter = clone!(plants, settings, id_counter)
+	    id_counter = clone!(plants, settings, id_counter, t)
 
 	    setfield!.(plants, :mated, false) # plant only produces seeds again if it gets pollinated
 	    
