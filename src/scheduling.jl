@@ -82,6 +82,8 @@ function run_scheduling(settings, tdist, id_counter, management_counter, landpar
 	    id_counter = mkseeds!(plants, settings, id_counter, T, t)
 	    id_counter = clone!(plants, settings, id_counter, t)
 
+	    self_pollinate!(plants, settings, id_counter, t)
+	    
 	    setfield!.(plants, :mated, false) # plant only produces seeds again if it gets pollinated
 	    
 	    justdispersed = disperse!(landscape, plants, t, settings,  landpars, tdist)

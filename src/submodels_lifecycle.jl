@@ -265,6 +265,69 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counte
 end
 
 """
+self_pollinate!()
+"""
+function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counter::Int64, t::Int64)
+
+ selfers = filter(x-> x.stage == "a" &&
+    	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]x.seednumber &&
+		       x.mated == false &&
+		       x.self_failoutcross == true,
+		       plants)|>
+           x -> sample(x, Int(ceil(SELFING_PROBA*length(x))))
+
+ for sp in unique(getfield.(selfers, :sp))
+
+    	seedmass = SPP_REF.seedmass[sp]
+	spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
+	
+	selfers_sp = findall(x -> x.sp == sp && x.id in getfield.(selfers, :id), plants)
+	# check-point
+    	open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+	    println(sim, "Number of selfers: $(length(selfers_sp))")
+        end
+
+	for s in selfers_sp
+	
+	    offs = div(ALLOC_SEED*plants[s].mass["repr"], seedmass)
+	    
+	    if offs > 0
+		
+		# limit offspring production to the maximal number of seeds the species can produce
+		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
+
+                spoffspringcounter += offs
+		open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
+    	            writedlm(seedfile, hcat(t, sp, "s", "self", spoffspringcounter))
+  	        end
+
+		# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
+		plants[s].mass["repr"] = 0
+
+		for n in 1:offs
+
+		    id_counter += 1
+		    seed = deepcopy(plants[s])
+		    
+		    # reassign state variables that dont evolve
+		    seed.id = string(id_counter, base = 16)
+		    seed.mass = Dict("leaves" => 0.0,
+		                     "stem" => 0.0,
+				     "root" => seedmass,
+				     "repr" => 0.0)
+                    seed.stage = "s-in-flower"
+                    seed.age = 0
+                    seed.mated = false
+
+		    push!(plants, seed)
+
+		end
+	    end
+        end
+  end
+end
+
+"""
 clone!()
 Asexual reproduction.
 """
