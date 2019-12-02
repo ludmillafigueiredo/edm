@@ -35,7 +35,7 @@ theme_set(theme_edm())
 #' @param EDdir The path to EDM, if not default
 getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.path("~/model")){
 
-  spp_seedmass <- read_csv(file.path(outputsdir, "sppref_traitvalues.csv"), col_names=TRUE) %>% select(sp = sp_id, seedmass) 
+  spp_seedmass <- read_csv(file.path(outputsdir, "sppref_traitvalues.csv"), col_names=TRUE) %>% dplyr::select(sp = species, seedmass) 
 
   ## initiliaze list to contain outputs 
   ##outdatalist <- list()
@@ -103,7 +103,12 @@ orgareplicates <- function(parentsimID, repfolder, nreps){
     	       	           col_names = TRUE)%>%
         mutate(repli = as.factor(rep(sim, nrow(.))))
     offspring_sim <- read_tsv(file.path(folder, "offspringproduction.csv"),
-    		    	     col_names = TRUE)%>%
+    		    	     col_names = TRUE,
+			     col_types = cols(week = col_integer(),
+                                        stage = col_character(),
+                                        sp = col_character(),
+                                        abundance = col_double(),
+                                        mode = col_character()))%>%
       mutate(repli = as.factor(rep(sim, nrow(.))))
     
     ## fill in cleanoutput object (necessary step because of bind_rows)
@@ -130,7 +135,7 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
   ## get biomasses allocated to each compartment
   # summary within replicates
   biomass_tabrepli <- juvads_allreps_tab%>%
-    select(week, id, stage, sp, leaves, stem, root, repr, repli)%>%
+    dplyr::select(week, id, stage, sp, leaves, stem, root, repr, repli)%>%
     filter(stage %in% c("j", "a"))%>%
     group_by(week, stage, sp, repli)%>%
     summarize(mean_reprmass = mean(repr),
@@ -144,7 +149,7 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
     ungroup()
   # summary through replicates
   biomass_tab <- juvads_allreps_tab%>%
-    select(week, id, stage, sp, leaves, stem, root, repr)%>%
+    dplyr::select(week, id, stage, sp, leaves, stem, root, repr)%>%
     filter(stage %in% c("j", "a"))%>%
     group_by(week, stage, sp)%>%
     summarize(mean_repr = mean(repr),
@@ -213,7 +218,7 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
   # Total biomass growth curve
   # -------------------------#
   growthcurve_tab <- juvads_allreps_tab%>%
-    select(week, id, stage, sp, leaves, stem, root, repr)%>%
+    dplyr::select(week, id, stage, sp, leaves, stem, root, repr)%>%
     filter(stage %in% c("j", "a"))%>%
     group_by(week, stage, sp, id)%>%
     summarize(total = sum(leaves, stem, root, repr))
@@ -235,7 +240,7 @@ popabund <- function(juvads_allreps_tab){
   
   ## extract relevant variables
   pop_tab <- juvads_allreps_tab%>%
-    select(week,sp,stage,repli)%>%
+    dplyr::select(week,sp,stage,repli)%>%
     ungroup()
   
   ## summarize abundaces/species/week
@@ -267,12 +272,12 @@ popstruct <- function(pop_tab, seeds_allreps_tab, parentsimID){
   
   ## Population strucuture: absolute abundances
     absltstruct_tab <- pop_tab%>%
-      group_by(week, sp, stage)%>%
+      group_by(as.factor(week), sp, stage)%>%
       summarize(abundance = n())%>%
       ungroup()%>%
-      bind_rows(., select(seeds_allreps_tab, -mode))%>% #merge offspring file
+      bind_rows(., dplyr::select(seeds_allreps_tab, -mode))%>% #merge offspring file
       ungroup()%>%
-      group_by(week, sp, stage)%>%
+      group_by(as.factor(week), sp, stage)%>%
       summarize(mean_abundance = mean(abundance),
                 sd_abundance = sd(abundance))%>%
       ungroup()
@@ -317,7 +322,7 @@ spprichness <- function(juvads_allreps_tab, pop_tab, parentsimID, disturbance,td
   
   ## extract richness from output
   spprichness_tab <- pop_tab%>%
-    select(week, sp, repli)%>%
+    dplyr::select(week, sp, repli)%>%
     group_by(week)%>%
     summarize(richness = length(unique(sp)),
               mean_richness = mean(richness),
@@ -359,7 +364,7 @@ spprichness <- function(juvads_allreps_tab, pop_tab, parentsimID, disturbance,td
   
   ## richness per group of size
   groupspprichness_tab  <- juvads_allreps_tab%>%
-    select(week, sp, seedmass)%>%
+    dplyr::select(week, sp, seedmass)%>%
     ungroup()%>%
     group_by(week, seedmass)%>%
     summarize(richness = length(unique(sp)))%>%
@@ -410,20 +415,20 @@ groupdyn <- function(juvads_allreps_tab, singlestages){
   
   ## create table
   grouppop_tab <- juvads_allreps_tab%>%
-    group_by(week, sp, seedmass, stage)%>%
+    group_by(as.factor(week), sp, seedmass, stage)%>%
     summarize(abundance = n())%>%
     ungroup()%>%
-    bind_rows(., select(seeds_allreps_tab, -mode))%>% # merge seed info
+    bind_rows(., dplyr::select(seeds_allreps_tab, -mode))%>% # merge seed info
     group_by(sp)%>% # necessary to fill in seed size according to species
     fill(seedmass)%>%
     ungroup()%>%
-    group_by(week, seedmass, stage)%>% 
+    group_by(as.factor(week), seedmass, stage)%>% 
     summarize(mean_abundance = mean(abundance),
               sd_abundance = sd(abundance))%>%
     ungroup()
   
   groupweight_tab <- juvads_allreps_tab%>%
-    select(week, id, stage, seedmass, sp, leaves, stem, root, repr)%>%
+    dplyr::select(week, id, stage, seedmass, sp, leaves, stem, root, repr)%>%
     mutate(total = leaves + stem + root + repr)%>%
     group_by(week, stage, seedmass)%>%
     summarize(totalmass_mean = mean(total),
@@ -432,7 +437,7 @@ groupdyn <- function(juvads_allreps_tab, singlestages){
   
   # intra-replicate summary
   groupweight_replitab <- juvads_allreps_tab%>%
-    select(week, id, stage, seedmass, sp, leaves, stem, root, repr, repli)%>%
+    dplyr::select(week, id, stage, seedmass, sp, leaves, stem, root, repr, repli)%>%
     mutate(total = leaves + stem + root + repr)%>%
     group_by(week, stage, seedmass, repli)%>%
     summarize(totalmass_mean = mean(total),
@@ -468,7 +473,7 @@ groupdyn <- function(juvads_allreps_tab, singlestages){
 production <- function(juvads_allreps_tab){
   
   production_tab <- juvads_allreps_tab%>%
-    select(week, leaves, stem, root, repr, repli)%>%
+    dplyr::select(week, leaves, stem, root, repr, repli)%>%
     mutate(production = sum(leaves,stem, root, repr)/(10^3))%>%
     ungroup()%>%
     group_by(week)%>%
@@ -477,7 +482,7 @@ production <- function(juvads_allreps_tab){
     ungroup()
   
   production_replitab <- juvads_allreps_tab%>%
-    select(week, leaves, stem, root, repr,repli)%>%
+    dplyr::select(week, leaves, stem, root, repr,repli)%>%
     mutate(production = sum(leaves,stem, root, repr)/(10^3))%>%
     ungroup()%>%
     group_by(week, repli)%>%
@@ -507,7 +512,7 @@ traitchange  <- function(juvads_allreps_tab, timesteps, species){
   
   #Plot trait distribution for the species, at different time steps
   traitvalue_tab <- juvads_allreps_tab%>%
-    select(-c(kernel, clonality, age, xloc, yloc, leaves, stem, root, repr, mated))
+    dplyr::select(-c(kernel, clonality, age, xloc, yloc, leaves, stem, root, repr, mated))
   
   traitvalue4dist <- gather(traitvalue_tab%>%
                               filter(week %in% timesteps),
@@ -536,7 +541,7 @@ traitchange  <- function(juvads_allreps_tab, timesteps, species){
   
   # Plot trait variance over time
   traitsummary_tab  <- juvads_allreps_tab%>%
-    select(-c(id, stage, kernel, clonality, age, xloc, yloc, 
+    dplyr::select(-c(id, stage, kernel, clonality, age, xloc, yloc, 
               leaves, stem, root, repr, mated, repli))%>%
     group_by(week, sp)%>%
     summarize_all(funs(mean = mean,
@@ -551,7 +556,7 @@ traitchange  <- function(juvads_allreps_tab, timesteps, species){
                                factor_key = TRUE)%>%
     mutate(trait_metric = str_extract(trait, "^[^_]+"))%>%
     split(.$trait_metric)%>%
-    #map(~ select(.x, -trait_metric))%>%
+    #map(~ dplyr::select(.x, -trait_metric))%>%
     map(~ spread(.x,
                  key = trait,
                  value = value))%>%
@@ -586,9 +591,9 @@ traitspacechange  <- function(traitsdistributions_tab, timesteps){
   traitPCA <- function(timestep){
     
     traitpca <- PCA(traitsdistributions_tab%>%
-                      select(-sp, -stage, -ends_with("_sd"))%>%
+                      dplyr::select(-sp, -stage, -ends_with("_sd"))%>%
                       filter(week %in% timestep)%>%
-                      select(-week, -id),
+                      dplyr::select(-week, -id),
                     scale.unit = TRUE,
                     ncp = 5,
                     graph = FALSE)
@@ -606,7 +611,7 @@ traitspacechange  <- function(traitsdistributions_tab, timesteps){
                                   geom.ind = "point", # show points only (but not "text")
                                   pointshape = 21,
                                   pointsize = 2.5,
-                                  fill.ind = factor(select(filter(traitsdistributions_tab,
+                                  fill.ind = factor(dplyr::select(filter(traitsdistributions_tab,
 					            week %in% timesteps), week)), # color by time
                                   col.ind = "black",
                                   ##addEllipses = TRUE, # Concentration ellipse,
@@ -621,34 +626,34 @@ traitspacechange  <- function(traitsdistributions_tab, timesteps){
 }
 
 #' Life-history events
-lifehistory <- function(outputsdir){
-  
-  lifeevents_tab <- read_tsv(file.path(outputsdir, "eventslog.txt"), col_names = TRUE)
-  lifeevents_plot <- lifeevents_tab%>%
-    select(-age)%>%
-    group_by(week, event, stage)%>%
-    summarize(total = n())%>%
-    ggplot(aes(x = week, y = total, color = event))+
-    geom_line()+
-    facet_wrap(~stage, ncol = 1, scales = "free_y")
-  
-  metabolic_tab <- read_tsv(file.path(outputsdir, "metaboliclog.txt"), col_names = TRUE)
-  metabolic_summary_tab <- metabolic_tab%>%
-    select(-age)%>%
-    gather(c(rate, probability), key = "metric", value = value)%>%
-    group_by(stage, event, metric)%>%
-    summarize(mean = mean(value),
-              sd = sd(value))
-  
-  return(list(a = lifeevents_tab, b = lifeevents_plot,
-  	      c = metabolic_tab, d = metabolic_summary_tab))
-}
+#lifehistory <- function(outputsdir){
+#  
+#  lifeevents_tab <- read_tsv(file.path(outputsdir, "eventslog.txt"), col_names = TRUE)
+#  lifeevents_plot <- lifeevents_tab%>%
+#    dplyr::select(-age)%>%
+#    group_by(week, event, stage)%>%
+#    summarize(total = n())%>%
+#    ggplot(aes(x = week, y = total, color = event))+
+#    geom_line()+
+#    facet_wrap(~stage, ncol = 1, scales = "free_y")
+#  
+#  metabolic_tab <- read_tsv(file.path(outputsdir, "metaboliclog.txt"), col_names = TRUE)
+#  metabolic_summary_tab <- metabolic_tab%>%
+#    dplyr::select(-age)%>%
+#    gather(c(rate, probability), key = "metric", value = value)%>%
+#    group_by(stage, event, metric)%>%
+#    summarize(mean = mean(value),
+#              sd = sd(value))
+#  
+#  return(list(a = lifeevents_tab, b = lifeevents_plot,
+#  	      c = metabolic_tab, d = metabolic_summary_tab))
+#}
 
 #' Age distribution of stages
 agetraits <- function(juvads_allreps_tab){
   
   meanage_plot <- juvads_allreps_tab%>%
-    select(-repli)%>%
+    dplyr::select(-repli)%>%
     group_by(week, sp, stage)%>%
     summarize(mean_age = mean(age),
               sd_age = sd(age),
@@ -672,23 +677,23 @@ agetraits <- function(juvads_allreps_tab){
 ##scale_color_viridis(discrete = TRUE)
 
 #' Seed production and seed bank
-seeddynamics <- function(juvads_allreps_tab, seeds_allreps_tab){
-  
-  seeddyn_tab <- juvads_allreps_tab%>%
-    filter(stage == "s")%>%
-    select(week, sp, stage, repli)%>%
-    group_by(week, sp, stage, repli)%>%
-    summarize(abundance = n())%>%
-    ungroup()%>%
-    mutate(stage = "seedbank")%>%
-    bind_rows(select(seeds_allreps_tab, -mode))
-  
-  seeddyn_plot <- ggplot(seeddyn_tab, aes(x = week, y = abundance))+
-    geom_line(aes(group = sp, colour = stage))+
-    geom_point()
-    
-  return(list(a = seeddyn_tab, b = seeddyn_plot))
-}
+#seeddynamics <- function(juvads_allreps_tab, seeds_allreps_tab){
+#  
+#  seeddyn_tab <- juvads_allreps_tab%>%
+#    filter(stage == "s")%>%
+#    dplyr::select(week, sp, stage, repli)%>%
+#    group_by(week, sp, stage, repli)%>%
+#    summarize(abundance = n())%>%
+#    ungroup()%>%
+#    mutate(stage = "seedbank")%>%
+#    bind_rows(dplyr::select(seeds_allreps_tab, -mode))
+#  
+#  seeddyn_plot <- ggplot(seeddyn_tab, aes(x = week, y = abundance))+
+#    geom_line(aes(group = sp, colour = stage))+
+#    geom_point()
+#    
+#  return(list(a = seeddyn_tab, b = seeddyn_plot))
+#}
 
 
 ####                                    Save analysis                               ####
@@ -782,21 +787,21 @@ rm(prod)
 ##rm(traitspace)
 
 ## Life history
-lifehistory <- lifehistory(outputsdir)
-lifehistory$a -> events_tab
-lifehistory$b -> events_plot
-lifehistory$c -> metabolic_tab
-lifehistory$d -> metabolic_summary_tab
-rm(lifehistory)
+#lifehistory <- lifehistory(outputsdir)
+#lifehistory$a -> events_tab
+#lifehistory$b -> events_plot
+#lifehistory$c -> metabolic_tab
+#lifehistory$d -> metabolic_summary_tab
+#rm(lifehistory)
 
 ## Age traits
 meanage_plot <- agetraits(juvads_allreps_tab)
 
 ## Seed dynamics
-seeddyn <- seeddynamics(juvads_allreps_tab, seeds_allreps_tab)
-seeddyn$a -> seeddyn_tab
-seeddyn$b -> seeddyn_plot
-rm(seeddyn)
+#seeddyn <- seeddynamics(juvads_allreps_tab, seeds_allreps_tab)
+#seeddyn$a -> seeddyn_tab
+#seeddyn$b -> seeddyn_plot
+#rm(seeddyn)
 
 ## Save bundle of tabs and plots as RData
 EDtabs <- objects(name = environment(), all.names = FALSE, pattern = "tab$")

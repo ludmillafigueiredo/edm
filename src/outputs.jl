@@ -66,7 +66,6 @@ end
 
 function log_settings()
         open(joinpath(simresults_folder, "simsettings.jl"),"w") do ID
-            println(ID, "tdist = $(repr(tdist))")
             println(ID, "landpars = $(repr(typeof(landpars))) \ninitial = $(repr(typeof(landpars.initial))) \ndisturb = $(repr(typeof(landpars.disturbance)))")
             println(ID, "commandsettings = $(repr(settings))")
         end

@@ -75,7 +75,7 @@ Calculate the number of individuals that get pollinated under each regime of pol
 Wind-pollinated species are not affected be pollination loss. Therefore, the number of pollinated individuals dependents only on the amount of flowering and on the default values of efficiency.
 Scenarios of rdm and equal pollination loss have the same calculation, but for equal, the number is calculated per species, whereas for rdm, its the total number.
 """
-function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars::PollPars)
+function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
     if pollen_vector == "wind"
         npoll = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*WIND_DFLT)),WIND_EFFC))[1]
@@ -85,7 +85,11 @@ function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars
 	if poll_pars.scen == "indep"
      	    npoll = npoll_dflt 
 	elseif poll_pars.scen in ["equal", "rdm"]
-	    npoll = Int(ceil(npoll_dflt * poll_pars.regime[poll_pars.regime.td .== t, :remaining][1]))
+	    if t in poll_pars.regime.td
+	        npoll = Int(ceil(npoll_dflt * poll_pars.regime[poll_pars.regime.td.== t,:remaining][1]))
+	    else
+		npoll = npoll_dflt
+	    end
 	elseif poll_pars.scen == "spec"
 	    # pseudo
 	end
@@ -112,7 +116,7 @@ end
     mate!(plants, t, settings)
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
 """
-function mate!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, poll_pars::PollPars)
+function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, poll_pars::PollPars)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Pollination ...")
@@ -128,19 +132,20 @@ function mate!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any}, poll
         filter!(x -> !(x.id in getfield.(flowering, :id)), plants)
 
 	wind_plants = filter(x -> occursin("wind", x.pollen_vector), flowering)
-	npoll = get_npoll("wind", wind_plants, poll_pars)
+	npoll = get_npoll("wind", wind_plants, poll_pars, t)
 	pollinate!(wind_plants, plants, npoll)
 
 	insects_plants = filter(x -> occursin("insects", x.pollen_vector),
 	                                      flowering)
 	
-	if poll_pars.scen == "indep" || (poll_pars.scen in ["equal", "rdm", "spec"] && !(t in poll_pars.regime.td))
+	if poll_pars.scen == "indep" || (poll_pars.scen in ["equal", "rdm", "spec"] &&
+	   !(t in poll_pars.regime.td))
 
-	    npoll = get_npoll("insects", insects_plants, poll_pars)
+	    npoll = get_npoll("insects", insects_plants, poll_pars, t)
 	    pollinate!(insects_plants, plants, npoll)
 		
 	else
-	    disturb_pollinate!(insects_plants, poll_pars, plants)
+	    disturb_pollinate!(insects_plants, poll_pars, plants, t)
 	end
     end
     
@@ -379,7 +384,7 @@ end
 Seeds are dispersed.
 `get_dest` is defined in `auxiliary.jl`
 """
-function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,settings::Dict{String, Any},landpars::Any, tdist::Any)
+function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,settings::Dict{String, Any},landpars::Any)
 
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Dispersing ..."))

@@ -150,7 +150,7 @@ temp_ts = CSV.read(settings["temp_ts"])
 landpars = read_landpars(settings)
 
 # Timestep(s) of disturbance
-tdist = set_tdist(settings)
+#tdist = set_tdist(settings)
 
 const SPP_REF = read_sppinput(settings)
 const TRAIT_RANGES = define_traitranges(settings)

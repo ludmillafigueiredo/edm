@@ -1,12 +1,14 @@
 const BOLTZ = 8.62e-5 #- eV/K Brown & Sibly MTE book chap 2
 const A_E = 0.63 #-eV Brown & Sibly MTE book chap 2
 const T_K = 273.15 # °C to K converter
-# These factors adapt the base mortality rates to the developmental stage of the individual. They were defined through a study of the rates yielded by the metabolic theory for species in the Goettingen list
+# These factors adapt the base mortality rates to the developmental stage of the individual.
+# They were defined through a study of the rates yielded by the metabolic theory for
+# species in the listed for the calcareous grasslands around Goettingen.
 const SEED_MFACTOR = 1
 
 # Normalization constants of metabolic rates
 # ------------------------------------------
-const B0_GERM = 141363714.221475/100
+const B0_GERM = 141363714.221475/10
 const B0_MORT = 1113239249.49412
 # Growth constant is species-specific
 
@@ -27,7 +29,7 @@ const INSCT_EFFC = 0.6
 const WIND_DFLT = 1
 # Efficiency of wind pollination
 const WIND_EFFC = 0.6
-
+const SELFING_PROBA = 0.5
 
 # Parameters of dispersal kernels
 # -------------------------------
@@ -38,7 +40,7 @@ const DISPERSAL_PARS = Dict("short" => (mu = 1, lambda = 0.2, factor = 4),
 # Growth parameters
 # -----------------
 const Q = 5
-const C_K = 1000.0
+const C_K = 500.0
 
 # Probability of management
 # -------------------------

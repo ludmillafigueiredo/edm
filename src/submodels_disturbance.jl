@@ -2,7 +2,7 @@
     disturb!(landscape, landscape, plants, t, settings, landpars, tdist)
 Change landscape structure and metrics according to the simulation scenario (`loss`, habitat loss, or `frag`, fragmentation)
 """
-function disturb!(landscape::BitArray{2}, plants::Array{Plant,1}, t::Int64, settings::Dict{String,Any}, landpars::LandPars, tdist::Any)
+function disturb!(landscape::BitArray{2}, plants::Array{Plant,1}, t::Int64, settings::Dict{String,Any}, landpars::LandPars)
 
     if settings["disturb_type"] == "loss"
          landscape = destroyarea!(landpars, landscape, settings, t)
@@ -94,7 +94,7 @@ end
 disturb_pollinate!()
 Call the pollinate!() function for groups of individuals according to 
 """
-function disturb_pollinate!(insects_plants::Array{Plant,1}, poll_pars::PollPars, plants::Array{Plant,1})
+function disturb_pollinate!(insects_plants::Array{Plant,1}, poll_pars::PollPars, plants::Array{Plant,1}, t::Int64)
 
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
@@ -105,13 +105,13 @@ function disturb_pollinate!(insects_plants::Array{Plant,1}, poll_pars::PollPars,
         for sp in unique(getfield.(insects_plants, :sp))
     	    insects_plants_sp = filter(x -> x.sp == sp, insects_plants)
 	    filter!(x -> !(x.sp == sp), insects_plants)
-	    npoll = get_npoll(insects_plants_sp, poll_pars)
+	    npoll = get_npoll(insects_plants_sp, poll_pars, t)
 	    if npoll > 0
 	        pollinate!(insects_plants_sp, plants, npoll)
 	    end
 	end
     elseif poll_pars.scen == "rdm"
-    	npoll = get_npoll(insects_plants, poll_pars)
+    	npoll = get_npoll(insects_plants, poll_pars, t)
 	if npoll > 0
 	    pollinate!(insects_plants_sp, plants, npoll)
 	end
