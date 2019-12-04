@@ -178,7 +178,9 @@ function read_pollination(settings::Dict{String,Any})
     if pollination_scen == "indep"
         poll_pars = PollPars(pollination_scen, nothing)
     else
-	poll_pars = PollPars(pollination_scen, pollination_file)
+       disturbed_regime= CSV.read(pollination_file, header = true,
+				  type = Dict("td" => Int64, "remaining" => Float64))
+       poll_pars = PollPars(pollination_scen, disturbed_regime)	
     end
     
     return poll_pars
@@ -196,17 +198,8 @@ function set_tdist(settings)
             tdist = nothing
 	elseif settings["disturb_type"] in ["loss" "frag"]
             tdist = CSV.read(settings["disturb_file"], header=true, types=Dict("td"=>Int64))[:td]
-        elseif settings["disturb_type"] == "poll"
-            tdist = CSV.read(settings["insect"])[:, :td]
         elseif settings["disturb_type"] == "temp"
             println("Temperature change is simulated with the temperature file provided.")
-        else
-            error("Please specify one of the disturbance scenarios with `--disturb`:
-                \n\'none\' if no disturbance should be simulated,
-                \n\'loss\' for habitat area loss,
-                \n\'frag\' for habitat fragmentation,
-                \n\'temp\' for temperature change,
-                \n\'poll\' for pollination loss.")
         end
 
 	return tdist
