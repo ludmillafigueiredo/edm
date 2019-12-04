@@ -669,7 +669,7 @@ traitspacechange  <- function(traitsdistributions_tab, timesteps){
 #' Age distribution of stages
 agetraits <- function(juvads_allreps_tab){
   
-  meanage_plot <- juvads_allreps_tab%>%
+  meanage_tab <- juvads_allreps_tab%>%
     dplyr::select(-repli)%>%
     group_by(week, sp, stage)%>%
     summarize(mean_age = mean(age),
@@ -678,16 +678,27 @@ agetraits <- function(juvads_allreps_tab){
               sd_span = sd(span),
               mean_firstflower = mean(firstflower),
               sd_firstflower = sd(firstflower))%>%
-    ungroup()%>%
-    ggplot(aes(x=week, y=mean_age, colour=stage))+
-    geom_errorbar(aes(ymin=mean_age-sd_age, ymax=mean_age+sd_age))+
-    geom_line()+
-    geom_hline(aes(yintercept = mean_span), colour = "grey", alpha = 0.1)+
-    geom_hline(aes(yintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
-    geom_vline(aes(xintercept = mean_span), colour = "grey", alpha = 0.1)+
-    geom_vline(aes(xintercept = mean_firstflower), colour = "gold", alpha = 0.1)
+    ungroup()
   
-  return(meanage_plot)
+  meanage_juvplot <- meanage_tab%>%
+    filter(stage == "j")%>%
+    ggplot(aes(x=week, y=mean_age, colour=stage))+
+    geom_hline(aes(yintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
+    geom_vline(aes(xintercept = mean_firstflower), colour = "gold", alpha = 0.1)+
+    geom_errorbar(aes(ymin=mean_age-sd_age, ymax=mean_age+sd_age))+
+    geom_line()
+    
+  meanage_adtplot <- meanage_tab%>%
+    filter(stage == "a")%>%
+    ggplot(aes(x=week, y=mean_age, colour=stage))+
+    geom_hline(aes(yintercept = mean_span), colour = "grey", alpha = 0.1)+
+    geom_vline(aes(xintercept = mean_span), colour = "grey", alpha = 0.1)+
+    geom_errorbar(aes(ymin=mean_age-sd_age, ymax=mean_age+sd_age))+
+    geom_line()
+  
+  meanage_plot <- plot_grid(meanage_juvplot, meanage_adtplot,
+                            ncol = 2, nrow = 1)
+  return(list(a = meanage_tab, b = meanage_plot))
 }
 
 ##facet_grid(rows = vars(stage), cols = vars(metric), scales = "free_y")+
@@ -810,7 +821,9 @@ rm(prod)
 #rm(lifehistory)
 
 #### Age traits ####
-meanage_plot <- agetraits(juvads_allreps_tab)
+meanage <- agetraits(juvads_allreps_tab)
+meanage$a -> meanage_tab
+meanage$b -> meanage_plot
 #### Seed dynamics ####
 #seeddyn <- seeddynamics(juvads_allreps_tab, seeds_allreps_tab)
 #seeddyn$a -> seeddyn_tab
