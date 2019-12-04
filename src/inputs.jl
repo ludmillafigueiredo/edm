@@ -65,7 +65,7 @@ v
         "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
-        default = joinpath("test_inputs", "temp1917_2017.csv")
+        default = joinpath("template_files", "temperaturegoettingen_18572017.csv")
 
         "--timemsg"
         help = "Output timing to terminal, as well as checkpoint"
