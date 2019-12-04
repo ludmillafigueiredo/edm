@@ -1,6 +1,6 @@
 if(Sys.info()["user"] == "ludmilla"){
   EDdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/src")
-  EDdocsdir <- file.path(EDdir, "models_docs")
+  EDdocsdir <- file.path(EDdir, "models_docs/EDODD")
   traitsdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis","functional_types")
 }else if (Sys.info()["user"] == "ubuntu") {
   EDdir <- file.path("/home/ubuntu/model/src")
