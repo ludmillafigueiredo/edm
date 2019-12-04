@@ -282,3 +282,8 @@ function grow_allocate!(plant, b0grow, flowering_ids)
     end
 
 end
+
+# function to vectorize age increase
+function age!(plant::Plant)
+    plant.age += 1
+end

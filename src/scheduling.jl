@@ -73,7 +73,7 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
 	    # all individuals except seeds in flowers get older over time
 	    s_flower = filter(x -> x.stage == "s-in-flower", plants)
 	    filter!(x -> x.stage != "s-in-flower", plants)
-	    setfield!.(plants, :age, +(1)) # surviving get older
+	    map(x -> age!(x), plants) # surviving get older
 	    append!(plants, s_flower)
 	    
 	    develop!(plants, settings, t)
