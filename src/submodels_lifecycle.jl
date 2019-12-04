@@ -64,6 +64,10 @@ function develop!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
     # find indexes of individuals that are ready to become adults
     juvs = filter(x->x.stage == "j" && x.age >= x.firstflower,plants)
     filter!(x -> !(x.id in getfield.(juvs, :id)), plants)
+    # unit test
+    if juvs[1].stage != "j" || plants[1].stage == "j"
+        error("Juvenile sorting for maturation is doing the opposite")
+    end
     setfield!.(juvs, :stage, "a")
     append!(plants, juvs)
     
@@ -94,7 +98,9 @@ function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars
 	    # pseudo
 	end
     end
-
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        println(sim, "Number of pollinated plants: $npoll")
+    end
     return npoll
 
 end
@@ -110,6 +116,10 @@ function pollinate!(poll_plants::Array{Plant,1}, plants::Array{Plant,1}, npoll::
     non_pollinated = filter(x -> !(x.id in getfield.(pollinated,:id)), poll_plants)
     append!(plants, append!(pollinated, non_pollinated))
 
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        println(sim, "Number of pollinated plants: $(length(pollinated)), non-pollinated: $(length(non_pollinated))")
+    end
+
 end
 
 """
@@ -117,14 +127,14 @@ end
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
 """
 function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, poll_pars::PollPars)
-    # check-point
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Pollination ...")
-    end
 
     flowering = filter(x-> x.stage == "a" &&
     	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]x.seednumber,
 		       plants)
+    # check-point
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        println(sim, "Number of flowering plants: $(length(flowering)).")
+    end
 
     if length(flowering) > 0 # check if there is anyone flowering
 
@@ -211,7 +221,7 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counte
 	ferts_sp = findall(x -> x.sp == sp && x.id in getfield.(ferts, :id), plants)
 	# check-point
     	open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-	    println(sim, "Number of sowing: $(length(ferts_sp))")
+	    println(sim, "Number of $sp sowing: $(length(ferts_sp))")
         end
 
 	for s in ferts_sp
@@ -361,7 +371,11 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter
 	id_counter += 1
 	clone.id = string(id_counter, base=16)
 	push!(plants, clone)
-	spclonescounter += 1
+	    spclonescounter += 1
+            # check-point of life-history processes
+	    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+	        writedlm(sim, hcat(t, "clonal reproduction", "a", plants[c].age))
+	    end
        	end
        end
 
@@ -398,6 +412,12 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
 			x.seedon <= rem(t,52) < x.seedoff), plants)
     n_dispersing = length(dispersing)
     filter!(x -> !(x.id in getfield.(dispersing, :id)), plants)
+    # check-point of life-history processes
+    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+        for i in 1:length(dispersing)
+            writedlm(sim, hcat(t, "dispersal", "s", plants[c].age))
+        end
+    end
     
     for kernels in unique(getfield.(dispersing, :kernel))
 
@@ -485,13 +505,20 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
 	
 	germinated_ids = vectorized_seedproc("germination", establishing_sp, Bg)
 	germinated = filter(x -> x.id in germinated_ids, establishing_sp)
-	setproperty!.(germinated, :stage, "j")
+        setproperty!.(germinated, :stage, "j")
 	append!(plants, germinated)
 	germinations += length(germinated)
 	# update the seeds that did not germinate and will go back into the main vector
 	non_germinated = filter(x -> !(x.id in germinated_ids), establishing_sp)
     	append!(plants, non_germinated)
 	non_germinations += length(non_germinated)
+        # check-point of life-history processes
+	open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+            for i in 1:length(germinated)
+	        writedlm(sim, hcat(t, "germination", "j", mean(getfield.(germinated, :age))))
+            end
+	end
+	
     end
 
     # check-point: can probably go, becuase the unit test is enough
@@ -537,7 +564,11 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
 	println(sim, "Dead on seed-bank: $(length(old))")
 	println(sim, "Dead metabolic: $(length(deaths))")
     end
-
+    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+        for i in 1:deaths
+            writedlm(sim, hcat(t, "death-indep", "s", mean(getfield.(dying, :age))))
+        end
+    end
 end
 
 """
@@ -564,7 +595,11 @@ function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, 
         println(sim, "Density-independent mortality: $(length(dead_ids))")
         println(sim, "$(uppercase(dying_stage)) dying of age: $(length(old))")
     end
-
+    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+        for i in 1:length(dead_ids)
+            writedlm(sim, hcat(t, "death-indep", dying_stage, mean(getfield.(dying, :age))))
+        end
+    end
     
 end
 
@@ -634,9 +669,13 @@ function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any
 
 			   dying_idxs = findall(x -> x.id in getfield.(dying, :id), plants)
 			   deleteat!(plants, dying_idxs)
-
+                           # check point life history events
+                            open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+                                for i in 1:length(dying)
+                                    writedlm(sim, hcat(t, "death-dep", dying_stage, mean(getfield.(dying, :age))))
+                                end
+                            end
                         end
-
                     end
                 end
             end
