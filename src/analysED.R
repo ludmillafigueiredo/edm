@@ -1,7 +1,7 @@
 ## This is an R script intended at fast analysis. Details on the RNotebook file of same name
 ##
 
-## Load packages 
+#### Load packages ####
 library(tidyverse);
 library(viridis);
 library(grid);
@@ -14,18 +14,21 @@ library(corrplot);
 library(gganimate); #sudo apt-get install cargo install.packages("gifski")
 library(cowplot);
 
-## Set directories
-source("src/dirnames_setup.R")
-
-# Set up directory and environement to store analysis
+#### Directories and environment to store analysis ####
+#source("src/dirnames_setup.R")
 analysEDdir <- file.path(outputsdir, paste(parentsimID, "analysED", sep = "_"))
 dir.create(analysEDdir)
 
-## Set theme and colours
+#### Theme, colours, labels ####
 source("src/theme_edm.R")
 theme_set(theme_edm())
+size_labels = c('0.0001' = "Small",
+                '0.0003' = "Medium",
+                '0.001' = "Big")
+options(scipen = 999)
 
-## Default values for analysis
+
+#### Functions ####
 
 #' Organize individual-based output
 #' 
@@ -35,7 +38,8 @@ theme_set(theme_edm())
 #' @param EDdir The path to EDM, if not default
 getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.path("~/model")){
 
-  spp_seedmass <- read_csv(file.path(outputsdir, "sppref_traitvalues.csv"), col_names=TRUE) %>% dplyr::select(sp = species, seedmass) 
+  spp_seedmass <- read_csv(file.path(outputsdir, "sppref_traitvalues.csv"), 
+                           col_names=TRUE) %>% dplyr::select(sp = species, seedmass) 
 
   ## initiliaze list to contain outputs 
   ##outdatalist <- list()
@@ -50,6 +54,9 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
                                         sp = col_character(),
                                         kernel = col_character(),
                                         clonality = col_logical(),
+                                        pollen_vector = col_character(),
+                                        self_failoutcross = col_character(),
+                                        self_proba = col_double(),
                                         compartsize = col_double(),
                                         span = col_integer(),
                                         firstflower = col_integer(),
@@ -134,7 +141,7 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
   
   ## get biomasses allocated to each compartment
   # summary within replicates
-  biomass_tabrepli <- juvads_allreps_tab%>%
+  mass_summaryrepli <- juvads_allreps_tab%>%
     dplyr::select(week, id, stage, sp, leaves, stem, root, repr, repli)%>%
     filter(stage %in% c("j", "a"))%>%
     group_by(week, stage, sp, repli)%>%
@@ -148,7 +155,7 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
               rootmass = sd(root))%>%
     ungroup()
   # summary through replicates
-  biomass_tab <- juvads_allreps_tab%>%
+  mass_tab <- juvads_allreps_tab%>%
     dplyr::select(week, id, stage, sp, leaves, stem, root, repr)%>%
     filter(stage %in% c("j", "a"))%>%
     group_by(week, stage, sp)%>%
@@ -165,7 +172,7 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
   # Plot biomass in compartments
   # TODO: Factorize it, but beware of the compartment specific column names.
   # ends_with() does not seem to work inside aes
-  leaves_plot <- biomass_tab%>%
+  leaves_plot <- mass_tab%>%
     dplyr::select(week, stage, sp, ends_with("leaves"))%>%
     ggplot(aes(x = week, y = mean_leaves, group = factor(sp), colour = factor(sp)))+
     geom_errorbar(aes(min = mean_leaves - sd_leaves,
@@ -174,9 +181,10 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
     geom_line() +
     geom_point()+
     facet_wrap(~stage, ncol = 2)+
-    labs(title = "Biomass allocated to leaves")
+    labs(title = "Biomass allocated to leaves")+
+    theme(legend.position = "none")
   
-  stem_plot <- biomass_tab%>%
+  stem_plot <- mass_tab%>%
     dplyr::select(week, stage, sp, ends_with("stem"))%>%
     ggplot(aes(x = week, y = mean_stem, group = factor(sp), colour = factor(sp)))+
     geom_errorbar(aes(min = mean_stem - sd_stem,
@@ -185,9 +193,10 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
     geom_line() +
     geom_point()+
     facet_wrap(~stage, ncol = 2)+
-    labs(title = "Biomass allocated to stem")
+    labs(title = "Biomass allocated to stem")+
+    theme(legend.position = "none")
   
-  root_plot <- biomass_tab%>%
+  root_plot <- mass_tab%>%
     dplyr::select(week, stage, sp, ends_with("root"))%>%
     ggplot(aes(x = week, y = mean_root, group = factor(sp), colour = factor(sp)))+
     geom_errorbar(aes(min = mean_root - sd_root,
@@ -196,9 +205,10 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
     geom_line() +
     geom_point()+
     facet_wrap(~stage, ncol = 2)+
-    labs(title = "Biomass allocated to root")
+    labs(title = "Biomass allocated to root")+
+    theme(legend.position = "none")
   
-  repr_plot <- biomass_tab%>%
+  repr_plot <- mass_tab%>%
     filter(stage == "a")%>%
     dplyr::select(week, stage, sp, ends_with("repr"))%>%
     ggplot(aes(x = week, y = mean_repr, group = factor(sp), colour = factor(sp)))+
@@ -207,7 +217,8 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
                   stat = "identity")+
     geom_line() +
     geom_point()+
-    labs(title = "Biomass allocated to reproductive structures")
+    labs(title = "Biomass allocated to reproductive structures")+
+    theme(legend.position = "none")
   
   biomass_plot <- plot_grid(leaves_plot, 
                             stem_plot, 
@@ -221,16 +232,18 @@ biomass_allocation <- function(juvads_allreps_tab, stages = factor(c("a", "j", "
     dplyr::select(week, id, stage, sp, leaves, stem, root, repr)%>%
     filter(stage %in% c("j", "a"))%>%
     group_by(week, stage, sp, id)%>%
-    summarize(total = sum(leaves, stem, root, repr))
+    mutate(total = leaves + stem + root + repr)
   
   growthcurve <- growthcurve_tab%>%
     ggplot(aes(x = week, y = total, group = factor(id), colour = factor(id)))+
     geom_line() +
     geom_point()+
-    facet_wrap(~stage, ncol = 1)+
-    labs(title = "Growth curve of individuals")
+    facet_wrap(~stage, ncol = 1,
+               scales = "free_y")+
+    labs(title = "Individual growth curves")+
+    theme(legend.position = "none")
   
-  return(list(a = biomass_tabrepli, b = biomass_tab, c = growthcurve_tab,
+  return(list(a = mass_summaryrepli, b = mass_tab, c = growthcurve_tab,
               d = leaves_plot, e = stem_plot, f = repr_plot, g = root_plot,
               h = biomass_plot, i = growthcurve))
 }
@@ -260,9 +273,10 @@ popabund <- function(juvads_allreps_tab){
     		      ymax= mean_abundance + sd_abundance), 
                   stat = "identity")+
     geom_line()+
-    geom_point()+
+    geom_point(size = 1.25)+
     labs(x = "Year", y = "Abundance (mean +- sd)",
-         title = "Species abundance variation")
+         title = "Species abundance variation")+
+    theme(legend.position = "none")
   
   return(list(a = pop_tab, b = spabund_tab, c = abund_plot))
 }
@@ -277,7 +291,7 @@ popstruct <- function(pop_tab, seeds_allreps_tab, parentsimID){
       ungroup()%>%
       bind_rows(., dplyr::select(seeds_allreps_tab, -mode))%>% #merge offspring file
       ungroup()%>%
-      group_by(as.factor(week), sp, stage)%>%
+      group_by(week, sp, stage)%>%
       summarize(mean_abundance = mean(abundance),
                 sd_abundance = sd(abundance))%>%
       ungroup()
@@ -300,18 +314,20 @@ popstruct <- function(pop_tab, seeds_allreps_tab, parentsimID){
                       ymax = mean_abundance + sd_abundance),
                   stat = "identity")+
     geom_line()+
-    geom_point()+
+    geom_point(size = 1.5)+
     labs(x = "Week", y = "Abundance",
          title = "Population structure")+
-    facet_wrap(~sp, ncol = 4, scale = "free_y")
+    facet_wrap(~sp, ncol = 4, scale = "free_y")+
+    theme(legend.position = "bottom")
   
   rltvstruct_plot <- ggplot(rltvstruct_tab,
                             aes(x = week, y = rltv_abund, color = as.factor(stage)))+
     geom_line()+
-    geom_point()+
+    geom_point(size = 1.5)+
     labs(x = "Week", y = "Relative abundace",
          title = "Population structure")+
-    facet_wrap(~sp, ncol = 4)
+    facet_wrap(~sp, ncol = 4)+
+    theme(legend.position = "bottom")
 
   return(list(a = absltstruct_tab, b = rltvstruct_tab,
               c = absltstruct_plot, d = rltvstruct_plot))
@@ -331,17 +347,16 @@ spprichness <- function(juvads_allreps_tab, pop_tab, parentsimID, disturbance,td
   
   ## create plots
   ## identify when disturbance happens, if it does
-  if(disturbance == "none" && missing(tdist)){
-    spprichness_plot <- ggplot(spprichness_tab,
-                                  aes(x = week, y = mean_richness))+
-      geom_errorbar(aes(ymin = mean_richness - sd_richness,
-                        ymax = mean_richness + sd_richness),
-                    stat = "identity")+
-      geom_line(color = "dodgerblue2", size = 1.25)+
-      geom_point()
+  spprichness_plot <- ggplot(spprichness_tab,
+                             aes(x = week, y = mean_richness))+
+    geom_errorbar(aes(ymin = mean_richness - sd_richness,
+                      ymax = mean_richness + sd_richness),
+                  stat = "identity")+
+    geom_line(color = "darkslateblue")+
+    geom_point(color = "darkslateblue", size = 1.25)+
+    labs(x = "Time", y = "Species richness")
     
-  }else{
-    
+    if (disturbance != "none"){
     if (disturbance == "loss"){
       text <- "Area loss"
     } else if (disturbance == "frag"){
@@ -352,14 +367,8 @@ spprichness <- function(juvads_allreps_tab, pop_tab, parentsimID, disturbance,td
     ## TODO: annotate it
     ## my_grob <- grobTree(textGrob(text, x = 0.5, y = 0.9, hjust = 0, 
     ##                             gp = gpar(fontsize = 10, fontface = "italic")))
-    spprichness_plot <- ggplot(spprichness_tab, aes(x = week, y = mean_richness))+
-      geom_errorbar(aes(ymin = mean_richness - sd_richness,
-                        ymax = mean_richness + sd_richness),
-                    stat = "identity")+
-      geom_line(size = 1.25)+
-      geom_point()+
-      geom_vline(xintercept = tdist, linetype = 2, color = "red")+
-      labs(x = "Time", y = "Spp. richness")
+    spprichness_plot <- spprichness_plot +
+      geom_vline(xintercept = tdist, linetype = 2, color = "red")
   }
   
   ## richness per group of size
@@ -369,12 +378,16 @@ spprichness <- function(juvads_allreps_tab, pop_tab, parentsimID, disturbance,td
     group_by(week, seedmass)%>%
     summarize(richness = length(unique(sp)))%>%
     ungroup()
-  groupspprichness_plot <- ggplot(data = groupspprichness_tab, aes(x = week, y = richness))+
-    facet_wrap(~seedmass, scales = "free_y", ncol = 1)+
-    geom_line()
   
-  return(list(a = spprichness_tab, b = groupspprichness_tab, 
-              c = spprichness_plot, d = groupspprichness_plot))
+  groupspprichness_plot <- ggplot(data = groupspprichness_tab, aes(x = week, y = richness))+
+    facet_wrap(~seedmass, scales = "free_y", ncol = 1,
+               labeller = labeller(seedmass = size_labels))+
+    geom_line(color = "darkslateblue")+
+    geom_point(color = "darkslateblue", size = 1.25)+
+    labs(x = "Time", y = "Species richness")
+  
+  return(list(a = spprichness_tab, b = spprichness_plot,
+              c = groupspprichness_tab, d = groupspprichness_plot))
   
 }
 
@@ -397,7 +410,7 @@ rankabund <- function(pop_tab, timesteps){
     ggplot(filter(rltvabund_tab, week %in% timestep),
            aes(x = reorder(sp, -rltv_abund), y = rltv_abund))+
       geom_bar(stat = "identity")+
-      theme(axis.text.x = element_text(angle = 50, size = 10, vjust = 0.5))
+      theme(axis.text.x = element_text(angle = 80, size = 10, vjust = 0.5))
   }
   
   rankabund_plots <- timesteps%>%
@@ -422,7 +435,7 @@ groupdyn <- function(juvads_allreps_tab, singlestages){
     group_by(sp)%>% # necessary to fill in seed size according to species
     fill(seedmass)%>%
     ungroup()%>%
-    group_by(as.factor(week), seedmass, stage)%>% 
+    group_by(week, seedmass, stage)%>% 
     summarize(mean_abundance = mean(abundance),
               sd_abundance = sd(abundance))%>%
     ungroup()
@@ -451,9 +464,12 @@ groupdyn <- function(juvads_allreps_tab, singlestages){
                       ymax = mean_abundance + sd_abundance),
                   stat = "identity")+
     geom_line()+
-    geom_point()+
-    facet_wrap(~seedmass, ncol = 1)+
-    labs(title = "Population structure per group size")
+    geom_point(size = 1.25)+
+    facet_wrap(~seedmass, ncol = 1,
+               labeller = labeller(seedmass = size_labels),
+               scales = "free_y")+
+    labs(title = "Population structure per group size")+
+    theme(legend.position = "bottom")
   
   ## plot weigh variation
   groupweight_plot <- ggplot(groupweight_tab,
@@ -461,9 +477,12 @@ groupdyn <- function(juvads_allreps_tab, singlestages){
     geom_errorbar(aes(ymin = totalmass_mean -totalmass_sd, 
                       ymax = totalmass_mean + totalmass_sd))+
     geom_line()+
-    geom_point()+
-    facet_wrap(~seedmass, ncol = 1)+
-    labs(title = "Total biomass per group size")
+    geom_point(size = 1.25)+
+    facet_wrap(~seedmass, ncol = 1,
+               labeller = labeller(seedmass = size_labels),
+               scales = "free_y")+
+    labs(title = "Total biomass per group size")+
+    theme(legend.position = "bottom")
   
   return(list(a = grouppop_tab, b = groupweight_tab, c = groupweight_replitab,
               d = grouppop_plot, e = groupweight_plot))
@@ -474,7 +493,7 @@ production <- function(juvads_allreps_tab){
   
   production_tab <- juvads_allreps_tab%>%
     dplyr::select(week, leaves, stem, root, repr, repli)%>%
-    mutate(production = sum(leaves,stem, root, repr)/(10^3))%>%
+    mutate(production = (leaves+stem+root+repr)/(10^3))%>%
     ungroup()%>%
     group_by(week)%>%
     summarize(prod_mean = mean(production),
@@ -483,7 +502,7 @@ production <- function(juvads_allreps_tab){
   
   production_replitab <- juvads_allreps_tab%>%
     dplyr::select(week, leaves, stem, root, repr,repli)%>%
-    mutate(production = sum(leaves,stem, root, repr)/(10^3))%>%
+    mutate(production = (leaves+stem+root+repr)/(10^3))%>%
     ungroup()%>%
     group_by(week, repli)%>%
     summarize(prod_mean = mean(production))%>%
@@ -502,7 +521,6 @@ production <- function(juvads_allreps_tab){
 }
 
 #' Analysis of change in trait values distribution
-
 traitchange  <- function(juvads_allreps_tab, timesteps, species){
   
   if(missing(species)){
@@ -584,7 +602,6 @@ traitchange  <- function(juvads_allreps_tab, timesteps, species){
 }
 
 #' Analysis of change in trait space
-
 traitspacechange  <- function(traitsdistributions_tab, timesteps){
   
   ## PCA (internal function because it needs to passed to map)
@@ -695,67 +712,65 @@ agetraits <- function(juvads_allreps_tab){
 #  return(list(a = seeddyn_tab, b = seeddyn_plot))
 #}
 
-
-####                                    Save analysis                               ####
-# -------------------------------------------------------------------------------------#
-
+#### Clean main output ####
+#-------------------------#
 cleanoutput <- getoutput(parentsimID, repfolder, nreps,
 	       	         outputsdir = outputsdir, EDdir = EDdir)  
 
-## Identify replicates
+#### Identify replicates #####
 replicates <- orgareplicates(parentsimID, repfolder, nreps)
 replicates$a -> juvads_allreps_tab
 replicates$b -> seeds_allreps_tab
 rm(replicates)
 
-## Individual vegetative and reproductive biomasses of juveniles and adults
+#### Biomasses #####
 biomass <- biomass_allocation(juvads_allreps_tab)
-biomass$a -> biomass_tabrepli
-biomass$b -> biomass_tab
+biomass$a -> mass_summaryrepli
+biomass$b -> mass_tab
 biomass$c -> growthcurve_tab
 biomass$d -> leaves_plot 
 biomass$e -> stem_plot 
 biomass$f -> repr_plot
 biomass$g -> root_plot
 biomass$h -> biomass_plot
-biomass$i -> growthcurve
+biomass$i -> growthcurve_bigplot
 rm(biomass)
 
-## Species abundance variation
+#### Abundances #####
 abund <- popabund(juvads_allreps_tab)
 abund$a -> pop_tab
 abund$b -> spabund_tab
 abund$c -> abund_plot
 rm(abund)
 
-## Population structure variation
-population <- popstruct(pop_tab, seeds_allreps_tab, parentsimID) # specifying species is optional
+#### Population structure #####
+population <- popstruct(pop_tab, seeds_allreps_tab, parentsimID)
 population$a -> absstruct_tab
 population$b -> rltvstruct_tab
 population$c -> absstruct_plot
 population$d -> rltvstruct_plot
 rm(population)
 
-## Species richness
-spprich <- spprichness(juvads_allreps_tab, pop_tab, parentsimID, disturbance) # tdist is optional
+#### Species richness ####
+spprich <- spprichness(juvads_allreps_tab, pop_tab, parentsimID, disturbance)
 spprich$a -> spprichness_tab
-spprich$b -> spprichness_plot
-spprich$c -> groupspprichness_tab 
+spprich$b -> spprichness_plot 
+spprich$c -> groupspprichness_tab
 spprich$d -> groupspprichness_plot
 rm(spprich)
 
+#### Species rank-abundance ####
 ## Set up time-steps for which to output derived analysis
 #if(!("timesteps" %in% ls())){timesteps <- c(min(pop_tab$week), max(pop_tab$week))}
 timesteps <- factor(c(min(pop_tab$week), max(pop_tab$week))) #provided or not, must be converted
 
-## Species rank-abundance 
 rank <- rankabund(pop_tab, timesteps)
 rank$a -> rltvabund_tab
 rank$b -> rankabund_plots
 rank$c -> rankabund_plot
 rm(rank)
 
-## Population structure by group size
+#### Population structure by group size ####
 groups <- groupdyn(juvads_allreps_tab) #specifying singlestages is optional
 groups$a -> grouppop_tab
 groups$b -> groupweight_tab
@@ -764,14 +779,14 @@ groups$d -> grouppop_plot
 groups$e -> groupweight_plot
 rm(groups)
 
-## Biomass production
+#### Biomass production ####
 prod <- production(juvads_allreps_tab)
 prod$a -> production_tab
 prod$b -> production_replitab
 prod$c -> production_plot
 rm(prod)
 
-## Trait change
+#### Trait change ####
 ### trait values
 #traitschange <- traitchange(juvads_allreps_tab, timesteps)
 #traitschange$a -> traitvalues_tab
@@ -786,7 +801,7 @@ rm(prod)
 ##traitspace$c -> timepca_plot
 ##rm(traitspace)
 
-## Life history
+#### Life history ####
 #lifehistory <- lifehistory(outputsdir)
 #lifehistory$a -> events_tab
 #lifehistory$b -> events_plot
@@ -794,16 +809,15 @@ rm(prod)
 #lifehistory$d -> metabolic_summary_tab
 #rm(lifehistory)
 
-## Age traits
+#### Age traits ####
 meanage_plot <- agetraits(juvads_allreps_tab)
-
-## Seed dynamics
+#### Seed dynamics ####
 #seeddyn <- seeddynamics(juvads_allreps_tab, seeds_allreps_tab)
 #seeddyn$a -> seeddyn_tab
 #seeddyn$b -> seeddyn_plot
 #rm(seeddyn)
 
-## Save bundle of tabs and plots as RData
+#### Save bundle of tabs and plots as RData ####
 EDtabs <- objects(name = environment(), all.names = FALSE, pattern = "tab$")
 save(list = EDtabs, file = file.path(analysEDdir,
                                      paste(parentsimID, "_tabs.RData", sep = "")))
@@ -812,21 +826,21 @@ EDplots <- objects(name = environment(), all.names = FALSE, pattern = "plot$")
 save(list = EDplots, file = file.path(analysEDdir,
                                       paste(parentsimID, "_plots.RData", sep = "")))
 
-## Growth curve is rather heavy, dont save an image for it
-save(growthcurve, file = file.path(analysEDdir,
+# Growth curve is rather heavy, dont save an image for it
+save(growthcurve_bigplot, file = file.path(analysEDdir,
                                   paste("growthcurve", ".RData", sep = "")))
 
-## Rank-abundance plots are in a list
+# Rank-abundance plots are in a list
 save(rankabund_plots, file = file.path(analysEDdir,
                                   paste(parentsimID, "rankabunds", ".RData", sep = "")))
 
-## Save lists with plots of trait distribution and values over time
+# Save lists with plots of trait distribution and values over time
 traits_plots <- objects(name = environment(), all.names = FALSE, pattern = "plots$")
 save(list = traits_plots, file = file.path(analysEDdir,
                                             paste(parentsimID, "traitsdistributions",
 					          ".RData", sep = "")))
 
-## Plot all graphs
+# Plot all graphs
 map(EDplots, ~ save_plot(filename = file.path(analysEDdir, paste(.x, ".png", sep ="")),
 	       	         plot = get(.x)))
 
