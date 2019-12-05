@@ -14,7 +14,7 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
 	
         # RUN MODEL
         ############
-        for t in 1:settings["timesteps"]
+        for t in 1:length(temp_ts.week)
 
             # check-point
             open(joinpath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim

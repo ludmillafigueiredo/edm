@@ -52,11 +52,6 @@ v
         arg_type = Any
         default = nothing
 
-        "--timesteps"
-        help = "Duration of simulation in weeks."
-        arg_type = Int
-        default = 5200
-
         "--tout"
         help = "Frequency of output (number of weeks)"
         arg_type = Int
