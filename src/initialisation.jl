@@ -144,7 +144,8 @@ id_counter = 0
 management_counter = 0
 
 # Temperature time-series
-temp_ts = CSV.read(settings["temp_ts"])
+temp_ts = CSV.read(settings["temp_ts"], header = true,
+                   types = Dict("week" => Int64, "meantemp" => Float64, "begin_date" => Dates.Date, "week_year" => String, "week_inyear" => Int64))
 
 # Landscape parameters
 landpars = read_landpars(settings)

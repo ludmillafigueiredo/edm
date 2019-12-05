@@ -179,7 +179,7 @@ function read_pollination(settings::Dict{String,Any})
         poll_pars = PollPars(pollination_scen, nothing)
     else
        disturbed_regime= CSV.read(pollination_file, header = true,
-				  type = Dict("td" => Int64, "remaining" => Float64))
+				  types = Dict("td" => Int64, "remaining" => Float64))
        poll_pars = PollPars(pollination_scen, disturbed_regime)	
     end
     

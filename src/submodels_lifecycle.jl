@@ -65,8 +65,10 @@ function develop!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
     juvs = filter(x->x.stage == "j" && x.age >= x.firstflower,plants)
     filter!(x -> !(x.id in getfield.(juvs, :id)), plants)
     # unit test
-    if juvs[1].stage != "j" || plants[1].stage == "j"
-        error("Juvenile sorting for maturation is doing the opposite")
+    if length(juvs) > 0
+        if juvs[1].stage != "j" || plants[1].stage == "j"
+            error("Juvenile sorting for maturation is doing the opposite")
+        end
     end
     setfield!.(juvs, :stage, "a")
     append!(plants, juvs)
@@ -415,7 +417,7 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
     # check-point of life-history processes
     open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
         for i in 1:length(dispersing)
-            writedlm(sim, hcat(t, "dispersal", "s", plants[c].age))
+            writedlm(sim, hcat(t, "dispersal", "s", mean(getfield.(dispersing, :age))))
         end
     end
     
@@ -575,7 +577,7 @@ end
 die!()
 
 """
-function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, dying_stage::String)
+function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, dying_stage::String, t::Int64)
 
     old = findall( x -> (x.stage == dying_stage && x.age >= x.span), plants)
     deleteat!(plants, old)
