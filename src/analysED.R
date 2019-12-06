@@ -39,7 +39,7 @@ options(scipen = 999)
 getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.path("~/model")){
 
   spp_seedmass <- read_csv(file.path(outputsdir, "sppref_traitvalues.csv"), 
-                           col_names=TRUE) %>% dplyr::select(sp = species, seedmass) 
+                           col_names=TRUE) %>% dplyr::select(sp, seedmass) 
 
   ## initiliaze list to contain outputs 
   ##outdatalist <- list()

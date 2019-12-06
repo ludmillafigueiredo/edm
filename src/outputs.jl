@@ -52,7 +52,7 @@ end
 
 function output_sppref(SPP_REF)
 	 	# printout SPP_REF
-	open(joinpath(simresults_folder, "SPP_REF.csv"), "w") do ref
+	open(joinpath(simresults_folder, "sppref_traitvalues.csv"), "w") do ref
             writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")
 	end
     

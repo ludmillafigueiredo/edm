@@ -11,7 +11,7 @@ using Dates
 
 # Initial trait values is read from an input file and stored for reference in `sppref::SppRef`.
 mutable struct SppRef
-    species::Array{String, 1}
+    sp::Array{String, 1}
     clonality::Dict{String,Bool}
     kernel::Dict{String,String}
     pollen_vector::Dict{String,String}
