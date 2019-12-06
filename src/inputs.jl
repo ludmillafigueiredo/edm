@@ -25,11 +25,11 @@ function parse_commandline()
         arg_type = String
         default = "outputs"
 
-        "--spinput"
+        "--sppinput"
         help = "Name of file with species list."
         arg_type = String
         default = joinpath("test_inputs", "weisssingles/weissplants_sppinput.csv")
-v
+
         "--pollination"
         help = "How to explicitly model insects:
                 pollination-independent reproduction \"indep\";
@@ -97,26 +97,26 @@ Reads in species trait values (min. and max. values for the evolvable ones). Sto
 """
 function read_sppinput(settings::Dict{String,Any})
 
-    spinputtbl = CSV.read(settings["spinput"])
+    sppinputtbl = CSV.read(settings["sppinput"])
 
     sppref = SppRef()
 
     # species, clonality and fitness columns cannot be set as the rest
-    sppref.species = spinputtbl[:, :species]
-    sppref.clonality = Dict(spinputtbl[:, :species][i] => spinputtbl[:, :clonality][i] == "TRUE"
-		        	      		    for i in 1:length(spinputtbl[:, :species]))
-    sppref.kernel = Dict(spinputtbl[:, :species][i] => spinputtbl[:, :kernel][i]
-		        	      		    for i in 1:length(spinputtbl[:, :species]))
-    sppref.pollen_vector = Dict(spinputtbl[:, :species][i] => spinputtbl[:, :pollen_vector][i]
-		        	      		    for i in 1:length(spinputtbl[:, :species]))
-    sppref.self_failoutcross = Dict(spinputtbl[:,:species][i] => spinputtbl[:,:self_failoutcross][i] == "TRUE"
-		        	      		    for i in 1:length(spinputtbl[:, :species]))
+    sppref.species = sppinputtbl[:, :species]
+    sppref.clonality = Dict(sppinputtbl[:, :species][i] => sppinputtbl[:, :clonality][i] == "TRUE"
+		        	      		    for i in 1:length(sppinputtbl[:, :species]))
+    sppref.kernel = Dict(sppinputtbl[:, :species][i] => sppinputtbl[:, :kernel][i]
+		        	      		    for i in 1:length(sppinputtbl[:, :species]))
+    sppref.pollen_vector = Dict(sppinputtbl[:, :species][i] => sppinputtbl[:, :pollen_vector][i]
+		        	      		    for i in 1:length(sppinputtbl[:, :species]))
+    sppref.self_failoutcross = Dict(sppinputtbl[:,:species][i] => sppinputtbl[:,:self_failoutcross][i] == "TRUE"
+		        	      		    for i in 1:length(sppinputtbl[:, :species]))
     sppref.fitness = Dict()
 
     for field in fieldnames(typeof(sppref))[6:end-1]
     	setfield!(sppref, field,
-	          Dict(spinputtbl[:, :species][i] => Float64(spinputtbl[:, field][i])
-		        	      		    for i in 1:length(spinputtbl[:, :species])))
+	          Dict(sppinputtbl[:, :species][i] => Float64(sppinputtbl[:, field][i])
+		        	      		    for i in 1:length(sppinputtbl[:, :species])))
     end
     
     return sppref
@@ -129,36 +129,36 @@ Values are store in an object of type TraitRanges, where each field is a Diction
 """
 function define_traitranges(settings::Dict{String,Any})
 
-    spinputtbl = CSV.read(settings["spinput"])
+    sppinputtbl = CSV.read(settings["sppinput"])
 
     traitranges = TraitRanges(
-        Dict(spinputtbl[:,:species][i] =>
-             [spinputtbl[:,:compartsize][i], spinputtbl[:,:compartsize][i]]
-             for i in 1:length(spinputtbl[:,:species])),
-        Dict(spinputtbl[:,:species][i] =>
-             [Int(round(spinputtbl[:,:span_min][i], RoundDown)), Int(round(spinputtbl[:,:span_max][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:species])),
-        Dict(spinputtbl[:,:species][i] =>
-             [Int(round(spinputtbl[:,:firstflower_min][i], RoundDown)), Int(round(spinputtbl[:,:firstflower_max][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:species])),
-        Dict(spinputtbl[:,:species][i] =>
-             [Int(round(spinputtbl[:,:floron][i], RoundDown)), Int(round(spinputtbl[:,:floron][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:species])),
-        Dict(spinputtbl[:,:species][i] =>
-             [Int(round(spinputtbl[:,:floroff][i], RoundDown)), Int(round(spinputtbl[:,:floroff][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:species])),
-        Dict(spinputtbl[:,:species][i] =>
-             [Int(round(spinputtbl[:,:seednumber_min][i], RoundDown)), Int(round(spinputtbl[:,:seednumber_max][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:species])),
-        Dict(spinputtbl[:,:species][i] =>
-             [Int(round(spinputtbl[:,:seedon][i], RoundDown)), Int(round(spinputtbl[:,:seedon][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:species])),
-        Dict(spinputtbl[:,:species][i] =>
-             [Int(round(spinputtbl[:,:seedoff][i], RoundDown)), Int(round(spinputtbl[:,:seedoff][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:species])),
-        Dict(spinputtbl[:,:species][i] =>
-             [Int(round(spinputtbl[:,:bankduration_min][i], RoundDown)), Int(round(spinputtbl[:,:bankduration_max][i], RoundUp))]
-             for i in 1:length(spinputtbl[:,:species])))
+        Dict(sppinputtbl[:,:species][i] =>
+             [sppinputtbl[:,:compartsize][i], sppinputtbl[:,:compartsize][i]]
+             for i in 1:length(sppinputtbl[:,:species])),
+        Dict(sppinputtbl[:,:species][i] =>
+             [Int(round(sppinputtbl[:,:span_min][i], RoundDown)), Int(round(sppinputtbl[:,:span_max][i], RoundUp))]
+             for i in 1:length(sppinputtbl[:,:species])),
+        Dict(sppinputtbl[:,:species][i] =>
+             [Int(round(sppinputtbl[:,:firstflower_min][i], RoundDown)), Int(round(sppinputtbl[:,:firstflower_max][i], RoundUp))]
+             for i in 1:length(sppinputtbl[:,:species])),
+        Dict(sppinputtbl[:,:species][i] =>
+             [Int(round(sppinputtbl[:,:floron][i], RoundDown)), Int(round(sppinputtbl[:,:floron][i], RoundUp))]
+             for i in 1:length(sppinputtbl[:,:species])),
+        Dict(sppinputtbl[:,:species][i] =>
+             [Int(round(sppinputtbl[:,:floroff][i], RoundDown)), Int(round(sppinputtbl[:,:floroff][i], RoundUp))]
+             for i in 1:length(sppinputtbl[:,:species])),
+        Dict(sppinputtbl[:,:species][i] =>
+             [Int(round(sppinputtbl[:,:seednumber_min][i], RoundDown)), Int(round(sppinputtbl[:,:seednumber_max][i], RoundUp))]
+             for i in 1:length(sppinputtbl[:,:species])),
+        Dict(sppinputtbl[:,:species][i] =>
+             [Int(round(sppinputtbl[:,:seedon][i], RoundDown)), Int(round(sppinputtbl[:,:seedon][i], RoundUp))]
+             for i in 1:length(sppinputtbl[:,:species])),
+        Dict(sppinputtbl[:,:species][i] =>
+             [Int(round(sppinputtbl[:,:seedoff][i], RoundDown)), Int(round(sppinputtbl[:,:seedoff][i], RoundUp))]
+             for i in 1:length(sppinputtbl[:,:species])),
+        Dict(sppinputtbl[:,:species][i] =>
+             [Int(round(sppinputtbl[:,:bankduration_min][i], RoundDown)), Int(round(sppinputtbl[:,:bankduration_max][i], RoundUp))]
+             for i in 1:length(sppinputtbl[:,:species])))
     return traitranges
 end
 
