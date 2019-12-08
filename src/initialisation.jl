@@ -82,7 +82,7 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::
 
 	for i in 1:sp_abund
 
-	    id_counter += 1 # update individual counter
+	    id_counter = id_counter + 1 # update individual counter
 	    minvalue = 1e-7 # Distribution.Uniform requires max > min
 
 	    newplant = Plant(string(id_counter, base=16),
@@ -141,7 +141,6 @@ settings = parse_commandline()
 println(keys(settings))
 Random.seed!(settings["rseed"])
 
-id_counter = 0
 management_counter = 0
 
 # Temperature time-series
@@ -161,4 +160,5 @@ landscape = init_landscape(landpars)
 K = init_K(landscape, settings, 1)
 T, mean_annual = setenv!(1, temp_ts)
 init_fitness!(SPP_REF, mean_annual, 1.0)
-plants, id_counter = init_plants(landscape, SPP_REF, id_counter, settings, K)
+plants, id_counter = init_plants(landscape, SPP_REF, settings, K)
+println("id_counter: $id_counter, # plants: $(length(plants))")

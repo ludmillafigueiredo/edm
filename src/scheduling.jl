@@ -84,7 +84,7 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
 	    id_counter = mkseeds!(plants, settings, id_counter, T, t)
 	    id_counter = clone!(plants, settings, id_counter, t)
 
-	    self_pollinate!(plants, settings, id_counter, t)
+	    id_counter = self_pollinate!(plants, settings, id_counter, t)
 	    
 	    setfield!.(plants, :mated, false) # plant only produces seeds again if it gets pollinated
 	    
@@ -97,6 +97,8 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
 	    if (rem(t,52) == 51)
 	       winter_dieback!(plants, t)
 	    end
+
+	    println("id_counter: $id_counter, # plants: $(length(plants))")
         end
     end
 

@@ -37,25 +37,27 @@ function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T:
 	
     end
 
+    # unit test
+    check_duplicates(plants)
+    masserror = findall(x -> sum(collect(values(x.mass))) <= 0, plants)
+    if length(masserror) > 0
+        println("Plant: plants[masserror[1]]")
+	error("Zero or negative values of biomass detected.")
+    end
+
     # check-point
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         println(sim, "Above-ground biomass after growth:\n$(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
 	filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
     end
     
-    # unit test
-    masserror = findall(x -> sum(collect(values(x.mass))) <= 0, plants)
-    if length(masserror) > 0
-        println("Plant: plants[masserror[1]]")
-	error("Zero or negative values of biomass detected.")
-    end
 end
 
 """
-    develop!(plants, settings, t)
+    mature!(plants, settings, t)
 Juveniles in `plants` older than their age of first flowering at time `t` become adults.
 """
-function develop!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
+function mature!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Maturation...")
@@ -66,12 +68,15 @@ function develop!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
     filter!(x -> !(x.id in getfield.(juvs, :id)), plants)
     # unit test
     if length(juvs) > 0
-        if juvs[1].stage != "j" || plants[1].stage == "j"
+        if "a" in getfield.(juvs, :stage) || "s" in getfield.(juvs, :stage)
             error("Juvenile sorting for maturation is doing the opposite")
         end
     end
     setfield!.(juvs, :stage, "a")
     append!(plants, juvs)
+
+    # unit test
+    check_duplicates(plants)
     
 end
 
@@ -118,6 +123,11 @@ function pollinate!(poll_plants::Array{Plant,1}, plants::Array{Plant,1}, npoll::
     non_pollinated = filter(x -> !(x.id in getfield.(pollinated,:id)), poll_plants)
     append!(plants, append!(pollinated, non_pollinated))
 
+
+    # unit test
+    check_duplicates(plants)
+
+    # log
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Number of pollinated plants: $(length(pollinated)), non-pollinated: $(length(non_pollinated))")
     end
@@ -248,7 +258,7 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counte
 
                 for n in 1:offs
 
-		    id_counter += 1
+		    id_counter = id_counter + 1
 		    seed = deepcopy(plants[s])
 		    seed_counter += 1
 		    
@@ -273,6 +283,8 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counte
 
   end
 
+    # unit test
+    check_duplicates(plants)
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Total number of individuals after SEX:", length(plants)))
     end
@@ -323,7 +335,7 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, id
 
 		for n in 1:offs
 
-		    id_counter += 1
+		    id_counter = id_counter + 1
 		    seed = deepcopy(plants[s])
 		    
 		    # reassign state variables that dont evolve
@@ -342,6 +354,12 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, id
 	    end
         end
   end
+
+  # unit test
+  check_duplicates(plants)
+
+  return id_counter
+  
 end
 
 """
@@ -370,7 +388,7 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter
 	clone.mass["root"] = plants[c].compartsize*0.1
 	clone.mass["repr"] = 0.0
 
-	id_counter += 1
+	id_counter = id_counter + 1
 	clone.id = string(id_counter, base=16)
 	push!(plants, clone)
 	    spclonescounter += 1
@@ -386,7 +404,9 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter
 	writedlm(seedfile, hcat(t, sp, "j", "asex", spclonescounter))
     	end
     end
-    
+
+    # unit test
+    check_duplicates(plants)
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Total number of individuals after ASEX:", length(plants)))
     end
@@ -414,6 +434,7 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
 			x.seedon <= rem(t,52) < x.seedoff), plants)
     n_dispersing = length(dispersing)
     filter!(x -> !(x.id in getfield.(dispersing, :id)), plants)
+
     # check-point of life-history processes
     open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
         for i in 1:length(dispersing)
@@ -459,6 +480,11 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
 	
     end
 
+    # unit test
+    if lost +  length(justdispersed) != n_dispersing
+       error("Number of successes and fails in dispersal do not match.")
+    end
+    check_duplicates(plants)
     
     # for now, just change the stage: these seeds are no longer in a flower
     # these individuals will be put back into the main vector `plants` after establishment (next)
@@ -470,11 +496,6 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
     	println(sim, "Lost in dispersal: $lost")
     end
 
-    # unit test
-    if lost +  length(justdispersed) != n_dispersing
-       error("Number of successes and fails in dispersal do not match.")
-    end
-    
     return justdispersed
     
 end
@@ -493,7 +514,7 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
     
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-	writedlm(sim, hcat("Seeds trying to establish:", length(establishing)))
+	println(sim, "Seeds trying to establish: $n_establishing")
     end
 
     germinations = 0
@@ -510,11 +531,13 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
         setproperty!.(germinated, :stage, "j")
 	append!(plants, germinated)
 	germinations += length(germinated)
+
 	# update the seeds that did not germinate and will go back into the main vector
 	non_germinated = filter(x -> !(x.id in germinated_ids), establishing_sp)
     	append!(plants, non_germinated)
 	non_germinations += length(non_germinated)
-        # check-point of life-history processes
+
+	# check-point of life-history processes
 	open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
             for i in 1:length(germinated)
 	        writedlm(sim, hcat(t, "germination", "j", mean(getfield.(germinated, :age))))
@@ -530,6 +553,7 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
     end
 
     # unit test
+    check_duplicates(plants)
     if germinations + non_germinations != n_establishing
        error("Number of successes and fails in establishment do not match.")
     end
@@ -550,6 +574,8 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
     
     dying = filter(x -> x.stage == "s", plants)
     deaths = 0
+
+    plantsbefore = length(plants)
     
     for sp in unique(getfield.(dying, :sp))
     	dying_sp = filter(x -> x.sp == "sp", plants)
@@ -558,6 +584,10 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
 		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
 	deleteat!(plants, death_idxs)
 	deaths += length(death_idxs)
+    end
+
+    if plantsbefore - deaths != length(plants)
+        error("Error in processing seed deaths")
     end
 
     # check-point
@@ -571,6 +601,10 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
             writedlm(sim, hcat(t, "death-indep", "s", mean(getfield.(dying, :age))))
         end
     end
+
+    #unit test
+    check_duplicates(plants)
+    
 end
 
 """
@@ -591,6 +625,9 @@ function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, 
     deleteat!(plants, dead_idxs)
     living = filter(x -> x.id in living_ids, dying)
     append!(plants, living)
+
+    # unit test
+    check_duplicates(plants)
     
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
@@ -684,6 +721,7 @@ function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any
     end
 
     # check-point
+    check_duplicates(plants)
     open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
         println(sim, "Above-ground biomass after density-dependent mortality:\n$(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
 	filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
