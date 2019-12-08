@@ -102,7 +102,7 @@ function read_sppinput(settings::Dict{String,Any})
     sppref = SppRef()
 
     # species, clonality and fitness columns cannot be set as the rest
-    sppref.species = sppinputtbl[:, :species]
+    sppref.sp = sppinputtbl[:, :species]
     sppref.clonality = Dict(sppinputtbl[:, :species][i] => sppinputtbl[:, :clonality][i] == "TRUE"
 		        	      		    for i in 1:length(sppinputtbl[:, :species]))
     sppref.kernel = Dict(sppinputtbl[:, :species][i] => sppinputtbl[:, :kernel][i]

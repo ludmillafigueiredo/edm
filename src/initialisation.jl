@@ -46,7 +46,7 @@ It runs at initialization, to set up niche partitioning. It used the  with mean 
 - `std_tol::Float64`: parameter `c` is the standard deviation,
 """
 function init_fitness!(SPP_REF::SppRef, mean_annual::Float64, max_fitness::Float64)
-    for sp in SPP_REF.species
+    for sp in SPP_REF.sp
         mean_opt = SPP_REF.temp_opt[sp]
         std_tol = SPP_REF.temp_tol[sp]
 
@@ -57,16 +57,17 @@ end
 
 
 """
-    init_plants(landscape, SPP_REF,id_counter)
+    init_plants(landscape, SPP_REF)
 
 Initialize the organisms with trait values stored in `SPP_REF` and distributes them in the suitable grid-cells in the landscape `landscape`.
 Store the individuals in the `plants` array, which holds all plants simulated at any given time.
 """
-function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, id_counter::Int, settings::Dict{String, Any}, K::Float64)
+function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::Dict{String, Any}, K::Float64)
 
     plants = Plant[]
+    id_counter = 0
 
-    for s in SPP_REF.species
+    for s in SPP_REF.sp
 
         # Niche partitioning: Upon initialization, each species total biomass equals K*fitness_relative, where fitness_relative is the species fitness values relative to the sum of others
         # The initial abundance is number of medium-sized individuals (50% of maximal biomass) that would sum up to the biomass.

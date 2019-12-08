@@ -176,7 +176,7 @@ Fitness is updated every begining of the year, with mean temperature for the yea
 - `std_tol::Float64`: parameter `c` is the standard deviation,
 """
 function updatefitness!(mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Dict{String, Any})
-    for sp in SPP_REF.species
+    for sp in SPP_REF.sp
 
         mean_opt = SPP_REF.temp_opt[sp]
         std_tol = SPP_REF.temp_tol[sp]
