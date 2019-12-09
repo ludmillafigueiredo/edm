@@ -22,8 +22,8 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
 		println(sim, "Species richness: $(length(unique(getfield.(plants, :sp))))")
             end
 
-	        println("\nWEEK $t")
-	        println("Species richness: $(length(unique(getfield.(plants, :sp))))")
+	    println("\nWEEK $t")
+	    println("Species richness: $(length(unique(getfield.(plants, :sp))))")
 
             # APPLY LANDSCAPE DISTURBANCE
 	    if landpars.disturbance != nothing
@@ -43,8 +43,7 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
 	        println(sim, "Temperature for week $t: $T")
 	        println(sim, "Mean for the year of week $t: $mean_annual")
 	    end
-	
-
+	    
             updatefitness!(mean_annual, 1.0, t, settings)
 
             write_output(plants,t,settings)

@@ -287,3 +287,36 @@ end
 function age!(plant::Plant)
     plant.age += 1
 end
+
+function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cell::Array{Plant,1}, dying_stage::String, plants::Array{Plant,1}, settings::Dict{String,Any}, t::Int64)
+
+    C_K_sp = C_K * (sppcell_fitness[sp]/sum(collect(values(sppcell_fitness))))
+
+    plantscell_sp = filter(x -> x.sp == sp, plants_cell)
+
+    if sum(vcat(map(x->sum(values(x.mass))-x.mass["root"], plantscell_sp),NOT_0)) > 0
+
+        dying_plants = filter(x -> x.stage == dying_stage, plantscell_sp)
+	# order inds so smaller can be killed first with pop!
+        dying_sorted = sort(dying_plants, by = x -> sum(values(x.mass)), rev = true)
+
+	dying = Plant[]
+			   
+	while (sum(vcat(map(x->sum(values(x.mass))-x.mass["root"], plantscell_sp),NOT_0)) > C_K_sp
+	       && length(dying_sorted) > 0)
+
+	    # kill smallest
+	    pop!(dying_sorted) |> x -> (push!(dying, x);
+	                                filter!(y -> y.id != x.id, plantscell_sp))
+	end
+
+        dying_idxs = findall(x -> x.id in getfield.(dying, :id), plants)
+        deleteat!(plants, dying_idxs)
+        # check point life history events
+        open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+            for i in 1:length(dying)
+                writedlm(sim, hcat(t, "death-dep", dying_stage, mean(getfield.(dying, :age))))
+            end
+        end
+    end			
+end

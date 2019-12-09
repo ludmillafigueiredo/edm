@@ -391,7 +391,7 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter
 	id_counter = id_counter + 1
 	clone.id = string(id_counter, base=16)
 	push!(plants, clone)
-	    spclonescounter += 1
+	spclonescounter += 1
             # check-point of life-history processes
 	    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
 	        writedlm(sim, hcat(t, "clonal reproduction", "a", plants[c].age))
@@ -664,68 +664,27 @@ function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any
            println(sim, "Number of shared cells: $(length(unique(locs[fullcells_indxs])))")
        end
 
-	    for loc in unique(locs[fullcells_indxs])
+       for loc in unique(locs[fullcells_indxs])
 
-		#find plants that are in the same grid
-		plants_cell = filter(x -> x.location == loc, production_plants)
+           #find plants that are in the same grid
+	   plants_cell = filter(x -> x.location == loc, production_plants)
+  
+           # get fitness of all species in the cell to simulate local competition
+           sppcell_fitness = Dict(sp => SPP_REF.fitness[sp]
+	                          for sp in unique(getfield.(plants_cell, :sp)))
 
-		# get fitness of all species in the cell to simulate local competition
-                sppcell_fitness = Dict(sp => SPP_REF.fitness[sp]
-		    		      	   for sp in unique(getfield.(plants_cell, :sp)))
-
-		if sum(vcat(map(x->sum(values(x.mass))-x.mass["root"],plants_cell),NOT_0)) > C_K
-
-		    for sp in keys(sppcell_fitness)
-
-                       	C_K_sp = C_K * (sppcell_fitness[sp]/sum(collect(values(sppcell_fitness))))
-
-			prodplants_cell = filter(x -> x.stage in ["j", "a"] &&
-					  	      x.sp == sp &&
-						      x.location == loc,
-					  	 plants)
-
-			prodsp_cell = sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],prodplants_cell),NOT_0))
-			
-			if prodsp_cell > C_K_sp
-
-			   dying_plants = filter(x -> x.stage == dying_stage && x.sp == sp, plants_cell)
-			   # order inds so smaller can be killed first with pop!()
-                           dying_sorted = sort(dying_plants,
-					       by = x -> sum(values(x.mass)), rev = true)
-
-			   dying = Plant[]
-			   while (prodsp_cell > C_K_sp && length(dying_sorted) > 0)
-			       # kill smallest
-			       push!(dying, pop!(dying_sorted))
-
-			       #update controls of while loop
-			       prodplants_cell = filter(x -> x.stage in ["j", "a"] &&
-			       		       	 	     x.sp == sp &&
-							     x.location == loc,
-					  	        plants)
-			       prodsp_cell = sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],prodplants_cell),NOT_0))
-                           end
-
-			   dying_idxs = findall(x -> x.id in getfield.(dying, :id), plants)
-			   deleteat!(plants, dying_idxs)
-                           # check point life history events
-                            open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-                                for i in 1:length(dying)
-                                    writedlm(sim, hcat(t, "death-dep", dying_stage, mean(getfield.(dying, :age))))
-                                end
-                            end
-                        end
-                    end
-                end
-            end
+           if sum(vcat(map(x->sum(values(x.mass))-x.mass["root"],plants_cell),NOT_0)) > C_K
+	       for sp in keys(sppcell_fitness)
+	           sort_die!(sp, sppcell_fitness, plants_cell, dying_stage, plants, settings, t)
+	       end
+           end
+       end
     end
 
-    # check-point
+    # unit test
     check_duplicates(plants)
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-        println(sim, "Above-ground biomass after density-dependent mortality:\n$(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
-	filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
-    end
+    # log process
+    log_abovegroundmass("after", "density-dependent mortality")
     
 end
 
