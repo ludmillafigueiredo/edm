@@ -22,12 +22,7 @@ function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T:
         println(sim, "Flowering: $(length(flowering_ids))")
     end
 
-    # check-point
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Growth of $(length(growing)) $(uppercase(growing_stage))")
-        println(sim, "Above-ground biomass before growth:\n$(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
-	filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
-    end
+    log_abovegroundmass("before", "growth")
 	
     for sp in unique(getfield.(growing, :sp))
     	b0grow = SPP_REF.b0grow[sp]
@@ -44,12 +39,8 @@ function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T:
         println("Plant: plants[masserror[1]]")
 	error("Zero or negative values of biomass detected.")
     end
-
-    # check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-        println(sim, "Above-ground biomass after growth:\n$(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
-	filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
-    end
+    # log process
+    log_abovegroundmass("after", "growth")
     
 end
 
@@ -666,11 +657,9 @@ end
 
 function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  landscape::BitArray{2}, T, dying_stage::String)
 
-    # check-point
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-        println(sim, "Above-ground biomass after density-dependent mortality:\n$(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
-	filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
-    end
+    # log process
+    log_abovegroundmass("before", "density-depedent mortality")
+    
     # biomass of both juveniles and adults is used as criteria for check if  production > K
     # but only only stage dies at each timestep
     production_plants = filter(x -> x.stage in ["j" "a"], plants) 
