@@ -57,6 +57,8 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
                 println(sim, "Biomass production: $biomass_production")
             end
 
+	    check_ages(plants)
+	    
 	    die_seeds!(plants, settings, t, T)
 
 	    # Adults growth and mortality
@@ -75,8 +77,10 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
 	    map(x -> age!(x), plants) # surviving get older
 	    append!(plants, s_flower)
 	    
-	    develop!(plants, settings, t)
+	    mature!(plants, settings, t)
 
+	    check_ages(plants)
+	    
 	    mate!(plants, t, settings, poll_pars::PollPars)
 
 	    # Offspring production
@@ -97,7 +101,7 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
 	       winter_dieback!(plants, t)
 	    end
 
-	    println("id_counter: $id_counter, # plants: $(length(plants))")
+            println("id_counter: $id_counter, # plants: $(length(plants))")
         end
     end
 

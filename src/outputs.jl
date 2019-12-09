@@ -127,6 +127,37 @@ function write_output(plants::Array{Plant,1}, t::Int64, settings::Dict{String,An
 end
 
 """
+log_abovegroundmass(when, proc)
+"""
+function log_abovegroundmass(when,proc)
+
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+        println(sim,"Above-grd mass $when $proc: $(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
+	                                                        filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
+    end
+    
+end
+
+function log_sim(msg)
+
+    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+        println(sim, msg)
+    end
+    
+end
+
+function log_age()
+
+    open(joinpath(simresults_folder, "checkpoint.txt"),"a") do sim
+        println(sim, "Juvs age >= firstflower: $(filter(x -> (x.stage == "j" && x.age > x.firstflower), 
+                                                  plants) |> x -> [getfield.(x, :id), 
+                                                                   getfield.(x, :stage), 
+                                                                   getfield.(x, :firstflower), 
+                                                                   getfield.(x, :age)])")
+    end
+    
+end
+"""
 analsyED()
 Run R script of analysis after the model finishes the simulation
 """

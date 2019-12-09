@@ -58,13 +58,15 @@ end
 Juveniles in `plants` older than their age of first flowering at time `t` become adults.
 """
 function mature!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
+
+    nplants_before = length(plants)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Maturation...")
     end
 
     # find indexes of individuals that are ready to become adults
-    juvs = filter(x->x.stage == "j" && x.age >= x.firstflower,plants)
+    juvs = filter(x-> (x.stage == "j" && x.age >= x.firstflower),plants)
     filter!(x -> !(x.id in getfield.(juvs, :id)), plants)
     # unit test
     if length(juvs) > 0
@@ -73,8 +75,15 @@ function mature!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
         end
     end
     setfield!.(juvs, :stage, "a")
+    if "j" in getfield.(juvs, :stage)
+            error("Maturation is not working")
+        end
     append!(plants, juvs)
-
+    if nplants_before != length(plants)
+       error("Young adults got lost")
+    end
+    check_ages(plants)
+    
     # unit test
     check_duplicates(plants)
     
@@ -383,6 +392,7 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter
        	if rand(Distributions.Binomial(1, 0.5)) == 1
        	clone = deepcopy(plants[c])
 	clone.stage = "j" #clones have already germinated
+	clone.age = 0
 	clone.mass["leaves"] = (plants[c].compartsize*0.1)^(3/4)
 	clone.mass["stem"] = plants[c].compartsize*0.1
 	clone.mass["root"] = plants[c].compartsize*0.1
@@ -529,6 +539,7 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
 	germinated_ids = vectorized_seedproc("germination", establishing_sp, Bg)
 	germinated = filter(x -> x.id in germinated_ids, establishing_sp)
         setproperty!.(germinated, :stage, "j")
+	setproperty!.(germinated, :age, 0)
 	append!(plants, germinated)
 	germinations += length(germinated)
 
@@ -569,13 +580,14 @@ Both types of mortalities of adults and juveniles are calculated separately (as 
 Calculate seed mortality, vectorized for all seeds of a same species.
 """
 function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int64, T::Float64)
+
     old = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
     deleteat!(plants, old)
     
     dying = filter(x -> x.stage == "s", plants)
     deaths = 0
 
-    plantsbefore = length(plants)
+    n_plantsbefore = length(plants)
     
     for sp in unique(getfield.(dying, :sp))
     	dying_sp = filter(x -> x.sp == "sp", plants)
@@ -586,8 +598,12 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
 	deaths += length(death_idxs)
     end
 
-    if plantsbefore - deaths != length(plants)
+    #unit test
+    check_duplicates(plants)
+    if n_plantsbefore - deaths != length(plants)
         error("Error in processing seed deaths")
+    else
+	log_sim("Seed mortality running smoooth")
     end
 
     # check-point
@@ -602,9 +618,6 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
         end
     end
 
-    #unit test
-    check_duplicates(plants)
-    
 end
 
 """
@@ -613,8 +626,17 @@ die!()
 """
 function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, dying_stage::String, t::Int64)
 
-    old = findall( x -> (x.stage == dying_stage && x.age >= x.span), plants)
-    deleteat!(plants, old)
+    old = findall( x -> (x.stage == dying_stage && x.age > x.span), plants)
+    
+    if length(old) > 0
+       if dying_stage == "j"
+           # unit test
+	   log_age()
+           error("Juvenile did not mature before reaching maximum span")
+       else
+	   deleteat!(plants, old)
+       end 
+    end
 
     # the rest of the individuals have a metabolic probability of dying.
     dying = filter(x -> x.stage == dying_stage, plants)

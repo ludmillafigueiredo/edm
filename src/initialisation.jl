@@ -110,10 +110,8 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::
             ## initial biomass
 	    if newplant.stage == "s"
 		newplant.mass["root"] = SPP_REF.seedmass[newplant.sp]
-		newplant.age = 1
 	    elseif newplant.stage == "j"
 		newplant.mass["root"] = SPP_REF.seedmass[newplant.sp]
-		newplant.age = newplant.seedon + 4
 	    elseif newplant.stage in ["a"]
 		newplant.mass["leaves"] = newplant.compartsize^(3/4) * 0.75
 		newplant.mass["stem"] = newplant.compartsize * 0.75
