@@ -94,21 +94,18 @@ end
 disturb_pollinate!()
 Call the pollinate!() function for groups of individuals according to 
 """
-function disturb_pollinate!(insects_plants::Array{Plant,1}, poll_pars::PollPars, plants::Array{Plant,1}, t::Int64)
+function disturb_pollinate!(flowering::Array{Plant,1}, poll_pars::PollPars, plants::Array{Plant,1}, t::Int64)
 
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Pollination disturbed by $poll_pars.scen ...")
     end
 
+    insects_plants = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering)
+    
     if poll_pars.scen  == "equal" # all plants species are equally affected
         for sp in unique(getfield.(insects_plants, :sp))
-    	    insects_plants_sp = filter(x -> x.sp == sp, insects_plants)
-	    filter!(x -> !(x.sp == sp), insects_plants)
-	    npoll = get_npoll(insects_plants_sp, poll_pars, t)
-	    if npoll > 0
-	        pollinate!(insects_plants_sp, plants, npoll)
-	    end
+    	    pollinate!("insects", sp, plants, npoll)
 	end
     elseif poll_pars.scen == "rdm"
     	npoll = get_npoll(insects_plants, poll_pars, t)

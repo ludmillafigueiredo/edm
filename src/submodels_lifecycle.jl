@@ -116,20 +116,44 @@ end
 pollinate!()
 Mark plants and having pollinated (mated = true)
 """
-function pollinate!(poll_plants::Array{Plant,1}, plants::Array{Plant,1}, npoll::Int64)
+function pollinate!(pollen_vector::String, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
+    poll_plants = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering)
+    npoll = get_npoll("wind", poll_plants, poll_pars, t)
     pollinated = sample(poll_plants, npoll, replace = false, ordered = false)
+    filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
     setfield!.(pollinated, :mated, true)
-    non_pollinated = filter(x -> !(x.id in getfield.(pollinated,:id)), poll_plants)
-    append!(plants, append!(pollinated, non_pollinated))
-
-
+    append!(plants, pollinated)
+    
     # unit test
     check_duplicates(plants)
 
     # log
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Number of pollinated plants: $(length(pollinated)), non-pollinated: $(length(non_pollinated))")
+        println(sim, "Number of pollinated plants: $(length(pollinated)), non-pollinated: $(length(flowering))")
+    end
+
+end
+
+"""
+pollinate!()
+Method used when pollination haas been disturbed
+"""
+function pollinate!(insects_plants::Array{Plant,1}, sp::String, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+
+    insects_plants_sp = filter(x -> x.sp == sp, insects_plants)
+    npoll = get_npoll("wind", insects_plants_sp, poll_pars, t)
+    pollinated = sample(insects_plants_sp, npoll, replace = false, ordered = false)
+    filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
+    setfield!.(pollinated, :mated, true)
+    append!(plants, pollinated)
+    
+    # unit test
+    check_duplicates(plants)
+
+    # log
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        println(sim, "Number of pollinated plants: $(length(pollinated)), non-pollinated: $(length(flowering))")
     end
 
 end
@@ -148,28 +172,28 @@ function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, po
         println(sim, "Number of flowering plants: $(length(flowering)).")
     end
 
-    if length(flowering) > 0 # check if there is anyone flowering
+     if length(flowering) > 0 # check if there is anyone flowering
 
         # as with the other processes, it is easier to process plants separately from the main vector
         filter!(x -> !(x.id in getfield.(flowering, :id)), plants)
 
-	wind_plants = filter(x -> occursin("wind", x.pollen_vector), flowering)
-	npoll = get_npoll("wind", wind_plants, poll_pars, t)
-	pollinate!(wind_plants, plants, npoll)
+	pollinate!("wind", flowering, plants, poll_pars, t)
 
-	insects_plants = filter(x -> occursin("insects", x.pollen_vector),
-	                                      flowering)
-	
 	if poll_pars.scen == "indep" || (poll_pars.scen in ["equal", "rdm", "spec"] &&
 	   !(t in poll_pars.regime.td))
 
-	    npoll = get_npoll("insects", insects_plants, poll_pars, t)
-	    pollinate!(insects_plants, plants, npoll)
+	    pollinate!("insects", flowering, plants, poll_pars, t)
 		
 	else
-	    disturb_pollinate!(insects_plants, poll_pars, plants, t)
+	    disturb_pollinate!(flowering, poll_pars, plants, t)
 	end
+
+	# reinstate the ones that did not get pollinated
+	append!(plants, flowering)	
     end
+
+    # unit test
+    check_duplicates(plants)
     
 end
 
