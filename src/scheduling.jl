@@ -2,7 +2,7 @@
     simulate!()
 Run all functions
 """
-function run_scheduling(settings, id_counter, management_counter, landpars, poll_pars, K, T, mean_annual, plants,landscape)
+function run_scheduling(settings, management_counter, landpars, poll_pars, K, T, mean_annual, plants,landscape)
 
     Random.seed!(settings["rseed"])
     
@@ -84,10 +84,10 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
 	    mate!(plants, t, settings, poll_pars::PollPars)
 
 	    # Offspring production
-	    id_counter = mkseeds!(plants, settings, id_counter, T, t)
-	    id_counter = clone!(plants, settings, id_counter, t)
+	    mkseeds!(plants, settings, T, t)
+	    clone!(plants, settings, t)
 
-	    id_counter = self_pollinate!(plants, settings, id_counter, t)
+	    self_pollinate!(plants, settings, t)
 	    
 	    setfield!.(plants, :mated, false) # plant only produces seeds again if it gets pollinated
 	    
@@ -100,8 +100,6 @@ function run_scheduling(settings, id_counter, management_counter, landpars, poll
 	    if (rem(t,52) == 51)
 	       winter_dieback!(plants, t)
 	    end
-
-            println("id_counter: $id_counter, # plants: $(length(plants))")
         end
     end
 

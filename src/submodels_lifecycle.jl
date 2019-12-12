@@ -205,7 +205,7 @@ end
     mkseeds!()
 After mating happened (marked in `reped`), calculate the amount of offspring each individual produces, both sexually and assexually.
 """
-function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counter::Int, T::Float64, t::Int64)
+function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float64, t::Int64)
 
     # counters to keep track of offspring production
     seed_counter = 0
@@ -258,12 +258,11 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counte
 
                 for n in 1:offs
 
-		    id_counter = id_counter + 1
 		    seed = deepcopy(plants[s])
 		    seed_counter += 1
 		    
 		    # reassign state variables that dont evolve
-		    seed.id = string(id_counter, base = 16)
+		    seed.id = string(get_counter(), base = 16)
 		    seed.mass = Dict("leaves" => 0.0,
 		                     "stem" => 0.0,
 				     "root" => seedmass,
@@ -287,16 +286,13 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counte
     check_duplicates(plants)
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Total number of individuals after SEX:", length(plants)))
-    end
-
-    return id_counter
-    
+    end    
 end
 
 """
 self_pollinate!()
 """
-function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, id_counter::Int64, t::Int64)
+function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int64)
 
  selfers = filter(x-> x.stage == "a" &&
     	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]x.seednumber &&
@@ -335,11 +331,10 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, id
 
 		for n in 1:offs
 
-		    id_counter = id_counter + 1
 		    seed = deepcopy(plants[s])
 		    
 		    # reassign state variables that dont evolve
-		    seed.id = string(id_counter, base = 16)
+		    seed.id = string(get_counter(), base = 16)
 		    seed.mass = Dict("leaves" => 0.0,
 		                     "stem" => 0.0,
 				     "root" => seedmass,
@@ -357,8 +352,6 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, id
 
   # unit test
   check_duplicates(plants)
-
-  return id_counter
   
 end
 
@@ -366,7 +359,7 @@ end
 clone!()
 Asexual reproduction.
 """
-function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter::Int64, t::Int64)
+function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, t::Int64)
 
     asexuals=filter(x -> x.mated==false && x.clonality==true && x.mass["repr"]>SPP_REF.seedmass[x.sp],
                     plants)
@@ -389,8 +382,7 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter
 	clone.mass["root"] = plants[c].compartsize*0.1
 	clone.mass["repr"] = 0.0
 
-	id_counter = id_counter + 1
-	clone.id = string(id_counter, base=16)
+	clone.id = string(get_counter(), base=16)
 	push!(plants, clone)
 	spclonescounter += 1
             # check-point of life-history processes
@@ -411,8 +403,6 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, id_counter
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Total number of individuals after ASEX:", length(plants)))
     end
-
-    return id_counter
     
 end
 

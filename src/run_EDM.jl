@@ -16,7 +16,7 @@ include("unit_tests.jl")
 include("scheduling.jl")
 
 # run simulation
-results_folder = run_scheduling(settings, id_counter, management_counter, landpars, poll_pars, K, T, mean_annual, plants, landscape)
+results_folder = run_scheduling(settings, management_counter, landpars, poll_pars, K, T, mean_annual, plants, landscape)
 
 # analyse results
 analysED(settings, results_folder)

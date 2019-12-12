@@ -65,8 +65,7 @@ Store the individuals in the `plants` array, which holds all plants simulated at
 function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::Dict{String, Any}, K::Float64)
 
     plants = Plant[]
-    id_counter = 0
-
+    
     for s in SPP_REF.sp
 
         # Niche partitioning: Upon initialization, each species total biomass equals K*fitness_relative, where fitness_relative is the species fitness values relative to the sum of others
@@ -82,10 +81,9 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::
 
 	for i in 1:sp_abund
 
-	    id_counter = id_counter + 1 # update individual counter
 	    minvalue = 1e-7 # Distribution.Uniform requires max > min
 
-	    newplant = Plant(string(id_counter, base=16),
+	    newplant = Plant(string(get_counter(), base=16),
 			      rand(["a" "j" "s"]),
 			      (XYs[i,1],XYs[i,2]),
 			      s,
@@ -132,7 +130,7 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::
     end
 	
     end
-    return plants, id_counter
+    return plants
 end
 
 settings = parse_commandline()
@@ -151,6 +149,16 @@ landpars = read_landpars(settings)
 # Timestep(s) of disturbance
 #tdist = set_tdist(settings)
 
+let id_counter = 0
+global function get_counter()
+    id_counter += 1
+    return id_counter
+    end
+global function reset_counter()
+    id_counter = 0
+    end
+end
+
 const SPP_REF = read_sppinput(settings)
 const TRAIT_RANGES = define_traitranges(settings)
 poll_pars = read_pollination(settings)
@@ -158,5 +166,4 @@ landscape = init_landscape(landpars)
 K = init_K(landscape, settings, 1)
 T, mean_annual = setenv!(1, temp_ts)
 init_fitness!(SPP_REF, mean_annual, 1.0)
-plants, id_counter = init_plants(landscape, SPP_REF, settings, K)
-println("id_counter: $id_counter, # plants: $(length(plants))")
+plants = init_plants(landscape, SPP_REF, settings, K)
