@@ -8,7 +8,7 @@ const SEED_MFACTOR = 1
 
 # Normalization constants of metabolic rates
 # ------------------------------------------
-const B0_GERM = 141363714.221475/10
+const B0_GERM = 141363714.221475
 const B0_MORT = 1113239249.49412
 # Growth constant is species-specific
 
