@@ -98,21 +98,25 @@ function disturb_pollinate!(flowering::Array{Plant,1}, poll_pars::PollPars, plan
 
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Pollination disturbed by $poll_pars.scen ...")
+        println(sim, "Pollination disturbed by $(poll_pars.scen) ...")
     end
 
-    insects_plants = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering)
+    insects_plants = filter(x -> occursin("insects", x.pollen_vector), flowering)
+    total_p = 0
     
     if poll_pars.scen  == "equal" # all plants species are equally affected
         for sp in unique(getfield.(insects_plants, :sp))
-    	    pollinate!("insects", sp, plants, npoll)
+	    npoll = pollinate!(insects_plants, sp, flowering, plants, poll_pars, t)
+	    total_p += npoll
 	end
     elseif poll_pars.scen == "rdm"
     	npoll = get_npoll(insects_plants, poll_pars, t)
+	total_p += npoll
 	if npoll > 0
-	    pollinate!(insects_plants_sp, plants, npoll)
+	    pollinate!(insects_plants, plants, npoll)
 	end
     elseif poll_pars.scen == "spec"
+    	
     else
 	    error("Please chose a pollination scenario \"scen\" in insect.csv:
                    - \"indep\": sexual reproduction happens independently of pollination
@@ -120,5 +124,11 @@ function disturb_pollinate!(flowering::Array{Plant,1}, poll_pars::PollPars, plan
                    - \"spec\": specific loss of pollinator species")
         
     end
+
+    # check-point
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        println(sim, "Percentage of pollinated flowers under disturbance $(total_p/length(insects_plants)) ...")
+    end
+
     
 end

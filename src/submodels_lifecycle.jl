@@ -112,6 +112,28 @@ function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars
 
 end
 
+# method for disturb_poll
+function get_npoll(insects_plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+
+    npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(insects_plants)*VST_DFLT)),
+						 INSCT_EFFC))[1]
+	if poll_pars.scen == "indep"
+     	    npoll = npoll_dflt 
+	elseif poll_pars.scen in ["equal", "rdm"]
+	    if t in poll_pars.regime.td
+	        npoll = Int(ceil(npoll_dflt * poll_pars.regime[poll_pars.regime.td.== t,
+		                                               :remaining][1]))
+	    else
+		npoll = npoll_dflt
+	    end
+	elseif poll_pars.scen == "spec"
+	    # pseudo
+	end
+    
+    return npoll
+
+end
+
 """
 pollinate!()
 Mark plants and having pollinated (mated = true)
@@ -119,7 +141,7 @@ Mark plants and having pollinated (mated = true)
 function pollinate!(pollen_vector::String, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
     poll_plants = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering)
-    npoll = get_npoll("wind", poll_plants, poll_pars, t)
+    npoll = get_npoll(pollen_vector, poll_plants, poll_pars, t)
     pollinated = sample(poll_plants, npoll, replace = false, ordered = false)
     filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
     setfield!.(pollinated, :mated, true)
@@ -142,7 +164,7 @@ Method used when pollination haas been disturbed
 function pollinate!(insects_plants::Array{Plant,1}, sp::String, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
     insects_plants_sp = filter(x -> x.sp == sp, insects_plants)
-    npoll = get_npoll("wind", insects_plants_sp, poll_pars, t)
+    npoll = get_npoll(insects_plants_sp, poll_pars, t)
     pollinated = sample(insects_plants_sp, npoll, replace = false, ordered = false)
     filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
     setfield!.(pollinated, :mated, true)
@@ -155,6 +177,8 @@ function pollinate!(insects_plants::Array{Plant,1}, sp::String, flowering::Array
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Number of pollinated plants: $(length(pollinated)), non-pollinated: $(length(flowering))")
     end
+
+    return npoll
 
 end
 
@@ -179,13 +203,14 @@ function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, po
 
 	pollinate!("wind", flowering, plants, poll_pars, t)
 
-	if poll_pars.scen == "indep" || (poll_pars.scen in ["equal", "rdm", "spec"] &&
-	   !(t in poll_pars.regime.td))
+	if poll_pars.scen in ["equal", "rdm", "spec"] && t in poll_pars.regime.td
 
-	    pollinate!("insects", flowering, plants, poll_pars, t)
+	    disturb_pollinate!(flowering, poll_pars, plants, t)
 		
 	else
-	    disturb_pollinate!(flowering, poll_pars, plants, t)
+	
+	    pollinate!("insects", flowering, plants, poll_pars, t)
+	    
 	end
 
 	# reinstate the ones that did not get pollinated
