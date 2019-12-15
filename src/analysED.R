@@ -129,7 +129,6 @@ orgareplicates <- function(parentsimID, repfolder, nreps){
       seeds_allreps_tab <- bind_rows(seeds_allreps_tab, offspring_sim, .id = "repli")
     }
   }
-    seeds_allreps_tab$week = factor(seeds_allreps_tab$week)
     
   return(list(a = juvads_allreps_tab, b = seeds_allreps_tab))
 }
@@ -287,7 +286,7 @@ popstruct <- function(pop_tab, seeds_allreps_tab, parentsimID){
   
   ## Population strucuture: absolute abundances
     absltstruct_tab <- pop_tab%>%
-      group_by(as.factor(week), sp, stage)%>%
+      group_by(week, sp, stage)%>%
       summarize(abundance = n())%>%
       ungroup()%>%
       bind_rows(., dplyr::select(seeds_allreps_tab, -mode))%>% #merge offspring file
