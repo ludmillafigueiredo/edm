@@ -61,7 +61,7 @@ end
 
 function log_settings()
         open(joinpath(results_folder, "simsettings.jl"),"w") do ID
-            println(ID, "landpars = $(repr(typeof(landpars))) \ninitial = $(repr(typeof(landpars.initial))) \ndisturb_land = $(repr(typeof(landpars.disturbance))) \ndisturb_poll = $(repr(poll_pars))")
+            println(ID, "land_pars = $(repr(typeof(land_pars))) \ninitial = $(repr(typeof(land_pars.initial))) \ndisturb_land = $(repr(typeof(land_pars.disturbance))) \ndisturb_poll = $(repr(poll_pars))")
             println(ID, "commandsettings = $(repr(settings))")
         end
 end
@@ -168,7 +168,7 @@ function analysED(settings, land_pars, poll_pars)
     @rput disturbance
 
     if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
-        tdist = landpars.disturbance.td
+        tdist = land_pars.disturbance.td
     elseif settings["disturb_type"]
         tdist = poll_pars.regime.td
     else

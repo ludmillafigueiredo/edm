@@ -85,9 +85,9 @@ function read_landpars(settings)
 		disturbance = nothing
 	end
 
-	landpars = LandPars(settings["initial_land"], disturbance)
+	land_pars = LandPars(settings["initial_land"], disturbance)
 
-    return landpars
+    return land_pars
 
 end
 

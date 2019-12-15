@@ -460,7 +460,7 @@ end
 Seeds are dispersed.
 `get_dest` is defined in `auxiliary.jl`
 """
-function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,settings::Dict{String, Any},landpars::Any)
+function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,settings::Dict{String, Any},land_pars::Any)
 
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Dispersing ..."))

@@ -14,10 +14,10 @@ end
     init_landscape()
 Create the initial landscape structure.
 """
-function init_landscape(landpars::LandPars)
+function init_landscape(land_pars::LandPars)
 
      # process raster fies in R
-     initial_land = landpars.initial
+     initial_land = land_pars.initial
      @rput initial_land
      R"source(\"src/init_landscape.R\")"
      @rget initial_matrix
@@ -144,7 +144,7 @@ temp_ts = CSV.read(settings["temp_ts"], header = true,
                    types = Dict("week" => Int64, "meantemp" => Float64, "begin_date" => Dates.Date, "week_year" => String, "week_inyear" => Int64))
 
 # Landscape parameters
-landpars = read_landpars(settings)
+land_pars = read_landpars(settings)
 
 # Timestep(s) of disturbance
 #tdist = set_tdist(settings)
@@ -162,7 +162,7 @@ end
 const SPP_REF = read_sppinput(settings)
 const TRAIT_RANGES = define_traitranges(settings)
 poll_pars = read_pollination(settings)
-landscape = init_landscape(landpars)
+landscape = init_landscape(land_pars)
 K = init_K(landscape, settings, 1)
 T, mean_annual = setenv!(1, temp_ts)
 init_fitness!(SPP_REF, mean_annual, 1.0)

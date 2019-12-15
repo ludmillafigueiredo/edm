@@ -1,13 +1,13 @@
 """
-    disturb!(landscape, landscape, plants, t, settings, landpars, tdist)
+    disturb!(landscape, landscape, plants, t, settings, land_pars, tdist)
 Change landscape structure and metrics according to the simulation scenario (`loss`, habitat loss, or `frag`, fragmentation)
 """
-function disturb!(landscape::BitArray{2}, plants::Array{Plant,1}, t::Int64, settings::Dict{String,Any}, landpars::LandPars)
+function disturb!(landscape::BitArray{2}, plants::Array{Plant,1}, t::Int64, settings::Dict{String,Any}, land_pars::LandPars)
 
     if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
-         landscape = destroyarea!(landpars, landscape, settings, t)
+         landscape = destroyarea!(land_pars, landscape, settings, t)
     elseif settings["disturb_type"] == "frag"
-         landscape = load_fragmentation!(landpars, landscape, settings, t)
+         landscape = load_fragmentation!(land_pars, landscape, settings, t)
     end
 
     destroyorgs!(plants, landscape, settings)
@@ -19,12 +19,12 @@ end
 destroyarea!()
 Destroy proportion of habitat area according to input file. Destruction is simulated by making affected cells unavailable for germination and killing organisms in them.
 """
-function destroyarea!(landpars::LandPars, landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64)
+function destroyarea!(land_pars::LandPars, landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64)
 
     # index of the cells still available, 
     available = findall(x -> x == true, landscape)
     # number of cells to be destroyed:
-    loss = landpars.disturbance[landpars.disturbance.td .== t, :proportion][1]	
+    loss = land_pars.disturbance[land_pars.disturbance.td .== t, :proportion][1]	
 
     lostarea = round(Int,loss*length(available), RoundUp)
 
@@ -51,9 +51,9 @@ end
 fragment!()
 Create new landscape from raster file of a frafmented one
 """
-function load_fragmentation!(landpars::LandPars, landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64)
+function load_fragmentation!(land_pars::LandPars, landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64)
 
-     disturb_file = landpars.disturbance[landpars.disturbance.td .== t, :disturb_file][1]
+     disturb_file = land_pars.disturbance[land_pars.disturbance.td .== t, :disturb_file][1]
      @rput disturb_file
      R"source(\"src/load_fragmentation.R\")"
      @rget disturb_matrix

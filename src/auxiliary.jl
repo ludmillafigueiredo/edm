@@ -128,15 +128,15 @@ end
 Update the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`).
 It is called during initialization (`t` = 1)  and is called again if landscape is disturbed (at `tdist`; `criticalts` keeps track of the updates and outputs the new values).
 """
-function updateK!(K::Float64, landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64, landpars::LandPars)
+function updateK!(K::Float64, landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64, land_pars::LandPars)
 
     criticalts = Array{Int64,N} where N
     # check on which timesteps to write land dims (ifelse() does not work)y
-    if landpars.disturbance == nothing
+    if land_pars.disturbance == nothing
         criticalts = [1]
     else
         criticalts = append!([1],
-		     unique(sort(vcat(broadcast(-, landpars.disturbance.td, 1), broadcast(+, landpars.disturbance.td, 1), landpars.disturbance.td))))
+		     unique(sort(vcat(broadcast(-, land_pars.disturbance.td, 1), broadcast(+, land_pars.disturbance.td, 1), land_pars.disturbance.td))))
     end
 
     if t in criticalts

@@ -2,7 +2,7 @@
     simulate!()
 Run all functions
 """
-function run_scheduling(settings, management_counter, landpars, poll_pars, K, T, mean_annual, plants,landscape)
+function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T, mean_annual, plants,landscape)
 
     Random.seed!(settings["rseed"])
     
@@ -27,11 +27,11 @@ function run_scheduling(settings, management_counter, landpars, poll_pars, K, T,
 
             # APPLY LANDSCAPE DISTURBANCE
 	    if settings["disturb_type"] in ["frag", "area_loss", "area+poll_loss"] &&
-	       t in landpars.disturbance.td
-                landscape = disturb!(landscape,plants,t,settings,landpars)
+	       t in land_pars.disturbance.td
+                landscape = disturb!(landscape,plants,t,settings,land_pars)
 	    end
 	    
-            updateK!(K, landscape, settings, t, landpars)
+            updateK!(K, landscape, settings, t, land_pars)
 
 	    if rem(t, 52) == 1
                 T, mean_annual = setenv!(t, temp_ts)
@@ -90,7 +90,7 @@ function run_scheduling(settings, management_counter, landpars, poll_pars, K, T,
 	    
 	    setfield!.(plants, :mated, false) # plant only produces seeds again if it gets pollinated
 	    
-	    justdispersed = disperse!(landscape, plants, t, settings,  landpars)
+	    justdispersed = disperse!(landscape, plants, t, settings,  land_pars)
 
 	    establish!(justdispersed, plants, t, settings,  T, biomass_production, K)
 	    
