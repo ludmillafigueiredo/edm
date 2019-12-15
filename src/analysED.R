@@ -16,11 +16,30 @@ library(cowplot);
 
 #### Directories and environment to store analysis ####
 #source("src/dirnames_setup.R")
+if(Sys.info()["user"] == "ludmilla"){
+  EDdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis/model/src")
+  EDdocsdir <- file.path(EDdir, "models_docs/EDODD")
+  traitsdir <- file.path("/home/ludmilla/Documents/uni_wuerzburg/phd_project/thesis","functional_types")
+}else if (Sys.info()["user"] == "ubuntu") {
+  EDdir <- file.path("/home/ubuntu/model/src")
+  traitsdir <- file.path(EDdir, "inputs")
+}else{
+  EDdir <- file.path("/home/luf74xx/model/src")
+  EDdocsdir <- file.path("/home/luf74xx/Dokumente/model_docs")
+  traitsdir <- file.path(EDdocsdir,"functional_types")
+}
+inputsdir <- file.path(EDdir, "test_inputs")
+if(nreps > 1 | missing(nreps)){
+  repfolder <- paste(file.path(outputsdir, parentsimID), 1:nreps, sep = "_"); #parentsimID
+}else{
+  repfolder <- outputsdir
+}
+
 analysEDdir <- file.path(outputsdir, paste(parentsimID, "analysED", sep = "_"))
 dir.create(analysEDdir)
 
 #### Theme, colours, labels ####
-source("src/theme_edm.R")
+source(file.path(EDdir,"theme_edm.R"))
 theme_set(theme_edm())
 size_labels = c('0.0001' = "Small",
                 '0.0003' = "Medium",
@@ -358,16 +377,16 @@ spprichness <- function(juvads_allreps_tab, pop_tab, parentsimID, disturbance,td
     
     if (disturbance != "n"){
     
-        if (disturbance == "a"){
+        if (grepl(disturbanc == "area_loss")){
       	   text <- "Area loss"
-    	} else if (disturbance == "p"){
+    	} else if (disturbance == "poll_loss"){
       	   text <- "Pollination loss"
-    	} else if (disturbance == "ap"){
+    	} else if (disturbance == "area+poll_loss"){
       	   text <- "Area + pollination loss"
     	}
 
     spprichness_plot <- spprichness_plot +
-                        geom_vline(xintercept = tdist, linetype = 2, color = "red")
+                        geom_vline(xintercept = tdist, linetype = 2, color = "red", alpha = 0.5)
       
     }
   
