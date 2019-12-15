@@ -72,10 +72,9 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
                                         root = col_double(),
                                         repr = col_double(),
                                         mated = col_logical()));
-    ## clean it
+    # clean it
     ## take parentheses out of location column ("()")
     loc <- gsub("[\\(|\\)]", "", outraw$location)
-    ## split location in 3 columns
     loc <- as.data.frame(matrix(unlist(str_split(loc, ",")), ncol = 2, byrow = T))
     names(loc) = c("xloc", "yloc")
     ## complete and clean table
@@ -89,7 +88,9 @@ getoutput <- function(parentsimID, repfolder, nreps, outputsdir, EDdir = file.pa
 	      file.path(repli, paste(parentsimID, "juvads_statevars.csv", sep = "_")), row.names = FALSE)
     
   }
+  
   return(outdata)
+  
 }
 
 #' Assemble output files of replicates and identify them.
