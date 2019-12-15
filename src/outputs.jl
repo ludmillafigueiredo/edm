@@ -156,7 +156,7 @@ end
 analsyED()
 Run R script of analysis after the model finishes the simulation
 """
-function analysED(settings)
+function analysED(settings, land_pars, poll_pars)
 
     parentsimID = settings["simID"]
     @rput parentsimID
@@ -167,7 +167,16 @@ function analysED(settings)
     disturbance = settings["disturb_type"]
     @rput disturbance
 
-    outputsdir = results_folder
+    if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
+        tdist = landpars.disturbance.td
+    elseif settings["disturb_type"]
+        tdist = poll_pars.regime.td
+    else
+	tdist = nothing
+    end
+    @rput tdist
+
+    Outputsdir = joinpath(settings["outputat"],settings["simID"])
     @rput outputsdir
 
     # run analysis

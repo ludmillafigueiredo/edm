@@ -4,7 +4,7 @@ Change landscape structure and metrics according to the simulation scenario (`lo
 """
 function disturb!(landscape::BitArray{2}, plants::Array{Plant,1}, t::Int64, settings::Dict{String,Any}, landpars::LandPars)
 
-    if settings["disturb_type"] == "loss"
+    if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
          landscape = destroyarea!(landpars, landscape, settings, t)
     elseif settings["disturb_type"] == "frag"
          landscape = load_fragmentation!(landpars, landscape, settings, t)

@@ -26,10 +26,9 @@ function run_scheduling(settings, management_counter, landpars, poll_pars, K, T,
 	    println("Species richness: $(length(unique(getfield.(plants, :sp))))")
 
             # APPLY LANDSCAPE DISTURBANCE
-	    if landpars.disturbance != nothing
-                if settings["disturb_type"] in ["frag" "loss"] && t in landpars.disturbance.td
-                    landscape = disturb!(landscape,plants,t,settings,landpars)
-                end
+	    if settings["disturb_type"] in ["frag", "area_loss", "area+poll_loss"] &&
+	       t in landpars.disturbance.td
+                landscape = disturb!(landscape,plants,t,settings,landpars)
 	    end
 	    
             updateK!(K, landscape, settings, t, landpars)
@@ -102,7 +101,4 @@ function run_scheduling(settings, management_counter, landpars, poll_pars, K, T,
 	    end
         end
     end
-
-    return settings, results_folder
-
 end

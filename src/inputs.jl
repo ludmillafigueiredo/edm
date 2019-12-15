@@ -43,7 +43,7 @@ function parse_commandline()
         default = joinpath("test_inputs","control_49m2.grd")
 
         "--disturb_type"
-        help = "Type of environmental disturbance to be implemented: habitat area loss \"loss\", habitat fragmentation \"frag\" or temperature change \"temp\""
+        help = "Type of environmental disturbance to be implemented: habitat area loss \"area_loss\", pollination loss \"poll_loss\", area and pollination loss \"area+poll_loss\" or temperature change \"temp\""
         arg_type = String
         default = "none"
 
@@ -75,12 +75,12 @@ read_landpars
 """
 function read_landpars(settings)
 	    
-	if settings["disturb_type"] == "loss"
+	if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
                 disturbance = CSV.read(settings["disturb_file"], header = true,
 			      	       types = Dict("td" => Int64, "proportion" => Float64))
         elseif settings["disturb_type"] == "frag"
                 disturbance = CSV.read(settings["disturb_file"], header = true,
-			      	       types = Dict("td" => Int64, "disturb_file" => String))	    
+			      	       types = Dict("td" => Int64, "frag_file" => String))	    
         else
 		disturbance = nothing
 	end
@@ -168,11 +168,10 @@ Reads how insects are going to be implicitly simulated.
 """
 function read_pollination(settings::Dict{String,Any})
 
-    include(settings["pollination"])
-
-    if pollination_scen == "indep"
-        poll_pars = PollPars(pollination_scen, nothing)
+    if settings["disturb_type"] in ["poll_loss", "area+poll_loss"]
+        poll_pars = PollPars("indep", nothing)
     else
+       include(settings["pollination"])
        disturbed_regime= CSV.read(pollination_file, header = true,
 				  types = Dict("td" => Int64, "remaining" => Float64))
        poll_pars = PollPars(pollination_scen, disturbed_regime)	
@@ -191,7 +190,7 @@ function set_tdist(settings)
     # select file according to keyword: loss, frag, temp
         if settings["disturb_type"] == "none"
             tdist = nothing
-	elseif settings["disturb_type"] in ["loss" "frag"]
+	elseif settings["disturb_type"] in ["area_loss" "area+poll_loss"]
             tdist = CSV.read(settings["disturb_file"], header=true, types=Dict("td"=>Int64))[:td]
         elseif settings["disturb_type"] == "temp"
             println("Temperature change is simulated with the temperature file provided.")
