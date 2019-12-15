@@ -356,20 +356,20 @@ spprichness <- function(juvads_allreps_tab, pop_tab, parentsimID, disturbance,td
     geom_point(color = "darkslateblue", size = 1.25)+
     labs(x = "Time", y = "Species richness")
     
-    if (disturbance != "none"){
-    if (disturbance == "loss"){
-      text <- "Area loss"
-    } else if (disturbance == "frag"){
-      text <- "Fragmentation"
-    } else if (disturbance == "poll"){
-      text <- "Pollination loss"
-    }
-    ## TODO: annotate it
-    ## my_grob <- grobTree(textGrob(text, x = 0.5, y = 0.9, hjust = 0, 
-    ##                             gp = gpar(fontsize = 10, fontface = "italic")))
+    if (disturbance != "n"){
+    
+        if (disturbance == "a"){
+      	   text <- "Area loss"
+    	} else if (disturbance == "p"){
+      	   text <- "Pollination loss"
+    	} else if (disturbance == "ap"){
+      	   text <- "Area + pollination loss"
+    	}
+
     spprichness_plot <- spprichness_plot +
-      geom_vline(xintercept = tdist, linetype = 2, color = "red")
-  }
+                        geom_vline(xintercept = tdist, linetype = 2, color = "red")
+      
+    }
   
   ## richness per group of size
   groupspprichness_tab  <- juvads_allreps_tab%>%
