@@ -7,28 +7,23 @@ using RCall
 using DelimitedFiles
 
 function orga_outputs()
-        if settings["nreps"] == 1
-            simresults_folder = joinpath(settings["outputat"], settings["simID"])
-            results_folder = simresults_folder
-        else
-            simresults_folder = joinpath(settings["outputat"], string(settings["simID"], "_", rep))
-            results_folder = joinpath(settings["outputat"], settings["simID"])
-        end
 
-        try
-            mkpath("$(simresults_folder)")
-            println("Output will be written to '$(simresults_folder)'")
+        results_folder = joinpath(settings["outputat"], settings["simID"])
+
+	try
+            mkpath("$(results_folder)")
+            println("Output will be written to '$(results_folder)'")
         catch
-            println("Overwriting results to existing '$(simresults_folder)' folder")
+            println("Overwriting results to existing '$(results_folder)' folder")
         end
 
         # INITIALIZE FILE TO LOG SIMULATION PROGRESS
-        open(joinpath(simresults_folder, "checkpoint.txt"),"w") do sim
+        open(joinpath(results_folder, "checkpoint.txt"),"w") do sim
             println(sim,string("Simulation: ",settings["simID"],now()))
         end
 
         # INITIALIZE FILE TO LOG LIFE-HISTORY EVENTS
-        open(joinpath(simresults_folder, "eventslog.txt"),"w") do sim
+        open(joinpath(results_folder, "eventslog.txt"),"w") do sim
             writedlm(sim, hcat("week", "event", "stage", "age"))
         end
 
@@ -38,35 +33,35 @@ function orga_outputs()
         end
 
         # INITIALIZE FILE TO LOG SEED PRODUCTION
-        open(joinpath(simresults_folder, "offspringproduction.csv"),"w") do seedfile
+        open(joinpath(results_folder, "offspringproduction.csv"),"w") do seedfile
             writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
         end
 
 	    # INITIALIZE FILE TO LOG SPECIES FITNESS
-        open(joinpath(simresults_folder, "spp_fitness.csv"),"w") do fitnessfile
+        open(joinpath(results_folder, "spp_fitness.csv"),"w") do fitnessfile
             writedlm(fitnessfile, hcat("week", "sp", "fitness"))
         end
 
-	return simresults_folder, results_folder
+	return results_folder
 end
 
 function output_sppref(SPP_REF)
 	 	# printout SPP_REF
-	open(joinpath(simresults_folder, "sppref_traitvalues.csv"), "w") do ref
+	open(joinpath(results_folder, "sppref_traitvalues.csv"), "w") do ref
             writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")
 	end
     
 	for sp in SPP_REF.sp
     	    sp_ref = reshape(collect(map(x -> getfield(SPP_REF,x)[sp],fieldnames(SppRef)[2:end])),1,:)
-    	    open(joinpath(simresults_folder, "sppref_traitvalues.csv"), "a") do ref
+    	    open(joinpath(results_folder, "sppref_traitvalues.csv"), "a") do ref
                 writedlm(ref, [sp sp_ref], ",")
             end
 	end
 end
 
 function log_settings()
-        open(joinpath(simresults_folder, "simsettings.jl"),"w") do ID
-            println(ID, "landpars = $(repr(typeof(landpars))) \ninitial = $(repr(typeof(landpars.initial))) \ndisturb = $(repr(typeof(landpars.disturbance)))")
+        open(joinpath(results_folder, "simsettings.jl"),"w") do ID
+            println(ID, "landpars = $(repr(typeof(landpars))) \ninitial = $(repr(typeof(landpars.initial))) \ndisturb_land = $(repr(typeof(landpars.disturbance))) \ndisturb_poll = $(repr(poll_pars))")
             println(ID, "commandsettings = $(repr(settings))")
         end
 end
@@ -148,7 +143,7 @@ end
 
 function log_age()
 
-    open(joinpath(simresults_folder, "checkpoint.txt"),"a") do sim
+    open(joinpath(results_folder, "checkpoint.txt"),"a") do sim
         println(sim, "Juvs age >= firstflower: $(filter(x -> (x.stage == "j" && x.age > x.firstflower), 
                                                   plants) |> x -> [getfield.(x, :id), 
                                                                    getfield.(x, :stage), 
@@ -161,7 +156,7 @@ end
 analsyED()
 Run R script of analysis after the model finishes the simulation
 """
-function analysED(settings, results_folder)
+function analysED(settings)
 
     parentsimID = settings["simID"]
     @rput parentsimID

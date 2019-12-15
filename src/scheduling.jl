@@ -8,7 +8,7 @@ function run_scheduling(settings, management_counter, landpars, poll_pars, K, T,
     
     for rep in 1:settings["nreps"]
 
-        global simresults_folder, results_folder = orga_outputs()
+        global results_folder = orga_outputs()
 	log_settings()
 	output_sppref(SPP_REF)
 	
@@ -17,7 +17,7 @@ function run_scheduling(settings, management_counter, landpars, poll_pars, K, T,
         for t in 1:length(temp_ts.week)
 
             # check-point
-            open(joinpath(joinpath(simresults_folder, "checkpoint.txt")),"a") do sim
+            open(joinpath(joinpath(results_folder, "checkpoint.txt")),"a") do sim
                 println(sim, "\nWEEK $t")
 		println(sim, "Species richness: $(length(unique(getfield.(plants, :sp))))")
             end
@@ -53,7 +53,7 @@ function run_scheduling(settings, management_counter, landpars, poll_pars, K, T,
             end
 
             biomass_production = sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]),plants),NOT_0))
-            open(joinpath(simresults_folder, "checkpoint.txt"),"a") do sim
+            open(joinpath(results_folder, "checkpoint.txt"),"a") do sim
                 println(sim, "Biomass production: $biomass_production")
             end
 
