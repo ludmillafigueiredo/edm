@@ -377,7 +377,7 @@ spprichness <- function(juvads_allreps_tab, pop_tab, parentsimID, disturbance,td
     
     if (disturbance != "none"){
     
-        if (grepl(disturbanc == "area_loss")){
+        if (disturbance == "area_loss"){
       	   text <- "Area loss"
     	} else if (disturbance == "poll_loss"){
       	   text <- "Pollination loss"
@@ -386,7 +386,7 @@ spprichness <- function(juvads_allreps_tab, pop_tab, parentsimID, disturbance,td
     	}
 
     spprichness_plot <- spprichness_plot +
-                        geom_vline(xintercept = tdist, linetype = 2, color = "red", alpha = 0.5)
+                        geom_vline(aes(xintercept = tdist), linetype = 2, color = "red", alpha = 0.5)
       
     }
   
