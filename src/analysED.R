@@ -46,7 +46,6 @@ size_labels = c('0.0001' = "Small",
                 '0.001' = "Big")
 options(scipen = 999)
 
-
 #### Functions ####
 
 #' Organize individual-based output
@@ -782,7 +781,7 @@ population$d -> rltvstruct_plot
 rm(population)
 
 #### Species richness ####
-spprich <- spprichness(juvads_allreps_tab, pop_tab, parentsimID, disturbance)
+spprich <- spprichness(juvads_allreps_tab, pop_tab, parentsimID, disturbance, tdist)
 spprich$a -> spprichness_tab
 spprich$b -> spprichness_plot 
 spprich$c -> groupspprichness_tab
