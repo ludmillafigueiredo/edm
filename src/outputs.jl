@@ -37,12 +37,28 @@ function orga_outputs()
             writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
         end
 
-	    # INITIALIZE FILE TO LOG SPECIES FITNESS
+	# INITIALIZE FILE TO LOG SPECIES FITNESS
         open(joinpath(results_folder, "spp_fitness.csv"),"w") do fitnessfile
             writedlm(fitnessfile, hcat("week", "sp", "fitness"))
         end
 
+	# INITIALIZE FILE TO LOG SPECIES FITNESS
+        open(joinpath(results_folder, "pollination_log.csv"),"w") do pollfile
+             writedlm(pollfile, hcat("week", "vector", "proportion"))
+        end
+
 	return results_folder
+end
+
+function log_initialabund(plants)
+
+    plants_spp = getfield(plants, :sp)
+    initial_abunds = Dict(i => sum(plants_spp .== i) for i in unique(plants_spp))
+
+    open(joinpath(results_folder, "initialabundances.txt"),"w") do sim
+        println(sim, initial_abunds)
+    end
+    
 end
 
 function output_sppref(SPP_REF)

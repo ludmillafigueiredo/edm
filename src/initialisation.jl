@@ -72,10 +72,6 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::
         # The initial abundance is number of medium-sized individuals (50% of maximal biomass) that would sum up to the biomass.
         sp_abund = Int(round(((SPP_REF.fitness[s]/sum(collect(values(SPP_REF.fitness))))*K)/(0.5*(2*SPP_REF.compartsize[s]+SPP_REF.compartsize[s])), RoundUp))
 
-	open(joinpath(settings["outputat"], string(settings["simID"], "initialabundances.txt")),"a") do sim
-	    println(sim, "Initial abundance of $s: $sp_abund")
-        end
-
 	XYs = hcat(rand(1:size(landscape,1), sp_abund),
                     rand(1:size(landscape,2), sp_abund))
 
@@ -122,15 +118,11 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::
 	    push!(plants, newplant)
 
 	end
-
-    open(joinpath(settings["outputat"], string(settings["simID"], "initialabundances.txt")),"a") do sim
-        println(sim, "Seeds of $s: $(length(findall(x -> x.sp == s && x.stage == "s", plants)))")
-	println(sim, "Juveniles of $s: $(length(findall(x -> x.sp == s && x.stage == "j", plants)))")
-	println(sim, "Adults of $s: $(length(findall(x -> x.sp == s && x.stage == "a", plants)))")
-    end
 	
     end
+    
     return plants
+    
 end
 
 settings = parse_commandline()
