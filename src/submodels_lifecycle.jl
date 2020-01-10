@@ -28,8 +28,7 @@ function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T:
     	b0grow = SPP_REF.b0grow[sp]
     	growing_sp = filter(x->x.sp == sp, growing)
 	map(x -> grow_allocate!(x, b0grow, flowering_ids), growing_sp)
-	append!(plants, growing_sp)
-	
+	append!(plants, growing_sp)	
     end
 
     # unit test
@@ -187,21 +186,17 @@ function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, po
 
         # as with the other processes, it is easier to process plants separately from the main vector
         filter!(x -> !(x.id in getfield.(flowering, :id)), plants)
-
-	pollinate!("wind", flowering, plants, poll_pars, t)
-
-	if poll_pars.scen in ["equal", "rdm", "spec"] && t in poll_pars.regime.td
-
-	    disturb_pollinate!(flowering, poll_pars, plants, t)
-		
-	else
 	
+	pollinate!("wind", flowering, plants, poll_pars, t)
+	
+	if poll_pars.scen in ["equal", "rdm", "spec"] && t in poll_pars.regime.td
+	    disturb_pollinate!(flowering, poll_pars, plants, t)
+	else
 	    pollinate!("insects", flowering, plants, poll_pars, t)
-	    
 	end
 
-	# reinstate the ones that did not get pollinated
-	append!(plants, flowering)	
+	# re-insert the ones that did not get pollinated
+	append!(plants, flowering)
     end
 
     # unit test
@@ -634,12 +629,10 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
             writedlm(sim, hcat(t, "death-indep", "s", mean(getfield.(dying, :age))))
         end
     end
-
 end
 
 """
 die!()
-
 """
 function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, dying_stage::String, t::Int64)
 

@@ -68,7 +68,6 @@ end
 """
     destroyorgs!(plants)
 Kill organisms that where in the lost habitat cells.
-
 """
 function destroyorgs!(plants::Array{Plant,1}, landscape::BitArray{2}, settings::Dict{String,Any})
 
