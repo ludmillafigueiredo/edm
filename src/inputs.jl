@@ -168,13 +168,13 @@ Reads how insects are going to be implicitly simulated.
 """
 function read_pollination(settings::Dict{String,Any})
 
-    if settings["disturb_type"] in ["poll_loss", "area+poll_loss"]
-        poll_pars = PollPars("indep", nothing)
-    else
+    if occursin("poll", settings["disturb_type"]) 
        include(settings["pollination"])
        disturbed_regime= CSV.read(pollination_file, header = true,
 				  types = Dict("td" => Int64, "remaining" => Float64))
-       poll_pars = PollPars(pollination_scen, disturbed_regime)	
+       poll_pars = PollPars(pollination_scen, disturbed_regime)
+    else
+       poll_pars = PollPars("indep", nothing)
     end
     
     return poll_pars
