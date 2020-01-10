@@ -105,9 +105,7 @@ function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars
 	    # pseudo
 	end
     end
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Number of pollinated plants: $npoll")
-    end
+
     return npoll
 
 end
@@ -142,6 +140,7 @@ function pollinate!(pollen_vector::String, flowering::Array{Plant,1}, plants::Ar
 
     poll_plants = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering)
     npoll = get_npoll(pollen_vector, poll_plants, poll_pars, t)
+    log_pollination(flowering, npoll, pollen_vector, t)
     pollinated = sample(poll_plants, npoll, replace = false, ordered = false)
     filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
     setfield!.(pollinated, :mated, true)
@@ -149,36 +148,24 @@ function pollinate!(pollen_vector::String, flowering::Array{Plant,1}, plants::Ar
     
     # unit test
     check_duplicates(plants)
-
-    # log
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Number of pollinated plants: $(length(pollinated)), non-pollinated: $(length(flowering))")
-    end
-
+    
 end
 
 """
 pollinate!()
-Method used when pollination haas been disturbed
+Method used when pollination has been disturbed
 """
-function pollinate!(insects_plants::Array{Plant,1}, sp::String, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+function pollinate!(insects_plants_sp::Array{Plant,1}, npoll::Int64, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
-    insects_plants_sp = filter(x -> x.sp == sp, insects_plants)
-    npoll = get_npoll(insects_plants_sp, poll_pars, t)
-    pollinated = sample(insects_plants_sp, npoll, replace = false, ordered = false)
+    log_pollination(flowering, npoll, "insects-dist", t)
+    pollinated = sample(insects_plants_sp, npoll, replace = false,
+                        ordered = false)
     filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
     setfield!.(pollinated, :mated, true)
     append!(plants, pollinated)
     
     # unit test
     check_duplicates(plants)
-
-    # log
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Number of pollinated plants: $(length(pollinated)), non-pollinated: $(length(flowering))")
-    end
-
-    return npoll
 
 end
 

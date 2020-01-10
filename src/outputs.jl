@@ -168,6 +168,15 @@ function log_age()
     end
     
 end
+
+function log_pollination(flowering, npoll, pollen_vector, t)
+
+    open(joinpath(results_folder, "pollination_log.txt"),"a") do pollfile
+        writedlm(pollfile, hcat(t, pollen_vector, npoll/(length(flowering)+NOT_0)))
+    end
+    
+end
+
 """
 analsyED()
 Run R script of analysis after the model finishes the simulation

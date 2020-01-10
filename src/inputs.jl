@@ -67,7 +67,9 @@ function parse_commandline()
         arg_type = Bool
         default = false
     end
+    
     return parse_args(sets)
+    
 end
 
 """
@@ -159,7 +161,9 @@ function define_traitranges(settings::Dict{String,Any})
         Dict(sppinputtbl[:,:species][i] =>
              [Int(round(sppinputtbl[:,:bankduration_min][i], RoundDown)), Int(round(sppinputtbl[:,:bankduration_max][i], RoundUp))]
              for i in 1:length(sppinputtbl[:,:species])))
+	     
     return traitranges
+    
 end
 
 """
@@ -188,13 +192,12 @@ Set disturbance time(s).
 function set_tdist(settings)
 
     # select file according to keyword: loss, frag, temp
-        if settings["disturb_type"] == "none"
-            tdist = nothing
-	elseif settings["disturb_type"] in ["area_loss" "area+poll_loss"]
-            tdist = CSV.read(settings["disturb_file"], header=true, types=Dict("td"=>Int64))[:td]
-        elseif settings["disturb_type"] == "temp"
-            println("Temperature change is simulated with the temperature file provided.")
-        end
+    if occursin("none", settings["disturb_type"])
+        tdist = nothing
+    elseif occursin("area", settings["disturb_type"])
+        tdist = CSV.read(settings["disturb_file"], header=true, types=Dict("td"=>Int64))[:td]
+    end
 
-	return tdist
+    return tdist
+    
 end

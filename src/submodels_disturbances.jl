@@ -106,7 +106,9 @@ function disturb_pollinate!(flowering::Array{Plant,1}, poll_pars::PollPars, plan
     
     if poll_pars.scen  == "equal" # all plants species are equally affected
         for sp in unique(getfield.(insects_plants, :sp))
-	    npoll = pollinate!(insects_plants, sp, flowering, plants, poll_pars, t)
+	    insects_plants_sp = filter(x -> x.sp == sp, insects_plants)
+    	    npoll = get_npoll(insects_plants_sp, poll_pars, t)
+	    pollinate!(insects_plants_sp, npoll, flowering, plants, poll_pars, t)
 	    total_p += npoll
 	end
     elseif poll_pars.scen == "rdm"
@@ -124,11 +126,5 @@ function disturb_pollinate!(flowering::Array{Plant,1}, poll_pars::PollPars, plan
                    - \"spec\": specific loss of pollinator species")
         
     end
-
-    # check-point
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Percentage of pollinated flowers under disturbance $(total_p/length(insects_plants)) ...")
-    end
-
     
 end
