@@ -190,7 +190,7 @@ function analysED(settings, land_pars, poll_pars)
 
     if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
         tdist = land_pars.disturbance.td
-    elseif settings["disturb_type"]
+    elseif settings["disturb_type"] == "poll"
         tdist = poll_pars.regime.td
     else
 	tdist = nothing
