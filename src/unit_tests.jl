@@ -2,6 +2,14 @@
 This module contains functions for unit tests.
 """
 
+function check_overwrite(path_results)
+
+    if isdir(abspath(path_results))
+       error("Verify the simulation name: $path_results exists already.")
+    end
+    
+end
+
 function check_duplicates(plants::Array{Plant,1})
 
     if length(unique(getfield.(plants, :id))) != length(getfield.(plants, :id))

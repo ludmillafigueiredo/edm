@@ -9,14 +9,10 @@ using DelimitedFiles
 function orga_outputs()
 
         results_folder = joinpath(settings["outputat"], settings["simID"])
-
-	try
-            mkpath("$(results_folder)")
-            println("Output will be written to '$(results_folder)'")
-        catch
-            println("Overwriting results to existing '$(results_folder)' folder")
-        end
-
+	
+	check_overwrite(results_folder)
+	mkpath("$(results_folder)")
+	
         # INITIALIZE FILE TO LOG SIMULATION PROGRESS
         open(joinpath(results_folder, "checkpoint.txt"),"w") do sim
             println(sim,string("Simulation: ",settings["simID"],now()))
