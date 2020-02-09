@@ -53,8 +53,8 @@ Create new landscape from raster file of a frafmented one
 """
 function load_fragmentation!(land_pars::LandPars, landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64)
 
-     disturb_file = land_pars.disturbance[land_pars.disturbance.td .== t, :disturb_file][1]
-     @rput disturb_file
+     disturb_land = land_pars.disturbance[land_pars.disturbance.td .== t, :disturb_land][1]
+     @rput disturb_land
      R"source(\"src/load_fragmentation.R\")"
      @rget disturb_matrix
 

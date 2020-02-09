@@ -1,4 +1,4 @@
-"""
+
 This module contains functions related to outputting raw results from the model, as well as default derived analysis.
 """
 
@@ -58,7 +58,7 @@ function log_initialabund(plants)
 end
 
 function output_sppref(SPP_REF)
-	 	# printout SPP_REF
+	 	# prinoutput_freq SPP_REF
 	open(joinpath(results_folder, "sppref_traitvalues.csv"), "w") do ref
             writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")
 	end
@@ -99,7 +99,7 @@ function write_output(plants::Array{Plant,1}, t::Int64, settings::Dict{String,An
     end
 
     # output plants info
-    if t == 1 || rem(t,settings["tout"]) == 0
+    if t == 1 || rem(t,settings["output_freq"]) == 0
 
         for o in juvs_adlts
             open(joinpath(settings["outputat"],settings["simID"],"statevars_ind.txt"), "a") do output

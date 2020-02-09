@@ -99,6 +99,7 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 	    if (rem(t,52) == 51)
 	       winter_dieback!(plants, t)
 	    end
+	    
         end
     end
 end

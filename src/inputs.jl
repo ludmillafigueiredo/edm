@@ -10,20 +10,10 @@ function parse_commandline()
         arg_type = String
         default = "profiling"
 
-        "--nreps"
-        help = "Number of replicates."
-        arg_type = Int64
-        default = 1
-
         "--rseed"
         help = "Seed for RNG"
         arg_type = Int
         default = 100
-
-        "--outputat"
-        help = "Name of directory where output should be written ."
-        arg_type = String
-        default = "outputs"
 
         "--sppinput"
         help = "Name of file with species list."
@@ -43,16 +33,16 @@ function parse_commandline()
         default = joinpath("test_inputs","control_49m2.grd")
 
         "--disturb_type"
-        help = "Type of environmental disturbance to be implemented: habitat area loss \"area_loss\", pollination loss \"poll_loss\", area and pollination loss \"area+poll_loss\" or temperature change \"temp\""
+        help = "Type of disturbance to be implemented: none, area_loss, poll_loss, area+poll_loss, clim+area_loss, clim+poll_loss, clim+area+poll_loss"
         arg_type = String
         default = "none"
 
-        "--disturb_file"
+        "--disturb_land"
         help = "When simulating area loss, the path to a table with disturbance times (td) and proportions of loss of habitat area (template: habitatloss_template.csv). When simulating fragmentation, the path to a table with disturbance times (td) and proportions of loss of habitat area (template: habitatfrag_template.csv)"
         arg_type = Any
         default = nothing
 
-        "--tout"
+        "--output_freq"
         help = "Frequency of output (number of weeks)"
         arg_type = Int
         default = 12
@@ -62,10 +52,12 @@ function parse_commandline()
         arg_type = String
         default = joinpath("template_files", "temperaturegoettingen_18572017.csv")
 
-        "--timemsg"
-        help = "Output timing to terminal, as well as checkpoint"
-        arg_type = Bool
-        default = false
+        "--outputat"
+        help = "Name of directory where output should be written ."
+        arg_type = String
+        default = "outputs"
+
+        
     end
     
     return parse_args(sets)
@@ -78,10 +70,10 @@ read_landpars
 function read_landpars(settings)
 	    
 	if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
-                disturbance = CSV.read(settings["disturb_file"], header = true,
+                disturbance = CSV.read(settings["disturb-land"], header = true,
 			      	       types = Dict("td" => Int64, "proportion" => Float64))
         elseif settings["disturb_type"] == "frag"
-                disturbance = CSV.read(settings["disturb_file"], header = true,
+                disturbance = CSV.read(settings["disturb-land"], header = true,
 			      	       types = Dict("td" => Int64, "frag_file" => String))	    
         else
 		disturbance = nothing
@@ -195,7 +187,7 @@ function set_tdist(settings)
     if occursin("none", settings["disturb_type"])
         tdist = nothing
     elseif occursin("area", settings["disturb_type"])
-        tdist = CSV.read(settings["disturb_file"], header=true, types=Dict("td"=>Int64))[:td]
+        tdist = CSV.read(settings["disturb-land"], header=true, types=Dict("td"=>Int64))[:td]
     end
 
     return tdist
