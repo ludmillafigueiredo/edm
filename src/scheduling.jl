@@ -6,8 +6,7 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 
     Random.seed!(settings["rseed"])
     
-    for rep in 1:settings["nreps"]
-
+    
         global results_folder = orga_outputs()
 	log_settings()
 	output_sppref(SPP_REF)
@@ -101,5 +100,4 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 	    end
 	    
         end
-    end
 end

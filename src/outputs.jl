@@ -1,4 +1,4 @@
-
+"""
 This module contains functions related to outputting raw results from the model, as well as default derived analysis.
 """
 
@@ -179,15 +179,12 @@ Run R script of analysis after the model finishes the simulation
 """
 function analysED(settings, land_pars, poll_pars)
 
-    parentsimID = settings["simID"]
-    @rput parentsimID
-    EDdir = pwd()
-    @rput EDdir
-    nreps = settings["nreps"]
-    @rput nreps
+    simID = settings["simID"]
+    @rput simID
+    @rput EDMdir
     disturbance = settings["disturb_type"]
     @rput disturbance
-
+    
     if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
         tdist = land_pars.disturbance.td
     elseif settings["disturb_type"] == "poll"
@@ -197,7 +194,7 @@ function analysED(settings, land_pars, poll_pars)
     end
     @rput tdist
 
-    Outputsdir = joinpath(settings["outputat"],settings["simID"])
+    outputsdir = joinpath(settings["outputat"],settings["simID"])
     @rput outputsdir
 
     # run analysis

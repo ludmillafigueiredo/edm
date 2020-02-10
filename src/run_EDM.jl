@@ -1,6 +1,6 @@
 #!/Usr/bin/env julia
 
-const EDMdir = joinpath(pwd(), "src") # TODO test without pwd()
+const EDMdir = abspath(joinpath(pwd(), "src")) # absolute path because it is sent to R - avoid mistakes
 push!(LOAD_PATH, EDMdir)
 #cd(EDDir)
 
