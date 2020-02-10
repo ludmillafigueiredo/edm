@@ -1,1 +1,0 @@
-bufferarea = 10000
