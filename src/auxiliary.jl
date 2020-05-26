@@ -40,31 +40,11 @@ mutable struct SppRef
 end
 
 SppRef() = SppRef(String[],
-	          Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict(),
-		  Dict())
+	          Dict(), Dict(), Dict(), Dict(), Dict(),
+                  Dict(), Dict(), Dict(), Dict(), Dict(),
+		  Dict(), Dict(), Dict(), Dict(), Dict(),
+		  Dict(), Dict(), Dict(), Dict(), Dict(),
+		  Dict(), Dict(), Dict(), Dict(), Dict())
 
 # Minimal and maximal trait values, which control microevolution, are stored in `traitranges::TraitRanges`
 mutable struct TraitRanges
@@ -79,26 +59,24 @@ mutable struct TraitRanges
     bankduration::Dict{String,Array{Int64,1}}
 end
 
-TraitRanges() = TraitRanges(Dict(),
-		            Dict(),
-			    Dict(),
-			    Dict(),
-			    Dict(),
-			    Dict(),
-			    Dict(),
-			    Dict(),
-			    Dict(),
-			    Dict())
+TraitRanges() = TraitRanges(Dict(), Dict(), Dict(), Dict(), Dict(),
+			    Dict(), Dict(), Dict(), Dict(), Dict())
 
+"""
+    gridsizes(realxlen, realylen)
+
+Calculate grid size
+"""
 function gridsizes(realxlen::Array{Float64,1}, realylen::Array{Float64,1})
   xlength = round(Int64,((realxlen.*100)./100), RoundNearestTiesAway)
   ylength = round(Int64,((realylen.*100)./100), RoundNearestTiesAway)
   return xlength, ylength
 end
 
-"""
-lengthtocell(d)
-Converts distance values from m to cell size.
+""" 
+    lengthtocell(d)
+
+Convert distance values from m to cell size.
 """
 function lengthtocell(d::Float64)
   celldist = round(Int64,d, RoundNearestTiesAway)
@@ -106,7 +84,8 @@ function lengthtocell(d::Float64)
 end
 
 """
-areatocell(area)
+    areatocell(area)
+
 Calculate the side length of a square grid of a fragment of `area` m².
 1 m² = 10000 cm², 3 cm of cell side size
 # 2 methods:
@@ -125,6 +104,7 @@ end
 
 """
     updateK!(landscape, settings, t, tdist)
+
 Update the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`).
 It is called during initialization (`t` = 1)  and is called again if landscape is disturbed (at `tdist`; `criticalts` keeps track of the updates and outputs the new values).
 """
@@ -191,6 +171,7 @@ end
 
 """
     setenv!(landscape,t)
+
 Update temperature and precipitation values according to the weekly input data (weekly means and ).
 """
 function setenv!(t::Int64, temp_ts)
@@ -207,7 +188,8 @@ function setenv!(t::Int64, temp_ts)
 end
 
 """
-get_dest(loc, dist, theta)
+    get_dest(loc, dist, theta)
+
 For currrent location `loc`, calculate new location `(xdest, ydest)` based on the distance of dispersal `dist` and angle `theta`.
 """
 function get_dest(loc::NamedTuple{(:idx, :loc),Tuple{Int64,Tuple{Int64,Int64}}},
@@ -225,6 +207,9 @@ function get_dest(loc::NamedTuple{(:idx, :loc),Tuple{Int64,Tuple{Int64,Int64}}},
 end
 
 """
+    vectorized_seedproc()
+
+Run seed calculations vectorized.
 """
 function vectorized_seedproc(process::String, processing_sp::Array{Plant,1}, B::Float64)
 
@@ -267,7 +252,11 @@ function survival(dying::Array{Plant, 1}, T)
     return dead_ids, living_ids 
 end
 
+"""
+    grow_allocate!(plant, b0grow, flowering_ids)
 
+Calculate `plant` growth rate according to species `b0grow`
+"""
 function grow_allocate!(plant, b0grow, flowering_ids)
 
     B_grow = b0grow*((sum(values(plant.mass))-plant.mass["repr"])^(-1/4))*exp(-A_E/(BOLTZ*T)) # only vegetative biomass fuels growth
