@@ -70,10 +70,10 @@ read_landpars
 function read_landpars(settings)
 	    
 	if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
-                disturbance = CSV.read(settings["disturb-land"], header = true,
+                disturbance = CSV.read(settings["disturb_land"], header = true,
 			      	       types = Dict("td" => Int64, "proportion" => Float64))
         elseif settings["disturb_type"] == "frag"
-                disturbance = CSV.read(settings["disturb-land"], header = true,
+                disturbance = CSV.read(settings["disturb_land"], header = true,
 			      	       types = Dict("td" => Int64, "frag_file" => String))	    
         else
 		disturbance = nothing
@@ -165,7 +165,7 @@ Reads how insects are going to be implicitly simulated.
 function read_pollination(settings::Dict{String,Any})
 
     if occursin("poll", settings["disturb_type"]) 
-       include(settings["pollination"])
+       include(abspath(settings["pollination"]))
        disturbed_regime= CSV.read(pollination_file, header = true,
 				  types = Dict("td" => Int64, "remaining" => Float64))
        poll_pars = PollPars(pollination_scen, disturbed_regime)
@@ -187,7 +187,7 @@ function set_tdist(settings)
     if occursin("none", settings["disturb_type"])
         tdist = nothing
     elseif occursin("area", settings["disturb_type"])
-        tdist = CSV.read(settings["disturb-land"], header=true, types=Dict("td"=>Int64))[:td]
+        tdist = CSV.read(settings["disturb_land"], header=true, types=Dict("td"=>Int64))[:td]
     end
 
     return tdist
