@@ -322,11 +322,19 @@ end
 
 function die_spp!(sp::String, plants::Array{Plant, 1})
     dying_sp = filter(x -> x.sp == sp, plants)
-    	Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
-	death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |>
-		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
-	deleteat!(plants, death_idxs)
-	deaths += length(death_idxs)
+    Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
+    death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |>
+	ids_deaths -> findall(x -> x.id in ids_deaths, plants)
+    deleteat!(plants, death_idxs)
+    deaths += length(death_idxs)
+
+    # check-point
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        println(sim, "Seeds possibly dying: $(length(dying))")
+	println(sim, "Dead on seed-bank: $(length(old))")
+	println(sim, "Dead metabolic: $(length(deaths))")
+    end
+    
 end
 
 function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cell::Array{Plant,1}, dying_stage::String, plants::Array{Plant,1}, settings::Dict{String,Any}, t::Int64)

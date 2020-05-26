@@ -556,7 +556,6 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
     if germinations + non_germinations != n_establishing
        error("Number of successes and fails in establishment do not match.")
     end
-    
 end
 
 """
@@ -587,12 +586,6 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
 	log_sim("Seed mortality running smoooth")
     end
 
-    # check-point
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Seeds possibly dying: $(length(dying))")
-	println(sim, "Dead on seed-bank: $(length(old))")
-	println(sim, "Dead metabolic: $(length(deaths))")
-    end
     open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
         for i in 1:deaths
             writedlm(sim, hcat(t, "death-indep", "s", mean(getfield.(dying, :age))))
