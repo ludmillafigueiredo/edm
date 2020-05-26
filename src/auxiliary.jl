@@ -253,17 +253,29 @@ function survival(dying::Array{Plant, 1}, T)
 end
 
 """
+    grow_spp(sp)
+
+Vectorize growth function, which is vectorized for individuals, to all species.
+"""
+function grow_spp(sp::String)
+    b0grow = SPP_REF.b0grow[sp]
+    growing_sp = filter(x->x.sp == sp, growing)
+    map(p -> grow_allocate!(p, b0grow, flowering_ids), growing_sp)
+    append!(plants, growing_sp)	
+end
+
+"""
     grow_allocate!(plant, b0grow, flowering_ids)
 
 Calculate `plant` growth rate according to species `b0grow`
 """
-function grow_allocate!(plant, b0grow, flowering_ids)
+function grow_allocate!(plant::Array{Plant, 1}, b0grow::Float64, flowering_ids = [nothing])
 
     B_grow = b0grow*((sum(values(plant.mass))-plant.mass["repr"])^(-1/4))*exp(-A_E/(BOLTZ*T)) # only vegetative biomass fuels growth
 
     new_mass = B_grow*((2*plant.compartsize + plant.compartsize^(3/4))-(sum(values(plant.mass))-plant.mass["repr"]))
 
-    if plant.id in flowering_ids
+    if plant.stage == "a" && plant.id in flowering_ids
        plant.mass["repr"] += new_mass
     else
        map(x -> plant.mass[x] += (1/3)*new_mass,
@@ -272,9 +284,49 @@ function grow_allocate!(plant, b0grow, flowering_ids)
 
 end
 
+"""
+    germinate_spp!(sp, establishing, plants)
+
+Vectorize germination process of all species.
+"""
+function germinate_spp!(sp::String, establishing::Array{Plant, 1}, plants::Array{Plant, 1})
+    establishing_sp = filter(x->x.sp==sp, establishing)
+    
+    Bg = B0_GERM*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
+    
+    germinated_ids = vectorized_seedproc("germination", establishing_sp, Bg)
+    germinated = filter(x -> x.id in germinated_ids, establishing_sp)
+    setproperty!.(germinated, :stage, "j")
+    setproperty!.(germinated, :age, 0)
+    append!(plants, germinated)
+    germinations += length(germinated)
+
+    # update the seeds that did not germinate and will go back into the main vector
+    non_germinated = filter(x -> !(x.id in germinated_ids), establishing_sp)
+    append!(plants, non_germinated)
+    non_germinations += length(non_germinated)
+
+    # check-point of life-history processes
+    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+        for i in 1:length(germinated)
+	    writedlm(sim, hcat(t, "germination", "j", mean(getfield.(germinated, :age))))
+        end
+    end
+end
+
+
 # function to vectorize age increase
 function age!(plant::Plant)
     plant.age += 1
+end
+
+function die_spp!(sp::String, plants::Array{Plant, 1})
+    dying_sp = filter(x -> x.sp == sp, plants)
+    	Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
+	death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |>
+		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
+	deleteat!(plants, death_idxs)
+	deaths += length(death_idxs)
 end
 
 function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cell::Array{Plant,1}, dying_stage::String, plants::Array{Plant,1}, settings::Dict{String,Any}, t::Int64)
