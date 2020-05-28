@@ -9,26 +9,30 @@ using DelimitedFiles
 """
 function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
 
-    growing = filter(x-> x.stage == growing_stage, plants) 
-    filter!(x-> x.stage != growing_stage, plants)
-
-    flowering_ids = filter(x -> x.stage == "a" &&
-    		    	        x.floron <= rem(t,52) < x.floroff &&
-				(sum(values(x.mass))-x.mass["repr"]) >=
-				0.5*(2*x.compartsize+x.compartsize^(3/4)),
-			   growing) |>
-	            x -> getfield.(x, :id)
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Flowering: $(length(flowering_ids))")
+    # identify flowering adults, for reproductive allocation
+    if growing_stage == "a"
+        flowering_ids = filter(x -> x.floron <= rem(t,52) < x.floroff &&
+			       (sum(values(x.mass))-x.mass["repr"]) >=
+			       0.5*(2*x.compartsize+x.compartsize^(3/4)),
+			       plants) |>
+	                           x -> getfield.(x, :id)
+    else
+        flowering_ids = [nothing]
     end
 
     log_abovegroundmass("before", "growth")
-	
-    for sp in unique(getfield.(growing, :sp))
-    	b0grow = SPP_REF.b0grow[sp]
-    	growing_sp = filter(x->x.sp == sp, growing)
-	map(x -> grow_allocate!(x, b0grow, flowering_ids), growing_sp)
-	append!(plants, growing_sp)	
+
+    for plant in plants
+    	B_grow = SPP_REF.b0grow[plant.sp]*((sum(values(plant.mass))-plant.mass["repr"])^(-1/4))*exp(-A_E/(BOLTZ*T)) # only vegetative biomass fuels growth
+
+        new_mass = B_grow*((2*plant.compartsize + plant.compartsize^(3/4))-(sum(values(plant.mass))-plant.mass["repr"]))
+
+        if plant.id in flowering_ids
+            plant.mass["repr"] += new_mass
+        else
+            map(x -> plant.mass[x] += (1/3)*new_mass,
+       	        ["leaves", "stem", "root"])
+        end
     end
 
     # unit test
@@ -38,6 +42,7 @@ function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T:
         println("Plant: plants[masserror[1]]")
 	error("Zero or negative values of biomass detected.")
     end
+
     # log process
     log_abovegroundmass("after", "growth")
     
