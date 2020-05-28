@@ -5,32 +5,31 @@ using StatsBase
 using DelimitedFiles
 
 """
-    grow!(plants, t, setting, SPP_REF, T)
-
-Identify individuals in `plants`
-
+    allocate!(orgs, t, setting, SPP_REF, T)
 """
 function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
 
     growing = filter(x-> x.stage == growing_stage, plants) 
     filter!(x-> x.stage != growing_stage, plants)
 
-    if x.stage == "a"
-        flowering_ids = filter(x -> x.stage == "a" &&
+    flowering_ids = filter(x -> x.stage == "a" &&
     		    	        x.floron <= rem(t,52) < x.floroff &&
 				(sum(values(x.mass))-x.mass["repr"]) >=
 				0.5*(2*x.compartsize+x.compartsize^(3/4)),
 			   growing) |>
-	                       x -> getfield.(x, :id)
-    end
-    
+	            x -> getfield.(x, :id)
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Flowering: $(length(flowering_ids))")
     end
 
     log_abovegroundmass("before", "growth")
-
-    map(s -> grow_spp(s), unique(getfield.(growing, :sp)))
+	
+    for sp in unique(getfield.(growing, :sp))
+    	b0grow = SPP_REF.b0grow[sp]
+    	growing_sp = filter(x->x.sp == sp, growing)
+	map(x -> grow_allocate!(x, b0grow, flowering_ids), growing_sp)
+	append!(plants, growing_sp)	
+    end
 
     # unit test
     check_duplicates(plants)
@@ -542,8 +541,33 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
 
     germinations = 0
     non_germinations = 0
+    
+    for sp in unique(getfield.(establishing, :sp))
 
-    map(s -> germinate(s, establishing), unique(getfield.(establishing, :sp)))
+    	establishing_sp = filter(x->x.sp==sp, establishing)
+		
+    	Bg = B0_GERM*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
+	
+	germinated_ids = vectorized_seedproc("germination", establishing_sp, Bg)
+	germinated = filter(x -> x.id in germinated_ids, establishing_sp)
+        setproperty!.(germinated, :stage, "j")
+	setproperty!.(germinated, :age, 0)
+	append!(plants, germinated)
+	germinations += length(germinated)
+
+	# update the seeds that did not germinate and will go back into the main vector
+	non_germinated = filter(x -> !(x.id in germinated_ids), establishing_sp)
+    	append!(plants, non_germinated)
+	non_germinations += length(non_germinated)
+
+	# check-point of life-history processes
+	open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+            for i in 1:length(germinated)
+	        writedlm(sim, hcat(t, "germination", "j", mean(getfield.(germinated, :age))))
+            end
+	end
+	
+    end
 
     # check-point: can probably go, becuase the unit test is enough
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
@@ -556,6 +580,7 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
     if germinations + non_germinations != n_establishing
        error("Number of successes and fails in establishment do not match.")
     end
+    
 end
 
 """
@@ -575,9 +600,16 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
     deaths = 0
 
     n_plantsbefore = length(plants)
-
-    map(s -> die_spp!(sp, plants), unique(getfield.(dying, :sp)))
     
+    for sp in unique(getfield.(dying, :sp))
+    	dying_sp = filter(x -> x.sp == "sp", plants)
+    	Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
+	death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |>
+		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
+	deleteat!(plants, death_idxs)
+	deaths += length(death_idxs)
+    end
+
     #unit test
     check_duplicates(plants)
     if n_plantsbefore - deaths != length(plants)
@@ -586,6 +618,12 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
 	log_sim("Seed mortality running smoooth")
     end
 
+    # check-point
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        println(sim, "Seeds possibly dying: $(length(dying))")
+	println(sim, "Dead on seed-bank: $(length(old))")
+	println(sim, "Dead metabolic: $(length(deaths))")
+    end
     open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
         for i in 1:deaths
             writedlm(sim, hcat(t, "death-indep", "s", mean(getfield.(dying, :age))))
