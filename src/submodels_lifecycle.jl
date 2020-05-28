@@ -602,7 +602,7 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
     n_plantsbefore = length(plants)
     
     for sp in unique(getfield.(dying, :sp))
-    	dying_sp = filter(x -> x.sp == "sp", plants)
+    	dying_sp = filter(x -> x.sp == sp, plants)
     	Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
 	death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |>
 		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
