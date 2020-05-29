@@ -193,36 +193,30 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
 
     # fertilized individuals
     fert_ids = filter(x -> x.mated == true, plants) |> x -> getfield.(x, :id)
-    fert_spp = filter(x -> x.mated == true, plants) |> x -> getfield.(x, :sp) |> unique
     
     # unit test
     if length(fert_ids) > length(findall(x -> x.stage == "a", plants))
-       error("There are more fertilized individuals than adults")
+        error("There are more fertilized individuals than adults")
     end
     
     # check-point
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Total number of individuals before REPRODUCTION: $(length(plants))")
-   	println(sim,
-	"$(length(fert_ids)) fertilized in $(length(findall(x -> x.stage == "a", plants))) adults")
-    end
+    #open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+    #    println(sim, "Total number of individuals before REPRODUCTION: $(length(plants))")
+    # 	println(sim,
+    #"$(length(fert_ids)) fertilized in $(length(findall(x -> x.stage == "a", plants))) adults")
+    #end
 
     #ferts_sp = findall(x -> x.sp == sp && x.id in fert_ids)
-	# check-point
-    	#open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-	#    println(sim, "Number of $sp sowing: $(length(ferts_sp))")
-        #end
+    # check-point
+    #open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+    #    println(sim, "Number of $sp sowing: $(length(ferts_sp))")
+    #end
     
-    for sp in fert_spp
-
-    	seedmass = SPP_REF.seedmass[sp]
-	spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
-
-	for plant in plants
+    for plant in plants
+        
+	if plant.id in fert_ids
             
-	    if plant.id in fert_ids
-                
-	    offs = div(ALLOC_SEED*plant.mass["repr"], seedmass)
+	    offs = div(ALLOC_SEED*plant.mass["repr"], SPP_REF.seedmass[plant.sp])
 	    
 	    if offs > 0
 		
@@ -238,18 +232,18 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
 		plant.mass["repr"] = 0
 
 		# get a random parent
-		partner = rand(ferts)
+		partner = filter(x -> x.sp == plant.sp, fert_ids) |> rand
 
-                for n in 1:offs
-
-		    seed = deepcopy(plant)
+                seeds = repeat([deepcopy(plant)], offs)
+                
+                for seed in seeds
 		    seed_counter += 1
 		    
 		    # reassign state variables that dont evolve
 		    seed.id = string(get_counter(), base = 16)
 		    seed.mass = Dict("leaves" => 0.0,
 		                     "stem" => 0.0,
-				     "root" => seedmass,
+				     "root" => SPP_REF.seedmass[plant.sp],
 				     "repr" => 0.0)
                     seed.stage = "s-in-flower"
                     seed.age = 0
@@ -258,13 +252,11 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
 		    if rand(Distributions.Binomial(1, 1 - plants.self_proba)) == 1
                         microevolve!(seed, plants, partner)
 		    end
-		    push!(plants, seed)
-
 		end
+                append!(plants, seeds)
 	    end
         end
-
-  end
+    end
 
     # unit test
     check_duplicates(plants)
