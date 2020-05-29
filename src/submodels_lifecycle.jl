@@ -127,15 +127,15 @@ end
 pollinate!()
 Mark plants and having pollinated (mated = true)
 """
-function pollinate!(pollen_vector::String, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+function pollinate!(pollen_vector::String, flwr_ids::Array{String,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
-    tobepoll_ids = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering) |>
+    poll_ids = filter(x -> occursin(pollen_vector, x.pollen_vector) && x.id in flwr_ids, plants) |>
         x -> getfield.(x, :id)
-    npoll = get_npoll(pollen_vector, tobepoll_ids, poll_pars, t)
+    npoll = get_npoll(pollen_vector, poll_ids, poll_pars, t)
 
     log_pollination(npoll, pollen_vector, t)
 
-    pollinated_ids = sample(tobepoll_ids, npoll, replace = false, ordered = false)
+    pollinated_ids = sample(poll_ids, npoll, replace = false, ordered = false)
     for plant in plants
         if plant.id in pollinated_ids
             plant.mated = true
@@ -171,22 +171,22 @@ Calculate proportion of `plants` that reproduced at time `t`, acording to pollin
 """
 function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, poll_pars::PollPars)
 
-    n_flowering = filter(x-> x.stage == "a" &&
-    	    	         ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]x.seednumber,
-                         plants) |> length
+    flowering_ids = filter(x-> x.stage == "a" &&
+    	    	         ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber,
+                         plants) |> x -> getfield.(x, :id)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Number of flowering plants: $(length(flowering)).")
+        println(sim, "Number of flowering plants: $(length(flowering_ids)).")
     end
 
-     if n_flowering > 0 # check if there is anyone flowering
+     if length(flowering_ids) > 0 # check if there is anyone flowering
 
-        pollinate!("wind", plants, poll_pars, t)
+        pollinate!("wind", flowering_ids, plants, poll_pars, t)
 	
 	if poll_pars.scen in ["equal", "rdm", "spec"] && t in poll_pars.regime.td
-	    disturb_pollinate!(flowering, poll_pars, plants, t)
+	    disturb_pollinate!(poll_pars, plants, t)
 	else
-	    pollinate!("insects", plants, poll_pars, t)
+	    pollinate!("insects", flowering_ids, plants, poll_pars, t)
 	end
     end
 
