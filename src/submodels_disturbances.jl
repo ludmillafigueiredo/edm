@@ -115,16 +115,14 @@ end
 pollinate!()
 Method used when pollination has been disturbed
 """
-function pollinate!(tobepoll::Array{Plant,1}, npoll::Int64, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+function pollinate!(tobepoll_idxs::Array{Plant,1}, npoll::Int64, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
     log_pollination(npoll, "insects-dist", t)
 
-    pollinated = sample(tobepoll, npoll, replace = false,
+    poll_idxs = sample(tobepoll_idxs, npoll, replace = false,
                         ordered = false)
-    for plant in plants
-        if plant.id in getfield.(pollinated, :id)
-            plant.mated = true
-        end
+    for i in poll_idxs
+        plants[i].mated = true
     end
     
     # unit test
@@ -147,12 +145,13 @@ function disturb_pollinate!(flwr_ids::Array{String,1}, poll_pars::PollPars, plan
     
     if poll_pars.scen  == "equal" # allspecies are equally affected
         for sp in unique(getfield.(insct_plants, :sp))
-            tobepoll = filter(x -> x.sp == sp, insct_plants)
-	    npoll = get_npoll(tobepoll, poll_pars, t)
-	    pollinate!(tobepoll, npoll, plants, poll_pars, t)
+            tobepoll_idxs = findall(x -> x.sp == sp, insct_plants)
+	    npoll = get_npoll(tobepoll_idxs, poll_pars, t)
+	    pollinate!(tobepoll_idxs, npoll, plants, poll_pars, t)
 	end
     elseif poll_pars.scen == "rdm"
-    	npoll = get_npoll(insct_plants, poll_pars, t)
+        insctplants_idxs = findall(x -> x.id in getfiled.(insct_plants, :id), plants)
+        npoll = get_npoll(insctplants_idxs, poll_pars, t)
 	if npoll > 0
 	    pollinate!(insects_plants, plants, npoll)
 	end

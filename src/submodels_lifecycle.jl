@@ -9,6 +9,14 @@ using DelimitedFiles
 """
 function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
 
+    function calc_growth(plant::Plant)
+        Bs = SPP_REF.b0grow[plant.sp]*((sum(values(plant.mass)) -
+                                         plant.mass["repr"])^(-1/4))*exp(-A_E/(BOLTZ*T)) # only vegetative biomass fuels growth
+        mass = Bg*((2*plant.compartsize + plant.compartsize^(3/4)) -
+                   (sum(values(plant.mass))-plant.mass["repr"]))
+    end
+    
+    growing_idxs = findall(x -> x.stage in ["j", "a"], plants)
     # identify flowering adults, for reproductive allocation
     if growing_stage == "a"
         flowering_ids = filter(x -> x.floron <= rem(t,52) < x.floroff &&
@@ -22,10 +30,9 @@ function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T:
 
     log_abovegroundmass("before", "growth")
 
-    for plant in plants
-    	B_grow = SPP_REF.b0grow[plant.sp]*((sum(values(plant.mass))-plant.mass["repr"])^(-1/4))*exp(-A_E/(BOLTZ*T)) # only vegetative biomass fuels growth
-
-        new_mass = B_grow*((2*plant.compartsize + plant.compartsize^(3/4))-(sum(values(plant.mass))-plant.mass["repr"]))
+    for i in growing_idxs
+        
+        new_mass = calc_growth(plants[i])
 
         if plant.id in flowering_ids
             plant.mass["repr"] += new_mass
@@ -59,10 +66,9 @@ function mature!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
         println(sim, "Maturation...")
     end
 
-    for plant in plants
-        if plant.stage == "j" && plant.age >= x.firstflower
-            setfield!(plant, :stage, "a")
-        end
+    mat_idxs = findall(x -> x.stage == "j" && x.age >= x.firstflower, plants)
+    for i in mat_idxs
+        plants[i].stage = "a"
     end
 
     # unit test
@@ -77,12 +83,12 @@ Calculate the number of individuals that get pollinated under each regime of pol
 Wind-pollinated species are not affected be pollination loss. Therefore, the number of pollinated individuals dependents only on the amount of flowering and on the default values of efficiency.
 Scenarios of rdm and equal pollination loss have the same calculation, but for equal, the number is calculated per species, whereas for rdm, its the total number.
 """
-function get_npoll(pollen_vector::String, tobepoll_ids::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+function get_npoll(pollen_vector::String, poll_idxs::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
     if pollen_vector == "wind"
-        npoll = rand(Distributions.Binomial(Int(ceil(length(tobepoll_ids)*WIND_DFLT)),WIND_EFFC))[1]
+        npoll = rand(Distributions.Binomial(Int(ceil(length(poll_idxs)*WIND_DFLT)),WIND_EFFC))[1]
     else
-	npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(tobepoll_ids)*VST_DFLT)),
+	npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(poll_idxs)*VST_DFLT)),
 						 INSCT_EFFC))[1]
 	if poll_pars.scen == "indep"
      	    npoll = npoll_dflt 
@@ -105,18 +111,17 @@ end
 pollinate!()
 Mark plants and having pollinated (mated = true)
 """
-function pollinate!(pollen_vector::String,  flwr_ids::Array{String,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+function pollinate!(pollen_vector::String, flwr_ids::Array{String,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
-    poll_ids = filter(x -> occursin(pollen_vector, x.pollen_vector) && x.id in flwr_ids, plants) |>
-        x -> getfield.(x, :id)
-    npoll = get_npoll(pollen_vector, poll_ids, poll_pars, t)
+    poll_idxs = findall(x -> occursin(pollen_vector, x.pollen_vector) && x.id in flwr_ids, plants)
+    npoll = get_npoll(pollen_vector, poll_idxs, poll_pars, t)
 
     log_pollination(npoll, pollen_vector, t)
 
-    pollinated_ids = sample(poll_ids, npoll, replace = false, ordered = false)
-    for plant in plants
-        if plant.id in pollinated_ids
-            plant.mated = true
+    pollinated_idxs = sample(poll_idxs, npoll, replace = false, ordered = false)
+
+    for i in pollinated_idxs
+            plants[i].mated = true
         end
     end
     
@@ -131,7 +136,7 @@ Calculate proportion of `plants` that reproduced at time `t`, acording to pollin
 """
 function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, poll_pars::PollPars)
 
-    flowering_ids = filter(x-> x.stage == "a" &&
+    flwr_ids = filter(x-> x.stage == "a" &&
     	    	         ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber,
                          plants) |> x -> getfield.(x, :id)
     # check-point
@@ -139,14 +144,14 @@ function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, po
         println(sim, "Number of flowering plants: $(length(flowering_ids)).")
     end
 
-     if length(flowering_ids) > 0 # check if there is anyone flowering
+     if length(flwr_ids) > 0 # check if there is anyone flowering
 
-        pollinate!("wind", flowering_ids, plants, poll_pars, t)
+        pollinate!("wind", flwr_ids, plants, poll_pars, t)
 	
 	if poll_pars.scen in ["equal", "rdm", "spec"] && t in poll_pars.regime.td
-	    disturb_pollinate!(poll_pars, plants, t)
+	    disturb_pollinate!(flwr_ids, poll_pars, plants, t)
 	else
-	    pollinate!("insects", flowering_ids, plants, poll_pars, t)
+	    pollinate!("insects", flwr_ids, plants, poll_pars, t)
 	end
     end
 
@@ -191,11 +196,12 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
     # counters to keep track of offspring production
     seed_counter = 0
 
-    # fertilized individuals
-    fert_ids = filter(x -> x.mated == true, plants) |> x -> getfield.(x, :id)
+    # visited individuals
+    fert_ids = findall(x -> x.mated == true, plants) |> x -> getfield.(x, :id) #necessary for partner
+    fert_idxs = findall(x -> x.mated == true, plants)
     
     # unit test
-    if length(fert_ids) > length(findall(x -> x.stage == "a", plants))
+    if length(fert_idxs) > length(findall(x -> x.stage == "a", plants))
         error("There are more fertilized individuals than adults")
     end
     
@@ -212,16 +218,14 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
     #    println(sim, "Number of $sp sowing: $(length(ferts_sp))")
     #end
     
-    for plant in plants
+    for i in fert_idxs
         
-	if plant.id in fert_ids
-            
-	    offs = div(ALLOC_SEED*plant.mass["repr"], SPP_REF.seedmass[plant.sp])
+	    offs = div(ALLOC_SEED*plants[i].mass["repr"], SPP_REF.seedmass[plants[i].sp])
 	    
 	    if offs > 0
 		
 		# limit offspring production to the maximal number of seeds the species can produce
-		offs > plant.seednumber ? offs = plant.seednumber : offs
+		offs > plants[i].seednumber ? offs = plants[i].seednumber : offs
 
                 spoffspringcounter += offs
 		open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
@@ -229,22 +233,20 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
   	        end
 
 		# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
-		plant.mass["repr"] = 0
+		plants[i].mass["repr"] = 0
 
 		# get a random parent
-		partner = filter(x -> x.sp == plant.sp, fert_ids) |> rand
+		partner = filter(x -> x.sp == plants[i].sp, fert_ids) |> rand
 
-                seeds = repeat([deepcopy(plant)], offs)
+                seeds = repeat([deepcopy(plants[i])], offs)
                 
                 for seed in seeds
 		    seed_counter += 1
 		    
 		    # reassign state variables that dont evolve
 		    seed.id = string(get_counter(), base = 16)
-		    seed.mass = Dict("leaves" => 0.0,
-		                     "stem" => 0.0,
-				     "root" => SPP_REF.seedmass[plant.sp],
-				     "repr" => 0.0)
+		    seed.mass = Dict("leaves" => 0.0, "stem" => 0.0, "repr" => 0.0,
+				     "root" => SPP_REF.seedmass[plant.sp])
                     seed.stage = "s-in-flower"
                     seed.age = 0
                     seed.mated = false
@@ -255,7 +257,6 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
 		end
                 append!(plants, seeds)
 	    end
-        end
     end
 
     # unit test
@@ -270,44 +271,42 @@ self_pollinate!()
 """
 function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int64)
 
-    selfers_ids = filter(x-> x.stage == "a" &&
-    	    	         ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber &&
-		         x.mated == false && x.self_failoutcross == true,
-		         plants)|>
-    x -> sample(x, Int(ceil(SELFING_PROBA*length(x)))) |> x -> getfiled.(x, :id)
+    selfers_idxs = findall(x-> x.stage == "a" &&
+    	    	           ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber &&
+		           x.mated == false && x.self_failoutcross == true,
+		           plants)|>
+    x -> sample(x, Int(ceil(SELFING_PROBA*length(x))))
 
-    for plant in plants
+    for i in selfers_idxs
 
-        if plant.id in selfers_ids
-	    spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
-	    
-	    offs = div(ALLOC_SEED*plants[s].mass["repr"], SPP_REF.seedmass[plant.sp])
-	    
-	    if offs > 0
+        spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
+	
+	offs = div(ALLOC_SEED*plants[i].mass["repr"], SPP_REF.seedmass[plants[i].sp])
+	
+	if offs > 0
 
-                # Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
-		plants.mass["repr"] = 0
-                
-		# limit offspring production to the maximal number of seeds the species can produce
-		offs > plants.seednumber ? offs = plants.seednumber : offs
+            # Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
+	    plants[i].mass["repr"] = 0
+            
+	    # limit offspring production to the maximal number of seeds the species can produce
+	    offs > plants[i].seednumber ? offs = plants[i].seednumber : offs
 
-                spoffspringcounter += offs
-		open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
-    	            writedlm(seedfile, hcat(t, sp, "s", "self", spoffspringcounter))
-  	        end
-                
-                seeds = repeat([deepcopy(plant)], offs)
-                
-		for seed in seeds
-		    # reassign state variables
-		    seed.id = string(get_counter(), base = 16)
-		    seed.mass = Dict("leaves" => 0.0, "stem" => 0.0, "repr" => 0.0,
-                                     "root" => seedmass)
-                    seed.stage = "s-in-flower"
-                    seed.age = 0
-	        end
-                append!(plants, seeds)
-            end
+            spoffspringcounter += offs
+	    open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
+    	        writedlm(seedfile, hcat(t, sp, "s", "self", spoffspringcounter))
+  	    end
+            
+            seeds = repeat([deepcopy(plants[i])], offs)
+            
+	    for seed in seeds
+		# reassign state variables
+		seed.id = string(get_counter(), base = 16)
+		seed.mass = Dict("leaves" => 0.0, "stem" => 0.0, "repr" => 0.0,
+                                 "root" => SPP_REF.seedmass[plants[i].sp])
+                seed.stage = "s-in-flower"
+                seed.age = 0
+	    end
+            append!(plants, seeds)
         end
     end
     # unit test
@@ -320,41 +319,40 @@ Asexual reproduction.
 """
 function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, t::Int64)
 
-    asex_ids =filter(x -> x.mated==false &&
-                     x.clonality==true && x.mass["repr"] > SPP_REF.seedmass[x.sp],
-                     plants) |> x -> getfield.(x, :id)
-
-    for plant in plants        
-        if plant.id in asex_ids
-            if rand(Distributions.Binomial(1, CLONAL_PROBA)) == 1
-       	        clone = deepcopy(plant)
-	        clone.stage = "j" #clones have already germinated
-	        clone.age = 0
-	        clone.mass = Dict("leaves" => (plants.compartsize*0.1)^(3/4),
-                                  "stem" => plants.compartsize*0.1,
-                                  "root" => plants.compartsize*0.1, "repr" => 0.0)
-	        clone.id = string(get_counter(), base=16)
-	        push!(plants, clone)
-	        spclonescounter += 1
-                # check-point of life-history processes
-	        open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-	            writedlm(sim, hcat(t, "clonal reproduction", "a", plant.age))
-	        end
-       	    end
-        end
-
+    asex_idxs = findall(x -> x.mated==false &&
+                        x.clonality==true && x.mass["repr"] > SPP_REF.seedmass[x.sp],
+                        plants) |> x -> getfield.(x, :id)
+    clones = Plant[]
+    
+    for i in asex_idxs
+        if rand(Distributions.Binomial(1, CLONAL_PROBA)) == 1
+       	    clone = deepcopy(plant[i])
+	    clone.stage = "j" #clones have already germinated
+	    clone.age = 0
+	    clone.mass = Dict("leaves" => (plants[i].compartsize*0.1)^(3/4),
+                              "stem" => plants[i].compartsize*0.1,
+                              "root" => plants[i].compartsize*0.1, "repr" => 0.0)
+	    clone.id = string(get_counter(), base=16)
+	    push!(clones, clone)
+	    spclonescounter += 1
+            # check-point of life-history processes
+	    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+	        writedlm(sim, hcat(t, "clonal reproduction", "a", plants[i].age))
+	    end
+       	end
+        
         # output clones
         open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
 	    writedlm(seedfile, hcat(t, sp, "j", "asex", spclonescounter))
     	end
     end
+    append!(plants, clones)
 
     # unit test
     check_duplicates(plants)
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         writedlm(sim, hcat("Total number of individuals after ASEX:", length(plants)))
     end
-    
 end
 
 """
@@ -518,21 +516,18 @@ function die!(dying_stage::String, plants::Array{Plant, 1}, settings::Dict{Strin
     deleteat!(plants, old)
 
     # metabolic death
-    dying_ids = filter(x -> x.stage == dying_stage, plants) |> x -> getfield.(x, :id)
-    death_ids = String[]
+    dying_idxs = findall(x -> x.stage == dying_stage, plants)
+    dead = Plant[]
 
     n_plantsbefore = length(plants)
     
-    for plant in plants
-        if plant.id in dying_ids
-            prob = mort_prob(plant,T)
-	    if rand(Distributions.Bernoulli(1, prob))[1] == 1
-                push!(death_ids, seed.id)
-            end
+    for i in dying_idxs
+        prob = mort_prob(plant[i],T)
+	if rand(Distributions.Bernoulli(1, prob))[1] == 1
+            push!(dead, plants[i])
         end
     end
-
-    death_idxs = findall(x -> x.id in death_ids, plants)
+    death_idxs = findall(x -> x.id in getfield.(dead, :id), plants)
     deleteat!(plants, death_idxs)
     #unit test
     check_duplicates(plants)
@@ -544,24 +539,17 @@ function die!(dying_stage::String, plants::Array{Plant, 1}, settings::Dict{Strin
 
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-        for i in 1:length(dead_ids)
-            writedlm(sim, hcat(t, "death-indep", dying_stage, mean(getfield.(dying, :age))))
+        for i in 1:length(dead_idxs)
+            writedlm(sim, hcat(t, "death-indep", dying_stage, mean(getfield.(dead, :age))))
         end
     end
-    if dying_stage == "s"
-        open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-            println(sim, "Seeds possibly dying: $(length(dying_ids))")
-	    println(sim, "Dead on seed-bank: $(length(old))")
-	    println(sim, "Dead metabolic: $(death_ids)")
-        end
-    else
-        # check-point
-        open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-            println(sim, "Density-independent mortality: $(length(dead_ids))")
-            println(sim, "$(uppercase(dying_stage)) dying of age: $(length(old))")
-        end
+    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+        println(sim, "$(uppercase(dying_stage)) possibly dying: $(length(dying_idxs))")
+	println(sim, "$(uppercase(dying_stage)) on lifespan/seed-bank: $(length(old))")
+	println(sim, "$(uppercase(dying_stage)) metabolic: $(length(death_idxs))")
     end
 end
+
 
 function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  landscape::BitArray{2}, T, dying_stage::String)
 
