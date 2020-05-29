@@ -30,6 +30,8 @@ const WIND_DFLT = 1
 # Efficiency of wind pollination
 const WIND_EFFC = 0.6
 const SELFING_PROBA = 0.5
+# Probability of clonal distribution
+const CLONAL_PROBA
 
 # Parameters of dispersal kernels
 # -------------------------------

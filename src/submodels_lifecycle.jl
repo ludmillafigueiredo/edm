@@ -320,40 +320,32 @@ Asexual reproduction.
 """
 function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, t::Int64)
 
-    asexuals=filter(x -> x.mated==false && x.clonality==true && x.mass["repr"]>SPP_REF.seedmass[x.sp],
-                    plants)
+    asex_ids =filter(x -> x.mated==false &&
+                     x.clonality==true && x.mass["repr"] > SPP_REF.seedmass[x.sp],
+                     plants) |> x -> getfield.(x, :id)
 
-    for sp in unique(getfield.(asexuals, :sp))
+    for plant in plants        
+        if plant.id in asex_ids
+            if rand(Distributions.Binomial(1, CLONAL_PROBA)) == 1
+       	        clone = deepcopy(plant)
+	        clone.stage = "j" #clones have already germinated
+	        clone.age = 0
+	        clone.mass = Dict("leaves" => (plants.compartsize*0.1)^(3/4),
+                                  "stem" => plants.compartsize*0.1,
+                                  "root" => plants.compartsize*0.1, "repr" => 0.0)
+	        clone.id = string(get_counter(), base=16)
+	        push!(plants, clone)
+	        spclonescounter += 1
+                # check-point of life-history processes
+	        open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+	            writedlm(sim, hcat(t, "clonal reproduction", "a", plant.age))
+	        end
+       	    end
+        end
 
-       cloning = findall(x -> x.sp == sp && x.id in unique(getfield.(asexuals, :id)) , plants) # find mothers cloning
-
-       # start species  production counting
-       spclonescounter = 0
-
-       for c in cloning
-
-       	if rand(Distributions.Binomial(1, 0.5)) == 1
-       	clone = deepcopy(plants[c])
-	clone.stage = "j" #clones have already germinated
-	clone.age = 0
-	clone.mass["leaves"] = (plants[c].compartsize*0.1)^(3/4)
-	clone.mass["stem"] = plants[c].compartsize*0.1
-	clone.mass["root"] = plants[c].compartsize*0.1
-	clone.mass["repr"] = 0.0
-
-	clone.id = string(get_counter(), base=16)
-	push!(plants, clone)
-	spclonescounter += 1
-            # check-point of life-history processes
-	    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-	        writedlm(sim, hcat(t, "clonal reproduction", "a", plants[c].age))
-	    end
-       	end
-       end
-
-       # output clones
+        # output clones
         open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
-	writedlm(seedfile, hcat(t, sp, "j", "asex", spclonescounter))
+	    writedlm(seedfile, hcat(t, sp, "j", "asex", spclonescounter))
     	end
     end
 
