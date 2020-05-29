@@ -101,33 +101,11 @@ function get_npoll(pollen_vector::String, tobepoll_ids::Array{Plant,1}, poll_par
 
 end
 
-# method for disturb_poll
-function get_npoll(insects_plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
-
-    npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(insects_plants)*VST_DFLT)),
-						 INSCT_EFFC))[1]
-	if poll_pars.scen == "indep"
-     	    npoll = npoll_dflt 
-	elseif poll_pars.scen in ["equal", "rdm"]
-	    if t in poll_pars.regime.td
-	        npoll = Int(ceil(npoll_dflt * poll_pars.regime[poll_pars.regime.td.== t,
-		                                               :remaining][1]))
-	    else
-		npoll = npoll_dflt
-	    end
-	elseif poll_pars.scen == "spec"
-	    # pseudo
-	end
-    
-    return npoll
-
-end
-
 """
 pollinate!()
 Mark plants and having pollinated (mated = true)
 """
-function pollinate!(pollen_vector::String, flwr_ids::Array{String,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+function pollinate!(pollen_vector::String,  flwr_ids::Array{String,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
     poll_ids = filter(x -> occursin(pollen_vector, x.pollen_vector) && x.id in flwr_ids, plants) |>
         x -> getfield.(x, :id)
@@ -145,24 +123,6 @@ function pollinate!(pollen_vector::String, flwr_ids::Array{String,1}, plants::Ar
     # unit test
     check_duplicates(plants)
     
-end
-
-"""
-pollinate!()
-Method used when pollination has been disturbed
-"""
-function pollinate!(insects_plants_sp::Array{Plant,1}, npoll::Int64, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
-
-    log_pollination(flowering, npoll, "insects-dist", t)
-    pollinated = sample(insects_plants_sp, npoll, replace = false,
-                        ordered = false)
-    filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
-    setfield!.(pollinated, :mated, true)
-    append!(plants, pollinated)
-    
-    # unit test
-    check_duplicates(plants)
-
 end
 
 """

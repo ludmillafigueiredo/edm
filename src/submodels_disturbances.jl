@@ -89,41 +89,80 @@ function destroyorgs!(plants::Array{Plant,1}, landscape::BitArray{2}, settings::
     
 end
 
+# method for disturb_poll
+function get_npoll(tobepoll::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+
+    npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(tobepoll)*VST_DFLT)),
+						 INSCT_EFFC))[1]
+	if poll_pars.scen == "indep"
+     	    npoll = npoll_dflt 
+	elseif poll_pars.scen in ["equal", "rdm"]
+	    if t in poll_pars.regime.td
+	        npoll = Int(ceil(npoll_dflt * poll_pars.regime[poll_pars.regime.td.== t,
+		                                               :remaining][1]))
+	    else
+		npoll = npoll_dflt
+	    end
+	elseif poll_pars.scen == "spec"
+	    # pseudo
+	end
+    
+    return npoll
+
+end
+
 """
-disturb_pollinate!()
+pollinate!()
+Method used when pollination has been disturbed
+"""
+function pollinate!(tobepoll::Array{Plant,1}, npoll::Int64, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+
+    log_pollination(npoll, "insects-dist", t)
+
+    pollinated = sample(tobepoll, npoll, replace = false,
+                        ordered = false)
+    for plant in plants
+        if plant.id in getfield.(pollinated, :id)
+            plant.mated = true
+        end
+    end
+    
+    # unit test
+    check_duplicates(plants)
+
+end
+
+"""
+    disturb_pollinate!()
 Call the pollinate!() function for groups of individuals according to 
 """
-function disturb_pollinate!(flowering::Array{Plant,1}, poll_pars::PollPars, plants::Array{Plant,1}, t::Int64)
+function disturb_pollinate!(flwr_ids::Array{String,1}, poll_pars::PollPars, plants::Array{Plant,1}, t::Int64)
 
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Pollination disturbed by $(poll_pars.scen) ...")
     end
 
-    insects_plants = filter(x -> occursin("insects", x.pollen_vector), flowering)
-    total_p = 0
+    insct_plnts = filter(x -> occursin("insects", x.pollen_vector) && x.id in flwr_ids, plants)
     
-    if poll_pars.scen  == "equal" # all plants species are equally affected
-        for sp in unique(getfield.(insects_plants, :sp))
-	    insects_plants_sp = filter(x -> x.sp == sp, insects_plants)
-    	    npoll = get_npoll(insects_plants_sp, poll_pars, t)
-	    pollinate!(insects_plants_sp, npoll, flowering, plants, poll_pars, t)
-	    total_p += npoll
+    if poll_pars.scen  == "equal" # allspecies are equally affected
+        for sp in unique(getfield.(insct_plants, :sp))
+            tobepoll = filter(x -> x.sp == sp, insct_plants)
+	    npoll = get_npoll(tobepoll, poll_pars, t)
+	    pollinate!(tobepoll, npoll, plants, poll_pars, t)
 	end
     elseif poll_pars.scen == "rdm"
-    	npoll = get_npoll(insects_plants, poll_pars, t)
-	total_p += npoll
+    	npoll = get_npoll(insct_plants, poll_pars, t)
 	if npoll > 0
 	    pollinate!(insects_plants, plants, npoll)
 	end
     elseif poll_pars.scen == "spec"
     	
     else
-	    error("Please chose a pollination scenario \"scen\" in insect.csv:
-                   - \"indep\": sexual reproduction happens independently of pollination
-                   - \"rmd\": random loss of pollinator species 
-                   - \"spec\": specific loss of pollinator species")
-        
+	error("Please chose a pollination scenario \"scen\" in insect.csv:
+                       - \"indep\": sexual reproduction happens independently of pollination
+                       - \"rmd\": random loss of pollinator species 
+                       - \"spec\": specific loss of pollinator species")     
     end
     
 end
