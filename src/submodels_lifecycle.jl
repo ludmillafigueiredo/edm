@@ -161,7 +161,6 @@ microevolve!()
 function microevolve!(seed::Plant, fert::Plant, partner::Plant)
 
 for trait in EVOLVABLE_TRAITS
-
     # Calculate microevolution
     # ------------------------
     new_traitvalue = mean([getfield(seed, trait), getfield(partner, trait)]) +
@@ -193,10 +192,11 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
     seed_counter = 0
 
     # fertilized individuals
-    ferts = filter(x -> x.mated == true, plants)
-
+    fert_ids = filter(x -> x.mated == true, plants) |> x -> getfield.(x, :id)
+    fert_spp = filter(x -> x.mated == true, plants) |> x -> getfield.(x, :sp) |> unique
+    
     # unit test
-    if length(ferts) > length(findall(x -> x.stage == "a", plants))
+    if length(fert_ids) > length(findall(x -> x.stage == "a", plants))
        error("There are more fertilized individuals than adults")
     end
     
@@ -204,28 +204,30 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Total number of individuals before REPRODUCTION: $(length(plants))")
    	println(sim,
-	"$(length(ferts)) fertilized in $(length(findall(x -> x.stage == "a", plants))) adults")
+	"$(length(fert_ids)) fertilized in $(length(findall(x -> x.stage == "a", plants))) adults")
     end
+
+    #ferts_sp = findall(x -> x.sp == sp && x.id in fert_ids)
+	# check-point
+    	#open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+	#    println(sim, "Number of $sp sowing: $(length(ferts_sp))")
+        #end
     
-    for sp in unique(getfield.(ferts, :sp))
+    for sp in fert_spp
 
     	seedmass = SPP_REF.seedmass[sp]
 	spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
-	
-	ferts_sp = findall(x -> x.sp == sp && x.id in getfield.(ferts, :id), plants)
-	# check-point
-    	open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-	    println(sim, "Number of $sp sowing: $(length(ferts_sp))")
-        end
 
-	for s in ferts_sp
-	
-	    offs = div(ALLOC_SEED*plants[s].mass["repr"], seedmass)
+	for plant in plants
+            
+	    if plant.id in fert_ids
+                
+	    offs = div(ALLOC_SEED*plant.mass["repr"], seedmass)
 	    
 	    if offs > 0
 		
 		# limit offspring production to the maximal number of seeds the species can produce
-		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
+		offs > plant.seednumber ? offs = plant.seednumber : offs
 
                 spoffspringcounter += offs
 		open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
@@ -233,14 +235,14 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
   	        end
 
 		# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
-		plants[s].mass["repr"] = 0
+		plant.mass["repr"] = 0
 
 		# get a random parent
 		partner = rand(ferts)
 
                 for n in 1:offs
 
-		    seed = deepcopy(plants[s])
+		    seed = deepcopy(plant)
 		    seed_counter += 1
 		    
 		    # reassign state variables that dont evolve
@@ -253,8 +255,8 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
                     seed.age = 0
                     seed.mated = false
 
-		    if rand(Distributions.Binomial(1, 1 - plants[s].self_proba)) == 1
-                        microevolve!(seed, plants[s], partner)
+		    if rand(Distributions.Binomial(1, 1 - plants.self_proba)) == 1
+                        microevolve!(seed, plants, partner)
 		    end
 		    push!(plants, seed)
 
