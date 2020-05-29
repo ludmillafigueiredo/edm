@@ -513,26 +513,35 @@ Calculate seed mortality, vectorized for all seeds of a same species.
 """
 function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int64, T::Float64)
 
-    old = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
-    deleteat!(plants, old)
+    old_idxs = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
+    deleteat!(plants, old_idxs)
     
-    dying = filter(x -> x.stage == "s", plants)
-    deaths = 0
+    dying_ids = filter(x -> x.stage == "s", plants) |> x -> getfield.(x, :id)
+    death_ids = String[]
 
     n_plantsbefore = length(plants)
     
-    for sp in unique(getfield.(dying, :sp))
-    	dying_sp = filter(x -> x.sp == "sp", plants)
-    	Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
-	death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |>
-		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
-	deleteat!(plants, death_idxs)
-	deaths += length(death_idxs)
+    for seed in plants
+        if seed.id in dying_ids
+            Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[seed.sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
+	    prob = 1-exp(-Bm)
+	    # unit test
+	    if prob < 0
+	        error("$process probability < 0")
+	    elseif prob > 1
+	        error("$process probability > 1")
+	    end
+	    if rand(Distributions.Binomial(1, prob))[1] == 1
+                push!(death_ids, seed.id)
+            end
+        end
     end
 
+    death_idxs = findall(x -> x.id in death_ids, plants)
+    deleteat!(plants, death_idxs)
     #unit test
     check_duplicates(plants)
-    if n_plantsbefore - deaths != length(plants)
+    if n_plantsbefore - length(death_idxs) != length(plants)
         error("Error in processing seed deaths")
     else
 	log_sim("Seed mortality running smoooth")
@@ -540,9 +549,9 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
 
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Seeds possibly dying: $(length(dying))")
+        println(sim, "Seeds possibly dying: $(length(dying_ids))")
 	println(sim, "Dead on seed-bank: $(length(old))")
-	println(sim, "Dead metabolic: $(length(deaths))")
+	println(sim, "Dead metabolic: $(death_ids)")
     end
     open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
         for i in 1:deaths
