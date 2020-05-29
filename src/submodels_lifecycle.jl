@@ -77,12 +77,12 @@ Calculate the number of individuals that get pollinated under each regime of pol
 Wind-pollinated species are not affected be pollination loss. Therefore, the number of pollinated individuals dependents only on the amount of flowering and on the default values of efficiency.
 Scenarios of rdm and equal pollination loss have the same calculation, but for equal, the number is calculated per species, whereas for rdm, its the total number.
 """
-function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+function get_npoll(pollen_vector::String, tobepoll_ids::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
     if pollen_vector == "wind"
-        npoll = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*WIND_DFLT)),WIND_EFFC))[1]
+        npoll = rand(Distributions.Binomial(Int(ceil(length(tobepoll_ids)*WIND_DFLT)),WIND_EFFC))[1]
     else
-	npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*VST_DFLT)),
+	npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(tobepoll_ids)*VST_DFLT)),
 						 INSCT_EFFC))[1]
 	if poll_pars.scen == "indep"
      	    npoll = npoll_dflt 
@@ -127,15 +127,20 @@ end
 pollinate!()
 Mark plants and having pollinated (mated = true)
 """
-function pollinate!(pollen_vector::String, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+function pollinate!(pollen_vector::String, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
-    poll_plants = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering)
-    npoll = get_npoll(pollen_vector, poll_plants, poll_pars, t)
-    log_pollination(flowering, npoll, pollen_vector, t)
-    pollinated = sample(poll_plants, npoll, replace = false, ordered = false)
-    filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
-    setfield!.(pollinated, :mated, true)
-    append!(plants, pollinated)
+    tobepoll_ids = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering) |>
+        x -> getfield.(x, :id)
+    npoll = get_npoll(pollen_vector, tobepoll_ids, poll_pars, t)
+
+    log_pollination(npoll, pollen_vector, t)
+
+    pollinated_ids = sample(tobepoll_ids, npoll, replace = false, ordered = false)
+    for plant in plants
+        if plant.id in pollinated_ids
+            plant.mated = true
+        end
+    end
     
     # unit test
     check_duplicates(plants)
@@ -166,29 +171,23 @@ Calculate proportion of `plants` that reproduced at time `t`, acording to pollin
 """
 function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, poll_pars::PollPars)
 
-    flowering = filter(x-> x.stage == "a" &&
-    	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]x.seednumber,
-		       plants)
+    n_flowering = filter(x-> x.stage == "a" &&
+    	    	         ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]x.seednumber,
+                         plants) |> length
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Number of flowering plants: $(length(flowering)).")
     end
 
-     if length(flowering) > 0 # check if there is anyone flowering
+     if n_flowering > 0 # check if there is anyone flowering
 
-        # as with the other processes, it is easier to process plants separately from the main vector
-        filter!(x -> !(x.id in getfield.(flowering, :id)), plants)
-	
-	pollinate!("wind", flowering, plants, poll_pars, t)
+        pollinate!("wind", plants, poll_pars, t)
 	
 	if poll_pars.scen in ["equal", "rdm", "spec"] && t in poll_pars.regime.td
 	    disturb_pollinate!(flowering, poll_pars, plants, t)
 	else
-	    pollinate!("insects", flowering, plants, poll_pars, t)
+	    pollinate!("insects", plants, poll_pars, t)
 	end
-
-	# re-insert the ones that did not get pollinated
-	append!(plants, flowering)
     end
 
     # unit test
