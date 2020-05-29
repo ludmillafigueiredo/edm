@@ -54,32 +54,19 @@ Juveniles in `plants` older than their age of first flowering at time `t` become
 """
 function mature!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
 
-    nplants_before = length(plants)
     # check-point
     open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
         println(sim, "Maturation...")
     end
 
-    # find indexes of individuals that are ready to become adults
-    juvs = filter(x-> (x.stage == "j" && x.age >= x.firstflower),plants)
-    filter!(x -> !(x.id in getfield.(juvs, :id)), plants)
+    for plant in plants
+        if plant.stage == "j" && plant.age >= x.firstflower
+            setfield!(plant, :stage, "a")
+        end
+    end
+
     # unit test
-    if length(juvs) > 0
-        if "a" in getfield.(juvs, :stage) || "s" in getfield.(juvs, :stage)
-            error("Juvenile sorting for maturation is doing the opposite")
-        end
-    end
-    setfield!.(juvs, :stage, "a")
-    if "j" in getfield.(juvs, :stage)
-            error("Maturation is not working")
-        end
-    append!(plants, juvs)
-    if nplants_before != length(plants)
-       error("Young adults got lost")
-    end
     check_ages(plants)
-    
-    # unit test
     check_duplicates(plants)
     
 end
