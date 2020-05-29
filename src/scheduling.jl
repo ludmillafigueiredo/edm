@@ -57,16 +57,16 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 
 	    check_ages(plants)
 	    
-	    die_seeds!(plants, settings, t, T)
+	    die!("s", plants, settings, t, T)
 
 	    # Adults growth and mortality
             grow!(plants, t, settings, T, biomass_production, K, "a")
-            die!(plants, settings, T, "a", t)
+            die!("a", plants, settings, T, t)
 	    compete_die!(plants, t, settings, landscape, T, "a")
 	    
 	    # Juvenile growth and mortality 
 	    grow!(plants, t, settings, T, biomass_production, K, "j")
-            die!(plants, settings, T, "j", t)
+            die!("j", oplants, settings, T, t)
 	    compete_die!(plants, t, settings, landscape, T, "j")
 
 	    # all individuals except seeds in flowers get older over time

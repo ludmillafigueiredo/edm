@@ -225,33 +225,24 @@ function get_dest(loc::NamedTuple{(:idx, :loc),Tuple{Int64,Tuple{Int64,Int64}}},
 end
 
 """
-"""
-function vectorized_seedproc(process::String, processing_sp::Array{Plant,1}, B::Float64)
-
-	prob = 1-exp(-B)
-
-	# unit test
-	if prob < 0
-	    error("$process probability < 0")
-	elseif prob > 1
-	    error("$process probability > 1")
-	end
-
-	n_procs = rand(Distributions.Binomial(length(processing_sp), prob))[1]
-
-	ids_procs = sample(getfield.(processing_sp, :id), n_procs) 
-
-	return ids_procs # return ids and not indexes because germination uses ids,
-	       		 # and mortality uses indexes
-end
-
-"""
 mort_prob(plant)
 Calculate mortality probability for a single plant
 """
 function mort_prob(plant::Plant, T)
-    Bm = B0_MORT*(sum(values(plant.mass))^(-1/4))*exp(-A_E/(BOLTZ*T))
+    if plant.stage in["j", "a"]
+        Bm = B0_MORT*(sum(values(plant.mass))^(-1/4))*exp(-A_E/(BOLTZ*T))
+    else
+        Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[seed.sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
+    end
+
     mort_prob = 1-exp(-Bm)
+    # unit test
+    if prob < 0
+	error("$process probability < 0")
+    elseif prob > 1
+	error("$process probability > 1")
+    end
+    
     return mort_prob
 end
 

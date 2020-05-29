@@ -504,34 +504,29 @@ function establish!(justdispersed::Array{Plant,1}, plants::Array{Plant,1}, t::In
 end
 
 """
-    Plants density-independent mortality is calculated according to the metabolic theory.
-Density-dependent mortality is calculated for cells with biomass over the grid-cell carrying capacity `C_K`. It kills smaller individuals until the biomass of the grid-cell is above `C_K` again.
-Density-dependent mortality is not calculated for seeds. Their density-dependent mortality is calculated alongside adults just for convenience.
-Both types of mortalities of adults and juveniles are calculated separately (as set by `dying_stage`).
-    survive!(plants, t, settings, SPP_REF)
-Calculate seed mortality, vectorized for all seeds of a same species.
+    die!()
+Plants density-independent mortality is calculated according to the metabolic theory.
 """
-function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int64, T::Float64)
+function die!(dying_stage::String, plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, t::Int64)
 
-    old_idxs = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
-    deleteat!(plants, old_idxs)
-    
-    dying_ids = filter(x -> x.stage == "s", plants) |> x -> getfield.(x, :id)
+    ## death of maximal lifespan reached
+    if dying_stage == "s"
+        old_idxs = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
+    else
+        old_idxs = findall(x -> (x.stage == dying_stage && x.age > x.span), plants)
+    end
+    deleteat!(plants, old)
+
+    # metabolic death
+    dying_ids = filter(x -> x.stage == dying_stage, plants) |> x -> getfield.(x, :id)
     death_ids = String[]
 
     n_plantsbefore = length(plants)
     
-    for seed in plants
-        if seed.id in dying_ids
-            Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[seed.sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
-	    prob = 1-exp(-Bm)
-	    # unit test
-	    if prob < 0
-	        error("$process probability < 0")
-	    elseif prob > 1
-	        error("$process probability > 1")
-	    end
-	    if rand(Distributions.Binomial(1, prob))[1] == 1
+    for plant in plants
+        if plant.id in dying_ids
+            prob = mort_prob(plant,T)
+	    if rand(Distributions.Bernoulli(1, prob))[1] == 1
                 push!(death_ids, seed.id)
             end
         end
@@ -548,59 +543,24 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
     end
 
     # check-point
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Seeds possibly dying: $(length(dying_ids))")
-	println(sim, "Dead on seed-bank: $(length(old))")
-	println(sim, "Dead metabolic: $(death_ids)")
-    end
-    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-        for i in 1:deaths
-            writedlm(sim, hcat(t, "death-indep", "s", mean(getfield.(dying, :age))))
-        end
-    end
-end
-
-"""
-die!()
-"""
-function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, dying_stage::String, t::Int64)
-
-    old = findall( x -> (x.stage == dying_stage && x.age > x.span), plants)
-    
-    if length(old) > 0
-       if dying_stage == "j"
-           # unit test
-	   log_age()
-           error("Juvenile did not mature before reaching maximum span")
-       else
-	   deleteat!(plants, old)
-       end 
-    end
-
-    # the rest of the individuals have a metabolic probability of dying.
-    dying = filter(x -> x.stage == dying_stage, plants)
-    filter!(x -> x.stage != dying_stage, plants)
-
-    dead_ids, living_ids = survival(dying, T)
-    dead_idxs = findall(x -> x.id in dead_ids, plants)
-    deleteat!(plants, dead_idxs)
-    living = filter(x -> x.id in living_ids, dying)
-    append!(plants, living)
-
-    # unit test
-    check_duplicates(plants)
-    
-    # check-point
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-        println(sim, "Density-independent mortality: $(length(dead_ids))")
-        println(sim, "$(uppercase(dying_stage)) dying of age: $(length(old))")
-    end
     open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
         for i in 1:length(dead_ids)
             writedlm(sim, hcat(t, "death-indep", dying_stage, mean(getfield.(dying, :age))))
         end
     end
-    
+    if dying_stage == "s"
+        open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+            println(sim, "Seeds possibly dying: $(length(dying_ids))")
+	    println(sim, "Dead on seed-bank: $(length(old))")
+	    println(sim, "Dead metabolic: $(death_ids)")
+        end
+    else
+        # check-point
+        open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+            println(sim, "Density-independent mortality: $(length(dead_ids))")
+            println(sim, "$(uppercase(dying_stage)) dying of age: $(length(old))")
+        end
+    end
 end
 
 function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  landscape::BitArray{2}, T, dying_stage::String)
