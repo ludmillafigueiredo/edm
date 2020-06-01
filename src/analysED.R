@@ -12,8 +12,8 @@ library(viridis);
 library(readr);
 library(grid);
 library(gridExtra);
-library(FactoMineR);
-library(factoextra); #might require mvtnorm 1.0-6, which does not require R 3.5
+#library(FactoMineR);
+#library(factoextra); #might require mvtnorm 1.0-6, which does not require R 3.5
 		     #devtools::install_version("mvtnorm", version = "1.0-6",
 		     #                          repos = "http://cran.us.r-project.org")
 library(corrplot);
