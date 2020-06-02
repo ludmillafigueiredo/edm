@@ -450,10 +450,11 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
 
     dispersing_idxs = findall(x -> (x.stage == "s-in-flower" && x.seedon <= rem(t,52) < x.seedoff),
                               plants)
+    lost_idxs = Int64[]
     
     for i in dispersing_idxs
         
-        kernel = split(plant[i].kernel, "-") |> collect |> rand
+        kernel = split(plants[i].kernel, "-") |> collect |> rand
 	
 	# vectorized dispersal requires parameters to be vectorized too 
         dist = DISPERSAL_PARS[kernel].factor*
@@ -476,7 +477,7 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
 	for i in length(lost_idxs)
 	    writedlm(sim, hcat(t, "lost in dispersal", "s", 0))
 	end
-        for i in 1:length(dispersing)
+        for i in 1:length(dispersing_idxs)
             writedlm(sim, hcat(t, "dispersal", "s", 0))
         end
     end
@@ -500,9 +501,7 @@ function establish!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},
     
     for i in establishing_idxs
 
-    	establishing_sp = filter(x->x.sp==sp, establishing)
-	
-        if 1-exp(-(B0_GERM*(SPP_REF.seedmass[plants[i].sp]^(-1/4))*exp(-A_E/(BOLTZ*T)))) == 1
+    	if 1-exp(-(B0_GERM*(SPP_REF.seedmass[plants[i].sp]^(-1/4))*exp(-A_E/(BOLTZ*T)))) == 1
             plants[i].stage = "j"
             plants[i].age= 0
 	end
@@ -511,7 +510,7 @@ function establish!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},
     # check-point of life-history processes
     open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
         for i in 1:length(establishing_idxs)
-	    writedlm(sim, hcat(t, "germination", "j", mean(getfield.(germinated, :age))))
+	    writedlm(sim, hcat(t, "germination", "j", 0))
         end
     end
     
