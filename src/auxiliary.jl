@@ -210,17 +210,15 @@ end
 get_dest(loc, dist, theta)
 For currrent location `loc`, calculate new location `(xdest, ydest)` based on the distance of dispersal `dist` and angle `theta`.
 """
-function get_dest(loc::NamedTuple{(:idx, :loc),Tuple{Int64,Tuple{Int64,Int64}}},
-	 	  dist::Float64,
-		  theta::Float64)
+function get_dest(loc::Tuple, dist::Float64, theta::Float64)
 
-    xdest = loc.loc[1]+round(Int64, dist*cos(theta), RoundNearestTiesAway)
-    ydest = loc.loc[2]+round(Int64, dist*sin(theta), RoundNearestTiesAway)
+    xdest = loc[1]+round(Int64, dist*cos(theta), RoundNearestTiesAway)
+    ydest = loc[2]+round(Int64, dist*sin(theta), RoundNearestTiesAway)
     suitable = checkbounds(Bool, landscape, xdest, ydest) && landscape[xdest, ydest] == true
 	    
-    newlocs = (idx = loc.idx, dest = (xdest, ydest), suitable = suitable)
+    newloc = (dest = (xdest, ydest), suitable = suitable)
 	    
-    return newlocs
+    return newloc
 	    
 end
 
