@@ -15,13 +15,7 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
         ############
         for t in 1:length(temp_ts.week)
 
-            # check-point
-            open(joinpath(joinpath(results_folder, "checkpoint.txt")),"a") do sim
-                println(sim, "\nWEEK $t")
-		println(sim, "Species richness: $(length(unique(getfield.(plants, :sp))))")
-            end
-
-	    println("\nWEEK $t")
+            println("\nWEEK $t")
 	    println("Species richness: $(length(unique(getfield.(plants, :sp))))")
 
             # APPLY LANDSCAPE DISTURBANCE
@@ -37,11 +31,7 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 	    else
 	        T = setenv!(t, temp_ts)
 	    end
-	    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
-	        println(sim, "Temperature for week $t: $T")
-	        println(sim, "Mean for the year of week $t: $mean_annual")
-	    end
-	    
+
             updatefitness!(mean_annual, 1.0, t, settings)
 
             write_output(plants,t,settings)
@@ -51,11 +41,8 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
             end
 
             biomass_production = sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]),plants),NOT_0))
-            open(joinpath(results_folder, "checkpoint.txt"),"a") do sim
-                println(sim, "Biomass production: $biomass_production")
-            end
 
-	    check_ages(plants)
+            check_ages(plants)
 	    
 	    die_seeds!(plants, settings, t, T)
 
