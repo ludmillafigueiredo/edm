@@ -89,9 +89,11 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 	    
 	    setfield!.(plants, :mated, false) # plant only produces seeds again if it gets pollinated
 	    
-	    justdispersed = disperse!(landscape, plants, t, settings,  land_pars)
+	    println("Dispersal:")
+	    @time disperse!(landscape, plants, t, settings,  land_pars)
 
-	    establish!(justdispersed, plants, t, settings,  T, biomass_production, K)
+	    println("Dispersal:")
+	    @time establish!(plants, t, settings,  T, biomass_production, K)
 	    
 	    shedflower!(plants, t, settings)
 
