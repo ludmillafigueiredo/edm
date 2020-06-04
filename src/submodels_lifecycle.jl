@@ -251,10 +251,10 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
 		# limit offspring production to the maximal number of seeds the species can produce
 		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
 
-                spoffspringcounter += offs
-		open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
-    	            writedlm(seedfile, hcat(t, sp, "s", "sex", spoffspringcounter))
-  	        end
+                if t == 1 || rem(t,settings["output_freq"]) == 0
+                    spoffspringcounter += offs
+                    gather_offspring!(t, sp, "s", "sex", spoffspringcounter)
+                end
 
 		# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
 		plants[s].mass["repr"] = 0
@@ -321,11 +321,11 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, t:
 		# limit offspring production to the maximal number of seeds the species can produce
 		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
 
-                spoffspringcounter += offs
-		open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
-    	            writedlm(seedfile, hcat(t, sp, "s", "self", spoffspringcounter))
-  	        end
-
+                if t == 1 || rem(t,settings["output_freq"]) == 0
+                    spoffspringcounter += offs
+                    gather_offspring!(t, sp, "s", "sex", spoffspringcounter)
+                end
+                
 		# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
 		plants[s].mass["repr"] = 0
 
@@ -366,36 +366,32 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, t::Int64)
 
     for sp in unique(getfield.(asexuals, :sp))
 
-       cloning = findall(x -> x.sp == sp && x.id in unique(getfield.(asexuals, :id)) , plants) # find mothers cloning
+        cloning = findall(x -> x.sp == sp && x.id in unique(getfield.(asexuals, :id)) , plants) # find mothers cloning
 
-       # start species  production counting
-       spclonescounter = 0
+        # start species  production counting
+        spclonescounter = 0
 
-       for c in cloning
+        for c in cloning
 
-       	if rand(Distributions.Binomial(1, 0.5)) == 1
-       	clone = deepcopy(plants[c])
-	clone.stage = "j" #clones have already germinated
-	clone.age = 0
-	clone.mass["leaves"] = (plants[c].compartsize*0.1)^(3/4)
-	clone.mass["stem"] = plants[c].compartsize*0.1
-	clone.mass["root"] = plants[c].compartsize*0.1
-	clone.mass["repr"] = 0.0
+       	    if rand(Distributions.Binomial(1, 0.5)) == 1
+                spclonescounter += 1
+                clone = deepcopy(plants[c])
+	        clone.stage = "j" #clones have already germinated
+	        clone.age = 0
+	        clone.mass["leaves"] = (plants[c].compartsize*0.1)^(3/4)
+	        clone.mass["stem"] = plants[c].compartsize*0.1
+	        clone.mass["root"] = plants[c].compartsize*0.1
+	        clone.mass["repr"] = 0.0
 
-	clone.id = string(get_counter(), base=16)
-	push!(plants, clone)
-	spclonescounter += 1
-            # check-point of life-history processes
-	    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-	        writedlm(sim, hcat(t, "clonal reproduction", "a", plants[c].age))
-	    end
-       	end
-       end
+	        clone.id = string(get_counter(), base=16)
+	        push!(plants, clone)
+                
+       	    end
+        end
 
-       # output clones
-        open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do seedfile
-	writedlm(seedfile, hcat(t, sp, "j", "asex", spclonescounter))
-    	end
+        if t == 1 || rem(t,settings["output_freq"]) == 0
+            gather_offspring!(t, sp, "s", "asex", spclonescounter)
+        end
     end
 
     # unit test
@@ -434,14 +430,9 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
     end
 
     deleteat!(plants, lost_idxs)
-    # check-point of life-history processes
-    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-	for i in length(lost_idxs)
-	    writedlm(sim, hcat(t, "lost in dispersal", "s", 0))
-	end
-        for i in 1:length(dispersing_idxs)
-            writedlm(sim, hcat(t, "dispersal", "s", 0))
-        end
+    if t == 1 || rem(t,settings["output_freq"]) == 0
+        gather_event!(t, "lost in dispersal", "s", 0, length(lost_idxs))
+        gather_event!(t, "dispersal", "s", 0, length(dispersing_idxs))
     end
     
 end
@@ -464,13 +455,9 @@ function establish!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},
 	end
     end
 
-    # check-point of life-history processes
-    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-        for i in 1:length(establishing_idxs)
-	    writedlm(sim, hcat(t, "germination", "j", 0))
-        end
+    if t == 1 || rem(t,settings["output_freq"]) == 0
+        gather_event!(t, "germination", "j", 0, length(establishing_idxs))
     end
-    
 end
 
 """
@@ -487,7 +474,7 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
     deleteat!(plants, old)
     
     dying = filter(x -> x.stage == "s", plants)
-    deaths = 0
+    n_deaths = 0
 
     n_plantsbefore = length(plants)
     
@@ -497,21 +484,19 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
 	death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |>
 		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
 	deleteat!(plants, death_idxs)
-	deaths += length(death_idxs)
+	n_deaths += length(death_idxs)
     end
 
     #unit test
     check_duplicates(plants)
-    if n_plantsbefore - deaths != length(plants)
+    if n_plantsbefore - n_deaths != length(plants)
         error("Error in processing seed deaths")
     else
 	log_sim("Seed mortality running smoooth")
     end
 
-    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-        for i in 1:deaths
-            writedlm(sim, hcat(t, "death-indep", "s", mean(getfield.(dying, :age))))
-        end
+    if length(dying) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
+        gather_event!(t, "death-indep", "s", mean(getfield.(dying, :age)), n_deaths)
     end
 end
 
@@ -544,13 +529,10 @@ function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, 
 
     # unit test
     check_duplicates(plants)
-    
-    open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
-        for i in 1:length(dead_ids)
-            writedlm(sim, hcat(t, "death-indep", dying_stage, mean(getfield.(dying, :age))))
-        end
+
+    if length(dying) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
+        gather_event!(t, "death-indep", dying_stage, mean(getfield.(dying, :age)), length(dead_ids))
     end
-    
 end
 
 function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  landscape::BitArray{2}, T, dying_stage::String)
@@ -641,5 +623,7 @@ function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64, se
         management_counter += 1
 
     end
+    
     return management_counter
+    
 end

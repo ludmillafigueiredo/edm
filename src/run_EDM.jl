@@ -12,6 +12,7 @@ include(joinpath(EDMdir,"initialisation.jl"))
 include(joinpath(EDMdir,"submodels_lifecycle.jl"))
 include(joinpath(EDMdir,"submodels_disturbances.jl"))
 include(joinpath(EDMdir,"outputs.jl"))
+include(joinpath(EDMdir,"sim_log.jl"))
 include(joinpath(EDMdir,"unit_tests.jl"))
 include(joinpath(EDMdir,"scheduling.jl"))
 
