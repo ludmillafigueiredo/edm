@@ -92,7 +92,7 @@ end
 
 function log_pollination(flowering, npoll, pollen_vector, t)
 
-    open(joinpath(results_folder, "pollination_log.txt"),"a") do pollfile
+    open(joinpath(results_folder, "pollination_log.csv"),"a") do pollfile
         writedlm(pollfile, hcat(t, pollen_vector, npoll/(length(flowering)+NOT_0)))
     end
     
