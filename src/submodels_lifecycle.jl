@@ -78,7 +78,7 @@ Scenarios of rdm and equal pollination loss have the same calculation, but for e
 function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
 
     if pollen_vector == "wind"
-        npoll = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*WIND_DFLT)),WIND_EFFC))[1]
+        npoll = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*WIND_DFLT)), WIND_EFFC))[1]
     else
 	npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*VST_DFLT)),
 						 INSCT_EFFC))[1]
@@ -95,28 +95,6 @@ function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars
 	end
     end
 
-    return npoll
-
-end
-
-# method for disturb_poll
-function get_npoll(insects_plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
-
-    npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(insects_plants)*VST_DFLT)),
-						 INSCT_EFFC))[1]
-	if poll_pars.scen == "indep"
-     	    npoll = npoll_dflt 
-	elseif poll_pars.scen in ["equal", "rdm"]
-	    if t in poll_pars.regime.td
-	        npoll = Int(ceil(npoll_dflt * poll_pars.regime[poll_pars.regime.td.== t,
-		                                               :remaining][1]))
-	    else
-		npoll = npoll_dflt
-	    end
-	elseif poll_pars.scen == "spec"
-	    # pseudo
-	end
-    
     return npoll
 
 end
@@ -141,33 +119,14 @@ function pollinate!(pollen_vector::String, flowering::Array{Plant,1}, plants::Ar
 end
 
 """
-pollinate!()
-Method used when pollination has been disturbed
-"""
-function pollinate!(insects_plants_sp::Array{Plant,1}, npoll::Int64, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
-
-    log_pollination(flowering, npoll, "insects-dist", t)
-    pollinated = sample(insects_plants_sp, npoll, replace = false,
-                        ordered = false)
-    filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
-    setfield!.(pollinated, :mated, true)
-    append!(plants, pollinated)
-    
-    # unit test
-    check_duplicates(plants)
-
-end
-
-"""
     mate!(plants, t, settings)
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
 """
 function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, poll_pars::PollPars)
 
     flowering = filter(x-> x.stage == "a" &&
-    	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]x.seednumber,
+    	    	       ALLOC_SEED*x.mass["repr"] > SPP_REF.seedmass[x.sp],
 		       plants)
-
     if length(flowering) > 0 # check if there is anyone flowering
 
         # as with the other processes, it is easier to process plants separately from the main vector
