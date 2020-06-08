@@ -125,7 +125,7 @@ Calculate proportion of `plants` that reproduced at time `t`, acording to pollin
 function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, poll_pars::PollPars)
 
     flowering = filter(x-> x.stage == "a" &&
-    	    	       ALLOC_SEED*x.mass["repr"] > SPP_REF.seedmass[x.sp],
+    	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber,
 		       plants)
     if length(flowering) > 0 # check if there is anyone flowering
 
@@ -258,7 +258,7 @@ self_pollinate!()
 function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int64)
 
  selfers = filter(x-> x.stage == "a" &&
-    	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]x.seednumber &&
+    	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber &&
 		       x.mated == false &&
 		       x.self_failoutcross == true,
 		       plants)|>
