@@ -571,11 +571,11 @@ function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64, se
     if management_counter < 1 || 1 == rand(Distributions.Bernoulli(MANAGE_PROB))
 
         mowed = findall(x -> (x.stage in ["j" "a"] &&
-                           (x.mass["leaves"] >= (x.compartsize)^(3/4) || x.mass["stem"] >= 0.5*x.compartsize)), plants)
+                           (x.mass["leaves"] >= 0.5*(x.compartsize)^(3/4) || x.mass["stem"] >= 0.5*x.compartsize)), plants)
 
         for m in mowed
-	    plants[m].mass["leaves"] >= (0.5*plants[m].compartsize)^(3/4) ? plants[m].mass["leaves"] = (0.5*plants[m].compartsize) : nothing
-	    plants[m].mass["stem"] >= 0.5*plants[m].compartsize ? plants[m].mass["stem"] = (0.5*plants[m].compartsize) : nothing
+	    plants[m].mass["leaves"] = (0.5*plants[m].compartsize)
+	    plants[m].mass["stem"] = (0.5*plants[m].compartsize)
 	    plants[m].mass["repr"] = 0
         end
 
