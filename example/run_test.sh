@@ -1,0 +1,10 @@
+julia src/run_EDM.jl
+--simID "trial"
+--rseed "666"
+--sppinput "example/sppinput_example.csv"
+--temp_ts "example/temperature_example.csv"
+--initial_land "example/4m2.grd"
+--disturb_type "none"
+--pollination "example/pollination_example.jl"
+--output_freq "13"
+--outputat "."
