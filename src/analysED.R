@@ -17,7 +17,6 @@ library(gridExtra);
 		     #devtools::install_version("mvtnorm", version = "1.0-6",
 		     #                          repos = "http://cran.us.r-project.org")
 library(corrplot);
-library(gganimate); #sudo apt-get install cargo install.packages("gifski")
 library(cowplot);
 
 #### Directories and environment to store analysis ####
@@ -42,33 +41,48 @@ statevars <- format_statevars(outputsdir, simID, analysEDMdir)
 seed_production <- format_seedprod(outputsdir, simID, analysEDMdir)
 
 #### Growth #####
-biomass_allocation(statevars, analysEDMdir)
-growthcurves(statevars, analysEDMdir)
+allocation_plot <- biomass_allocation(statevars, analysEDMdir)
+growthcurve_plot <- growthcurves(statevars, analysEDMdir)
 
 #### Spp. abundances #####
-pop_vars <- pop_abundances(statevars, analysEDMdir)
+out.list <- pop_abundances(statevars, analysEDMdir)
+pop_vars <- out.list$tab
+spabund_plot <- out.list$plot
 
 #### Spp. population structure #####
-pop_structure(pop_vars, seed_production, simID, analysEDMdir)
+out.list <- pop_structure(pop_vars, seed_production, simID, analysEDMdir)
+absltstruct_plot <- out.list$absplot
+rltvstruct_plot <- out.list$rltvplot
 
 #### Species richness ####
-spp_richness(statevars, pop_vars, simID, disturbance, analysEDMdir)
+grouprichness_plot <- spp_richness(statevars, pop_vars, simID, disturbance, analysEDMdir)
 
 #### Species rank-abundance ####
 timesteps <- factor(c(min(pop_vars$week), max(pop_vars$week)))
-rank_abundances(pop_vars, timesteps, analysEDMdir)
+rankabund_plot <- rank_abundances(pop_vars, timesteps, analysEDMdir)
 
 #### Biomass production ####
-biomass_production(statevars, analysEDMdir)
+production_plot <- biomass_production(statevars, analysEDMdir)
 
 #### Life history ####
-lifehistory(outputsdir, simID, analysEDMdir)
+lifeevents_plot <- lifehistory(outputsdir, simID, analysEDMdir)
 
 #### Age traits ####
-agetraits(statevars, analysEDMdir)
+out.list <- agetraits(statevars, analysEDMdir)
+meanage_tab <- out.list$tab
+meanage_jplot <- out.list$jplot
+meanage_aplot <- out.list$aplot
 
 #### Seed dynamics ####
 #seeddynamics(statevars, seed_production, analysEDMdir)
+
+#### Plot diagnostics ####
+diagnostic.grid <- plot_grid(allocation_plot, growthcurve_plot, spabund_plot, absltstruct_plot, rltvstruct_plot, grouprichness_plot, rankabund_plot, production_plot, meanage_jplot, meanage_aplot,
+nrow = 5, ncol = 2)
+save_plot(file.path(analysEDMdir,"diagnostic.png"), plot = diagnostic.grid,
+ nrow = 5, ncol  = 2,
+ base_height = 5, base_width = 7,
+ dpi = 600)
 
 #### Trait change ####
 ### trait values

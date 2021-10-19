@@ -8,169 +8,119 @@ using DelimitedFiles
 
 function orga_outputs()
 
-        results_folder = joinpath(settings["outputat"], settings["simID"])
-	
-	check_overwrite(results_folder)
-	mkpath("$(results_folder)")
-	
-        # INITIALIZE FILE TO LOG SIMULATION PROGRESS
-        open(joinpath(results_folder, "checkpoint.txt"),"w") do sim
-            println(sim,string("Simulation: ",settings["simID"],now()))
-        end
-
-        # INITIALIZE FILE TO LOG LIFE-HISTORY EVENTS
-        open(joinpath(results_folder, "eventslog.txt"),"w") do sim
-            writedlm(sim, hcat("week", "event", "stage", "age"))
-        end
-
-        # INITIALIZE FILE TO LOG METABOLIC RATES
-        open(joinpath(settings["outputat"],settings["simID"],"metaboliclog.txt"),"w") do sim
-            writedlm(sim, hcat("stage", "age", "rate", "probability", "event"))
-        end
-
-        # INITIALIZE FILE TO LOG SEED PRODUCTION
-        open(joinpath(results_folder, "offspringproduction.csv"),"w") do seedfile
-            writedlm(seedfile, hcat(["week" "sp" "stage" "mode"], "abundance"))
-        end
-
-	# INITIALIZE FILE TO LOG SPECIES FITNESS
-        open(joinpath(results_folder, "spp_fitness.csv"),"w") do fitnessfile
-            writedlm(fitnessfile, hcat("week", "sp", "fitness"))
-        end
-
-	# INITIALIZE FILE TO LOG SPECIES FITNESS
-        open(joinpath(results_folder, "pollination_log.csv"),"w") do pollfile
-             writedlm(pollfile, hcat("week", "vector", "proportion"))
-        end
-
-	return results_folder
-end
-
-function log_initialabund(plants)
-
-    plants_spp = getfield(plants, :sp)
-    initial_abunds = Dict(i => sum(plants_spp .== i) for i in unique(plants_spp))
-
-    open(joinpath(results_folder, "initialabundances.txt"),"w") do sim
-        println(sim, initial_abunds)
+    results_folder = joinpath(settings["outputat"], settings["simID"])
+    
+    check_overwrite(results_folder)
+    mkpath("$(results_folder)")
+    
+    # INITIALIZE FILE TO LOG SIMULATION PROGRESS
+    open(joinpath(results_folder, "checkpoint.txt"),"w") do sim
+        println(sim,string("Simulation: ",settings["simID"],now()))
     end
-    
+
+    # INITIALIZE FILE OF MAIN OUTPUT
+    header = hcat(["week"],
+                  reshape(collect(string.(fieldnames(Plant)[1:19])),1,:),
+                  ["leaves" "stem" "root" "repr"],
+                  reshape(collect(string.(fieldnames(Plant)[21:end])),1,:))
+    open(joinpath(settings["outputat"],settings["simID"],"statevars_ind.txt"), "w") do output
+        writedlm(output, header) #reshape(header, 1, length(header)))
+    end
+
+    # INITIALIZE FILE TO OUTPUT SEED PRODUCTION
+    open(joinpath(results_folder, "offspringproduction.csv"),"w") do seedfile
+        writedlm(seedfile, hcat("week", "sp", "stage", "mode", "abundance"))
+    end
+
+    # INITIALIZE FILE TO LOG LIFE-HISTORY EVENTS
+    open(joinpath(results_folder, "eventslog.txt"),"w") do sim
+        writedlm(sim, hcat("week", "event", "stage", "age"))
+    end
+
+    # INITIALIZE FILE TO LOG SPECIES FITNESS
+    open(joinpath(results_folder, "spp_fitness.csv"),"w") do fitnessfile
+        writedlm(fitnessfile, hcat("week", "sp", "fitness"))
+    end
+
+    # INITIALIZE FILE TO LOG SPECIES FITNESS
+    open(joinpath(results_folder, "pollination_log.csv"),"w") do pollfile
+        writedlm(pollfile, hcat("week", "vector", "proportion"))
+    end
+
+    return results_folder
 end
 
-function output_sppref(SPP_REF)
-	 	# prinoutput_freq SPP_REF
-	open(joinpath(results_folder, "sppref_traitvalues.csv"), "w") do ref
-            writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")
-	end
-    
-	for sp in SPP_REF.sp
-    	    sp_ref = reshape(collect(map(x -> getfield(SPP_REF,x)[sp],fieldnames(SppRef)[2:end])),1,:)
-    	    open(joinpath(results_folder, "sppref_traitvalues.csv"), "a") do ref
-                writedlm(ref, [sp sp_ref], ",")
-            end
-	end
-end
-
-function log_settings()
-        open(joinpath(results_folder, "simsettings.jl"),"w") do ID
-            println(ID, "land_pars = $(repr(typeof(land_pars))) \ninitial = $(repr(typeof(land_pars.initial))) \ndisturb_land = $(repr(typeof(land_pars.disturbance))) \ndisturb_poll = $(repr(poll_pars))")
-            println(ID, "commandsettings = $(repr(settings))")
-        end
-end
-
-"""
+""" 
     outputorgs(plants,t,settings)
 Saves a long format table with the organisms field informations.
 """
-function write_output(plants::Array{Plant,1}, t::Int64, settings::Dict{String,Any})
+function write_output(plants::Array{Plant,1}, t::Int64)
 
     # only info on juveniles and adults is output
     juvs_adlts = findall(x -> x.stage in ["j", "a"], plants)
     
-    # output header
-    if t == 1
-        header = hcat(["week"],
-                      reshape(collect(string.(fieldnames(Plant)[1:19])),1,:),
-                      ["leaves" "stem" "root" "repr"],
-                      reshape(collect(string.(fieldnames(Plant)[21:end])),1,:))
-        open(joinpath(settings["outputat"],settings["simID"],"statevars_ind.txt"), "w") do output
-            writedlm(output, header) #reshape(header, 1, length(header)))
-        end
-    end
-
+    
     # output plants info
-    if t == 1 || rem(t,settings["output_freq"]) == 0
-
-        for o in juvs_adlts
-            open(joinpath(settings["outputat"],settings["simID"],"statevars_ind.txt"), "a") do output
-                writedlm(output, hcat(t,
-                                      plants[o].id,
-                                      plants[o].stage,
-                                      plants[o].location,
-                                      plants[o].sp,
-                                      plants[o].kernel,
-                                      plants[o].clonality,
-				      plants[o].pollen_vector,
-				      plants[o].self_failoutcross,
-				      plants[o].self_proba,
-                                      plants[o].compartsize,
-                                      plants[o].span,
-                                      plants[o].firstflower,
-                                      plants[o].floron,
-                                      plants[o].floroff,
-                                      plants[o].seednumber,
-                                      plants[o].seedon,
-                                      plants[o].seedoff,
-                                      plants[o].bankduration,
-                                      plants[o].age,
-                                      plants[o].mass["leaves"],
-                                      plants[o].mass["stem"],
-                                      plants[o].mass["root"],
-                                      plants[o].mass["repr"],
-                                      plants[o].mated))
-            end
+    for o in juvs_adlts
+        open(joinpath(results_folder,"statevars_ind.txt"), "a") do output
+            writedlm(output, hcat(t,
+                                  plants[o].id,
+                                  plants[o].stage,
+                                  plants[o].location,
+                                  plants[o].sp,
+                                  plants[o].kernel,
+                                  plants[o].clonality,
+				  plants[o].pollen_vector,
+				  plants[o].self_failoutcross,
+				  plants[o].self_proba,
+                                  plants[o].compartsize,
+                                  plants[o].span,
+                                  plants[o].firstflower,
+                                  plants[o].floron,
+                                  plants[o].floroff,
+                                  plants[o].seednumber,
+                                  plants[o].seedon,
+                                  plants[o].seedoff,
+                                  plants[o].bankduration,
+                                  plants[o].age,
+                                  plants[o].mass["leaves"],
+                                  plants[o].mass["stem"],
+                                  plants[o].mass["root"],
+                                  plants[o].mass["repr"],
+                                  plants[o].mated))
         end
     end
 end
 
-"""
-log_abovegroundmass(when, proc)
-"""
-function log_abovegroundmass(when,proc)
-
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-        println(sim,"Above-grd mass $when $proc: $(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
-	                                                        filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
-    end
-    
+struct OffspringInfo
+    sp::String
+    stage::String
+    repmode::String
+    amount::Int64
 end
 
-function log_sim(msg)
-
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
-        println(sim, msg)
+let offspring_out = OffspringInfo[]
+    
+    global function gather_offspring!(t, sp, stage, repmode, amount)
+        
+        push!(offspring_out, OffspringInfo(sp, stage, repmode, amount))
+        
     end
     
-end
-
-function log_age()
-
-    open(joinpath(results_folder, "checkpoint.txt"),"a") do sim
-        println(sim, "Juvs age >= firstflower: $(filter(x -> (x.stage == "j" && x.age > x.firstflower), 
-                                                  plants) |> x -> [getfield.(x, :id), 
-                                                                   getfield.(x, :stage), 
-                                                                   getfield.(x, :firstflower), 
-                                                                   getfield.(x, :age)])")
+    global function output_offspring!(t)
+        # output it
+        open(joinpath(settings["outputat"],settings["simID"],"offspringproduction.csv"),"a") do f
+            for o in eachindex(offspring_out)
+                writedlm(f, hcat(t,
+                                 offspring_out[o].sp,
+                                 offspring_out[o].stage,
+                                 offspring_out[o].repmode,
+                                 offspring_out[o].amount))
+            end
+  	end
+        # reset it
+        offspring_out = OffspringInfo[]
     end
-    
-end
-
-function log_pollination(flowering, npoll, pollen_vector, t)
-
-    open(joinpath(results_folder, "pollination_log.txt"),"a") do pollfile
-        writedlm(pollfile, hcat(t, pollen_vector, npoll/(length(flowering)+NOT_0)))
-    end
-    
 end
 
 """

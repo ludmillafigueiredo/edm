@@ -109,8 +109,8 @@ biomass_allocation <- function(statevars, analysEDMdir, stages = factor(c("a", "
   
   write_csv(allocation_summary,
 	      file.path(analysEDMdir, "allocation_summary.csv"))    
-  ggsave(file = file.path(analysEDMdir, "allocation_plot.png"), device = "png", plot = allocation_plot, 
-  	  width = 20, height = 15, units = "cm")
+  
+  return(allocation_plot)
 }
 
 #' Plot growth curve
@@ -125,7 +125,7 @@ growthcurves <- function(statevars, analysEDMdir){
               totalmass_sd = sd(total)) %>%
     ungroup() 
 
-  growthcurve <- growthcurve_tab%>%
+  growthcurve_plot <- growthcurve_tab%>%
     mutate(seedmass = as.factor(seedmass)) %>%
     ggplot(aes(x = week, y = totalmass_mean, group = seedmass, color = seedmass))+
     geom_line() +
@@ -140,9 +140,8 @@ growthcurves <- function(statevars, analysEDMdir){
 
     write_csv(growthcurve_tab,
 	      file.path(analysEDMdir, "growthcurve.csv"))    
-    ggsave(file = file.path(analysEDMdir, "growthcurve.png"), device = "png", plot = growthcurve, 
-            width = 20, height = 15, units = "cm")
-  
+    
+    return(growthcurve_plot)
 }
 
 #' Extract and plot population abundances
@@ -167,11 +166,9 @@ pop_abundances <- function(statevars, analysEDMdir){
     theme(legend.position = "none")
     
   write_csv(pop_vars,
-	    file.path(analysEDMdir, "pop_variables.csv"))    
-  ggsave(file = file.path(analysEDMdir, "sppabundance.png"), device = "png", plot = spabund_plot, 
-            width = 20, height = 15, units = "cm")
+	    file.path(analysEDMdir, "pop_variables.csv"))
   
-  return(pop_vars)
+  return(list(tab = pop_vars, plot = spabund_plot))
 }
 
 #' Extract and plot populations structure
@@ -220,10 +217,8 @@ pop_structure <- function(pop_vars, seed_production, simID, analysEDMdir){
 	    file.path(analysEDMdir, "absolute_structure.csv"))
     write_csv(rltvstruct_tab,
 	    file.path(analysEDMdir, "relative_structure.csv"))    
-    ggsave(file = file.path(analysEDMdir, "absltstruct.png"), device = "png", plot = absltstruct_plot, 
-            width = 40, height = 30, units = "cm")
-    ggsave(file = file.path(analysEDMdir, "rltvstruct.png"), device = "png", plot = rltvstruct_plot, 
-            width = 40, height = 30, units = "cm")
+
+    return(list(absplot = absltstruct_plot, rltvplot = rltvstruct_plot))
   
 }
 
@@ -265,10 +260,8 @@ spp_richness <- function(statevars, pop_vars, disturbance, tdist, analysEDMdir){
   
   write_csv(spprichness_tab,
 	    file.path(analysEDMdir, "spprichness.csv"))
-  #ggsave(file = file.path(analysEDMdir, "spprichness.png"), device = "png", plot = spprichness_plot, 
-  #        width = 12, height = 10, units = "cm")
-  ggsave(file = file.path(analysEDMdir, "grouprichness.png"), device = "png", plot = grouprichness_plot, 
-          width = 12, height = 20, units = "cm")
+
+  return(grouprichness_plot)
 }
 
 #' Calculate species relative abundance and plot species rank-abundance at a given time-step
@@ -297,8 +290,9 @@ rank_abundances <- function(pop_vars, timesteps, analysEDMdir){
   
   write_csv(spprltvabund_tab,
 	    file.path(analysEDMdir, "sppabundances.csv"))
-  ggsave(file = file.path(analysEDMdir, "rankabund.png"), device = "png", plot = rankabund_plot, 
-          width = 40, height = 20, units = "cm")
+  
+  return(rankabund_plot)
+
 }
 
 #' Calculate biomass production
@@ -325,8 +319,9 @@ biomass_production <- function(statevars, analysEDMdir){
 
   write_csv(production_tab,
 	    file.path(analysEDMdir, "biomass_production.csv"))
-  ggsave(file = file.path(analysEDMdir, "biomass_production.png"), device = "png", plot = production_plot, 
-            width = 12, height = 10, units = "cm")
+  
+  return(production_plot)
+
 }
 
 
@@ -353,10 +348,8 @@ lifehistory <- function(outputsdir, simID, analysEDMdir){
   
   write_csv(lifeevents_tab,
 	    file.path(analysEDMdir, "lifeevents.csv"))
-  #write_csv(metabolicrates,
-  # 	    file.path(analysEDMdir, "metabolicrates.csv"))
-  ggsave(file = file.path(analysEDMdir, "lifehistory.png"), device = "png", plot = lifeevents_plot, 
-            width = 12, height = 10, units = "cm")
+  
+  return(lifeevents_plot)
 
 }
 
@@ -394,7 +387,7 @@ agetraits <- function(statevars, analysEDMdir){
   meanage_plot <- plot_grid(meanage_juvplot, meanage_adtplot,
                             ncol = 2, nrow = 1)
 
-  return(list(a = meanage_tab, b = meanage_plot))
+  return(list(tab = meanage_tab, jplot = meanage_juvplot, aplot = meanage_adtplot))
 
 }
 
