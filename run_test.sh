@@ -1,10 +1,2 @@
-julia src/run_EDM.jl
---simID "trial"
---rseed "666"
---sppinput "example/sppinput_example.csv"
---temp_ts "example/temperature_example.csv"
---initial_land "example/4m2.grd"
---disturb_type "none"
---pollination "example/pollination_example.jl"
---output_freq "13"
---outputat "."
+#!/bin/bash
+/your_path_to/julia-1.0.5/bin/julia src/run_EDM.jl --simID "test" --rseed "666" --sppinput "examples/test/sppinput_example.csv" --temp_ts "examples/tese/temperature_example.csv" --initial_land "examples/test/4m2.grd" --disturb_type "none" --pollination "examples/test/pollination_example.jl" --output_freq "13" --outputat "."

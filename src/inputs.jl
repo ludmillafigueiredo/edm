@@ -8,7 +8,7 @@ function parse_commandline()
         "--simID"
         help = "Name of the folder where outputs will be stored."
         arg_type = String
-        default = "profiling"
+        default = "EDM_sim"
 
         "--rseed"
         help = "Seed for RNG"
@@ -18,19 +18,16 @@ function parse_commandline()
         "--sppinput"
         help = "Name of file with species list."
         arg_type = String
-        default = joinpath("test_inputs", "weisssingles/weissplants_sppinput.csv")
 
         "--pollination"
         help = "How to explicitly model insects:
                 pollination-independent reproduction \"indep\";
                 equal pollination loss for all species \"equal\"."
         arg_type = String
-        default = joinpath("test_inputs", "insects_indep.csv")
 
         "--initial_land"
         help = "Name of file with landscape size values: areas of fragments, mean (and s.d.) temperature."
         arg_type = String
-        default = joinpath("test_inputs","control_49m2.grd")
 
         "--disturb_type"
         help = "Type of disturbance to be implemented: none, area_loss, poll_loss, area+poll_loss, clim+area_loss, clim+poll_loss, clim+area+poll_loss"
@@ -50,12 +47,10 @@ function parse_commandline()
         "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
-        default = joinpath("template_files", "temperaturegoettingen_18572017.csv")
 
         "--outputat"
         help = "Name of directory where output should be written ."
         arg_type = String
-        default = "outputs"
 
         
     end
