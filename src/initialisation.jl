@@ -132,7 +132,7 @@ Random.seed!(settings["rseed"])
 management_counter = 0
 
 # Temperature time-series
-temp_ts = CSV.read(settings["temp_ts"], header = true,
+temp_ts = CSV.read(settings["temp_ts"], DataFrame, header = true,
                    types = Dict("week" => Int64, "meantemp" => Float64,
 		                "begin_date" => Dates.Date, "week_year" => String,
 		                "week_inyear" => Int64))

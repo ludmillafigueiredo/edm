@@ -65,10 +65,10 @@ read_landpars
 function read_landpars(settings)
 	    
 	if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
-                disturbance = CSV.read(settings["disturb_land"], header = true,
+                disturbance = CSV.read(settings["disturb_land"], DataFrame, header = true,
 			      	       types = Dict("td" => Int64, "proportion" => Float64))
         elseif settings["disturb_type"] == "frag"
-                disturbance = CSV.read(settings["disturb_land"], header = true,
+                disturbance = CSV.read(settings["disturb_land"], DataFrame, header = true,
 			      	       types = Dict("td" => Int64, "frag_file" => String))	    
         else
 		disturbance = nothing
@@ -86,7 +86,7 @@ Reads in species trait values (min. and max. values for the evolvable ones). Sto
 """
 function read_sppinput(settings::Dict{String,Any})
 
-    sppinputtbl = CSV.read(settings["sppinput"])
+    sppinputtbl = CSV.read(settings["sppinput"], DataFrame)
 
     sppref = SppRef()
 
@@ -118,7 +118,7 @@ Values are store in an object of type TraitRanges, where each field is a Diction
 """
 function define_traitranges(settings::Dict{String,Any})
 
-    sppinputtbl = CSV.read(settings["sppinput"])
+    sppinputtbl = CSV.read(settings["sppinput"], DataFrame)
 
     traitranges = TraitRanges(
         Dict(sppinputtbl[:,:species][i] =>
@@ -161,7 +161,7 @@ function read_pollination(settings::Dict{String,Any})
 
     if occursin("poll", settings["disturb_type"]) 
        include(abspath(settings["pollination"]))
-       disturbed_regime= CSV.read(pollination_file, header = true,
+       disturbed_regime= CSV.read(pollination_file, DataFrame, header = true,
 				  types = Dict("td" => Int64, "remaining" => Float64))
        poll_pars = PollPars(pollination_scen, disturbed_regime)
     else
@@ -182,7 +182,7 @@ function set_tdist(settings)
     if occursin("none", settings["disturb_type"])
         tdist = nothing
     elseif occursin("area", settings["disturb_type"])
-        tdist = CSV.read(settings["disturb_land"], header=true, types=Dict("td"=>Int64))[:td]
+        tdist = CSV.read(settings["disturb_land"], DataFrame, header=true, types=Dict("td"=>Int64))[:td]
     end
 
     return tdist
