@@ -311,9 +311,9 @@ function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cel
         dying_idxs = findall(x -> x.id in getfield.(dying, :id), plants)
         deleteat!(plants, dying_idxs)
         # check point life history events
-        open(joinpath(settings["outputat"],settings["simID"],"eventslog.txt"),"a") do sim
+        open(joinpath(settings["outputat"],settings["simID"],"events.csv"),"a") do sim
             for i in 1:length(dying)
-                writedlm(sim, hcat(t, "death-dep", dying_stage, mean(getfield.(dying, :age))))
+                writedlm(sim, hcat(t, "death-dep", dying_stage, mean(getfield.(dying, :age)), 1))
             end
         end
     end			

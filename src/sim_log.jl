@@ -44,7 +44,7 @@ let events_log = EventInfo[]
     
     global function log_events!(t)
         # output it
-        open(joinpath(results_folder,"eventslog.csv"),"a") do f
+        open(joinpath(results_folder,"events.csv"),"a") do f
             for e in eachindex(events_log)
                 writedlm(f, hcat(t,
                                  events_log[e].event,

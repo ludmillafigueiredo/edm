@@ -325,15 +325,16 @@ biomass_production <- function(statevars, analysEDMdir){
 }
 
 
-#' Life-history events
+#' Summarized number of occurrences of life-history events,
+#' i.e. germination, reproduction, dispersal, and mortality.
 lifehistory <- function(outputsdir, simID, analysEDMdir){
   
-  lifeevents_tab <- read_tsv(file.path(outputsdir, "eventslog.txt"), col_names = TRUE) %>%
+  lifeevents_tab <- read_tsv(file.path(outputsdir, "events.csv"), col_names = TRUE) %>%
   		    mutate(simID = simID)
   lifeevents_plot <- lifeevents_tab%>%
     dplyr::select(-age)%>%
     group_by(week, event, stage, simID)%>%
-    summarize(total = n())%>%
+    summarize(total = sum(n_events))%>%
     ggplot(aes(x = week, y = total, color = event))+
     geom_line()+
     facet_wrap(~stage, ncol = 1, scales = "free_y")

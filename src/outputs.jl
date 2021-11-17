@@ -33,8 +33,8 @@ function orga_outputs()
     end
 
     # INITIALIZE FILE TO LOG LIFE-HISTORY EVENTS
-    open(joinpath(results_folder, "eventslog.txt"),"w") do sim
-        writedlm(sim, hcat("week", "event", "stage", "age"))
+    open(joinpath(results_folder, "events.csv"),"w") do sim
+        writedlm(sim, hcat("week", "event", "stage", "age", "n_events"))
     end
 
     # INITIALIZE FILE TO LOG SPECIES FITNESS
