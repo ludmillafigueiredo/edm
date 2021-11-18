@@ -389,8 +389,11 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
     end
 
     deleteat!(plants, lost_idxs)
-    if t == 1 || rem(t,settings["output_freq"]) == 0
+    if length(lost_idxs) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
         gather_event!(t, "lost in dispersal", "s", 0, length(lost_idxs))
+    end
+
+    if length(dispersing_idxs) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
         gather_event!(t, "dispersal", "s", 0, length(dispersing_idxs))
     end
     
@@ -405,17 +408,20 @@ function establish!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},
     # seeds that just dispersed try to establish and the ones that did not succeed previously
     # will get a chance again.
     establishing_idxs = findall(x -> x.stage == "s", plants)
-
+    # counter of germinations
+    n_germinations = 0
+    
     for i in establishing_idxs
 
     	if 1-exp(-(B0_GERM*(SPP_REF.seedmass[plants[i].sp]^(-1/4))*exp(-A_E/(BOLTZ*T)))) == 1
             plants[i].stage = "j"
-            plants[i].age= 0
+            plants[i].age= 0 ## restart age counter to control flowering age
+            n_germinations += 1
 	end
     end
 
-    if t == 1 || rem(t,settings["output_freq"]) == 0
-        gather_event!(t, "germination", "j", 0, length(establishing_idxs))
+    if n_germinations > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
+        gather_event!(t, "germination", "j", 0, n_germinations)
     end
 end
 
@@ -454,7 +460,7 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
 	log_sim("Seed mortality running smoooth")
     end
 
-    if length(dying) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
+    if n_deaths > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
         gather_event!(t, "death-indep", "s", mean(getfield.(dying, :age)), n_deaths)
     end
 end
@@ -488,8 +494,8 @@ function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, 
 
     # unit test
     check_duplicates(plants)
-
-    if length(dying) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
+    println("dead_ids = ", dead_ids)
+    if length(dead_ids) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
         gather_event!(t, "death-indep", dying_stage, mean(getfield.(dying, :age)), length(dead_ids))
     end
 end
