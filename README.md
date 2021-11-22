@@ -1,6 +1,13 @@
-# File structure
+# File structure and contents
 
-The source code (`src`) is structured to fit into the ODD framework (Overview, Design concepts and Details) devised by Grimm et al.(2010) for the description of individual-based models. The full description is available in `docs/EDM_ODD.pdf`.
+## Documentation
+
+`docs/EDM_ODD.pdf`: Summarized description of the _Overview, Design concepts and Details_ of the model, following the ODD protocol devised by Grimm et al.(2010) for the description of individual-based models.
+
+`docs/TRACE/EDM_TRACE.html`: Detailed model description, including reasoning and decisions behind development, following the _TRAnsparent and Comprehensive Ecological modelling documentation_ (TRACE) framework, devised by Grimm et al.(2014).
+
+## Source code
+The source code (`src`) is structured to fit into the ODD framework.
 - `inputs.jl`: function for reading in inputs
 - `initialisation.jl`: functions and custom-types for initalisation of model data structures
 - `submodels_lifecycle.jl`: functions to simulate the biological processes of the model
@@ -13,18 +20,22 @@ The source code (`src`) is structured to fit into the ODD framework (Overview, D
 - `createnlm.R`: creates neutral landscapes as one of the possible inputs of the model.
 - `analysED.R`: functions containing the main analysis of the outputs of the model
 
-
+## Example
 `examples`: examples of how input files should look like
 
-To run the model, use the command line:
+# Usage 
 
+Before running the model, make sure you have:
+- Julia v1.6.3 installed
+- Install the following Julia packages: `ArgParse`, `Distributions`, `CSV`, `DataFrames`, `DataValues`, `RCall`, `Random`, `DelimitedFiles`, `Dates`.
+
+The model is run from the command line, as such:
 ```
 your_path_to/julia-1.6.3/bin/julia run_EDM.jl --arguments
 ```
 
-`run_test.sh` shows how to run the `test` example.
+`run_test.sh` shows how to run the `test` example, with input from the `examples/test` folder.
 
-`docs/TRACE/EDM_TRACE.html`: Detailed model description, including reasoning and decisions behind development, following the TRACE framework (TRAnsparent and Comprehensive Ecological modelling documentation), devised by Grimm et al.(2014).
 
 *References*
 Grimm, V., Berger, U., DeAngelis, D. L., Polhill, J. G., Giske, J., & Railsback, S. F. (2010). The ODD protocol: A review and first update. Ecological Modelling, 221(23), 2760–2768. https://doi.org/10.1016/j.ecolmodel.2010.08.019
