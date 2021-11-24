@@ -2,10 +2,6 @@
 This module contains functions related to outputting raw results from the model, as well as default derived analysis.
 """
 
-# Julia packages
-using RCall
-using DelimitedFiles
-
 function orga_outputs()
 
     results_folder = joinpath(settings["outputat"], settings["simID"])

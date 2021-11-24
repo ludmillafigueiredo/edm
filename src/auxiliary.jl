@@ -1,14 +1,3 @@
-# Julia Packages
-using ArgParse
-using Distributions
-using CSV
-using DataFrames
-using DataValues
-using RCall
-using Random
-using DelimitedFiles
-using Dates
-
 # Initial trait values is read from an input file and stored for reference in `sppref::SppRef`.
 mutable struct SppRef
     sp::Array{String, 1}
