@@ -1,10 +1,12 @@
 # Functions for reading inputs and initialisation of variables of the model
 
+'
 using RCall
+'
 
 function parse_commandline()
     sets = ArgParseSettings() #object that will be populated with the arguments by the macro
-    @add_arg_table sets begin
+    @add_arg_table! sets begin
         "--simID"
         help = "Name of the folder where outputs will be stored."
         arg_type = String
@@ -52,24 +54,24 @@ function parse_commandline()
         help = "Name of directory where output should be written ."
         arg_type = String
 
-        
+
     end
-    
+
     return parse_args(sets)
-    
+
 end
 
 """
 read_landpars
 """
 function read_landpars(settings)
-	    
+
 	if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
                 disturbance = CSV.read(settings["disturb_land"], DataFrame, header = true,
 			      	       types = Dict("td" => Int64, "proportion" => Float64))
         elseif settings["disturb_type"] == "frag"
                 disturbance = CSV.read(settings["disturb_land"], DataFrame, header = true,
-			      	       types = Dict("td" => Int64, "frag_file" => String))	    
+			      	       types = Dict("td" => Int64, "frag_file" => String))
         else
 		disturbance = nothing
 	end
@@ -107,7 +109,7 @@ function read_sppinput(settings::Dict{String,Any})
 	          Dict(sppinputtbl[:, :species][i] => Float64(sppinputtbl[:, field][i])
 		        	      		    for i in 1:length(sppinputtbl[:, :species])))
     end
-    
+
     return sppref
 end
 
@@ -148,9 +150,9 @@ function define_traitranges(settings::Dict{String,Any})
         Dict(sppinputtbl[:,:species][i] =>
              [Int(round(sppinputtbl[:,:bankduration_min][i], RoundDown)), Int(round(sppinputtbl[:,:bankduration_max][i], RoundUp))]
              for i in 1:length(sppinputtbl[:,:species])))
-	     
+
     return traitranges
-    
+
 end
 
 """
@@ -159,7 +161,7 @@ Reads how insects are going to be implicitly simulated.
 """
 function read_pollination(settings::Dict{String,Any})
 
-    if occursin("poll", settings["disturb_type"]) 
+    if occursin("poll", settings["disturb_type"])
        include(abspath(settings["pollination"]))
        disturbed_regime= CSV.read(pollination_file, DataFrame, header = true,
 				  types = Dict("td" => Int64, "remaining" => Float64))
@@ -167,7 +169,7 @@ function read_pollination(settings::Dict{String,Any})
     else
        poll_pars = PollPars("indep", nothing)
     end
-    
+
     return poll_pars
 
 end
@@ -186,5 +188,5 @@ function set_tdist(settings)
     end
 
     return tdist
-    
+
 end

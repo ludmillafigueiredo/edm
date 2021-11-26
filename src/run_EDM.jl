@@ -4,6 +4,7 @@ const EDMdir = abspath(joinpath(pwd(), "src")) # absolute path because it is sen
 push!(LOAD_PATH, EDMdir)
 #cd(EDDir)
 
+include(joinpath(EDMdir,"setup_julia.jl")) # for "using" statements
 include(joinpath(EDMdir,"constants.jl"))
 include(joinpath(EDMdir,"entities.jl"))
 include(joinpath(EDMdir,"auxiliary.jl"))

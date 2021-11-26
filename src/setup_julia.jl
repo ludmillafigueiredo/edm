@@ -8,5 +8,4 @@ using DataValues
 using RCall
 using Random
 using Dates
-
-
+using StatsBase

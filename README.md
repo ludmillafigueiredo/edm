@@ -23,10 +23,12 @@ The source code (`src`) is structured to fit into the ODD framework.
 ## Example
 `examples`: examples of how input files should look like
 
-# Usage 
+# Usage
 
 Before running the model, make sure you have:
-- Julia v1.6.3 installed
+- R 4.1.2 installed
+- Install the following R packages: `raster`, `tidyverse`, `viridis`, `corrplot`, `cowplot`.
+- Julia v1.6.4 installed
 - Install the following Julia packages: `ArgParse`, `Distributions`, `CSV`, `DataFrames`, `DataValues`, `RCall`, `Random`, `DelimitedFiles`, `Dates`.
 
 The model is run from the command line, as such:
@@ -41,4 +43,3 @@ your_path_to/julia-1.6.3/bin/julia run_EDM.jl --arguments
 Grimm, V., Berger, U., DeAngelis, D. L., Polhill, J. G., Giske, J., & Railsback, S. F. (2010). The ODD protocol: A review and first update. Ecological Modelling, 221(23), 2760–2768. https://doi.org/10.1016/j.ecolmodel.2010.08.019
 
 Grimm, V., Augusiak, J., Focks, A., Frank, B. M., Gabsi, F., Johnston, A. S. A., … Railsback, S. F. (2014). Towards better modelling and decision support: Documenting model development, testing, and analysis using TRACE. _Ecological Modelling_, 280, 129–139. https://doi.org/10.1016/j.ecolmodel.2014.01.018
-

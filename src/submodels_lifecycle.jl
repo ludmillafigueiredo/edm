@@ -1,15 +1,18 @@
+
+'
 using Distributions
 using DataFrames
 using DataValues
 using StatsBase
 using DelimitedFiles
+'
 
 """
     allocate!(orgs, t, setting, SPP_REF, T)
 """
 function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
 
-    growing = filter(x-> x.stage == growing_stage, plants) 
+    growing = filter(x-> x.stage == growing_stage, plants)
     filter!(x-> x.stage != growing_stage, plants)
 
     flowering_ids = filter(x -> x.stage == "a" &&
@@ -23,7 +26,7 @@ function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T:
     	b0grow = SPP_REF.b0grow[sp]
     	growing_sp = filter(x->x.sp == sp, growing)
 	map(x -> grow_allocate!(x, b0grow, flowering_ids), growing_sp)
-	append!(plants, growing_sp)	
+	append!(plants, growing_sp)
     end
 
     # unit test
@@ -33,7 +36,7 @@ function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T:
         println("Plant: plants[masserror[1]]")
 	error("Zero or negative values of biomass detected.")
     end
-    
+
 end
 
 """
@@ -63,10 +66,10 @@ function mature!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
     end
 
     check_ages(plants)
-    
+
     # unit test
     check_duplicates(plants)
-    
+
 end
 
 """
@@ -83,7 +86,7 @@ function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars
 	npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*VST_DFLT)),
 						 INSCT_EFFC))[1]
 	if poll_pars.scen == "indep"
-     	    npoll = npoll_dflt 
+     	    npoll = npoll_dflt
 	elseif poll_pars.scen in ["equal", "rdm"]
 	    if t in poll_pars.regime.td
 	        npoll = Int(ceil(npoll_dflt * poll_pars.regime[poll_pars.regime.td.== t,:remaining][1]))
@@ -112,10 +115,10 @@ function pollinate!(pollen_vector::String, flowering::Array{Plant,1}, plants::Ar
     filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
     setfield!.(pollinated, :mated, true)
     append!(plants, pollinated)
-    
+
     # unit test
     check_duplicates(plants)
-    
+
 end
 
 """
@@ -131,9 +134,9 @@ function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, po
 
         # as with the other processes, it is easier to process plants separately from the main vector
         filter!(x -> !(x.id in getfield.(flowering, :id)), plants)
-	
+
 	pollinate!("wind", flowering, plants, poll_pars, t)
-	
+
 	if poll_pars.scen in ["equal", "rdm", "spec"] && t in poll_pars.regime.td
 	    disturb_pollinate!(flowering, poll_pars, plants, t)
 	else
@@ -146,7 +149,7 @@ function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, po
 
     # unit test
     check_duplicates(plants)
-    
+
 end
 
 """
@@ -163,14 +166,14 @@ for trait in EVOLVABLE_TRAITS
     if trait != :compartsize
        new_traitvalue = Int(round(new_traitvalue, RoundUp))
     end
-       
+
     # Constrain microevolution
     # ------------------------
     if new_traitvalue < getfield(TRAIT_RANGES, trait)[seed.sp][1]
        new_traitvalue = getfield(TRAIT_RANGES, trait)[seed.sp][1]
     elseif new_traitvalue > getfield(TRAIT_RANGES, trait)[seed.sp][end]
        new_traitvalue = getfield(TRAIT_RANGES, trait)[seed.sp][end]
-    end   
+    end
 
     setfield!(seed, trait, new_traitvalue)
 
@@ -193,20 +196,20 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
     if length(ferts) > length(findall(x -> x.stage == "a", plants))
        error("There are more fertilized individuals than adults")
     end
-    
+
     for sp in unique(getfield.(ferts, :sp))
 
     	seedmass = SPP_REF.seedmass[sp]
 	spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
-	
+
 	ferts_sp = findall(x -> x.sp == sp && x.id in getfield.(ferts, :id), plants)
-	
+
 	for s in ferts_sp
-	
+
 	    offs = div(ALLOC_SEED*plants[s].mass["repr"], seedmass)
-	    
+
 	    if offs > 0
-		
+
 		# limit offspring production to the maximal number of seeds the species can produce
 		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
 
@@ -225,7 +228,7 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
 
 		    seed = deepcopy(plants[s])
 		    seed_counter += 1
-		    
+
 		    # reassign state variables that dont evolve
 		    seed.id = string(get_counter(), base = 16)
 		    seed.mass = Dict("leaves" => 0.0,
@@ -249,7 +252,7 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
 
     # unit test
     check_duplicates(plants)
-    
+
 end
 
 """
@@ -268,15 +271,15 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, t:
 
     	seedmass = SPP_REF.seedmass[sp]
 	spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
-	
+
 	selfers_sp = findall(x -> x.sp == sp && x.id in getfield.(selfers, :id), plants)
-	
+
 	for s in selfers_sp
-	
+
 	    offs = div(ALLOC_SEED*plants[s].mass["repr"], seedmass)
-	    
+
 	    if offs > 0
-		
+
 		# limit offspring production to the maximal number of seeds the species can produce
 		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
 
@@ -284,14 +287,14 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, t:
                     spoffspringcounter += offs
                     gather_offspring!(t, sp, "s", "sex", spoffspringcounter)
                 end
-                
+
 		# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
 		plants[s].mass["repr"] = 0
 
 		for n in 1:offs
 
 		    seed = deepcopy(plants[s])
-		    
+
 		    # reassign state variables that dont evolve
 		    seed.id = string(get_counter(), base = 16)
 		    seed.mass = Dict("leaves" => 0.0,
@@ -311,7 +314,7 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, t:
 
   # unit test
   check_duplicates(plants)
-  
+
 end
 
 """
@@ -344,7 +347,7 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, t::Int64)
 
 	        clone.id = string(get_counter(), base=16)
 	        push!(plants, clone)
-                
+
        	    end
         end
 
@@ -355,7 +358,7 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, t::Int64)
 
     # unit test
     check_duplicates(plants)
-    
+
 end
 
 """
@@ -368,12 +371,12 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
     dispersing_idxs = findall(x -> (x.stage == "s-in-flower" && x.seedon <= rem(t,52) < x.seedoff),
                               plants)
     lost_idxs = Int64[]
-    
+
     for i in dispersing_idxs
-        
+
         kernel = split(plants[i].kernel, "-") |> collect |> rand
-	
-	# vectorized dispersal requires parameters to be vectorized too 
+
+	# vectorized dispersal requires parameters to be vectorized too
         dist = DISPERSAL_PARS[kernel].factor*
 	rand(InverseGaussian(DISPERSAL_PARS[kernel].mu,
                              DISPERSAL_PARS[kernel].lambda))
@@ -396,7 +399,7 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
     if length(dispersing_idxs) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
         gather_event!(t, "dispersal", "s", 0, length(dispersing_idxs))
     end
-    
+
 end
 
 """
@@ -410,7 +413,7 @@ function establish!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},
     establishing_idxs = findall(x -> x.stage == "s", plants)
     # counter of germinations
     n_germinations = 0
-    
+
     for i in establishing_idxs
 
     	if 1-exp(-(B0_GERM*(SPP_REF.seedmass[plants[i].sp]^(-1/4))*exp(-A_E/(BOLTZ*T)))) == 1
@@ -437,12 +440,12 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
 
     old = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
     deleteat!(plants, old)
-    
+
     dying = filter(x -> x.stage == "s", plants)
     n_deaths = 0
 
     n_plantsbefore = length(plants)
-    
+
     for sp in unique(getfield.(dying, :sp))
     	dying_sp = filter(x -> x.sp == sp, plants)
     	Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
@@ -471,7 +474,7 @@ die!()
 function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, dying_stage::String, t::Int64)
 
     old = findall( x -> (x.stage == dying_stage && x.age > x.span), plants)
-    
+
     if length(old) > 0
        if dying_stage == "j"
            # unit test
@@ -479,7 +482,7 @@ function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, 
            error("Juvenile did not mature before reaching maximum span")
        else
 	   deleteat!(plants, old)
-       end 
+       end
     end
 
     # the rest of the individuals have a metabolic probability of dying.
@@ -502,14 +505,14 @@ end
 
 function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  landscape::BitArray{2}, T, dying_stage::String)
 
-    
+
     # biomass of both juveniles and adults is used as criteria for check if  production > K
     # but only only stage dies at each timestep
-    production_plants = filter(x -> x.stage in ["j" "a"], plants) 
+    production_plants = filter(x -> x.stage in ["j" "a"], plants)
 
     # get coordinates of all occupied cells
     locs = getfield.(production_plants, :location)
-    fullcells_indxs = findall(nonunique(DataFrame(hcat(locs))))
+    fullcells_indxs = findall(nonunique(DataFrame(hcat(locs), :auto)))
 
     if length(fullcells_indxs) > 0
 
@@ -517,7 +520,7 @@ function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any
 
            #find plants that are in the same grid
 	   plants_cell = filter(x -> x.location == loc, production_plants)
-  
+
            # get fitness of all species in the cell to simulate local competition
            sppcell_fitness = Dict(sp => SPP_REF.fitness[sp]
 	                          for sp in unique(getfield.(plants_cell, :sp)))
@@ -532,7 +535,7 @@ function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any
 
     # unit test
     check_duplicates(plants)
-    
+
 end
 
 """
@@ -544,17 +547,17 @@ Plants loose their reproductive biomasses at the end of the reproductive season
 function shedflower!(plants::Array{Plant,1},  t::Int, settings::Dict{String,Any})
 
     flowering = findall(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), plants)
-    
+
     for f in flowering
 	plants[f].mass["repr"] = 0.0
     end
-    
+
 end
 
 """
     winter_dieback!(plants, t)
 In the last week of the year, all adult `plants` loose all of the biomass allocated to `leaves`
-and reproductive (`repr`) structures. Biomass allocated to `stem` is decreased by a half, if not 
+and reproductive (`repr`) structures. Biomass allocated to `stem` is decreased by a half, if not
 already at that value.
 """
 function winter_dieback!(plants::Array{Plant,1}, t::Int)
@@ -588,7 +591,7 @@ function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64, se
         management_counter += 1
 
     end
-    
+
     return management_counter
-    
+
 end

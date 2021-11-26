@@ -2,7 +2,9 @@
 This file contains data structures used to represent entities in the model and to store values somehow related to them
 """
 
+'
 using DataFrames
+'
 
 # Data structures and submodel functions related to the Plant entity
 # -----------------------------------------------------------------
