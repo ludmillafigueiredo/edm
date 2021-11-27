@@ -44,7 +44,7 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
             management_counter = manage!(plants, t, management_counter)
         end
 
-        biomass_production = sum(vcat(map(x -> (x.mass["leaves"]+x.mass["stem"]),plants),NOT_0))
+        biomass_production = sum(vcat(map(x -> (x.mass.leaves+x.mass.stem),plants),NOT_0))
 
 	print("check_ages:")
     @time check_ages(plants)

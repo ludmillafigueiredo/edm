@@ -9,9 +9,13 @@ using DataFrames
 # Data structures and submodel functions related to the Plant entity
 # -----------------------------------------------------------------
 
-# mutable struct Mass
-#     fields
-# end
+# Data structure holding plant mass values
+mutable struct Mass
+    repr::Float64
+    root::Float64
+    stem::Float64
+    leaves::Float64
+end
 
 # Data structure holding individual trait values
 mutable struct Plant
@@ -36,7 +40,7 @@ mutable struct Plant
     bankduration::Int64
     #### State variables ####
     age::Int64 # control death when older than max. lifespan
-    mass::Dict{String, Float64}
+    mass::Mass
     mated::Bool
 end
 

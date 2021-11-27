@@ -98,18 +98,18 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, K::Float64
 			      SPP_REF.seedoff[s],
 			      Int(round(rand(Distributions.Uniform(SPP_REF.bankduration_min[s],SPP_REF.bankduration_max[s] + minvalue),1)[1], RoundUp)),
 			      0, #age
-			      Dict("leaves" => 0.0, "stem" => 0.0, "repr" => 0.0, "root" => 0.0),
+				  Mass(0.0, 0.0, 0.0, 0.0),
 			      false)
 
             ## initial biomass
 	    if newplant.stage == "s"
-		newplant.mass["root"] = SPP_REF.seedmass[newplant.sp]
+		newplant.mass.root = SPP_REF.seedmass[newplant.sp]
 	    elseif newplant.stage == "j"
-		newplant.mass["root"] = SPP_REF.seedmass[newplant.sp]
+		newplant.mass.root = SPP_REF.seedmass[newplant.sp]
 	    elseif newplant.stage in ["a"]
-		newplant.mass["leaves"] = newplant.compartsize^(3/4) * 0.75
-		newplant.mass["stem"] = newplant.compartsize * 0.75
-		newplant.mass["root"] = newplant.compartsize * 0.75
+		newplant.mass.leaves = newplant.compartsize^(3/4) * 0.75
+		newplant.mass.stem = newplant.compartsize * 0.75
+		newplant.mass.root = newplant.compartsize * 0.75
 		newplant.age = newplant.firstflower
 	    else
 		error("Check individual stages.")

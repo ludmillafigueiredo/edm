@@ -17,7 +17,7 @@ function grow!(plants::Array{Plant,1}, t::Int64, T::Float64, biomass_production:
 
     flowering_ids = filter(x -> x.stage == "a" &&
     		    	        x.floron <= rem(t,52) < x.floroff &&
-				(sum(values(x.mass))-x.mass["repr"]) >=
+				(sumofplantmass(x)-x.mass.repr) >=
 				0.5*(2*x.compartsize+x.compartsize^(3/4)),
 			   growing) |>
 	            x -> getfield.(x, :id)
@@ -31,11 +31,12 @@ function grow!(plants::Array{Plant,1}, t::Int64, T::Float64, biomass_production:
 
     # unit test
     check_duplicates(plants)
-    masserror = findall(x -> sum(collect(values(x.mass))) <= 0, plants)
-    if length(masserror) > 0
-        println("Plant: plants[masserror[1]]")
-	error("Zero or negative values of biomass detected.")
-    end
+	for plant in plants
+	    if sumofplantmass(plant) <= 0
+	        println(plant.mass)
+			error("Zero or negative values of biomass detected.")
+	    end
+	end
 
 end
 
@@ -128,7 +129,7 @@ Calculate proportion of `plants` that reproduced at time `t`, acording to pollin
 function mate!(plants::Array{Plant,1}, t::Int64, poll_pars::PollPars, settings::Settings)
 
     flowering = filter(x-> x.stage == "a" &&
-    	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber,
+    	    	       ALLOC_SEED*x.mass.repr > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber,
 		       plants)
     if length(flowering) > 0 # check if there is anyone flowering
 
@@ -206,7 +207,7 @@ function mkseeds!(plants::Array{Plant,1}, settings::Settings, T::Float64, t::Int
 
 	for s in ferts_sp
 
-	    offs = div(ALLOC_SEED*plants[s].mass["repr"], seedmass)
+	    offs = div(ALLOC_SEED*plants[s].mass.repr, seedmass)
 
 	    if offs > 0
 
@@ -219,7 +220,7 @@ function mkseeds!(plants::Array{Plant,1}, settings::Settings, T::Float64, t::Int
                 end
 
 		# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
-		plants[s].mass["repr"] = 0
+		plants[s].mass.repr = 0
 
 		# get a random parent
 		partner = rand(ferts)
@@ -231,13 +232,10 @@ function mkseeds!(plants::Array{Plant,1}, settings::Settings, T::Float64, t::Int
 
 		    # reassign state variables that dont evolve
 		    seed.id = string(get_counter(), base = 16)
-		    seed.mass = Dict("leaves" => 0.0,
-		                     "stem" => 0.0,
-				     "root" => seedmass,
-				     "repr" => 0.0)
-                    seed.stage = "s-in-flower"
-                    seed.age = 0
-                    seed.mated = false
+		    seed.mass = Mass(0.0, seedmass, 0.0, 0.0)
+            seed.stage = "s-in-flower"
+            seed.age = 0
+            seed.mated = false
 
 		    if rand(Distributions.Binomial(1, 1 - plants[s].self_proba)) == 1
                         microevolve!(seed, plants[s], partner)
@@ -261,7 +259,7 @@ self_pollinate!()
 function self_pollinate!(plants::Array{Plant,1}, settings::Settings, t::Int64)
 
  selfers = filter(x-> x.stage == "a" &&
-    	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber &&
+    	    	       ALLOC_SEED*x.mass.repr > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber &&
 		       x.mated == false &&
 		       x.self_failoutcross == true,
 		       plants)|>
@@ -276,7 +274,7 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Settings, t::Int64)
 
 	for s in selfers_sp
 
-	    offs = div(ALLOC_SEED*plants[s].mass["repr"], seedmass)
+	    offs = div(ALLOC_SEED*plants[s].mass.repr, seedmass)
 
 	    if offs > 0
 
@@ -289,7 +287,7 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Settings, t::Int64)
                 end
 
 		# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
-		plants[s].mass["repr"] = 0
+		plants[s].mass.repr = 0
 
 		for n in 1:offs
 
@@ -297,13 +295,10 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Settings, t::Int64)
 
 		    # reassign state variables that dont evolve
 		    seed.id = string(get_counter(), base = 16)
-		    seed.mass = Dict("leaves" => 0.0,
-		                     "stem" => 0.0,
-				     "root" => seedmass,
-				     "repr" => 0.0)
-                    seed.stage = "s-in-flower"
-                    seed.age = 0
-                    seed.mated = false
+		    seed.mass = Mass(0.0, seedmass, 0.0, 0.0)
+            seed.stage = "s-in-flower"
+        	seed.age = 0
+            seed.mated = false
 
 		    push!(plants, seed)
 
@@ -323,7 +318,7 @@ Asexual reproduction.
 """
 function clone!(plants::Array{Plant, 1}, settings::Settings, t::Int64)
 
-    asexuals=filter(x -> x.mated==false && x.clonality==true && x.mass["repr"]>SPP_REF.seedmass[x.sp],
+    asexuals=filter(x -> x.mated==false && x.clonality==true && x.mass.repr>SPP_REF.seedmass[x.sp],
                     plants)
 
     for sp in unique(getfield.(asexuals, :sp))
@@ -340,10 +335,10 @@ function clone!(plants::Array{Plant, 1}, settings::Settings, t::Int64)
                 clone = deepcopy(plants[c])
 	        clone.stage = "j" #clones have already germinated
 	        clone.age = 0
-	        clone.mass["leaves"] = (plants[c].compartsize*0.1)^(3/4)
-	        clone.mass["stem"] = plants[c].compartsize*0.1
-	        clone.mass["root"] = plants[c].compartsize*0.1
-	        clone.mass["repr"] = 0.0
+	        clone.mass.leaves = (plants[c].compartsize*0.1)^(3/4)
+	        clone.mass.stem = plants[c].compartsize*0.1
+	        clone.mass.root = plants[c].compartsize*0.1
+	        clone.mass.repr = 0.0
 
 	        clone.id = string(get_counter(), base=16)
 	        push!(plants, clone)
@@ -525,7 +520,7 @@ function compete_die!(plants::Array{Plant,1}, t::Int,  landscape::BitArray{2}, T
            sppcell_fitness = Dict(sp => SPP_REF.fitness[sp]
 	                          for sp in unique(getfield.(plants_cell, :sp)))
 
-           if sum(vcat(map(x->sum(values(x.mass))-x.mass["root"],plants_cell),NOT_0)) > C_K
+           if sum(vcat(map(x->sumofplantmass(x)-x.mass.root,plants_cell),NOT_0)) > C_K
 	       for sp in keys(sppcell_fitness)
 	           sort_die!(sp, sppcell_fitness, plants_cell, dying_stage, plants, settings, t)
 	       end
@@ -546,10 +541,10 @@ Plants loose their reproductive biomasses at the end of the reproductive season
 """
 function shedflower!(plants::Array{Plant,1},  t::Int)
 
-    flowering = findall(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), plants)
+    flowering = findall(x -> (x.mass.repr > 0 && rem(t,52) > x.floroff), plants)
 
     for f in flowering
-	plants[f].mass["repr"] = 0.0
+	plants[f].mass.repr = 0.0
     end
 
 end
@@ -564,9 +559,9 @@ function winter_dieback!(plants::Array{Plant,1}, t::Int)
     adults = findall(x -> (x.stage == "a"), plants)
 
     for a in adults
-        plants[a].mass["leaves"] = 0.0
-	plants[a].mass["repr"] = 0.0
-	plants[a].mass["stem"] >= (0.5*plants[a].compartsize) ? plants[a].mass["stem"] = (0.5*plants[a].compartsize) : nothing
+        plants[a].mass.leaves = 0.0
+	plants[a].mass.repr = 0.0
+	plants[a].mass.stem >= (0.5*plants[a].compartsize) ? plants[a].mass.stem = (0.5*plants[a].compartsize) : nothing
     end
 end
 
@@ -580,12 +575,12 @@ function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64)
     if management_counter < 1 || 1 == rand(Distributions.Bernoulli(MANAGE_PROB))
 
         mowed = findall(x -> (x.stage in ["j" "a"] &&
-                           (x.mass["leaves"] >= 0.5*(x.compartsize)^(3/4) || x.mass["stem"] >= 0.5*x.compartsize)), plants)
+                           (x.mass.leaves >= 0.5*(x.compartsize)^(3/4) || x.mass.stem >= 0.5*x.compartsize)), plants)
 
         for m in mowed
-	    plants[m].mass["leaves"] = (0.5*plants[m].compartsize)
-	    plants[m].mass["stem"] = (0.5*plants[m].compartsize)
-	    plants[m].mass["repr"] = 0
+	    plants[m].mass.leaves = (0.5*plants[m].compartsize)
+	    plants[m].mass.stem = (0.5*plants[m].compartsize)
+	    plants[m].mass.repr = 0
         end
 
         management_counter += 1

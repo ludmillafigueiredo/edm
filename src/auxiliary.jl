@@ -86,6 +86,15 @@ function gridsizes(realxlen::Array{Float64,1}, realylen::Array{Float64,1})
 end
 
 """
+sumofplantmass(mass)
+get sum of a Plant's mass
+"""
+
+function sumofplantmass(plant::Plant)
+	return (plant.mass.repr + plant.mass.root + plant.mass.stem + plant.mass.leaves)
+end
+
+"""
 lengthtocell(d)
 Converts distance values from m to cell size.
 """
@@ -237,7 +246,7 @@ mort_prob(plant)
 Calculate mortality probability for a single plant
 """
 function mort_prob(plant::Plant, T)
-    Bm = B0_MORT*(sum(values(plant.mass))^(-1/4))*exp(-A_E/(BOLTZ*T))
+    Bm = B0_MORT*(sumofplantmass(plant)^(-1/4))*exp(-A_E/(BOLTZ*T))
     mort_prob = 1-exp(-Bm)
     return mort_prob
 end
@@ -257,15 +266,16 @@ end
 
 function grow_allocate!(plant, b0grow, flowering_ids)
 
-    B_grow = b0grow*((sum(values(plant.mass))-plant.mass["repr"])^(-1/4))*exp(-A_E/(BOLTZ*T)) # only vegetative biomass fuels growth
+    B_grow = b0grow*(plant.mass.root + plant.mass.stem + plant.mass.leaves)^(-1/4)*exp(-A_E/(BOLTZ*T)) # only vegetative biomass fuels growth
 
-    new_mass = B_grow*((2*plant.compartsize + plant.compartsize^(3/4))-(sum(values(plant.mass))-plant.mass["repr"]))
+    new_mass = B_grow*((2*plant.compartsize + plant.compartsize^(3/4))-(plant.mass.root+plant.mass.stem+plant.mass.leaves))
 
     if plant.id in flowering_ids
-       plant.mass["repr"] += new_mass
+       plant.mass.repr += new_mass
     else
-       map(x -> plant.mass[x] += (1/3)*new_mass,
-       	   ["leaves", "stem", "root"])
+		plant.mass.leaves += (1/3) * new_mass
+		plant.mass.stem += (1/3) * new_mass
+		plant.mass.root += (1/3) * new_mass
     end
 
 end
@@ -281,7 +291,7 @@ function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cel
 
     plantscell_sp = filter(x -> x.sp == sp, plants_cell)
 
-    if sum(vcat(map(x->sum(values(x.mass))-x.mass["root"], plantscell_sp),NOT_0)) > 0
+    if sum(vcat(map(x->sum(values(x.mass))-x.mass.root, plantscell_sp),NOT_0)) > 0
 
         dying_plants = filter(x -> x.stage == dying_stage, plantscell_sp)
 	# order inds so smaller can be killed first with pop!
@@ -289,7 +299,7 @@ function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cel
 
 	dying = Plant[]
 
-	while (sum(vcat(map(x->sum(values(x.mass))-x.mass["root"], plantscell_sp),NOT_0)) > C_K_sp
+	while (sum(vcat(map(x->sum(values(x.mass))-x.mass.root, plantscell_sp),NOT_0)) > C_K_sp
 	       && length(dying_sorted) > 0)
 
 	    # kill smallest

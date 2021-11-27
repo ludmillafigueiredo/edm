@@ -64,7 +64,7 @@ log_abovegroundmass(when, proc)
 function log_abovegroundmass(when,proc)
 
     open(abspath(joinpath(settings.outputat, settings.simID,"checkpoint.txt")),"a") do sim
-        println(sim,"Above-grd mass $when $proc: $(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
+        println(sim,"Above-grd mass $when $proc: $(sum(vcat(map(x -> sum(values(x.mass))-x.mass.root,
 	                                                        filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
     end
 

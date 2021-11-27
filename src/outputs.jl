@@ -79,10 +79,10 @@ function write_output(plants::Array{Plant,1}, t::Int64)
                                   plants[o].seedoff,
                                   plants[o].bankduration,
                                   plants[o].age,
-                                  plants[o].mass["leaves"],
-                                  plants[o].mass["stem"],
-                                  plants[o].mass["root"],
-                                  plants[o].mass["repr"],
+                                  plants[o].mass.leaves,
+                                  plants[o].mass.stem,
+                                  plants[o].mass.root,
+                                  plants[o].mass.repr,
                                   plants[o].mated))
         end
     end
