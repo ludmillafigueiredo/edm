@@ -29,7 +29,7 @@ println("Simulation time: ", end_time-start_time)
 start_time = now()
 
 # analyse results
-analysED(settings, land_pars, poll_pars)
+# analysED(settings, land_pars, poll_pars)
 
 end_time = now()
 

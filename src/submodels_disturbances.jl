@@ -115,10 +115,10 @@ end
 disturb_pollinate!()
 Call the pollinate!() function for groups of individuals according to
 """
-function disturb_pollinate!(flowering::Array{Plant,1}, poll_pars::PollPars, plants::Array{Plant,1}, t::Int64)
+function disturb_pollinate!(flowering::Array{Plant,1}, poll_pars::PollPars, plants::Array{Plant,1}, t::Int64, settings::Settings)
 
     # check-point
-    open(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt"),"a") do sim
+    open(joinpath(settings.outputat,settings.simID,"checkpoint.txt"),"a") do sim
         println(sim, "Pollination disturbed by $(poll_pars.scen) ...")
     end
 

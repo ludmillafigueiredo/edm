@@ -81,7 +81,7 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 	@time check_ages(plants)
 
 	print("mate:")
-	@time mate!(plants, t, poll_pars::PollPars)
+	@time mate!(plants, t, poll_pars::PollPars, settings)
 
 	# Offspring production
 	mkseeds!(plants, settings, T, t)

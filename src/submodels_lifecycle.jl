@@ -125,7 +125,7 @@ end
     mate!(plants, t, settings)
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
 """
-function mate!(plants::Array{Plant,1}, t::Int64, poll_pars::PollPars)
+function mate!(plants::Array{Plant,1}, t::Int64, poll_pars::PollPars, settings::Settings)
 
     flowering = filter(x-> x.stage == "a" &&
     	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber,
@@ -138,7 +138,7 @@ function mate!(plants::Array{Plant,1}, t::Int64, poll_pars::PollPars)
 	pollinate!("wind", flowering, plants, poll_pars, t)
 
 	if poll_pars.scen in ["equal", "rdm", "spec"] && t in poll_pars.regime.td
-	    disturb_pollinate!(flowering, poll_pars, plants, t)
+	    disturb_pollinate!(flowering, poll_pars, plants, t, settings)
 	else
 	    pollinate!("insects", flowering, plants, poll_pars, t)
 	end

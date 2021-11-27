@@ -9,6 +9,10 @@ using DataFrames
 # Data structures and submodel functions related to the Plant entity
 # -----------------------------------------------------------------
 
+# mutable struct Mass
+#     fields
+# end
+
 # Data structure holding individual trait values
 mutable struct Plant
     id::String
