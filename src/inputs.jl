@@ -183,13 +183,13 @@ end
     set_tdist()
 Set disturbance time(s).
 """
-function set_tdist(settings)
+function set_tdist(settings::Settings)
 
     # select file according to keyword: loss, frag, temp
-    if occursin("none", settings["disturb_type"])
+    if occursin("none", settings.disturb_type)
         tdist = nothing
-    elseif occursin("area", settings["disturb_type"])
-        tdist = CSV.read(settings["disturb_land"], DataFrame, header=true, types=Dict("td"=>Int64))[:td]
+    elseif occursin("area", settings.disturb_type)
+        tdist = CSV.read(settings.disturb_land, DataFrame, header=true, types=Dict("td"=>Int64))[:td]
     end
 
     return tdist
