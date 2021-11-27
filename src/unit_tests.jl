@@ -5,9 +5,9 @@ This module contains functions for unit tests.
 function check_overwrite(path_results)
 
     if isdir(abspath(path_results))
-       error("Verify the simulation name: $path_results exists already.")
+       #error("Verify the simulation name: $path_results exists already.")
     end
-    
+
 end
 
 function check_duplicates(plants::Array{Plant,1})
@@ -15,7 +15,7 @@ function check_duplicates(plants::Array{Plant,1})
     if length(unique(getfield.(plants, :id))) != length(getfield.(plants, :id))
        error("Duplicated individuals: $(length(unique(getfield.(plants, :id)))) ids and $(length(getfield.(plants, :id))) plants")
     end
-    
+
 end
 
 function check_ages(plants::Array{Plant,1})
@@ -28,5 +28,5 @@ function check_ages(plants::Array{Plant,1})
        	log_age()
         error("Immature juvenile")
     end
-    
+
 end

@@ -117,7 +117,7 @@ end
 Update the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`).
 It is called during initialization (`t` = 1)  and is called again if landscape is disturbed (at `tdist`; `criticalts` keeps track of the updates and outputs the new values).
 """
-function updateK!(K::Float64, landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64, land_pars::LandPars)
+function updateK!(K::Float64, landscape::BitArray{2}, settings::Settings, t::Int64, land_pars::LandPars)
 
     criticalts = Array{Int64,N} where N
     # check on which timesteps to write land dims (ifelse() does not work)y
@@ -131,7 +131,7 @@ function updateK!(K::Float64, landscape::BitArray{2}, settings::Dict{String,Any}
     if t in criticalts
         # output message
         if t == 1
-            open(joinpath(settings["outputat"],settings["simID"],"landlog.txt"),"w") do sim
+            open(joinpath(settings.outputat, settings.simID,"landlog.txt"),"w") do sim
                 println(sim, "week\tK\tC_K\thabitatarea\ttotalarea")
             end
         end
@@ -141,7 +141,7 @@ function updateK!(K::Float64, landscape::BitArray{2}, settings::Dict{String,Any}
         totalarea = prod(size(landscape)) # total number of grid cell. Habitat or not
 
 	K = C_K*habitatarea
-        open(joinpath(settings["outputat"],settings["simID"],"landlog.txt"),"a") do sim
+        open(joinpath(settings.outputat, settings.simID,"landlog.txt"),"a") do sim
             writedlm(sim,[t K C_K habitatarea totalarea])
         end
     end
@@ -164,7 +164,7 @@ Fitness is updated every begining of the year, with mean temperature for the yea
 - `mean_opt::Float64`: parameter `b` is the position of the center of the peak.
 - `std_tol::Float64`: parameter `c` is the standard deviation,
 """
-function updatefitness!(mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Dict{String, Any})
+function updatefitness!(mean_annual::Float64, max_fitness::Float64, t::Int64, settings::Settings)
     for sp in SPP_REF.sp
 
         mean_opt = SPP_REF.temp_opt[sp]
@@ -173,7 +173,7 @@ function updatefitness!(mean_annual::Float64, max_fitness::Float64, t::Int64, se
         absolute_fitness = max_fitness*exp(-((mean_annual-mean_opt)^2)/(2*(std_tol^2)))
         SPP_REF.fitness[sp] = absolute_fitness
     end
-    open(joinpath(settings["outputat"], settings["simID"], "spp_fitness.csv"),"a") do fitnessfile
+    open(joinpath(settings.outputat, settings.simID, "spp_fitness.csv"),"a") do fitnessfile
     	writedlm(fitnessfile, hcat(t, sp, get(SPP_REF.fitness, sp, "NA")) for sp in collect(keys(SPP_REF.fitness)))
     end
 end
@@ -185,14 +185,14 @@ Update temperature and precipitation values according to the weekly input data (
 function setenv!(t::Int64, temp_ts)
 
     T = temp_ts[t, :meantemp][1] + T_K
-    
+
     if rem(t, 52) == 1
 	mean_annual = mean(temp_ts[t:(t+51), :meantemp] .+ T_K)
 	return T, mean_annual
     else
 	return T
     end
-    
+
 end
 
 """
@@ -204,11 +204,11 @@ function get_dest(loc::Tuple, dist::Float64, theta::Float64)
     xdest = loc[1]+round(Int64, dist*cos(theta), RoundNearestTiesAway)
     ydest = loc[2]+round(Int64, dist*sin(theta), RoundNearestTiesAway)
     suitable = checkbounds(Bool, landscape, xdest, ydest) && landscape[xdest, ydest] == true
-	    
+
     newloc = (dest = (xdest, ydest), suitable = suitable)
-	    
+
     return newloc
-	    
+
 end
 
 """
@@ -226,7 +226,7 @@ function vectorized_seedproc(process::String, processing_sp::Array{Plant,1}, B::
 
 	n_procs = rand(Distributions.Binomial(length(processing_sp), prob))[1]
 
-	ids_procs = sample(getfield.(processing_sp, :id), n_procs) 
+	ids_procs = sample(getfield.(processing_sp, :id), n_procs)
 
 	return ids_procs # return ids and not indexes because germination uses ids,
 	       		 # and mortality uses indexes
@@ -244,14 +244,14 @@ end
 
 """
 survival(dying)
-Calculate the 
+Calculate the
 """
 function survival(dying::Array{Plant, 1}, T)
     deaths = map(x -> (id = x.id,
                        death = rand(Bernoulli(mort_prob(x, T)))), dying)
     dead_ids = getfield.(filter(x -> x.death == 1, deaths), :id)
     living_ids = getfield.(filter(x -> x.death == 0, deaths), :id)
-    return dead_ids, living_ids 
+    return dead_ids, living_ids
 end
 
 
@@ -275,7 +275,7 @@ function age!(plant::Plant)
     plant.age += 1
 end
 
-function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cell::Array{Plant,1}, dying_stage::String, plants::Array{Plant,1}, settings::Dict{String,Any}, t::Int64)
+function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cell::Array{Plant,1}, dying_stage::String, plants::Array{Plant,1}, settings::Settings, t::Int64)
 
     C_K_sp = C_K * (sppcell_fitness[sp]/sum(collect(values(sppcell_fitness))))
 
@@ -288,7 +288,7 @@ function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cel
         dying_sorted = sort(dying_plants, by = x -> sum(values(x.mass)), rev = true)
 
 	dying = Plant[]
-			   
+
 	while (sum(vcat(map(x->sum(values(x.mass))-x.mass["root"], plantscell_sp),NOT_0)) > C_K_sp
 	       && length(dying_sorted) > 0)
 
@@ -300,10 +300,10 @@ function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cel
         dying_idxs = findall(x -> x.id in getfield.(dying, :id), plants)
         deleteat!(plants, dying_idxs)
         # check point life history events
-        open(joinpath(settings["outputat"],settings["simID"],"events.csv"),"a") do sim
+        open(joinpath(settings.outputat,settings.simID,"events.csv"),"a") do sim
             for i in 1:length(dying)
                 writedlm(sim, hcat(t, "death-dep", dying_stage, mean(getfield.(dying, :age)), 1))
             end
         end
-    end			
+    end
 end

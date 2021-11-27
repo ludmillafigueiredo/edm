@@ -6,13 +6,13 @@ function log_initialabund(plants)
     open(joinpath(results_folder, "initialabundances.txt"),"w") do sim
         println(sim, initial_abunds)
     end
-    
+
 end
 
 function log_sppref(SPP_REF)
     # prinoutput_freq SPP_REF
     open(joinpath(results_folder, "sppref_traitvalues.csv"), "w") do ref
-        writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")    
+        writedlm(ref, reshape(collect(string.(fieldnames(SppRef))), 1,:), ",")
         for sp in SPP_REF.sp
     	    sp_ref = reshape(collect(map(x -> getfield(SPP_REF,x)[sp],fieldnames(SppRef)[2:end])),1,:)
     	    writedlm(ref, [sp sp_ref], ",")
@@ -35,13 +35,13 @@ struct EventInfo
 end
 
 let events_log = EventInfo[]
-    
+
     global function gather_event!(t, event, stage, mean_age, amount)
-        
+
         push!(events_log, EventInfo(event, stage, mean_age, amount))
-        
+
     end
-    
+
     global function log_events!(t)
         # output it
         open(joinpath(results_folder,"events.csv"),"a") do f
@@ -63,31 +63,31 @@ log_abovegroundmass(when, proc)
 """
 function log_abovegroundmass(when,proc)
 
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+    open(abspath(joinpath(settings.outputat, settings.simID,"checkpoint.txt")),"a") do sim
         println(sim,"Above-grd mass $when $proc: $(sum(vcat(map(x -> sum(values(x.mass))-x.mass["root"],
 	                                                        filter(x -> x.stage in ["j", "a"], plants)), NOT_0)))g")
     end
-    
+
 end
 
 function log_sim(msg)
 
-    open(abspath(joinpath(settings["outputat"],settings["simID"],"checkpoint.txt")),"a") do sim
+    open(abspath(joinpath(settings.outputat, settings.simID,"checkpoint.txt")),"a") do sim
         println(sim, msg)
     end
-    
+
 end
 
 function log_age()
 
     open(joinpath(results_folder, "checkpoint.txt"),"a") do sim
-        println(sim, "Juvs age >= firstflower: $(filter(x -> (x.stage == "j" && x.age > x.firstflower), 
-                                                  plants) |> x -> [getfield.(x, :id), 
-                                                                   getfield.(x, :stage), 
-                                                                   getfield.(x, :firstflower), 
+        println(sim, "Juvs age >= firstflower: $(filter(x -> (x.stage == "j" && x.age > x.firstflower),
+                                                  plants) |> x -> [getfield.(x, :id),
+                                                                   getfield.(x, :stage),
+                                                                   getfield.(x, :firstflower),
                                                                    getfield.(x, :age)])")
     end
-    
+
 end
 
 function log_pollination(flowering, npoll, pollen_vector, t)
@@ -95,6 +95,5 @@ function log_pollination(flowering, npoll, pollen_vector, t)
     open(joinpath(results_folder, "pollination_log.csv"),"a") do pollfile
         writedlm(pollfile, hcat(t, pollen_vector, npoll/(length(flowering)+NOT_0)))
     end
-    
-end
 
+end

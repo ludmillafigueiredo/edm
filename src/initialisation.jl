@@ -3,7 +3,7 @@
 Calculate the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`) at initialization.
 `K` is used to initialize the species with abundances corresponding to a niche partitioning model.
 """
-function init_K(landscape::BitArray{2}, settings::Dict{String,Any}, t::Int64)
+function init_K(landscape::BitArray{2}, t::Int64)
     habitatarea = length(findall(x -> x == true, landscape))
     totalarea = prod(size(landscape))
     K = C_K*habitatarea
@@ -26,7 +26,7 @@ function init_landscape(land_pars::LandPars)
     landscape = BitArray(initial_matrix)
 
     return landscape
-    
+
 end
 
 """
@@ -62,10 +62,10 @@ end
 Initialize the organisms with trait values stored in `SPP_REF` and distributes them in the suitable grid-cells in the landscape `landscape`.
 Store the individuals in the `plants` array, which holds all plants simulated at any given time.
 """
-function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::Dict{String, Any}, K::Float64)
+function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, K::Float64)
 
     plants = Plant[]
-    
+
     for s in SPP_REF.sp
 
         # Niche partitioning: Upon initialization, each species total biomass equals K*fitness_relative, where fitness_relative is the species fitness values relative to the sum of others
@@ -118,21 +118,37 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::
 	    push!(plants, newplant)
 
 	end
-	
+
     end
-    
+
     return plants
-    
+
 end
 
 settings = parse_commandline()
-println(keys(settings))
-Random.seed!(settings["rseed"])
 
+
+# println(keys(settings))
+# for key in keys(settings)
+# 	print("$key::")
+# 	println(typeof(settings[key]))
+# end
+# print("Settings(")
+# for key in keys(settings)
+# 	print("settings[\"$key\"], ")
+# end
+# print(")")
+
+
+settings = Settings(settings["output_freq"], settings["temp_ts"], settings["pollination"],
+	settings["disturb_type"], settings["outputat"], settings["initial_land"],
+	settings["sppinput"], settings["disturb_land"], settings["rseed"], settings["simID"])
+
+Random.seed!(settings.rseed)
 management_counter = 0
 
 # Temperature time-series
-temp_ts = CSV.read(settings["temp_ts"], DataFrame, header = true,
+temp_ts = CSV.read(settings.temp_ts, DataFrame, header = true,
                    types = Dict("week" => Int64, "meantemp" => Float64,
 		                "begin_date" => Dates.Date, "week_year" => String,
 		                "week_inyear" => Int64))
@@ -157,7 +173,7 @@ const SPP_REF = read_sppinput(settings)
 const TRAIT_RANGES = define_traitranges(settings)
 poll_pars = read_pollination(settings)
 landscape = init_landscape(land_pars)
-K = init_K(landscape, settings, 1)
+K = init_K(landscape, 1)
 T, mean_annual = setenv!(1, temp_ts)
 init_fitness!(SPP_REF, mean_annual, 1.0)
-plants = init_plants(landscape, SPP_REF, settings, K)
+plants = init_plants(landscape, SPP_REF, K)

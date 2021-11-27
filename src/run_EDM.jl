@@ -17,8 +17,20 @@ include(joinpath(EDMdir,"sim_log.jl"))
 include(joinpath(EDMdir,"unit_tests.jl"))
 include(joinpath(EDMdir,"scheduling.jl"))
 
+start_time = now()
+
 # run simulation
 run_scheduling(settings, management_counter, land_pars, poll_pars, K, T, mean_annual, plants, landscape)
 
+end_time = now()
+
+println("Simulation time: ", end_time-start_time)
+
+start_time = now()
+
 # analyse results
 analysED(settings, land_pars, poll_pars)
+
+end_time = now()
+
+println("Analyze time: ", end_time-start_time)

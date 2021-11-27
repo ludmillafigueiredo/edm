@@ -1,16 +1,16 @@
 
-'
+"""
 using Distributions
 using DataFrames
 using DataValues
 using StatsBase
 using DelimitedFiles
-'
+"""
 
 """
     allocate!(orgs, t, setting, SPP_REF, T)
 """
-function grow!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
+function grow!(plants::Array{Plant,1}, t::Int64, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
 
     growing = filter(x-> x.stage == growing_stage, plants)
     filter!(x-> x.stage != growing_stage, plants)
@@ -43,7 +43,7 @@ end
     mature!(plants, settings, t)
 Juveniles in `plants` older than their age of first flowering at time `t` become adults.
 """
-function mature!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int)
+function mature!(plants::Array{Plant,1}, t::Int)
 
     nplants_before = length(plants)
 
@@ -125,7 +125,7 @@ end
     mate!(plants, t, settings)
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
 """
-function mate!(plants::Array{Plant,1}, t::Int64, settings::Dict{String, Any}, poll_pars::PollPars)
+function mate!(plants::Array{Plant,1}, t::Int64, poll_pars::PollPars)
 
     flowering = filter(x-> x.stage == "a" &&
     	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber,
@@ -184,7 +184,7 @@ end
     mkseeds!()
 After mating happened (marked in `reped`), calculate the amount of offspring each individual produces, both sexually and assexually.
 """
-function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float64, t::Int64)
+function mkseeds!(plants::Array{Plant,1}, settings::Settings, T::Float64, t::Int64)
 
     # counters to keep track of offspring production
     seed_counter = 0
@@ -213,7 +213,7 @@ function mkseeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, T::Float6
 		# limit offspring production to the maximal number of seeds the species can produce
 		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
 
-                if t == 1 || rem(t,settings["output_freq"]) == 0
+                if t == 1 || rem(t,settings.output_freq) == 0
                     spoffspringcounter += offs
                     gather_offspring!(t, sp, "s", "sex", spoffspringcounter)
                 end
@@ -258,7 +258,7 @@ end
 """
 self_pollinate!()
 """
-function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int64)
+function self_pollinate!(plants::Array{Plant,1}, settings::Settings, t::Int64)
 
  selfers = filter(x-> x.stage == "a" &&
     	    	       ALLOC_SEED*x.mass["repr"] > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber &&
@@ -283,7 +283,7 @@ function self_pollinate!(plants::Array{Plant,1}, settings::Dict{String, Any}, t:
 		# limit offspring production to the maximal number of seeds the species can produce
 		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
 
-                if t == 1 || rem(t,settings["output_freq"]) == 0
+                if t == 1 || rem(t,settings.output_freq) == 0
                     spoffspringcounter += offs
                     gather_offspring!(t, sp, "s", "sex", spoffspringcounter)
                 end
@@ -321,7 +321,7 @@ end
 clone!()
 Asexual reproduction.
 """
-function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, t::Int64)
+function clone!(plants::Array{Plant, 1}, settings::Settings, t::Int64)
 
     asexuals=filter(x -> x.mated==false && x.clonality==true && x.mass["repr"]>SPP_REF.seedmass[x.sp],
                     plants)
@@ -351,7 +351,7 @@ function clone!(plants::Array{Plant, 1}, settings::Dict{String, Any}, t::Int64)
        	    end
         end
 
-        if t == 1 || rem(t,settings["output_freq"]) == 0
+        if t == 1 || rem(t,settings.output_freq) == 0
             gather_offspring!(t, sp, "s", "asex", spclonescounter)
         end
     end
@@ -366,7 +366,7 @@ end
 Seeds are dispersed.
 `get_dest` is defined in `auxiliary.jl`
 """
-function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,settings::Dict{String, Any},land_pars::Any)
+function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,settings::Settings,land_pars::Any)
 
     dispersing_idxs = findall(x -> (x.stage == "s-in-flower" && x.seedon <= rem(t,52) < x.seedoff),
                               plants)
@@ -392,11 +392,11 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
     end
 
     deleteat!(plants, lost_idxs)
-    if length(lost_idxs) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
+    if length(lost_idxs) > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "lost in dispersal", "s", 0, length(lost_idxs))
     end
 
-    if length(dispersing_idxs) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
+    if length(dispersing_idxs) > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "dispersal", "s", 0, length(dispersing_idxs))
     end
 
@@ -406,7 +406,7 @@ end
     establish!
 Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish in the grid-cell they are in. Germinated seeds mature to juveniles immediately. Seeds that don't germinate stay in the seedbank.
 """
-function establish!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  T::Float64, biomass_production::Float64, K::Float64)
+function establish!(plants::Array{Plant,1}, t::Int, settings::Settings,  T::Float64, biomass_production::Float64, K::Float64)
 
     # seeds that just dispersed try to establish and the ones that did not succeed previously
     # will get a chance again.
@@ -423,7 +423,7 @@ function establish!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},
 	end
     end
 
-    if n_germinations > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
+    if n_germinations > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "germination", "j", 0, n_germinations)
     end
 end
@@ -436,7 +436,7 @@ Both types of mortalities of adults and juveniles are calculated separately (as 
     survive!(plants, t, settings, SPP_REF)
 Calculate seed mortality, vectorized for all seeds of a same species.
 """
-function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int64, T::Float64)
+function die_seeds!(plants::Array{Plant,1}, settings::Settings, t::Int64, T::Float64)
 
     old = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
     deleteat!(plants, old)
@@ -463,7 +463,7 @@ function die_seeds!(plants::Array{Plant,1}, settings::Dict{String, Any}, t::Int6
 	log_sim("Seed mortality running smoooth")
     end
 
-    if n_deaths > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
+    if n_deaths > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "death-indep", "s", mean(getfield.(dying, :age)), n_deaths)
     end
 end
@@ -471,7 +471,7 @@ end
 """
 die!()
 """
-function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, dying_stage::String, t::Int64)
+function die!(plants::Array{Plant, 1}, settings::Settings, T::Float64, dying_stage::String, t::Int64)
 
     old = findall( x -> (x.stage == dying_stage && x.age > x.span), plants)
 
@@ -498,12 +498,12 @@ function die!(plants::Array{Plant, 1}, settings::Dict{String, Any}, T::Float64, 
     # unit test
     check_duplicates(plants)
     println("dead_ids = ", dead_ids)
-    if length(dead_ids) > 0 && (t == 1 || rem(t,settings["output_freq"]) == 0)
+    if length(dead_ids) > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "death-indep", dying_stage, mean(getfield.(dying, :age)), length(dead_ids))
     end
 end
 
-function compete_die!(plants::Array{Plant,1}, t::Int, settings::Dict{String, Any},  landscape::BitArray{2}, T, dying_stage::String)
+function compete_die!(plants::Array{Plant,1}, t::Int,  landscape::BitArray{2}, T, dying_stage::String)
 
 
     # biomass of both juveniles and adults is used as criteria for check if  production > K
@@ -544,7 +544,7 @@ Plants loose their reproductive biomasses at the end of the reproductive season
  and 50% of biomass during winter.
 
 """
-function shedflower!(plants::Array{Plant,1},  t::Int, settings::Dict{String,Any})
+function shedflower!(plants::Array{Plant,1},  t::Int)
 
     flowering = findall(x -> (x.mass["repr"] > 0 && rem(t,52) > x.floroff), plants)
 
@@ -575,7 +575,7 @@ end
 Juvenile and adult that are big enough, i.e., above-ground compartments have more than 50% its maximum value, have these compartments reduced to 50% of their biomass.
 Mowing happens at most once a year, between August and September.
 """
-function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64, settings::Dict{String,Any})
+function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64)
 
     if management_counter < 1 || 1 == rand(Distributions.Bernoulli(MANAGE_PROB))
 

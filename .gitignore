@@ -13,4 +13,5 @@ analysis/*
 .Rproj.user
 inputs/*
 test/*
+EDM_sim/*
 v0*

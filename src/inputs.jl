@@ -1,8 +1,8 @@
 # Functions for reading inputs and initialisation of variables of the model
 
-'
+"""
 using RCall
-'
+"""
 
 function parse_commandline()
     sets = ArgParseSettings() #object that will be populated with the arguments by the macro
@@ -15,21 +15,24 @@ function parse_commandline()
         "--rseed"
         help = "Seed for RNG"
         arg_type = Int
-        default = 100
+        default = 666
 
         "--sppinput"
         help = "Name of file with species list."
         arg_type = String
+		default = "examples/test/sppinput_example.csv"
 
         "--pollination"
         help = "How to explicitly model insects:
                 pollination-independent reproduction \"indep\";
                 equal pollination loss for all species \"equal\"."
         arg_type = String
+		default = "examples/test/pollination_example.jl"
 
         "--initial_land"
         help = "Name of file with landscape size values: areas of fragments, mean (and s.d.) temperature."
         arg_type = String
+		default = "examples/test/4m2.grd"
 
         "--disturb_type"
         help = "Type of disturbance to be implemented: none, area_loss, poll_loss, area+poll_loss, clim+area_loss, clim+poll_loss, clim+area+poll_loss"
@@ -44,15 +47,17 @@ function parse_commandline()
         "--output_freq"
         help = "Frequency of output (number of weeks)"
         arg_type = Int
-        default = 12
+        default = 13
 
         "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
+		default = "examples/test/temperature_example.csv"
 
         "--outputat"
         help = "Name of directory where output should be written ."
         arg_type = String
+		default = "."
 
 
     end
@@ -64,19 +69,19 @@ end
 """
 read_landpars
 """
-function read_landpars(settings)
+function read_landpars(settings::Settings)
 
-	if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
-                disturbance = CSV.read(settings["disturb_land"], DataFrame, header = true,
+	if settings.disturb_type in ["area_loss", "area+poll_loss"]
+                disturbance = CSV.read(settings.disturb_land, DataFrame, header = true,
 			      	       types = Dict("td" => Int64, "proportion" => Float64))
-        elseif settings["disturb_type"] == "frag"
-                disturbance = CSV.read(settings["disturb_land"], DataFrame, header = true,
+        elseif settings.disturb_type == "frag"
+                disturbance = CSV.read(settings.disturb_land, DataFrame, header = true,
 			      	       types = Dict("td" => Int64, "frag_file" => String))
         else
 		disturbance = nothing
 	end
 
-	land_pars = LandPars(settings["initial_land"], disturbance)
+	land_pars = LandPars(settings.initial_land, disturbance)
 
     return land_pars
 
@@ -86,9 +91,9 @@ end
     read_sppinput(settings)
 Reads in species trait values (min. and max. values for the evolvable ones). Stores them in `sppref`, a structure with parameters as Dictionnary fields, where species names are the keys to the parameter values.
 """
-function read_sppinput(settings::Dict{String,Any})
+function read_sppinput(settings::Settings)
 
-    sppinputtbl = CSV.read(settings["sppinput"], DataFrame)
+    sppinputtbl = CSV.read(settings.sppinput, DataFrame)
 
     sppref = SppRef()
 
@@ -118,9 +123,9 @@ end
 Based on input species traits values, set the limits upon which they can vary during sexual reproduction: [min., max.].
 Values are store in an object of type TraitRanges, where each field is a Dictionary for a trait, where the keys are the species, and the values are Arrays holding min. and max. values the trait can take.
 """
-function define_traitranges(settings::Dict{String,Any})
+function define_traitranges(settings::Settings)
 
-    sppinputtbl = CSV.read(settings["sppinput"], DataFrame)
+    sppinputtbl = CSV.read(settings.sppinput, DataFrame)
 
     traitranges = TraitRanges(
         Dict(sppinputtbl[:,:species][i] =>
@@ -159,10 +164,10 @@ end
     read_pollination(settings)
 Reads how insects are going to be implicitly simulated.
 """
-function read_pollination(settings::Dict{String,Any})
+function read_pollination(settings::Settings)
 
-    if occursin("poll", settings["disturb_type"])
-       include(abspath(settings["pollination"]))
+    if occursin("poll", settings.disturb_type)
+       include(abspath(settings.pollination))
        disturbed_regime= CSV.read(pollination_file, DataFrame, header = true,
 				  types = Dict("td" => Int64, "remaining" => Float64))
        poll_pars = PollPars(pollination_scen, disturbed_regime)

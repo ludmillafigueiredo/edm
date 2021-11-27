@@ -2,9 +2,9 @@
 This file contains data structures used to represent entities in the model and to store values somehow related to them
 """
 
-'
+"""
 using DataFrames
-'
+"""
 
 # Data structures and submodel functions related to the Plant entity
 # -----------------------------------------------------------------
@@ -50,4 +50,23 @@ end
 mutable struct LandPars
     initial::String
     disturbance::Any # it can be Nothing or a DataFrames.DataFrame
+end
+
+struct Cell
+    plants::Vector{Plant}
+    habitability::Bool
+    location::Tuple
+end
+
+struct Settings
+    output_freq::Int64
+    temp_ts::String
+    pollination::String
+    disturb_type::String
+    outputat::String
+    initial_land::String
+    sppinput::String
+    disturb_land::Any
+    rseed::Int64
+    simID::String
 end
