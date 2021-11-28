@@ -1,8 +1,8 @@
 # Functions for reading inputs and initialisation of variables of the model
 
-'
+"""
 using RCall
-'
+"""
 
 function parse_commandline()
     sets = ArgParseSettings() #object that will be populated with the arguments by the macro
@@ -15,21 +15,24 @@ function parse_commandline()
         "--rseed"
         help = "Seed for RNG"
         arg_type = Int
-        default = 100
+        default = 666
 
         "--sppinput"
         help = "Name of file with species list."
         arg_type = String
+		default = "examples/test/sppinput_example.csv"
 
         "--pollination"
         help = "How to explicitly model insects:
                 pollination-independent reproduction \"indep\";
                 equal pollination loss for all species \"equal\"."
         arg_type = String
+		default = "examples/test/pollination_example.jl"
 
         "--initial_land"
         help = "Name of file with landscape size values: areas of fragments, mean (and s.d.) temperature."
         arg_type = String
+		default = "examples/test/4m2.grd"
 
         "--disturb_type"
         help = "Type of disturbance to be implemented: none, area_loss, poll_loss, area+poll_loss, clim+area_loss, clim+poll_loss, clim+area+poll_loss"
@@ -44,15 +47,17 @@ function parse_commandline()
         "--output_freq"
         help = "Frequency of output (number of weeks)"
         arg_type = Int
-        default = 12
+        default = 13
 
         "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
+		default = "examples/test/temperature_example.csv"
 
         "--outputat"
         help = "Name of directory where output should be written ."
         arg_type = String
+		default = "."
 
 
     end
