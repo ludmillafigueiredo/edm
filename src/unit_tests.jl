@@ -18,6 +18,13 @@ function check_duplicates(plants::Array{Plant,1})
 
 end
 
+#Wrapper to parallelize check_ages function
+function check_ages_matrix!(plants_matrix::Matrix{Vector{Plant}})
+    for plants in plants_matrix
+        check_ages(plants)
+    end
+end
+
 function check_ages(plants::Array{Plant,1})
 
     #if true in (map(x -> x.age > x.span, plants))

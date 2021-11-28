@@ -60,12 +60,20 @@ mutable struct LandPars
     disturbance::Any # it can be Nothing or a DataFrames.DataFrame
 end
 
-struct Cell
-    plants::Vector{Plant}
-    habitability::Bool
-    location::Tuple
+#DataStructure holding the population of a Cell in the landscape (with some properties...maybe)
+# struct Cell
+#     plants::Vector{Plant}
+#     habitability::Bool
+#     location::Tuple
+# end
+
+struct Landscape
+    plants::Array{Vector{Plant}, 2}
+    dispersal::Array{Vector{Plant}, 2}
+    habitability::BitArray{2}
 end
 
+#DataStructure holding the settings
 struct Settings
     output_freq::Int64
     temp_ts::String

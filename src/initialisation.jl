@@ -3,9 +3,9 @@
 Calculate the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`) at initialization.
 `K` is used to initialize the species with abundances corresponding to a niche partitioning model.
 """
-function init_K(landscape::BitArray{2}, t::Int64)
-    habitatarea = length(findall(x -> x == true, landscape))
-    totalarea = prod(size(landscape))
+function init_K(habitability::BitArray{2}, t::Int64)
+    habitatarea = length(findall(x -> x == true, habitability))
+    totalarea = prod(size(habitability))
     K = C_K*habitatarea
     return K
 end
@@ -23,10 +23,13 @@ function init_landscape(land_pars::LandPars)
      @rget initial_matrix
 
     # convert raster matrix to BitArray (smaller than Bool)
-    landscape = BitArray(initial_matrix)
+    habitability = BitArray(initial_matrix)
+	#initialize empty plant array of the landscape's size
+	plants = [Plant[] for i=1:size(habitability)[1], j=1:size(habitability)[2]]
+	dispersal = [Plant[] for i=1:size(habitability)[1], j=1:size(habitability)[2]]
+	landscape = Landscape(plants, dispersal, habitability)
 
     return landscape
-
 end
 
 """
@@ -62,9 +65,7 @@ end
 Initialize the organisms with trait values stored in `SPP_REF` and distributes them in the suitable grid-cells in the landscape `landscape`.
 Store the individuals in the `plants` array, which holds all plants simulated at any given time.
 """
-function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, K::Float64)
-
-    plants = Plant[]
+function init_plants(landscape::Landscape, SPP_REF::SppRef, K::Float64)
 
     for s in SPP_REF.sp
 
@@ -72,56 +73,53 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, K::Float64
         # The initial abundance is number of medium-sized individuals (50% of maximal biomass) that would sum up to the biomass.
         sp_abund = Int(round(((SPP_REF.fitness[s]/sum(collect(values(SPP_REF.fitness))))*K)/(0.5*(2*SPP_REF.compartsize[s]+SPP_REF.compartsize[s])), RoundUp))
 
-	XYs = hcat(rand(1:size(landscape,1), sp_abund),
-                    rand(1:size(landscape,2), sp_abund))
+		XYs = hcat(rand(1:size(landscape.habitability,1), sp_abund),
+	                    rand(1:size(landscape.habitability,2), sp_abund))
 
-	for i in 1:sp_abund
+		for i in 1:sp_abund
 
-	    minvalue = 1e-7 # Distribution.Uniform requires max > min
+		    minvalue = 1e-7 # Distribution.Uniform requires max > min
 
-	    newplant = Plant(string(get_counter(), base=16),
-			      rand(["a" "j" "s"]),
-			      (XYs[i,1],XYs[i,2]),
-			      s,
-			      SPP_REF.kernel[s],
-			      SPP_REF.clonality[s],
-			      SPP_REF.pollen_vector[s],
-			      SPP_REF.self_failoutcross[s],
-			      SPP_REF.self_proba[s],
-			      SPP_REF.compartsize[s], #compartsize
-			      Int(round(rand(Distributions.Uniform(SPP_REF.span_min[s], SPP_REF.span_max[s] + minvalue),1)[1], RoundUp)),
-			      Int(round(rand(Distributions.Uniform(SPP_REF.firstflower_min[s], SPP_REF.firstflower_max[s] + minvalue),1)[1], RoundUp)),
-			      SPP_REF.floron[s],
-			      SPP_REF.floroff[s],
-			      Int(round(rand(Distributions.Uniform(SPP_REF.seednumber_min[s],SPP_REF.seednumber_max[s] + minvalue),1)[1], RoundUp)),
-			      SPP_REF.seedon[s],
-			      SPP_REF.seedoff[s],
-			      Int(round(rand(Distributions.Uniform(SPP_REF.bankduration_min[s],SPP_REF.bankduration_max[s] + minvalue),1)[1], RoundUp)),
-			      0, #age
-				  Mass(0.0, 0.0, 0.0, 0.0),
-			      false)
+		    newplant = Plant(string(get_counter(), base=16),
+				      rand(["a" "j" "s"]),
+				      (XYs[i,1],XYs[i,2]),
+				      s,
+				      SPP_REF.kernel[s],
+				      SPP_REF.clonality[s],
+				      SPP_REF.pollen_vector[s],
+				      SPP_REF.self_failoutcross[s],
+				      SPP_REF.self_proba[s],
+				      SPP_REF.compartsize[s], #compartsize
+				      Int(round(rand(Distributions.Uniform(SPP_REF.span_min[s], SPP_REF.span_max[s] + minvalue),1)[1], RoundUp)),
+				      Int(round(rand(Distributions.Uniform(SPP_REF.firstflower_min[s], SPP_REF.firstflower_max[s] + minvalue),1)[1], RoundUp)),
+				      SPP_REF.floron[s],
+				      SPP_REF.floroff[s],
+				      Int(round(rand(Distributions.Uniform(SPP_REF.seednumber_min[s],SPP_REF.seednumber_max[s] + minvalue),1)[1], RoundUp)),
+				      SPP_REF.seedon[s],
+				      SPP_REF.seedoff[s],
+				      Int(round(rand(Distributions.Uniform(SPP_REF.bankduration_min[s],SPP_REF.bankduration_max[s] + minvalue),1)[1], RoundUp)),
+				      0, #age
+					  Mass(0.0, 0.0, 0.0, 0.0),
+				      false)
 
-            ## initial biomass
-	    if newplant.stage == "s"
-		newplant.mass.root = SPP_REF.seedmass[newplant.sp]
-	    elseif newplant.stage == "j"
-		newplant.mass.root = SPP_REF.seedmass[newplant.sp]
-	    elseif newplant.stage in ["a"]
-		newplant.mass.leaves = newplant.compartsize^(3/4) * 0.75
-		newplant.mass.stem = newplant.compartsize * 0.75
-		newplant.mass.root = newplant.compartsize * 0.75
-		newplant.age = newplant.firstflower
-	    else
-		error("Check individual stages.")
-	    end
+	            ## initial biomass
+		    if newplant.stage == "s"
+				newplant.mass.root = SPP_REF.seedmass[newplant.sp]
+		    elseif newplant.stage == "j"
+				newplant.mass.root = SPP_REF.seedmass[newplant.sp]
+		    elseif newplant.stage in ["a"]
+				newplant.mass.leaves = newplant.compartsize^(3/4) * 0.75
+				newplant.mass.stem = newplant.compartsize * 0.75
+				newplant.mass.root = newplant.compartsize * 0.75
+				newplant.age = newplant.firstflower
+		    else
+				error("Check individual stages.")
+		    end
 
-	    push!(plants, newplant)
-
-	end
+		    push!(landscape.plants[newplant.location[1],newplant.location[2]], newplant)
+		end
 
     end
-
-    return plants
 
 end
 
@@ -173,7 +171,7 @@ const SPP_REF = read_sppinput(settings)
 const TRAIT_RANGES = define_traitranges(settings)
 poll_pars = read_pollination(settings)
 landscape = init_landscape(land_pars)
-K = init_K(landscape, 1)
+K = init_K(landscape.habitability, 1)
 T, mean_annual = setenv!(1, temp_ts)
 init_fitness!(SPP_REF, mean_annual, 1.0)
-plants = init_plants(landscape, SPP_REF, K)
+init_plants(landscape, SPP_REF, K)

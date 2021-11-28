@@ -126,7 +126,7 @@ end
 Update the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`).
 It is called during initialization (`t` = 1)  and is called again if landscape is disturbed (at `tdist`; `criticalts` keeps track of the updates and outputs the new values).
 """
-function updateK!(K::Float64, landscape::BitArray{2}, settings::Settings, t::Int64, land_pars::LandPars)
+function updateK!(K::Float64, landscape::Landscape, settings::Settings, t::Int64, land_pars::LandPars)
 
     criticalts = Array{Int64,N} where N
     # check on which timesteps to write land dims (ifelse() does not work)y
@@ -146,8 +146,8 @@ function updateK!(K::Float64, landscape::BitArray{2}, settings::Settings, t::Int
         end
 
         # habitat area
-        habitatarea = length(findall(x -> x == true, landscape))  #number of habitat grid cels ggrid cells
-        totalarea = prod(size(landscape)) # total number of grid cell. Habitat or not
+        habitatarea = length(findall(x -> x == true, landscape.habitability))  #number of habitat grid cels ggrid cells
+        totalarea = prod(size(landscape.habitability)) # total number of grid cell. Habitat or not
 
 	K = C_K*habitatarea
         open(joinpath(settings.outputat, settings.simID,"landlog.txt"),"a") do sim
@@ -208,7 +208,7 @@ end
 get_dest(loc, dist, theta)
 For currrent location `loc`, calculate new location `(xdest, ydest)` based on the distance of dispersal `dist` and angle `theta`.
 """
-function get_dest(loc::Tuple, dist::Float64, theta::Float64)
+function get_dest(landscape::BitArray{2}, loc::Tuple, dist::Float64, theta::Float64)
 
     xdest = loc[1]+round(Int64, dist*cos(theta), RoundNearestTiesAway)
     ydest = loc[2]+round(Int64, dist*sin(theta), RoundNearestTiesAway)

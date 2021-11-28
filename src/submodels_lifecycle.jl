@@ -10,6 +10,14 @@ using DelimitedFiles
 """
     allocate!(orgs, t, setting, SPP_REF, T)
 """
+
+#Wrapper to parallelize grow function
+function grow_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
+    for plants in plants_matrix
+        grow!(plants, t, T, biomass_production, K, growing_stage)
+    end
+end
+
 function grow!(plants::Array{Plant,1}, t::Int64, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
 
     growing = filter(x-> x.stage == growing_stage, plants)
@@ -44,6 +52,14 @@ end
     mature!(plants, settings, t)
 Juveniles in `plants` older than their age of first flowering at time `t` become adults.
 """
+
+#Wrapper to parallelize mature function
+function mature_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int)
+	for plants in plants_matrix
+        mature!(plants, t)
+    end
+end
+
 function mature!(plants::Array{Plant,1}, t::Int)
 
     nplants_before = length(plants)
@@ -125,7 +141,16 @@ end
 """
     mate!(plants, t, settings)
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
+TODO: Ask if this supposed to be happening is locally or globally.
 """
+
+#Wrapper to parallelize age_plants function
+function mate_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, poll_pars::PollPars, settings::Settings)
+	for plants in plants_matrix
+        mate!(plants, t, poll_pars, settings)
+    end
+end
+
 function mate!(plants::Array{Plant,1}, t::Int64, poll_pars::PollPars, settings::Settings)
 
     flowering = filter(x-> x.stage == "a" &&
@@ -185,6 +210,14 @@ end
     mkseeds!()
 After mating happened (marked in `reped`), calculate the amount of offspring each individual produces, both sexually and assexually.
 """
+
+#Wrapper to parallelize mkseeds function
+function mkseeds_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, T::Float64, t::Int64)
+	for plants in plants_matrix
+        mkseeds!(plants, settings, T, t)
+    end
+end
+
 function mkseeds!(plants::Array{Plant,1}, settings::Settings, T::Float64, t::Int64)
 
     # counters to keep track of offspring production
@@ -256,6 +289,14 @@ end
 """
 self_pollinate!()
 """
+
+#Wrapper to parallelize self_pollinate function
+function self_pollinate_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64)
+	for plants in plants_matrix
+        self_pollinate!(plants, settings, t)
+    end
+end
+
 function self_pollinate!(plants::Array{Plant,1}, settings::Settings, t::Int64)
 
  selfers = filter(x-> x.stage == "a" &&
@@ -316,6 +357,14 @@ end
 clone!()
 Asexual reproduction.
 """
+
+#Wrapper to parallelize clone function
+function clone_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64)
+	for plants in plants_matrix
+        clone!(plants, settings, t)
+    end
+end
+
 function clone!(plants::Array{Plant, 1}, settings::Settings, t::Int64)
 
     asexuals=filter(x -> x.mated==false && x.clonality==true && x.mass.repr>SPP_REF.seedmass[x.sp],
@@ -361,32 +410,50 @@ end
 Seeds are dispersed.
 `get_dest` is defined in `auxiliary.jl`
 """
-function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,settings::Settings,land_pars::Any)
 
-    dispersing_idxs = findall(x -> (x.stage == "s-in-flower" && x.seedon <= rem(t,52) < x.seedoff),
-                              plants)
-    lost_idxs = Int64[]
+#Wrapper to parallelize disperse function
+function calculate_dispersal_matrix!(landscape::Landscape,t::Int,settings::Settings,land_pars::Any)
+	for x in 1:size(landscape.habitability)[1]
+		for y in 1:size(landscape.habitability)[2]
+			disperse!(landscape, x, y, t, settings, land_pars)
+		end
+	end
+end
+
+function disperse!(landscape::Landscape, x::Int, y::Int, t::Int, settings::Settings, land_pars::Any)
+
+    dispersing_idxs = findall(x -> (x.stage == "s-in-flower" && x.seedon <= rem(t,52) < x.seedoff), landscape.plants[x,y])
+
+	lost_idxs = Int64[]
+	dispersed_idxs = Int64[]
+
+	todelete = Int64[]
 
     for i in dispersing_idxs
 
-        kernel = split(plants[i].kernel, "-") |> collect |> rand
+        kernel = split(landscape.plants[x,y][i].kernel, "-") |> collect |> rand
 
-	# vectorized dispersal requires parameters to be vectorized too
-        dist = DISPERSAL_PARS[kernel].factor*
-	rand(InverseGaussian(DISPERSAL_PARS[kernel].mu,
-                             DISPERSAL_PARS[kernel].lambda))
-	theta = rand(Uniform(0,2))*pi
-	newloc = get_dest(plants[i].location, dist, theta)
+		# vectorized dispersal requires parameters to be vectorized too
+        dist = DISPERSAL_PARS[kernel].factor*rand(InverseGaussian(DISPERSAL_PARS[kernel].mu, DISPERSAL_PARS[kernel].lambda))
+		theta = rand(Uniform(0,2))*pi
+		newloc = get_dest(landscape.habitability, landscape.plants[x,y][i].location, dist, theta)
 
         if newloc.suitable
-            plants[i].stage = "s"
-            plants[i].location = newloc.dest
+			push!(dispersed_idxs, i)
+			push!(todelete, i)
+			dispersed = landscape.plants[x,y][i]
+            dispersed.stage = "s"
+            dispersed.location = newloc.dest
+			push!(landscape.dispersal[newloc.dest[1], newloc.dest[2]], dispersed)
         else
-            push!(lost_idxs,i)
+            push!(lost_idxs, i)
+			push!(todelete, i)
         end
     end
 
-    deleteat!(plants, lost_idxs)
+	#Remove lost or dispersed entities from plants
+    deleteat!(landscape.plants[x,y], todelete)
+
     if length(lost_idxs) > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "lost in dispersal", "s", 0, length(lost_idxs))
     end
@@ -397,10 +464,27 @@ function disperse!(landscape::BitArray{2},plants::Array{Plant, 1},t::Int,setting
 
 end
 
+function apply_dispersal_matrix!(landscape::Landscape)
+	for x in 1:size(landscape.habitability)[1]
+		for y in 1:size(landscape.habitability)[2]
+			append!(landscape.plants[x,y],landscape.dispersal[x,y])
+			landscape.dispersal[x,y] = Plant[]
+		end
+	end
+end
+
 """
     establish!
 Seed that have already been released (in the current time step, or previously - this is why `seedsi` does not limit who get to establish) and did not die during dispersal can establish in the grid-cell they are in. Germinated seeds mature to juveniles immediately. Seeds that don't germinate stay in the seedbank.
 """
+
+#Wrapper to parallelize establish function
+function establish_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int, settings::Settings,  T::Float64, biomass_production::Float64, K::Float64)
+    for plants in plants_matrix
+        establish!(plants, t, settings, T, biomass_production, K)
+    end
+end
+
 function establish!(plants::Array{Plant,1}, t::Int, settings::Settings,  T::Float64, biomass_production::Float64, K::Float64)
 
     # seeds that just dispersed try to establish and the ones that did not succeed previously
@@ -410,12 +494,11 @@ function establish!(plants::Array{Plant,1}, t::Int, settings::Settings,  T::Floa
     n_germinations = 0
 
     for i in establishing_idxs
-
     	if 1-exp(-(B0_GERM*(SPP_REF.seedmass[plants[i].sp]^(-1/4))*exp(-A_E/(BOLTZ*T)))) == 1
             plants[i].stage = "j"
             plants[i].age= 0 ## restart age counter to control flowering age
             n_germinations += 1
-	end
+		end
     end
 
     if n_germinations > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
@@ -431,6 +514,15 @@ Both types of mortalities of adults and juveniles are calculated separately (as 
     survive!(plants, t, settings, SPP_REF)
 Calculate seed mortality, vectorized for all seeds of a same species.
 """
+
+
+#Wrapper to parallelize die_seeds function
+function die_seeds_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64, T::Float64)
+    for plants in plants_matrix
+        die_seeds!(plants, settings, t, T)
+    end
+end
+
 function die_seeds!(plants::Array{Plant,1}, settings::Settings, t::Int64, T::Float64)
 
     old = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
@@ -466,6 +558,14 @@ end
 """
 die!()
 """
+
+#Wrapper to parallelize die function
+function die_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, T::Float64, dying_stage::String, t::Int64)
+    for plants in plants_matrix
+        die!(plants, settings, T, dying_stage, t)
+    end
+end
+
 function die!(plants::Array{Plant, 1}, settings::Settings, T::Float64, dying_stage::String, t::Int64)
 
     old = findall( x -> (x.stage == dying_stage && x.age > x.span), plants)
@@ -492,9 +592,16 @@ function die!(plants::Array{Plant, 1}, settings::Settings, T::Float64, dying_sta
 
     # unit test
     check_duplicates(plants)
-    println("dead_ids = ", dead_ids)
+    #println("dead_ids = ", dead_ids)
     if length(dead_ids) > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "death-indep", dying_stage, mean(getfield.(dying, :age)), length(dead_ids))
+    end
+end
+
+#Wrapper to parallelize die function
+function compete_die_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int,  landscape::BitArray{2}, T, dying_stage::String)
+    for plants in plants_matrix
+        compete_die!(plants, t, landscape, T, dying_stage)
     end
 end
 
@@ -514,16 +621,16 @@ function compete_die!(plants::Array{Plant,1}, t::Int,  landscape::BitArray{2}, T
        for loc in unique(locs[fullcells_indxs])
 
            #find plants that are in the same grid
-	   plants_cell = filter(x -> x.location == loc, production_plants)
+	   	   plants_cell = filter(x -> x.location == loc, production_plants)
 
            # get fitness of all species in the cell to simulate local competition
            sppcell_fitness = Dict(sp => SPP_REF.fitness[sp]
 	                          for sp in unique(getfield.(plants_cell, :sp)))
 
            if sum(vcat(map(x->sumofplantmass(x)-x.mass.root,plants_cell),NOT_0)) > C_K
-	       for sp in keys(sppcell_fitness)
-	           sort_die!(sp, sppcell_fitness, plants_cell, dying_stage, plants, settings, t)
-	       end
+		       for sp in keys(sppcell_fitness)
+		           sort_die!(sp, sppcell_fitness, plants_cell, dying_stage, plants, settings, t)
+		       end
            end
        end
     end
@@ -539,6 +646,13 @@ Plants loose their reproductive biomasses at the end of the reproductive season
  and 50% of biomass during winter.
 
 """
+#Wrapper to parallelize shedflower function
+function shedflower_matrix!(plants_matrix::Matrix{Vector{Plant}},  t::Int)
+	for plants in plants_matrix
+        shedflower!(plants, t)
+    end
+end
+
 function shedflower!(plants::Array{Plant,1},  t::Int)
 
     flowering = findall(x -> (x.mass.repr > 0 && rem(t,52) > x.floroff), plants)
@@ -555,6 +669,13 @@ In the last week of the year, all adult `plants` loose all of the biomass alloca
 and reproductive (`repr`) structures. Biomass allocated to `stem` is decreased by a half, if not
 already at that value.
 """
+#Wrapper to parallelize winter_dieback function
+function winter_dieback_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int)
+	for plants in plants_matrix
+        winter_dieback!(plants, t)
+    end
+end
+
 function winter_dieback!(plants::Array{Plant,1}, t::Int)
     adults = findall(x -> (x.stage == "a"), plants)
 
@@ -570,6 +691,14 @@ end
 Juvenile and adult that are big enough, i.e., above-ground compartments have more than 50% its maximum value, have these compartments reduced to 50% of their biomass.
 Mowing happens at most once a year, between August and September.
 """
+#Wrapper to parallelize manage function
+function manage_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, management_counter::Int64)
+	for plants in plants_matrix
+        management_counter += manage!(plants, t::Int64, management_counter::Int64)
+    end
+	return management_counter
+end
+
 function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64)
 
     if management_counter < 1 || 1 == rand(Distributions.Bernoulli(MANAGE_PROB))
@@ -589,4 +718,39 @@ function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64)
 
     return management_counter
 
+end
+
+"""
+	age_plants!
+All individuals except seeds in flowers get older over time
+TODO: Function seems a bit clunky, rewrite!
+"""
+
+#Wrapper to parallelize age_plants function
+function age_plants_matrix!(plants_matrix::Matrix{Vector{Plant}})
+	for plants in plants_matrix
+        age_plants!(plants)
+    end
+end
+
+function age_plants!(plants::Array{Plant,1})
+	s_flower = filter(x -> x.stage == "s-in-flower", plants)
+	filter!(x -> x.stage != "s-in-flower", plants)
+	map(x -> age!(x), plants) # surviving get older
+	append!(plants, s_flower)
+end
+
+"""
+	reset_plant_mating!
+Plant only produces seeds again next timestep if it gets pollinated
+"""
+
+function reset_plant_mating_matrix!(plants_matrix::Matrix{Vector{Plant}})
+    for plants in plants_matrix
+        reset_plant_mating!(plants)
+    end
+end
+
+function reset_plant_mating!(plants::Array{Plant,1})
+    setfield!.(plants, :mated, false)
 end

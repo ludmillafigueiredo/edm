@@ -20,7 +20,7 @@ include(joinpath(EDMdir,"scheduling.jl"))
 start_time = now()
 
 # run simulation
-run_scheduling(settings, management_counter, land_pars, poll_pars, K, T, mean_annual, plants, landscape)
+run_scheduling(settings, management_counter, land_pars, poll_pars, K, T, mean_annual, landscape)
 
 end_time = now()
 
@@ -29,7 +29,7 @@ println("Simulation time: ", end_time-start_time)
 start_time = now()
 
 # analyse results
-# analysED(settings, land_pars, poll_pars)
+analysED(settings, land_pars, poll_pars)
 
 end_time = now()
 

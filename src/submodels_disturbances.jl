@@ -2,15 +2,15 @@
     disturb!(landscape, landscape, plants, t, settings, land_pars, tdist)
 Change landscape structure and metrics according to the simulation scenario (`loss`, habitat loss, or `frag`, fragmentation)
 """
-function disturb!(landscape::BitArray{2}, plants::Array{Plant,1}, t::Int64, settings::Settings, land_pars::LandPars)
+function disturb!(landscape::Landscape, t::Int64, settings::Settings, land_pars::LandPars)
 
     if settings.disturb_type in ["area_loss", "area+poll_loss"]
-         landscape = destroyarea!(land_pars, landscape, settings, t)
+         landscape.habitability = destroyarea!(land_pars, landscape.habitability, settings, t)
     elseif settings.disturb_type == "frag"
-         landscape = load_fragmentation!(land_pars, landscape, t)
+         landscape.habitability = load_fragmentation!(land_pars, landscape.habitability, t)
     end
 
-    destroyorgs!(plants, landscape, settings)
+    destroyorgs!(landscape, settings)
 
     return landscape
 end
@@ -69,22 +69,22 @@ end
     destroyorgs!(plants)
 Kill organisms that where in the lost habitat cells.
 """
-function destroyorgs!(plants::Array{Plant,1}, landscape::BitArray{2}, settings::Settings)
+function destroyorgs!(landscape::Landscape, settings::Settings)
 
-    kills = []
-    for o in 1:length(plants)
-	if landscape[plants[o].location...] == false
-	    push!(kills,o)
+	kills = 0
+
+	for i in 1:size(landscape.habitability)[1]
+		for j in 1:size(landscape.habitability)[2]
+			if landscape.habitability[i,j] == 0
+				kills += length(landscape.plants[i,j])
+				landscape.plants[i,j] = Plant[]
+			end
+		end
 	end
-    end
-
-    if length(kills) > 0 # trying to delete at index 0 generates an error
-	deleteat!(plants, kills)
-    end
 
     # check-point
     open(abspath(joinpath(settings.outputat,settings.simID,"checkpoint.txt")),"a") do sim
-        println(sim, "Killed $(length(kills))")
+        println(sim, "Killed $(kills)")
     end
 
 end
