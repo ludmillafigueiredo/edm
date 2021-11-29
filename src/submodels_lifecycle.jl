@@ -536,10 +536,9 @@ function die_seeds!(plants::Array{Plant,1}, settings::Settings, t::Int64, T::Flo
     for sp in unique(getfield.(dying, :sp))
     	dying_sp = filter(x -> x.sp == sp, plants)
     	Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
-	death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |>
-		    ids_deaths -> findall(x -> x.id in ids_deaths, plants)
-	deleteat!(plants, death_idxs)
-	n_deaths += length(death_idxs)
+		death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |> ids_deaths -> findall(x -> x.id in ids_deaths, plants)
+		deleteat!(plants, death_idxs)
+		n_deaths += length(death_idxs)
     end
 
     #unit test
@@ -547,7 +546,7 @@ function die_seeds!(plants::Array{Plant,1}, settings::Settings, t::Int64, T::Flo
     if n_plantsbefore - n_deaths != length(plants)
         error("Error in processing seed deaths")
     else
-	log_sim("Seed mortality running smoooth")
+		#log_sim("Seed mortality running smoooth") #This is unnecessary and takes 5ms each time!
     end
 
     if n_deaths > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
@@ -610,8 +609,20 @@ function compete_die!(plants::Array{Plant,1}, t::Int,  landscape::BitArray{2}, T
 
     # biomass of both juveniles and adults is used as criteria for check if  production > K
     # but only only stage dies at each timestep
-    production_plants = filter(x -> x.stage in ["j" "a"], plants)
+    plants_cell = filter(x -> x.stage in ["j" "a"], plants)
 
+	if length(plants_cell) > 0
+		sppcell_fitness = Dict(sp => SPP_REF.fitness[sp] for sp in unique(getfield.(plants_cell, :sp)))
+
+		if sum(vcat(map(x->sumofplantmass(x)-x.mass.root,plants_cell),NOT_0)) > C_K
+			for sp in keys(sppcell_fitness)
+				sort_die!(sp, sppcell_fitness, plants_cell, dying_stage, plants, settings, t)
+			end
+		end
+	end
+
+	"""
+	DEPRECATED
     # get coordinates of all occupied cells
     locs = getfield.(production_plants, :location)
     fullcells_indxs = findall(nonunique(DataFrame(hcat(locs), :auto)))
@@ -634,6 +645,7 @@ function compete_die!(plants::Array{Plant,1}, t::Int,  landscape::BitArray{2}, T
            end
        end
     end
+	"""
 
     # unit test
     check_duplicates(plants)
@@ -681,8 +693,8 @@ function winter_dieback!(plants::Array{Plant,1}, t::Int)
 
     for a in adults
         plants[a].mass.leaves = 0.0
-	plants[a].mass.repr = 0.0
-	plants[a].mass.stem >= (0.5*plants[a].compartsize) ? plants[a].mass.stem = (0.5*plants[a].compartsize) : nothing
+		plants[a].mass.repr = 0.0
+		plants[a].mass.stem >= (0.5*plants[a].compartsize) ? plants[a].mass.stem = (0.5*plants[a].compartsize) : nothing
     end
 end
 
@@ -703,17 +715,26 @@ function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64)
 
     if management_counter < 1 || 1 == rand(Distributions.Bernoulli(MANAGE_PROB))
 
-        mowed = findall(x -> (x.stage in ["j" "a"] &&
-                           (x.mass.leaves >= 0.5*(x.compartsize)^(3/4) || x.mass.stem >= 0.5*x.compartsize)), plants)
+		for x in plants
+			if x.stage in ["j" "a"] && (x.mass.leaves >= 0.5*(x.compartsize)^(3/4) || x.mass.stem >= 0.5*x.compartsize)
+				x.mass.leaves = (0.5*x.compartsize)
+			    x.mass.stem = (0.5*x.compartsize)
+			    x.mass.repr = 0
+			end
+		end
+
+		"""
+		DEPRECATED
+        mowed = findall(x -> (x.stage in ["j" "a"] && (x.mass.leaves >= 0.5*(x.compartsize)^(3/4) || x.mass.stem >= 0.5*x.compartsize)), plants)
 
         for m in mowed
-	    plants[m].mass.leaves = (0.5*plants[m].compartsize)
-	    plants[m].mass.stem = (0.5*plants[m].compartsize)
-	    plants[m].mass.repr = 0
+		    plants[m].mass.leaves = (0.5*plants[m].compartsize)
+		    plants[m].mass.stem = (0.5*plants[m].compartsize)
+		    plants[m].mass.repr = 0
         end
 
         management_counter += 1
-
+		"""
     end
 
     return management_counter
@@ -734,10 +755,19 @@ function age_plants_matrix!(plants_matrix::Matrix{Vector{Plant}})
 end
 
 function age_plants!(plants::Array{Plant,1})
+	for plant in plants
+		if plant.stage != "s-in-flower"
+			age!(plant)
+		end
+	end
+
+	"""
+	DEPRECATED
 	s_flower = filter(x -> x.stage == "s-in-flower", plants)
 	filter!(x -> x.stage != "s-in-flower", plants)
 	map(x -> age!(x), plants) # surviving get older
 	append!(plants, s_flower)
+	"""
 end
 
 """
