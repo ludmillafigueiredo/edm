@@ -1,0 +1,26 @@
+[general]
+creator=R package 'raster'
+created=2021-11-29 19:45:21
+[georeference]
+nrows=400
+ncols=400
+xmin=0
+ymin=0
+xmax=400
+ymax=400
+projection=NA
+[data]
+datatype=FLT4S
+byteorder=little
+nbands=1
+bandorder=BIL
+categorical=FALSE
+minvalue=1
+maxvalue=1
+nodatavalue=-3.4e+38
+[legend]
+legendtype=
+values=
+color=
+[description]
+layername=clumps
