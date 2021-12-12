@@ -69,19 +69,19 @@ end
 """
 read_landpars
 """
-function read_landpars(settings)
+function read_landpars(settings::Settings)
 
-	if settings["disturb_type"] in ["area_loss", "area+poll_loss"]
-                disturbance = CSV.read(settings["disturb_land"], DataFrame, header = true,
+	if settings.disturb_type in ["area_loss", "area+poll_loss"]
+                disturbance = CSV.read(settings.disturb_land, DataFrame, header = true,
 			      	       types = Dict("td" => Int64, "proportion" => Float64))
-        elseif settings["disturb_type"] == "frag"
-                disturbance = CSV.read(settings["disturb_land"], DataFrame, header = true,
+        elseif settings.disturb_type == "frag"
+                disturbance = CSV.read(settings.disturb_land, DataFrame, header = true,
 			      	       types = Dict("td" => Int64, "frag_file" => String))
         else
 		disturbance = nothing
 	end
 
-	land_pars = LandPars(settings["initial_land"], disturbance)
+	land_pars = LandPars(settings.initial_land, disturbance)
 
     return land_pars
 
@@ -91,12 +91,12 @@ end
     read_sppinput(settings)
 Reads in species trait values (min. and max. values for the evolvable ones). Stores them in `sppref`, a structure with parameters as Dictionnary fields, where species names are the keys to the parameter values.
 """
-function read_sppinput(settings::Dict{String,Any})
+function read_sppinput(settings::Settings)
 
-    sppinputtbl = CSV.read(settings["sppinput"], DataFrame)
+    sppinputtbl = CSV.read(settings.sppinput, DataFrame)
 
 	if !in("species", names(sppinputtbl))
-		speciesfile = split(settings["sppinput"],"_")[1]*"_"*split(settings["sppinput"],"_")[2]*"ids.csv"
+		speciesfile = split(settings.sppinput,"_")[1]*"_"*split(settings.sppinput,"_")[2]*"ids.csv"
 		sppinputtspecies = CSV.read(speciesfile, DataFrame)
 		sppinputtbl = innerjoin(sppinputtbl, sppinputtspecies, on = :sp_id)
 	end
@@ -129,17 +129,17 @@ end
 Based on input species traits values, set the limits upon which they can vary during sexual reproduction: [min., max.].
 Values are store in an object of type TraitRanges, where each field is a Dictionary for a trait, where the keys are the species, and the values are Arrays holding min. and max. values the trait can take.
 """
-function define_traitranges(settings::Dict{String,Any})
+function define_traitranges(settings::Settings)
 
-    sppinputtbl = CSV.read(settings["sppinput"], DataFrame)
+    sppinputtbl = CSV.read(settings.sppinput, DataFrame)
 
 	if !in("species", names(sppinputtbl))
-		speciesfile = split(settings["sppinput"],"_")[1]*"_"*split(settings["sppinput"],"_")[2]*"ids.csv"
+		speciesfile = split(settings.sppinput,"_")[1]*"_"*split(settings.sppinput,"_")[2]*"ids.csv"
 		sppinputtspecies = CSV.read(speciesfile, DataFrame)
 		sppinputtbl = innerjoin(sppinputtbl, sppinputtspecies, on = :sp_id)
 	end
 
-	    traitranges = TraitRanges(
+    traitranges = TraitRanges(
         Dict(sppinputtbl[:,:species][i] =>
              [sppinputtbl[:,:compartsize][i], sppinputtbl[:,:compartsize][i]]
              for i in 1:length(sppinputtbl[:,:species])),
@@ -176,10 +176,10 @@ end
     read_pollination(settings)
 Reads how insects are going to be implicitly simulated.
 """
-function read_pollination(settings::Dict{String,Any})
+function read_pollination(settings::Settings)
 
-    if occursin("poll", settings["disturb_type"])
-       include(abspath(settings["pollination"]))
+    if occursin("poll", settings.disturb_type)
+       include(abspath(settings.pollination))
        disturbed_regime= CSV.read(pollination_file, DataFrame, header = true,
 				  types = Dict("td" => Int64, "remaining" => Float64))
        poll_pars = PollPars(pollination_scen, disturbed_regime)
@@ -195,13 +195,13 @@ end
     set_tdist()
 Set disturbance time(s).
 """
-function set_tdist(settings)
+function set_tdist(settings::Settings)
 
     # select file according to keyword: loss, frag, temp
-    if occursin("none", settings["disturb_type"])
+    if occursin("none", settings.disturb_type)
         tdist = nothing
-    elseif occursin("area", settings["disturb_type"])
-        tdist = CSV.read(settings["disturb_land"], DataFrame, header=true, types=Dict("td"=>Int64))[:td]
+    elseif occursin("area", settings.disturb_type)
+        tdist = CSV.read(settings.disturb_land, DataFrame, header=true, types=Dict("td"=>Int64))[:td]
     end
 
     return tdist

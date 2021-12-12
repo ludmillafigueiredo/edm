@@ -1,0 +1,2 @@
+week	K	C_K	habitatarea	totalarea
+1.0	50000.0	500.0	100.0	100.0
