@@ -203,10 +203,10 @@ creatEDnlm(90000, 0,"examples/perform_optim")
 creatEDnlm(160000, 0,"examples/perform_optim")
 
 # 100 spp
-goetspp("100spp", rseed = 777 , mode = "random", richp = 100, traitsmode = "unif", traitsdir = "", spplist = NULL, inputsdir = getwd())
+create_sppfile("100spp", rseed = 777 , mode = "random", richp = 100, traitsmode = "unif", traitsdir = "", spplist = NULL, inputsdir = "examples/perform_optim")
 
 # 194
-goetspp("194spp", rseed = 777 , mode = "random", richp = 194, traitsmode = "unif", traitsdir = "", spplist = NULL, inputsdir = getwd())
+create_sppfile("194spp", rseed = 777 , mode = "random", richp = 194, traitsmode = "unif", traitsdir = "", spplist = NULL, inputsdir = getwd())
 
 # temperature file of 320 years (160 years the same used in simulations)
 rbind(readr::read_csv("temp_160years.csv"), 
