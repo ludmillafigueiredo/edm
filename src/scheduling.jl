@@ -13,7 +13,7 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 
     # RUN MODEL
     ############
-    for t in 1:length(temp_ts.week)
+    for t in 1:500 #length(temp_ts.week)
 
         println("\nWEEK $t")
 
