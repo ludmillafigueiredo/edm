@@ -54,61 +54,61 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 
         biomass_production = sum(vcat(map(x -> (x.mass.leaves+x.mass.stem),plantlist),NOT_0))
 
-	print("check_ages:")
-    @time check_ages_matrix!(landscape.plants)
+	# print("check_ages:")
+    check_ages_matrix!(landscape.plants)
 
-	print("die_seeds:")
-	@time die_seeds_matrix!(landscape.plants, settings, t, T)
+	# print("die_seeds:")
+	die_seeds_matrix!(landscape.plants, settings, t, T)
 
 	# Adults growth and mortality
-	print("A grow:")
-    @time grow_matrix!(landscape.plants, t, T, biomass_production, K, "a")
-	print("A die:")
-    @time die_matrix!(landscape.plants, settings, T, "a", t)
-	print("A compete_die:")
-	@time compete_die_matrix!(landscape.plants, t, landscape.habitability, T, "a")
+	# print("A grow:")
+    grow_matrix!(landscape.plants, t, T, biomass_production, K, "a")
+	# print("A die:")
+    die_matrix!(landscape.plants, settings, T, "a", t)
+	# print("A compete_die:")
+	compete_die_matrix!(landscape.plants, t, landscape.habitability, T, "a")
 
 	# Juvenile growth and mortality
-	print("J grow:")
-	@time grow_matrix!(landscape.plants, t, T, biomass_production, K, "j")
-	print("J die:")
-    @time die_matrix!(landscape.plants, settings, T, "j", t)
-	print("J compete_die:")
-	@time compete_die_matrix!(landscape.plants, t, landscape.habitability, T, "j")
+	# print("J grow:")
+	grow_matrix!(landscape.plants, t, T, biomass_production, K, "j")
+	# print("J die:")
+    die_matrix!(landscape.plants, settings, T, "j", t)
+	# print("J compete_die:")
+	compete_die_matrix!(landscape.plants, t, landscape.habitability, T, "j")
 
-	print("age_plants:")
-	@time age_plants_matrix!(landscape.plants)
+	# print("age_plants:")
+	age_plants_matrix!(landscape.plants)
 
-	print("mature:")
-	@time mature_matrix!(landscape.plants, t)
+	# print("mature:")
+	mature_matrix!(landscape.plants, t)
 
-	print("check_ages:")
-	@time check_ages_matrix!(landscape.plants)
+	# print("check_ages:")
+	check_ages_matrix!(landscape.plants)
 
-	print("mate:")
-	@time mate_matrix!(landscape.plants, t, poll_pars, settings)
+	# print("mate:")
+	mate_matrix!(landscape.plants, t, poll_pars, settings)
 
 	# Offspring production
-	print("mkseeds:")
-	@time mkseeds_matrix!(landscape.plants, settings, T, t)
-	print("clone:")
-	@time clone_matrix!(landscape.plants, settings, t)
+	# print("mkseeds:")
+	mkseeds_matrix!(landscape.plants, settings, T, t)
+	# print("clone:")
+	clone_matrix!(landscape.plants, settings, t)
 
-	print("self_pollinate:")
-	@time self_pollinate_matrix!(landscape.plants, settings, t)
+	# print("self_pollinate:")
+	self_pollinate_matrix!(landscape.plants, settings, t)
 
 	# plant only produces seeds again if it gets pollinated
 	reset_plant_mating_matrix!(landscape.plants)
 
 	# dispersal is a two step process, first the dispersal matrix is calculated, second the dispersal matrix is applied to the plant matrix
-	print("Dispersal Matrix Calculation:")
-	@time calculate_dispersal_matrix!(landscape, t, settings,  land_pars)
+	# print("Dispersal Matrix Calculation:")
+	calculate_dispersal_matrix!(landscape, t, settings,  land_pars)
 	#Apply and reset the dispersal matrix
-	print("Dispersal Matrix Application:")
-	@time apply_dispersal_matrix!(landscape)
+	# print("Dispersal Matrix Application:")
+	apply_dispersal_matrix!(landscape)
 
-	print("Establish:")
-	@time establish_matrix!(landscape.plants, t, settings,  T, biomass_production, K)
+	# print("Establish:")
+	establish_matrix!(landscape.plants, t, settings,  T, biomass_production, K)
 
 	shedflower_matrix!(landscape.plants, t)
 

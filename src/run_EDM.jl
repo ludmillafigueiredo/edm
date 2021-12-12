@@ -26,6 +26,7 @@ end_time = now()
 
 println("Simulation time: ", end_time-start_time)
 
+"""
 start_time = now()
 
 # analyse results
@@ -34,3 +35,4 @@ analysED(settings, land_pars, poll_pars)
 end_time = now()
 
 println("Analyze time: ", end_time-start_time)
+"""
