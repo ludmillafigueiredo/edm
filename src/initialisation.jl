@@ -26,7 +26,7 @@ function init_landscape(land_pars::LandPars)
     landscape = BitArray(initial_matrix)
 
     return landscape
-    
+
 end
 
 """
@@ -65,7 +65,7 @@ Store the individuals in the `plants` array, which holds all plants simulated at
 function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::Dict{String, Any}, K::Float64)
 
     plants = Plant[]
-    
+
     for s in SPP_REF.sp
 
         # Niche partitioning: Upon initialization, each species total biomass equals K*fitness_relative, where fitness_relative is the species fitness values relative to the sum of others
@@ -118,11 +118,11 @@ function init_plants(landscape::BitArray{N} where N, SPP_REF::SppRef, settings::
 	    push!(plants, newplant)
 
 	end
-	
+
     end
-    
+
     return plants
-    
+
 end
 
 settings = parse_commandline()

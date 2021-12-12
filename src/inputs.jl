@@ -10,17 +10,17 @@ function parse_commandline()
         "--simID"
         help = "Name of the folder where outputs will be stored."
         arg_type = String
-        default = "EDM_sim"
+        default = "test_100_100_100"
 
         "--rseed"
         help = "Seed for RNG"
         arg_type = Int
-        default = 666
+        default = 777
 
         "--sppinput"
         help = "Name of file with species list."
         arg_type = String
-		default = "examples/test/sppinput_example.csv"
+		default = "examples/perform_optim/100spp_sppinput.csv"
 
         "--pollination"
         help = "How to explicitly model insects:
@@ -32,7 +32,7 @@ function parse_commandline()
         "--initial_land"
         help = "Name of file with landscape size values: areas of fragments, mean (and s.d.) temperature."
         arg_type = String
-		default = "examples/test/4m2.grd"
+		default = "examples/perform_optim/control_100m2.grd"
 
         "--disturb_type"
         help = "Type of disturbance to be implemented: none, area_loss, poll_loss, area+poll_loss, clim+area_loss, clim+poll_loss, clim+area+poll_loss"
@@ -47,12 +47,12 @@ function parse_commandline()
         "--output_freq"
         help = "Frequency of output (number of weeks)"
         arg_type = Int
-        default = 13
+        default = 26
 
         "--temp_ts"
         help = "Name of file with weekly temperature  and precipitation time series"
         arg_type = String
-		default = "examples/test/temperature_example.csv"
+		default = "examples/perform_optim/temp_160years.csv"
 
         "--outputat"
         help = "Name of directory where output should be written ."
@@ -95,6 +95,12 @@ function read_sppinput(settings::Dict{String,Any})
 
     sppinputtbl = CSV.read(settings["sppinput"], DataFrame)
 
+	if !in("species", names(sppinputtbl))
+		speciesfile = split(settings["sppinput"],"_")[1]*"_"*split(settings["sppinput"],"_")[2]*"ids.csv"
+		sppinputtspecies = CSV.read(speciesfile, DataFrame)
+		sppinputtbl = innerjoin(sppinputtbl, sppinputtspecies, on = :sp_id)
+	end
+
     sppref = SppRef()
 
     # species, clonality and fitness columns cannot be set as the rest
@@ -127,7 +133,13 @@ function define_traitranges(settings::Dict{String,Any})
 
     sppinputtbl = CSV.read(settings["sppinput"], DataFrame)
 
-    traitranges = TraitRanges(
+	if !in("species", names(sppinputtbl))
+		speciesfile = split(settings["sppinput"],"_")[1]*"_"*split(settings["sppinput"],"_")[2]*"ids.csv"
+		sppinputtspecies = CSV.read(speciesfile, DataFrame)
+		sppinputtbl = innerjoin(sppinputtbl, sppinputtspecies, on = :sp_id)
+	end
+
+	    traitranges = TraitRanges(
         Dict(sppinputtbl[:,:species][i] =>
              [sppinputtbl[:,:compartsize][i], sppinputtbl[:,:compartsize][i]]
              for i in 1:length(sppinputtbl[:,:species])),
