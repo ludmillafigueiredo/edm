@@ -13,7 +13,7 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 
     # RUN MODEL
     ############
-    for t in 1:500 #length(temp_ts.week)
+    for t in 1:2 #length(temp_ts.week)
 
         println("\nWEEK $t")
 
@@ -54,39 +54,51 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 
         biomass_production = sum(vcat(map(x -> (x.mass.leaves+x.mass.stem),plantlist),NOT_0))
 
-	# print("check_ages:")
+	print("check_ages:")
     check_ages_matrix!(landscape.plants)
+	debug_plant_amount(landscape)
 
-	# print("die_seeds:")
+	print("die_seeds:")
 	die_seeds_matrix!(landscape.plants, settings, t, T)
+	debug_plant_amount(landscape)
 
 	# Adults growth and mortality
-	# print("A grow:")
+	print("A grow:")
     grow_matrix!(landscape.plants, t, T, biomass_production, K, "a")
-	# print("A die:")
+	debug_plant_amount(landscape)
+	print("A die:")
     die_matrix!(landscape.plants, settings, T, "a", t)
-	# print("A compete_die:")
+	debug_plant_amount(landscape)
+	print("A compete_die:")
 	compete_die_matrix!(landscape.plants, t, landscape.habitability, T, "a")
+	debug_plant_amount(landscape)
 
 	# Juvenile growth and mortality
-	# print("J grow:")
+	print("J grow:")
 	grow_matrix!(landscape.plants, t, T, biomass_production, K, "j")
-	# print("J die:")
+	debug_plant_amount(landscape)
+	print("J die:")
     die_matrix!(landscape.plants, settings, T, "j", t)
-	# print("J compete_die:")
+	debug_plant_amount(landscape)
+	print("J compete_die:")
 	compete_die_matrix!(landscape.plants, t, landscape.habitability, T, "j")
+	debug_plant_amount(landscape)
 
-	# print("age_plants:")
+	print("age_plants:")
 	age_plants_matrix!(landscape.plants)
+	debug_plant_amount(landscape)
 
-	# print("mature:")
+	print("mature:")
 	mature_matrix!(landscape.plants, t)
+	debug_plant_amount(landscape)
 
-	# print("check_ages:")
+	print("check_ages:")
 	check_ages_matrix!(landscape.plants)
+	debug_plant_amount(landscape)
 
-	# print("mate:")
+	print("mate:")
 	mate_matrix!(landscape.plants, t, poll_pars, settings)
+	debug_plant_amount(landscape)
 
 	# Offspring production
 	# print("mkseeds:")

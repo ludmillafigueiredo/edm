@@ -317,3 +317,11 @@ function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cel
         end
     end
 end
+
+function debug_plant_amount(landscape::Landscape)
+	plantlist = Plant[]
+	for plant_vector in landscape.plants
+		plantlist = vcat(plantlist, plant_vector)
+	end
+	println("Total population: ", length(plantlist))
+end
