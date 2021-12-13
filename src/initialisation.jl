@@ -100,7 +100,9 @@ function init_plants(landscape::Landscape, SPP_REF::SppRef, K::Float64)
 				      Int(round(rand(Distributions.Uniform(SPP_REF.bankduration_min[s],SPP_REF.bankduration_max[s] + minvalue),1)[1], RoundUp)),
 				      0, #age
 					  Mass(0.0, 0.0, 0.0, 0.0),
-				      false)
+				      false,
+					  false
+					  )
 
 	            ## initial biomass
 		    if newplant.stage == "s"

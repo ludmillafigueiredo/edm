@@ -19,23 +19,23 @@ function grow_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, T::Float64
 end
 
 function grow!(plants::Array{Plant,1}, t::Int64, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
+	for plant in plants
+		if plant.stage == growing_stage
+			grow_allocate!(plant, SPP_REF.b0grow[plant.sp], t)
+		end
+	end
 
+	""" DEPRECATED
     growing = filter(x-> x.stage == growing_stage, plants)
     filter!(x-> x.stage != growing_stage, plants)
-
-    flowering_ids = filter(x -> x.stage == "a" &&
-    		    	        x.floron <= rem(t,52) < x.floroff &&
-				(sumofplantmass(x)-x.mass.repr) >=
-				0.5*(2*x.compartsize+x.compartsize^(3/4)),
-			   growing) |>
-	            x -> getfield.(x, :id)
 
     for sp in unique(getfield.(growing, :sp))
     	b0grow = SPP_REF.b0grow[sp]
     	growing_sp = filter(x->x.sp == sp, growing)
-	map(x -> grow_allocate!(x, b0grow, flowering_ids), growing_sp)
-	append!(plants, growing_sp)
+		map(x -> grow_allocate!(x, b0grow, t), growing_sp)
+		append!(plants, growing_sp)
     end
+	"""
 
     # unit test
     check_duplicates(plants)
@@ -153,24 +153,23 @@ end
 
 function mate!(plants::Array{Plant,1}, t::Int64, poll_pars::PollPars, settings::Settings)
 
-    flowering = filter(x-> x.stage == "a" &&
-    	    	       ALLOC_SEED*x.mass.repr > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber,
-		       plants)
-    if length(flowering) > 0 # check if there is anyone flowering
+    flowering = filter(x-> x.stage == "a" && ALLOC_SEED*x.mass.repr > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber, plants)
+
+	if length(flowering) > 0 # check if there is anyone flowering
 
         # as with the other processes, it is easier to process plants separately from the main vector
         filter!(x -> !(x.id in getfield.(flowering, :id)), plants)
 
-	pollinate!("wind", flowering, plants, poll_pars, t)
+		pollinate!("wind", flowering, plants, poll_pars, t)
 
-	if poll_pars.scen in ["equal", "rdm", "spec"] && t in poll_pars.regime.td
-	    disturb_pollinate!(flowering, poll_pars, plants, t, settings)
-	else
-	    pollinate!("insects", flowering, plants, poll_pars, t)
-	end
+		if poll_pars.scen in ["equal", "rdm", "spec"] && t in poll_pars.regime.td
+		    disturb_pollinate!(flowering, poll_pars, plants, t, settings)
+		else
+		    pollinate!("insects", flowering, plants, poll_pars, t)
+		end
 
-	# re-insert the ones that did not get pollinated
-	append!(plants, flowering)
+		# re-insert the ones that did not get pollinated
+		append!(plants, flowering)
     end
 
     # unit test
@@ -234,56 +233,49 @@ function mkseeds!(plants::Array{Plant,1}, settings::Settings, T::Float64, t::Int
     for sp in unique(getfield.(ferts, :sp))
 
     	seedmass = SPP_REF.seedmass[sp]
-	spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
+		spoffspringcounter = 0 #offspring is not output in the same file as adults and juveniles
 
-	ferts_sp = findall(x -> x.sp == sp && x.id in getfield.(ferts, :id), plants)
+		ferts_sp = findall(x -> x.sp == sp && x.id in getfield.(ferts, :id), plants)
 
-	for s in ferts_sp
+		for s in ferts_sp
 
-	    offs = div(ALLOC_SEED*plants[s].mass.repr, seedmass)
+		    offs = div(ALLOC_SEED*plants[s].mass.repr, seedmass)
 
-	    if offs > 0
+		    if offs > 0
+				offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
+	           	if t == 1 || rem(t,settings.output_freq) == 0
+	            	spoffspringcounter += offs
+	                gather_offspring!(t, sp, "s", "sex", spoffspringcounter)
+	            end
 
-		# limit offspring production to the maximal number of seeds the species can produce
-		offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
+				# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
+				plants[s].mass.repr = 0
 
-                if t == 1 || rem(t,settings.output_freq) == 0
-                    spoffspringcounter += offs
-                    gather_offspring!(t, sp, "s", "sex", spoffspringcounter)
-                end
+				# get a random parent
+				partner = rand(ferts)
 
-		# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
-		plants[s].mass.repr = 0
+	            for n in 1:offs
 
-		# get a random parent
-		partner = rand(ferts)
+				    seed = deepcopy(plants[s])
+				    seed_counter += 1
 
-                for n in 1:offs
+				    # reassign state variables that dont evolve
+				    seed.id = string(get_counter(), base = 16)
+				    seed.mass = Mass(0.0, seedmass, 0.0, 0.0)
+		            seed.stage = "s-in-flower"
+		            seed.age = 0
+		            seed.mated = false
 
-		    seed = deepcopy(plants[s])
-		    seed_counter += 1
-
-		    # reassign state variables that dont evolve
-		    seed.id = string(get_counter(), base = 16)
-		    seed.mass = Mass(0.0, seedmass, 0.0, 0.0)
-            seed.stage = "s-in-flower"
-            seed.age = 0
-            seed.mated = false
-
-		    if rand(Distributions.Binomial(1, 1 - plants[s].self_proba)) == 1
-                        microevolve!(seed, plants[s], partner)
+				    if rand(Distributions.Binomial(1, 1 - plants[s].self_proba)) == 1
+		            	microevolve!(seed, plants[s], partner)
+				    end
+				    push!(plants, seed)
+				end
 		    end
-		    push!(plants, seed)
-
-		end
-	    end
         end
-
-  end
-
+	end
     # unit test
     check_duplicates(plants)
-
 end
 
 """
@@ -382,12 +374,12 @@ function clone!(plants::Array{Plant, 1}, settings::Settings, t::Int64)
        	    if rand(Distributions.Binomial(1, 0.5)) == 1
                 spclonescounter += 1
                 clone = deepcopy(plants[c])
-	        clone.stage = "j" #clones have already germinated
-	        clone.age = 0
-	        clone.mass.leaves = (plants[c].compartsize*0.1)^(3/4)
-	        clone.mass.stem = plants[c].compartsize*0.1
-	        clone.mass.root = plants[c].compartsize*0.1
-	        clone.mass.repr = 0.0
+		        clone.stage = "j" #clones have already germinated
+		        clone.age = 0
+		        clone.mass.leaves = (plants[c].compartsize*0.1)^(3/4)
+		        clone.mass.stem = plants[c].compartsize*0.1
+		        clone.mass.root = plants[c].compartsize*0.1
+		        clone.mass.repr = 0.0
 
 	        clone.id = string(get_counter(), base=16)
 	        push!(plants, clone)
@@ -515,10 +507,44 @@ Both types of mortalities of adults and juveniles are calculated separately (as 
 Calculate seed mortality, vectorized for all seeds of a same species.
 """
 
-
+"""
 #Wrapper to parallelize die_seeds function
 function die_seeds_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64, T::Float64)
-    for plants in plants_matrix
+	#Remove old seeds from each field of the matrix
+	for plants in plants_matrix
+		old = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
+	    deleteat!(plants, old)
+    end
+
+	#Determine which seeds will die
+	plantlist = get_global_plantlist!(landscape)
+
+	dying = filter(x -> x.stage == "s", plantlist)
+    n_deaths = 0
+
+    n_plantsbefore = length(plantlist)
+
+	for sp in unique(getfield.(dying, :sp))
+    	dying_sp = filter(x -> x.sp == sp, plantlist)
+    	Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
+		death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |> ids_deaths -> findall(x -> x.id in ids_deaths, plantlist)
+		flag_plants!(plantlist, death_idxs)
+		n_deaths += length(death_idxs)
+    end
+
+	#Apply seed deaths to flagged plants in landscape
+	for plants in plants_matrix
+        flagged = findall(x -> x.flagged == true, plants)
+		deleteat!(plants, flagged)
+    end
+end
+"""
+
+
+# """ DEPRECATED, dying chances different from concurrent version!
+#Wrapper to parallelize die_seeds function
+function die_seeds_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64, T::Float64)
+	for plants in plants_matrix
         die_seeds!(plants, settings, t, T)
     end
 end
@@ -553,6 +579,7 @@ function die_seeds!(plants::Array{Plant,1}, settings::Settings, t::Int64, T::Flo
         gather_event!(t, "death-indep", "s", mean(getfield.(dying, :age)), n_deaths)
     end
 end
+# """
 
 """
 die!()

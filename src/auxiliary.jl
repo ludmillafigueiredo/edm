@@ -263,14 +263,17 @@ function survival(dying::Array{Plant, 1}, T)
     return dead_ids, living_ids
 end
 
+function check_flowering(x::Plant, t::Int64)
+	return x.stage == "a" && x.floron <= rem(t,52) < x.floroff && (sumofplantmass(x)-x.mass.repr) >= 0.5*(2*x.compartsize+x.compartsize^(3/4))
+end # function
 
-function grow_allocate!(plant, b0grow, flowering_ids)
+function grow_allocate!(plant::Plant, b0grow, t::Int64)
 
     B_grow = b0grow*(plant.mass.root + plant.mass.stem + plant.mass.leaves)^(-1/4)*exp(-A_E/(BOLTZ*T)) # only vegetative biomass fuels growth
 
     new_mass = B_grow*((2*plant.compartsize + plant.compartsize^(3/4))-(plant.mass.root+plant.mass.stem+plant.mass.leaves))
 
-    if plant.id in flowering_ids
+    if check_flowering(plant, t)
        plant.mass.repr += new_mass
     else
 		plant.mass.leaves += (1/3) * new_mass
@@ -318,10 +321,64 @@ function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cel
     end
 end
 
-function debug_plant_amount(landscape::Landscape)
+function get_global_plantlist!(landscape::Landscape)
 	plantlist = Plant[]
 	for plant_vector in landscape.plants
 		plantlist = vcat(plantlist, plant_vector)
 	end
+	return plantlist
+end
+
+function debug_plant_amount(landscape::Landscape)
+	plantlist = get_global_plantlist!(landscape)
 	println("Total population: ", length(plantlist))
+end
+
+function debug_plant_amount_species(plants::Vector{Plant}, species::String)
+	total = 0
+	for plant in plants
+		if plant.sp == species
+			total = total + 1
+		end # if
+	end
+	return total
+end
+
+function debug_plant_amount_species_s(plants::Vector{Plant}, species::String)
+	total = 0
+	for plant in plants
+		if plant.sp == species && plant.stage == "s-in-flower"
+			total = total + 1
+		end # if
+	end
+	return total
+end
+
+function debug_plant_mated(landscape::Landscape)
+	plantlist = get_global_plantlist!(landscape)
+	println("Total mated Population: ", length(findall(x -> x.mated == true, plantlist)))
+end
+
+function flag_plants!(plants::Vector{Plant}, death_idxs::Vector{Int64})
+	for x in death_idxs
+		plants[x].flagged = true
+	end
+end
+
+function check_seedinflower(plants::Vector{Plant})
+	for plant in plants
+		if !(plant.stage == "s-in-flower")
+			return false
+		end # if
+	end
+	return true
+end
+
+function check_species(plants::Vector{Plant}, species::String)
+	for plant in plants
+		if !(plant.sp == species)
+			return false
+		end # if
+	end
+	return true
 end

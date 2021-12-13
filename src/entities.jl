@@ -42,6 +42,7 @@ mutable struct Plant
     age::Int64 # control death when older than max. lifespan
     mass::Mass
     mated::Bool
+    flagged::Bool
 end
 
 # Data structure for storing pollination
