@@ -10,7 +10,7 @@ function parse_commandline()
         "--simID"
         help = "Name of the folder where outputs will be stored."
         arg_type = String
-        default = "test_100_100_100"
+        default = "test_100_1000_100"
 
         "--rseed"
         help = "Seed for RNG"
@@ -32,7 +32,7 @@ function parse_commandline()
         "--initial_land"
         help = "Name of file with landscape size values: areas of fragments, mean (and s.d.) temperature."
         arg_type = String
-		default = "examples/perform_optim/control_100m2.grd"
+		default = "examples/perform_optim/control_1024m2.grd"
 
         "--disturb_type"
         help = "Type of disturbance to be implemented: none, area_loss, poll_loss, area+poll_loss, clim+area_loss, clim+poll_loss, clim+area+poll_loss"

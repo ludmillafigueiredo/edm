@@ -294,15 +294,15 @@ function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cel
 
     plantscell_sp = filter(x -> x.sp == sp, plants_cell)
 
-    if sum(vcat(map(x->sum(values(x.mass))-x.mass.root, plantscell_sp),NOT_0)) > 0
+    if sum(vcat(map(x->sumofplantmass(x)-x.mass.root, plantscell_sp),NOT_0)) > 0
 
         dying_plants = filter(x -> x.stage == dying_stage, plantscell_sp)
 	# order inds so smaller can be killed first with pop!
-        dying_sorted = sort(dying_plants, by = x -> sum(values(x.mass)), rev = true)
+        dying_sorted = sort(dying_plants, by = x -> sumofplantmass(x), rev = true)
 
 	dying = Plant[]
 
-	while (sum(vcat(map(x->sum(values(x.mass))-x.mass.root, plantscell_sp),NOT_0)) > C_K_sp
+	while (sum(vcat(map(x->sumofplantmass(x)-x.mass.root, plantscell_sp),NOT_0)) > C_K_sp
 	       && length(dying_sorted) > 0)
 
 	    # kill smallest

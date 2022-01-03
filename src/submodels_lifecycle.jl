@@ -13,7 +13,7 @@ using DelimitedFiles
 
 #Wrapper to parallelize grow function
 function grow_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, T::Float64, biomass_production::Float64, K::Float64, growing_stage::String)
-    for plants in plants_matrix
+    Threads.@threads for plants in plants_matrix
         grow!(plants, t, T, biomass_production, K, growing_stage)
     end
 end
@@ -55,7 +55,7 @@ Juveniles in `plants` older than their age of first flowering at time `t` become
 
 #Wrapper to parallelize mature function
 function mature_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int)
-	for plants in plants_matrix
+	Threads.@threads for plants in plants_matrix
         mature!(plants, t)
     end
 end
@@ -284,7 +284,7 @@ self_pollinate!()
 
 #Wrapper to parallelize self_pollinate function
 function self_pollinate_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64)
-	for plants in plants_matrix
+	Threads.@threads for plants in plants_matrix
         self_pollinate!(plants, settings, t)
     end
 end
@@ -446,6 +446,8 @@ function disperse!(landscape::Landscape, x::Int, y::Int, t::Int, settings::Setti
 	#Remove lost or dispersed entities from plants
     deleteat!(landscape.plants[x,y], todelete)
 
+	"""
+	DEbug Stuff, DEPRECATED
     if length(lost_idxs) > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "lost in dispersal", "s", 0, length(lost_idxs))
     end
@@ -453,6 +455,7 @@ function disperse!(landscape::Landscape, x::Int, y::Int, t::Int, settings::Setti
     if length(dispersing_idxs) > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "dispersal", "s", 0, length(dispersing_idxs))
     end
+	"""
 
 end
 
@@ -493,9 +496,12 @@ function establish!(plants::Array{Plant,1}, t::Int, settings::Settings,  T::Floa
 		end
     end
 
+	"""
+	DEbug Stuff, DEPRECATED
     if n_germinations > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "germination", "j", 0, n_germinations)
     end
+	"""
 end
 
 """
@@ -575,9 +581,12 @@ function die_seeds!(plants::Array{Plant,1}, settings::Settings, t::Int64, T::Flo
 		#log_sim("Seed mortality running smoooth") #This is unnecessary and takes 5ms each time!
     end
 
+	"""
+	DEbug Stuff, DEPRECATED
     if n_deaths > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "death-indep", "s", mean(getfield.(dying, :age)), n_deaths)
     end
+	"""
 end
 # """
 
@@ -619,9 +628,13 @@ function die!(plants::Array{Plant, 1}, settings::Settings, T::Float64, dying_sta
     # unit test
     check_duplicates(plants)
     #println("dead_ids = ", dead_ids)
+
+	"""
+	DEbug Stuff, DEPRECATED
     if length(dead_ids) > 0 && (t == 1 || rem(t,settings.output_freq) == 0)
         gather_event!(t, "death-indep", dying_stage, mean(getfield.(dying, :age)), length(dead_ids))
     end
+	"""
 end
 
 #Wrapper to parallelize die function
@@ -776,7 +789,7 @@ TODO: Function seems a bit clunky, rewrite!
 
 #Wrapper to parallelize age_plants function
 function age_plants_matrix!(plants_matrix::Matrix{Vector{Plant}})
-	for plants in plants_matrix
+	Threads.@threads for plants in plants_matrix
         age_plants!(plants)
     end
 end
@@ -803,7 +816,7 @@ Plant only produces seeds again next timestep if it gets pollinated
 """
 
 function reset_plant_mating_matrix!(plants_matrix::Matrix{Vector{Plant}})
-    for plants in plants_matrix
+    Threads.@threads for plants in plants_matrix
         reset_plant_mating!(plants)
     end
 end
