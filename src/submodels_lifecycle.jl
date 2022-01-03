@@ -710,7 +710,7 @@ function shedflower!(plants::Array{Plant,1},  t::Int)
     flowering = findall(x -> (x.mass.repr > 0 && rem(t,52) > x.floroff), plants)
 
     for f in flowering
-	plants[f].mass.repr = 0.0
+		plants[f].mass.repr = 0.0
     end
 
 end
@@ -745,40 +745,24 @@ Mowing happens at most once a year, between August and September.
 """
 #Wrapper to parallelize manage function
 function manage_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, management_counter::Int64)
-	for plants in plants_matrix
-        management_counter += manage!(plants, t::Int64, management_counter::Int64)
-    end
+	if management_counter < 1 || 1 == rand(Distributions.Bernoulli(MANAGE_PROB))
+		Threads.@threads for plants in plants_matrix
+	        management_counter += manage!(plants, t::Int64, management_counter::Int64)
+	    end
+		management_counter += 1
+	end
 	return management_counter
 end
 
 function manage!(plants::Array{Plant,1}, t::Int64, management_counter::Int64)
 
-    if management_counter < 1 || 1 == rand(Distributions.Bernoulli(MANAGE_PROB))
-
-		for x in plants
-			if x.stage in ["j" "a"] && (x.mass.leaves >= 0.5*(x.compartsize)^(3/4) || x.mass.stem >= 0.5*x.compartsize)
-				x.mass.leaves = (0.5*x.compartsize)
-			    x.mass.stem = (0.5*x.compartsize)
-			    x.mass.repr = 0
-			end
+	for x in plants
+		if x.stage in ["j" "a"] && (x.mass.leaves >= 0.5*(x.compartsize)^(3/4) || x.mass.stem >= 0.5*x.compartsize)
+			x.mass.leaves = (0.5*x.compartsize)
+			x.mass.stem = (0.5*x.compartsize)
+			x.mass.repr = 0
 		end
-
-		"""
-		DEPRECATED
-        mowed = findall(x -> (x.stage in ["j" "a"] && (x.mass.leaves >= 0.5*(x.compartsize)^(3/4) || x.mass.stem >= 0.5*x.compartsize)), plants)
-
-        for m in mowed
-		    plants[m].mass.leaves = (0.5*plants[m].compartsize)
-		    plants[m].mass.stem = (0.5*plants[m].compartsize)
-		    plants[m].mass.repr = 0
-        end
-
-        management_counter += 1
-		"""
-    end
-
-    return management_counter
-
+	end
 end
 
 """
@@ -800,14 +784,6 @@ function age_plants!(plants::Array{Plant,1})
 			age!(plant)
 		end
 	end
-
-	"""
-	DEPRECATED
-	s_flower = filter(x -> x.stage == "s-in-flower", plants)
-	filter!(x -> x.stage != "s-in-flower", plants)
-	map(x -> age!(x), plants) # surviving get older
-	append!(plants, s_flower)
-	"""
 end
 
 """
