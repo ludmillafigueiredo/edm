@@ -40,9 +40,18 @@ function mature_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int)
 end
 
 function mature!(plants::Array{Plant,1}, t::Int)
-	#TODO Rewrite this!
+	# find individuals that are ready to become adults
+	for plant in plants
+		if plant.stage == "j" && plant.age >= plant.firstflower
+			plant.stage = "a"
+		end
+	end
 
-	
+	check_ages(plants)
+
+
+	"""
+	DEPRECATED
     nplants_before = length(plants)
 
     # find indexes of individuals that are ready to become adults
@@ -67,6 +76,7 @@ function mature!(plants::Array{Plant,1}, t::Int)
 
     # unit test
     check_duplicates(plants)
+	"""
 
 end
 
@@ -104,7 +114,6 @@ pollinate!()
 Mark plants and having pollinated (mated = true)
 """
 function pollinate!(pollen_vector::String, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
-	#TODO Rewrite this!
 
     poll_plants = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering)
     npoll = get_npoll(pollen_vector, poll_plants, poll_pars, t)
@@ -122,7 +131,6 @@ end
 """
     mate!(plants, t, settings)
 Calculate proportion of `plants` that reproduced at time `t`, acording to pollination scenario `scen`, and mark that proportion of the population with the `mated` label.
-TODO: Ask if this supposed to be happening is locally or globally.
 """
 
 #Wrapper to parallelize age_plants function
@@ -137,7 +145,6 @@ function mate_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, poll_pars:
 end
 
 function mate!(plants::Array{Plant,1}, t::Int64, poll_pars::PollPars, settings::Settings)
-	#TODO Rewrite this!
 
     flowering = filter(x-> x.stage == "a" && ALLOC_SEED*x.mass.repr > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber, plants)
 
@@ -535,41 +542,6 @@ Both types of mortalities of adults and juveniles are calculated separately (as 
 Calculate seed mortality, vectorized for all seeds of a same species.
 """
 
-"""
-#Wrapper to parallelize die_seeds function
-function die_seeds_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64, T::Float64)
-	#Remove old seeds from each field of the matrix
-	for plants in plants_matrix
-		old = findall(x -> (x.stage == "s" && x.age > x.bankduration), plants)
-	    deleteat!(plants, old)
-    end
-
-	#Determine which seeds will die
-	plantlist = get_global_plantlist!(landscape)
-
-	dying = filter(x -> x.stage == "s", plantlist)
-    n_deaths = 0
-
-    n_plantsbefore = length(plantlist)
-
-	for sp in unique(getfield.(dying, :sp))
-    	dying_sp = filter(x -> x.sp == sp, plantlist)
-    	Bm = SEED_MFACTOR*B0_MORT*(SPP_REF.seedmass[sp]^(-1/4))*exp(-A_E/(BOLTZ*T))
-		death_idxs = vectorized_seedproc("mortality", dying_sp, Bm) |> ids_deaths -> findall(x -> x.id in ids_deaths, plantlist)
-		flag_plants!(plantlist, death_idxs)
-		n_deaths += length(death_idxs)
-    end
-
-	#Apply seed deaths to flagged plants in landscape
-	for plants in plants_matrix
-        flagged = findall(x -> x.flagged == true, plants)
-		deleteat!(plants, flagged)
-    end
-end
-"""
-
-
-# """ DEPRECATED, dying chances different from concurrent version!
 #Wrapper to parallelize die_seeds function
 function die_seeds_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64, T::Float64, chunks::Array{Tuple{Int,Int,Int,Int}})
 	Threads.@threads for chunk in chunks
@@ -640,8 +612,6 @@ function die!(plants::Array{Plant, 1}, settings::Settings, T::Float64, dying_sta
 	   		deleteat!(plants, old)
        	end
     end
-
-	#TODO Rewrite this
 
     # the rest of the individuals have a metabolic probability of dying.
     dying = filter(x -> x.stage == dying_stage, plants)

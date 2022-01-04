@@ -66,6 +66,10 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 
         biomass_production = sum(vcat(map(x -> (x.mass.leaves+x.mass.stem),plantlist),NOT_0))
 
+
+
+
+
 		# print("check_ages:")
 		check_ages_matrix!(landscape.plants, chunk6)
 
@@ -117,6 +121,8 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 		# dispersal is a two step process, first the dispersal matrix is calculated, second the dispersal matrix is applied to the plant matrix
 		# print("Dispersal Matrix Calculation:")
 		calculate_dispersal_matrix!(landscape, t, settings,  land_pars)
+
+		###EVERYTHING TILL HERE CAN BE MADE PERFECTLY IN PARALLEL
 
 		#Apply and reset the dispersal matrix
 		# print("Dispersal Matrix Application:")
