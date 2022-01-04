@@ -11,6 +11,8 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
     log_settings()
     log_sppref(SPP_REF)
 
+	chunk4 = get_chunks!(landscape.habitability.dims, 4)
+	chunk6 = get_chunks!(landscape.habitability.dims, 6)
 	chunk8 = get_chunks!(landscape.habitability.dims, 8)
 	chunk16 = get_chunks!(landscape.habitability.dims, 16)
 
@@ -65,17 +67,17 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
         biomass_production = sum(vcat(map(x -> (x.mass.leaves+x.mass.stem),plantlist),NOT_0))
 
 		# print("check_ages:")
-	    check_ages_matrix!(landscape.plants)
+		check_ages_matrix!(landscape.plants, chunk6)
 
 		# print("die_seeds:")
-		die_seeds_matrix!(landscape.plants, settings, t, T)
+		die_seeds_matrix!(landscape.plants, settings, t, T, chunk4)
 
 		# Adults growth and mortality
 		# print("A grow:")
-	    grow_matrix!(landscape.plants, t, T, biomass_production, K, "a")
+		grow_matrix!(landscape.plants, t, T, biomass_production, K, "a")
 
 		# print("A die:")
-	    die_matrix!(landscape.plants, settings, T, "a", t)
+		die_matrix!(landscape.plants, settings, T, "a", t)
 		# print("A compete_die:")
 		compete_die_matrix!(landscape.plants, t, landscape.habitability, T, "a")
 
@@ -83,7 +85,7 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 		# print("J grow:")
 		grow_matrix!(landscape.plants, t, T, biomass_production, K, "j")
 		# print("J die:")
-	    die_matrix!(landscape.plants, settings, T, "j", t)
+		die_matrix!(landscape.plants, settings, T, "j", t)
 		# print("J compete_die:")
 		compete_die_matrix!(landscape.plants, t, landscape.habitability, T, "j")
 
@@ -94,10 +96,10 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 		mature_matrix!(landscape.plants, t)
 
 		# print("check_ages:")
-		check_ages_matrix!(landscape.plants)
+		check_ages_matrix!(landscape.plants, chunk6)
 
 		# print("mate:")
-		mate_matrix!(landscape.plants, t, poll_pars, settings)
+		mate_matrix!(landscape.plants, t, poll_pars, settings, chunk4)
 
 		# Offspring production
 		# print("mkseeds:")
@@ -131,6 +133,6 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 		end
 		end_time = now()
 
-		println("Week Simulation Time: ", end_time-start_time)
+		# println("Week Simulation Time: ", end_time-start_time)
 	end
 end

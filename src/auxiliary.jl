@@ -400,8 +400,8 @@ function get_chunks!(landscape_size::Tuple{Int,Int}, chunksize::Int)
 	chunks =Tuple{Int,Int,Int,Int}[]
 	for x_start in 1:chunksize:landscape_size[1]
 		for y_start in 1:chunksize:landscape_size[2]
-			x_end = min(landscape_size[1], x_start+chunksize)
-			y_end = min(landscape_size[2], y_start+chunksize)
+			x_end = min(landscape_size[1], x_start+(chunksize-1))
+			y_end = min(landscape_size[2], y_start+(chunksize-1))
 			chunk = (x_start, x_end, y_start, y_end)
 			push!(chunks, chunk)
 		end

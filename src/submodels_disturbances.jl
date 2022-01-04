@@ -118,18 +118,20 @@ Call the pollinate!() function for groups of individuals according to
 function disturb_pollinate!(flowering::Array{Plant,1}, poll_pars::PollPars, plants::Array{Plant,1}, t::Int64, settings::Settings)
 
     # check-point
-    open(joinpath(settings.outputat,settings.simID,"checkpoint.txt"),"a") do sim
+	"""
+	open(joinpath(settings.outputat,settings.simID,"checkpoint.txt"),"a") do sim
         println(sim, "Pollination disturbed by $(poll_pars.scen) ...")
     end
+	"""
 
     insects_plants = filter(x -> occursin("insects", x.pollen_vector), flowering)
     total_p = 0
 
     if poll_pars.scen  == "equal" # all plants species are equally affected
         for sp in unique(getfield.(insects_plants, :sp))
-	    insects_plants_sp = filter(x -> x.sp == sp, insects_plants)
+	    	insects_plants_sp = filter(x -> x.sp == sp, insects_plants)
     	    npoll = get_npoll(insects_plants_sp, poll_pars, t)
-	    log_pollination(flowering, npoll, "insects-dist", t)
+	    	# log_pollination(flowering, npoll, "insects-dist", t)
             pollinated = sample(insects_plants_sp, npoll, replace = false,
                                 ordered = false)
             filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
@@ -138,17 +140,17 @@ function disturb_pollinate!(flowering::Array{Plant,1}, poll_pars::PollPars, plan
             total_p += npoll
             # unit test
             check_duplicates(plants)
-	end
-    elseif poll_pars.scen == "rdm"
-    	npoll = get_npoll(insects_plants, poll_pars, t)
-	total_p += npoll
-	if npoll > 0
-	    pollinate!(insects_plants, plants, npoll)
-	end
-    elseif poll_pars.scen == "spec"
+		end
+    	elseif poll_pars.scen == "rdm"
+    		npoll = get_npoll(insects_plants, poll_pars, t)
+			total_p += npoll
+			if npoll > 0
+	    		pollinate!(insects_plants, plants, npoll)
+			end
+    	elseif poll_pars.scen == "spec"
 
-    else
-	error("Please chose a pollination scenario \"scen\" in insect.csv:
+    	else
+			error("Please chose a pollination scenario \"scen\" in insect.csv:
                        - \"indep\": sexual reproduction happens independently of pollination
                        - \"rmd\": random loss of pollinator species
                        - \"spec\": specific loss of pollinator species")

@@ -19,9 +19,13 @@ function check_duplicates(plants::Array{Plant,1})
 end
 
 #Wrapper to parallelize check_ages function
-function check_ages_matrix!(plants_matrix::Matrix{Vector{Plant}})
-    for plants in plants_matrix
-        check_ages(plants)
+function check_ages_matrix!(plants_matrix::Matrix{Vector{Plant}}, chunks::Array{Tuple{Int,Int,Int,Int}})
+    Threads.@threads for chunk in chunks
+        for x in chunk[1]:chunk[2]
+            for y in chunk[3]:chunk[4]
+                check_ages(plants_matrix[x,y])
+            end
+        end
     end
 end
 

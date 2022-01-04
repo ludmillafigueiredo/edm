@@ -70,6 +70,7 @@ end
 
 struct Landscape
     plants::Array{Vector{Plant}, 2}
+    celllocks::Array{ReentrantLock, 2}
     dispersal::Array{Vector{Plant}, 2}
     habitability::BitArray{2}
 end

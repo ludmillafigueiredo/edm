@@ -1,5 +1,5 @@
 """
-    init_K(landscape, settings, t)
+    init_K(habitability, settings, t)
 Calculate the carrying capacity of the landscape (`K`) and of each gridcell (`C_K`) at initialization.
 `K` is used to initialize the species with abundances corresponding to a niche partitioning model.
 """
@@ -26,8 +26,9 @@ function init_landscape(land_pars::LandPars)
     habitability = BitArray(initial_matrix)
 	#initialize empty plant array of the landscape's size
 	plants = [Plant[] for i=1:size(habitability)[1], j=1:size(habitability)[2]]
+	celllocks = [ReentrantLock() for i=1:size(habitability)[1], j=1:size(habitability)[2]]
 	dispersal = [Plant[] for i=1:size(habitability)[1], j=1:size(habitability)[2]]
-	landscape = Landscape(plants, dispersal, habitability)
+	landscape = Landscape(plants, celllocks, dispersal, habitability)
 
     return landscape
 end

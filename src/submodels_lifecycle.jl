@@ -42,6 +42,7 @@ end
 function mature!(plants::Array{Plant,1}, t::Int)
 	#TODO Rewrite this!
 
+	
     nplants_before = length(plants)
 
     # find indexes of individuals that are ready to become adults
@@ -107,7 +108,7 @@ function pollinate!(pollen_vector::String, flowering::Array{Plant,1}, plants::Ar
 
     poll_plants = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering)
     npoll = get_npoll(pollen_vector, poll_plants, poll_pars, t)
-    log_pollination(flowering, npoll, pollen_vector, t)
+    #log_pollination(flowering, npoll, pollen_vector, t)
     pollinated = sample(poll_plants, npoll, replace = false, ordered = false)
     filter!(x -> !(x.id in getfield.(pollinated, :id)), flowering)
     setfield!.(pollinated, :mated, true)
@@ -125,9 +126,13 @@ TODO: Ask if this supposed to be happening is locally or globally.
 """
 
 #Wrapper to parallelize age_plants function
-function mate_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, poll_pars::PollPars, settings::Settings)
-	for plants in plants_matrix
-        mate!(plants, t, poll_pars, settings)
+function mate_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, poll_pars::PollPars, settings::Settings, chunks::Array{Tuple{Int,Int,Int,Int}})
+	Threads.@threads for chunk in chunks
+        for x in chunk[1]:chunk[2]
+            for y in chunk[3]:chunk[4]
+                mate!(plants_matrix[x,y], t, poll_pars, settings)
+            end
+        end
     end
 end
 
@@ -193,12 +198,14 @@ After mating happened (marked in `reped`), calculate the amount of offspring eac
 
 #Wrapper to parallelize mkseeds function
 function mkseeds_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, T::Float64, t::Int64)
-	for plants in plants_matrix
-        mkseeds!(plants, settings, T, t)
+	counterlck = ReentrantLock()
+
+	Threads.@threads for plants in plants_matrix
+        mkseeds!(plants, settings, T, t, counterlck)
     end
 end
 
-function mkseeds!(plants::Array{Plant,1}, settings::Settings, T::Float64, t::Int64)
+function mkseeds!(plants::Array{Plant,1}, settings::Settings, T::Float64, t::Int64, counterlck::ReentrantLock)
 
     # counters to keep track of offspring production
     seed_counter = 0
@@ -224,10 +231,13 @@ function mkseeds!(plants::Array{Plant,1}, settings::Settings, T::Float64, t::Int
 
 		    if offs > 0
 				offs > plants[s].seednumber ? offs = plants[s].seednumber : offs
-	           	if t == 1 || rem(t,settings.output_freq) == 0
+				"""
+				DEACTIVATED FOR MULTITHREADING
+				if t == 1 || rem(t,settings.output_freq) == 0
 	            	spoffspringcounter += offs
 	                gather_offspring!(t, sp, "s", "sex", spoffspringcounter)
 	            end
+				"""
 
 				# Once it produces seeds, the plant looses the current "flowers" (repr. biomass)
 				plants[s].mass.repr = 0
@@ -240,8 +250,14 @@ function mkseeds!(plants::Array{Plant,1}, settings::Settings, T::Float64, t::Int
 				    seed = deepcopy(plants[s])
 				    seed_counter += 1
 
+					# get new id in a thread safe way
+					counter = 0
+					lock(counterlck) do
+            			counter = get_counter()
+        			end
+
 				    # reassign state variables that dont evolve
-				    seed.id = string(get_counter(), base = 16)
+				    seed.id = string(counter, base = 16)
 				    seed.mass = Mass(0.0, seedmass, 0.0, 0.0)
 		            seed.stage = "s-in-flower"
 		            seed.age = 0
@@ -333,12 +349,14 @@ Asexual reproduction.
 
 #Wrapper to parallelize clone function
 function clone_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64)
-	for plants in plants_matrix
-        clone!(plants, settings, t)
+	counterlck = ReentrantLock()
+
+	Threads.@threads for plants in plants_matrix
+        clone!(plants, settings, t, counterlck)
     end
 end
 
-function clone!(plants::Array{Plant, 1}, settings::Settings, t::Int64)
+function clone!(plants::Array{Plant, 1}, settings::Settings, t::Int64, counterlck)
 
     asexuals=filter(x -> x.mated==false && x.clonality==true && x.mass.repr>SPP_REF.seedmass[x.sp],
                     plants)
@@ -362,15 +380,23 @@ function clone!(plants::Array{Plant, 1}, settings::Settings, t::Int64)
 		        clone.mass.root = plants[c].compartsize*0.1
 		        clone.mass.repr = 0.0
 
-	        clone.id = string(get_counter(), base=16)
-	        push!(plants, clone)
+				counter = 0
+				lock(counterlck) do
+					counter = get_counter()
+				end
+
+		        clone.id = string(counter, base=16)
+		        push!(plants, clone)
 
        	    end
         end
 
+		"""
+		DEPRECATED
         if t == 1 || rem(t,settings.output_freq) == 0
             gather_offspring!(t, sp, "s", "asex", spclonescounter)
         end
+		"""
     end
 
     # unit test
@@ -386,7 +412,7 @@ Seeds are dispersed.
 
 #Wrapper to parallelize disperse function
 function calculate_dispersal_matrix!(landscape::Landscape,t::Int,settings::Settings,land_pars::Any)
-	for x in 1:size(landscape.habitability)[1]
+	Threads.@threads for x in 1:size(landscape.habitability)[1]
 		for y in 1:size(landscape.habitability)[2]
 			disperse!(landscape, x, y, t, settings, land_pars)
 		end
@@ -417,7 +443,9 @@ function disperse!(landscape::Landscape, x::Int, y::Int, t::Int, settings::Setti
 			dispersed = landscape.plants[x,y][i]
             dispersed.stage = "s"
             dispersed.location = newloc.dest
-			push!(landscape.dispersal[newloc.dest[1], newloc.dest[2]], dispersed)
+			lock(landscape.celllocks[newloc.dest[1], newloc.dest[2]]) do
+				push!(landscape.dispersal[newloc.dest[1], newloc.dest[2]], dispersed)
+			end
         else
             push!(lost_idxs, i)
 			push!(todelete, i)
@@ -543,9 +571,13 @@ end
 
 # """ DEPRECATED, dying chances different from concurrent version!
 #Wrapper to parallelize die_seeds function
-function die_seeds_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64, T::Float64)
-	Threads.@threads for plants in plants_matrix
-        die_seeds!(plants, settings, t, T)
+function die_seeds_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64, T::Float64, chunks::Array{Tuple{Int,Int,Int,Int}})
+	Threads.@threads for chunk in chunks
+        for x in chunk[1]:chunk[2]
+            for y in chunk[3]:chunk[4]
+                die_seeds!(plants_matrix[x,y], settings, t, T)
+            end
+        end
     end
 end
 
@@ -758,7 +790,6 @@ end
 """
 	age_plants!
 All individuals except seeds in flowers get older over time
-TODO: Function seems a bit clunky, rewrite!
 """
 
 #Wrapper to parallelize age_plants function
