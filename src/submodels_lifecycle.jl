@@ -1,12 +1,3 @@
-
-"""
-using Distributions
-using DataFrames
-using DataValues
-using StatsBase
-using DelimitedFiles
-"""
-
 """
     allocate!(orgs, t, setting, SPP_REF, T)
 """
@@ -24,18 +15,6 @@ function grow!(plants::Array{Plant,1}, t::Int64, T::Float64, biomass_production:
 			grow_allocate!(plant, SPP_REF.b0grow[plant.sp], t)
 		end
 	end
-
-	""" DEPRECATED
-    growing = filter(x-> x.stage == growing_stage, plants)
-    filter!(x-> x.stage != growing_stage, plants)
-
-    for sp in unique(getfield.(growing, :sp))
-    	b0grow = SPP_REF.b0grow[sp]
-    	growing_sp = filter(x->x.sp == sp, growing)
-		map(x -> grow_allocate!(x, b0grow, t), growing_sp)
-		append!(plants, growing_sp)
-    end
-	"""
 
     # unit test
     check_duplicates(plants)
@@ -61,6 +40,7 @@ function mature_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int)
 end
 
 function mature!(plants::Array{Plant,1}, t::Int)
+	#TODO Rewrite this!
 
     nplants_before = length(plants)
 
@@ -100,15 +80,14 @@ function get_npoll(pollen_vector::String, poll_plants::Array{Plant,1}, poll_pars
     if pollen_vector == "wind"
         npoll = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*WIND_DFLT)), WIND_EFFC))[1]
     else
-	npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*VST_DFLT)),
-						 INSCT_EFFC))[1]
+		npoll_dflt = rand(Distributions.Binomial(Int(ceil(length(poll_plants)*VST_DFLT)), INSCT_EFFC))[1]
 	if poll_pars.scen == "indep"
-     	    npoll = npoll_dflt
+    	npoll = npoll_dflt
 	elseif poll_pars.scen in ["equal", "rdm"]
 	    if t in poll_pars.regime.td
 	        npoll = Int(ceil(npoll_dflt * poll_pars.regime[poll_pars.regime.td.== t,:remaining][1]))
 	    else
-		npoll = npoll_dflt
+			npoll = npoll_dflt
 	    end
 	elseif poll_pars.scen == "spec"
 	    # pseudo
@@ -124,6 +103,7 @@ pollinate!()
 Mark plants and having pollinated (mated = true)
 """
 function pollinate!(pollen_vector::String, flowering::Array{Plant,1}, plants::Array{Plant,1}, poll_pars::PollPars, t::Int64)
+	#TODO Rewrite this!
 
     poll_plants = filter(x -> occursin(pollen_vector, x.pollen_vector), flowering)
     npoll = get_npoll(pollen_vector, poll_plants, poll_pars, t)
@@ -152,6 +132,7 @@ function mate_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, poll_pars:
 end
 
 function mate!(plants::Array{Plant,1}, t::Int64, poll_pars::PollPars, settings::Settings)
+	#TODO Rewrite this!
 
     flowering = filter(x-> x.stage == "a" && ALLOC_SEED*x.mass.repr > 0.5*SPP_REF.seedmass[x.sp]*x.seednumber, plants)
 
@@ -460,7 +441,7 @@ function disperse!(landscape::Landscape, x::Int, y::Int, t::Int, settings::Setti
 end
 
 function apply_dispersal_matrix!(landscape::Landscape)
-	for x in 1:size(landscape.habitability)[1]
+	Threads.@threads for x in 1:size(landscape.habitability)[1]
 		for y in 1:size(landscape.habitability)[2]
 			append!(landscape.plants[x,y],landscape.dispersal[x,y])
 			landscape.dispersal[x,y] = Plant[]
@@ -475,14 +456,26 @@ Seed that have already been released (in the current time step, or previously - 
 
 #Wrapper to parallelize establish function
 function establish_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int, settings::Settings,  T::Float64, biomass_production::Float64, K::Float64)
-    for plants in plants_matrix
+    Threads.@threads for plants in plants_matrix
         establish!(plants, t, settings, T, biomass_production, K)
     end
 end
 
 function establish!(plants::Array{Plant,1}, t::Int, settings::Settings,  T::Float64, biomass_production::Float64, K::Float64)
+	# seeds that just dispersed try to establish and the ones that did not succeed previously
+	# will get a chance again.
+	# optimized version without debug output for easier multithreading
 
-    # seeds that just dispersed try to establish and the ones that did not succeed previously
+	for plant in plants
+		if 1-exp(-(B0_GERM*(SPP_REF.seedmass[plant.sp]^(-1/4))*exp(-A_E/(BOLTZ*T)))) == 1
+			plant.stage = "j"
+            plant.age= 0 ## restart age counter to control flowering age
+		end
+	end
+
+	"""
+	DEPRECATED
+	# seeds that just dispersed try to establish and the ones that did not succeed previously
     # will get a chance again.
     establishing_idxs = findall(x -> x.stage == "s", plants)
     # counter of germinations
@@ -495,6 +488,7 @@ function establish!(plants::Array{Plant,1}, t::Int, settings::Settings,  T::Floa
             n_germinations += 1
 		end
     end
+	"""
 
 	"""
 	DEbug Stuff, DEPRECATED
@@ -550,7 +544,7 @@ end
 # """ DEPRECATED, dying chances different from concurrent version!
 #Wrapper to parallelize die_seeds function
 function die_seeds_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, t::Int64, T::Float64)
-	for plants in plants_matrix
+	Threads.@threads for plants in plants_matrix
         die_seeds!(plants, settings, t, T)
     end
 end
@@ -596,7 +590,7 @@ die!()
 
 #Wrapper to parallelize die function
 function die_matrix!(plants_matrix::Matrix{Vector{Plant}}, settings::Settings, T::Float64, dying_stage::String, t::Int64)
-    for plants in plants_matrix
+    Threads.@threads for plants in plants_matrix
         die!(plants, settings, T, dying_stage, t)
     end
 end
@@ -606,14 +600,16 @@ function die!(plants::Array{Plant, 1}, settings::Settings, T::Float64, dying_sta
     old = findall( x -> (x.stage == dying_stage && x.age > x.span), plants)
 
     if length(old) > 0
-       if dying_stage == "j"
-           # unit test
-	   log_age()
-           error("Juvenile did not mature before reaching maximum span")
-       else
-	   deleteat!(plants, old)
-       end
+		if dying_stage == "j"
+			# unit test
+			log_age()
+			error("Juvenile did not mature before reaching maximum span")
+		else
+	   		deleteat!(plants, old)
+       	end
     end
+
+	#TODO Rewrite this
 
     # the rest of the individuals have a metabolic probability of dying.
     dying = filter(x -> x.stage == dying_stage, plants)
@@ -639,7 +635,7 @@ end
 
 #Wrapper to parallelize die function
 function compete_die_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int,  landscape::BitArray{2}, T, dying_stage::String)
-    for plants in plants_matrix
+    Threads.@threads for plants in plants_matrix
         compete_die!(plants, t, landscape, T, dying_stage)
     end
 end
@@ -652,6 +648,7 @@ function compete_die!(plants::Array{Plant,1}, t::Int,  landscape::BitArray{2}, T
     plants_cell = filter(x -> x.stage in ["j" "a"], plants)
 
 	if length(plants_cell) > 0
+		# get fitness of all species in the cell to simulate local competition
 		sppcell_fitness = Dict(sp => SPP_REF.fitness[sp] for sp in unique(getfield.(plants_cell, :sp)))
 
 		if sum(vcat(map(x->sumofplantmass(x)-x.mass.root,plants_cell),NOT_0)) > C_K
@@ -660,32 +657,6 @@ function compete_die!(plants::Array{Plant,1}, t::Int,  landscape::BitArray{2}, T
 			end
 		end
 	end
-
-	"""
-	DEPRECATED
-    # get coordinates of all occupied cells
-    locs = getfield.(production_plants, :location)
-    fullcells_indxs = findall(nonunique(DataFrame(hcat(locs), :auto)))
-
-    if length(fullcells_indxs) > 0
-
-       for loc in unique(locs[fullcells_indxs])
-
-           #find plants that are in the same grid
-	   	   plants_cell = filter(x -> x.location == loc, production_plants)
-
-           # get fitness of all species in the cell to simulate local competition
-           sppcell_fitness = Dict(sp => SPP_REF.fitness[sp]
-	                          for sp in unique(getfield.(plants_cell, :sp)))
-
-           if sum(vcat(map(x->sumofplantmass(x)-x.mass.root,plants_cell),NOT_0)) > C_K
-		       for sp in keys(sppcell_fitness)
-		           sort_die!(sp, sppcell_fitness, plants_cell, dying_stage, plants, settings, t)
-		       end
-           end
-       end
-    end
-	"""
 
     # unit test
     check_duplicates(plants)
@@ -700,18 +671,26 @@ Plants loose their reproductive biomasses at the end of the reproductive season
 """
 #Wrapper to parallelize shedflower function
 function shedflower_matrix!(plants_matrix::Matrix{Vector{Plant}},  t::Int)
-	for plants in plants_matrix
+	Threads.@threads for plants in plants_matrix
         shedflower!(plants, t)
     end
 end
 
 function shedflower!(plants::Array{Plant,1},  t::Int)
+	for plant in plants
+		if plant.mass.repr > 0 && rem(t,52) > plant.floroff
+			plant.mass.repr = 0.0
+		end
+	end
 
+	"""
+	DEPRECATED
     flowering = findall(x -> (x.mass.repr > 0 && rem(t,52) > x.floroff), plants)
 
     for f in flowering
 		plants[f].mass.repr = 0.0
     end
+	"""
 
 end
 
@@ -723,19 +702,30 @@ already at that value.
 """
 #Wrapper to parallelize winter_dieback function
 function winter_dieback_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int)
-	for plants in plants_matrix
+	Threads.@threads for plants in plants_matrix
         winter_dieback!(plants, t)
     end
 end
 
 function winter_dieback!(plants::Array{Plant,1}, t::Int)
-    adults = findall(x -> (x.stage == "a"), plants)
+	for plant in plants
+		if plant.stage == "a"
+			plant.mass.leaves = 0.0
+			plant.mass.repr = 0.0
+			plant.mass.stem >= (0.5*plant.compartsize) ? plant.mass.stem = (0.5*plant.compartsize) : nothing
+		end
+	end
+
+	"""
+	DEPRECATED
+	adults = findall(x -> (x.stage == "a"), plants)
 
     for a in adults
         plants[a].mass.leaves = 0.0
 		plants[a].mass.repr = 0.0
 		plants[a].mass.stem >= (0.5*plants[a].compartsize) ? plants[a].mass.stem = (0.5*plants[a].compartsize) : nothing
     end
+	"""
 end
 
 """
@@ -747,7 +737,7 @@ Mowing happens at most once a year, between August and September.
 function manage_matrix!(plants_matrix::Matrix{Vector{Plant}}, t::Int64, management_counter::Int64)
 	if management_counter < 1 || 1 == rand(Distributions.Bernoulli(MANAGE_PROB))
 		Threads.@threads for plants in plants_matrix
-	        management_counter += manage!(plants, t::Int64, management_counter::Int64)
+	        manage!(plants, t::Int64, management_counter::Int64)
 	    end
 		management_counter += 1
 	end

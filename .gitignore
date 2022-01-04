@@ -15,3 +15,4 @@ inputs/*
 test/*
 EDM_sim/*
 v0*
+src/scheduling_verbose.jl

@@ -26,6 +26,8 @@ end_time = now()
 
 println("Simulation time: ", end_time-start_time)
 
+println("Using: ", Threads.nthreads(), " Threads.")
+
 """
 start_time = now()
 

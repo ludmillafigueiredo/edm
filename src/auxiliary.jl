@@ -297,27 +297,29 @@ function sort_die!(sp::String, sppcell_fitness::Dict{String,Float64}, plants_cel
     if sum(vcat(map(x->sumofplantmass(x)-x.mass.root, plantscell_sp),NOT_0)) > 0
 
         dying_plants = filter(x -> x.stage == dying_stage, plantscell_sp)
-	# order inds so smaller can be killed first with pop!
+	    # order inds so smaller can be killed first with pop!
         dying_sorted = sort(dying_plants, by = x -> sumofplantmass(x), rev = true)
 
-	dying = Plant[]
+		dying = Plant[]
 
-	while (sum(vcat(map(x->sumofplantmass(x)-x.mass.root, plantscell_sp),NOT_0)) > C_K_sp
-	       && length(dying_sorted) > 0)
+		while (sum(vcat(map(x->sumofplantmass(x)-x.mass.root, plantscell_sp),NOT_0)) > C_K_sp && length(dying_sorted) > 0)
 
-	    # kill smallest
-	    pop!(dying_sorted) |> x -> (push!(dying, x);
-	                                filter!(y -> y.id != x.id, plantscell_sp))
-	end
+		    # kill smallest
+		    pop!(dying_sorted) |> x -> (push!(dying, x);filter!(y -> y.id != x.id, plantscell_sp))
+		end
 
         dying_idxs = findall(x -> x.id in getfield.(dying, :id), plants)
         deleteat!(plants, dying_idxs)
         # check point life history events
+
+		"""
+		DEACTIVATED FOR MULTITHREADING
         open(joinpath(settings.outputat,settings.simID,"events.csv"),"a") do sim
             for i in 1:length(dying)
                 writedlm(sim, hcat(t, "death-dep", dying_stage, mean(getfield.(dying, :age)), 1))
             end
         end
+		"""
     end
 end
 
@@ -381,4 +383,28 @@ function check_species(plants::Vector{Plant}, species::String)
 		end # if
 	end
 	return true
+end
+
+"""
+get_chunks!(landscape_size, chunksize)
+Get a list of chunks in the landscape, this is to speed up parallel processing,
+as one thread gets assigned multiple gridcells to work on. Assigning a thread
+only a single gridcell at one time results in a slowdown as the processing being
+done on just one cell is shorter than the time needed to assign a new task.
+As different tasks take different amount of time per gridzell, the chunksize
+parameter specifies how many cells a thread gets at once. The relationship
+between chunksize and gridzells is quadratic! (chunksize: 2 -> 4 cells in chunk)
+The chunk format used is x_start, x_end, y_start, y_end in a tuple.
+"""
+function get_chunks!(landscape_size::Tuple{Int,Int}, chunksize::Int)
+	chunks =Tuple{Int,Int,Int,Int}[]
+	for x_start in 1:chunksize:landscape_size[1]
+		for y_start in 1:chunksize:landscape_size[2]
+			x_end = min(landscape_size[1], x_start+chunksize)
+			y_end = min(landscape_size[2], y_start+chunksize)
+			chunk = (x_start, x_end, y_start, y_end)
+			push!(chunks, chunk)
+		end
+	end
+	return chunks
 end
