@@ -66,10 +66,40 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 
         biomass_production = sum(vcat(map(x -> (x.mass.leaves+x.mass.stem),plantlist),NOT_0))
 
+		counterlck = ReentrantLock()
 
+		Threads.@threads for plants in landscape.plants
+			check_ages(plants)
 
+			die_seeds!(plants, settings, t, T)
 
+			# Adults growth and mortality
+			grow!(plants, t, T, biomass_production, K, "a")
+			die!(plants, settings, T, "a", t)
+			compete_die!(plants, t, landscape.habitability, T, "a")
 
+			# Juvenile growth and mortality
+			grow!(plants, t, T, biomass_production, K, "j")
+			die!(plants, settings, T, "j", t)
+			compete_die!(plants, t, landscape.habitability, T, "j")
+
+			age_plants!(plants)
+
+			mature!(plants, t)
+
+			check_ages(plants)
+
+			mate!(plants, t, poll_pars, settings)
+
+			mkseeds!(plants, settings, T, t, counterlck)
+			clone!(plants, settings, t, counterlck)
+
+			self_pollinate!(plants, settings, t)
+
+			reset_plant_mating!(plants)
+		end
+
+		"""
 		# print("check_ages:")
 		check_ages_matrix!(landscape.plants, chunk6)
 
@@ -79,7 +109,6 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 		# Adults growth and mortality
 		# print("A grow:")
 		grow_matrix!(landscape.plants, t, T, biomass_production, K, "a")
-
 		# print("A die:")
 		die_matrix!(landscape.plants, settings, T, "a", t)
 		# print("A compete_die:")
@@ -117,12 +146,13 @@ function run_scheduling(settings, management_counter, land_pars, poll_pars, K, T
 		# plant only produces seeds again if it gets pollinated
 		# print("reset_plant_mating:")
 		reset_plant_mating_matrix!(landscape.plants)
+		"""
 
 		# dispersal is a two step process, first the dispersal matrix is calculated, second the dispersal matrix is applied to the plant matrix
 		# print("Dispersal Matrix Calculation:")
 		calculate_dispersal_matrix!(landscape, t, settings,  land_pars)
 
-		###EVERYTHING TILL HERE CAN BE MADE PERFECTLY IN PARALLEL
+		###EVERYTHING TILL HERE CAN BE MADE PERFECTLY IN PARALLEL TODO:Rewrite calculate dispersal
 
 		#Apply and reset the dispersal matrix
 		# print("Dispersal Matrix Application:")
